@@ -1,21 +1,37 @@
+using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Common.Security;
+using VanDriverRequisitions.Infrastructure.Identity;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Interceptors;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//builder.Services
+//    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddAuthorization(options =>
+ {
+     options.AddPolicy(Roles.Admin, p => p.RequireRole(Roles.Admin));
+     options.AddPolicy(Roles.User, p => p.RequireRole(Roles.User));
+ });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<AuditableEntityInterceptor>();
+
+// DbContext
+builder.Services.AddDbContext<VanDriverDbContext>((sp, options) =>
+{
+    options.AddInterceptors(
+        sp.GetRequiredService<AuditableEntityInterceptor>());
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
