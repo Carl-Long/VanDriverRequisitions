@@ -1,0 +1,6 @@
+@VanDriverRequisitions.Api_HostAddress = http://localhost:5028
+
+GET {{VanDriverRequisitions.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
