@@ -22,9 +22,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<AuditableEntityInterceptor>();
 
-// DbContext
 builder.Services.AddDbContext<VanDriverDbContext>((sp, options) =>
 {
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+    
     options.AddInterceptors(
         sp.GetRequiredService<AuditableEntityInterceptor>());
 });
@@ -36,4 +38,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

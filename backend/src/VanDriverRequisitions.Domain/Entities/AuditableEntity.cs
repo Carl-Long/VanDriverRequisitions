@@ -2,16 +2,11 @@ namespace VanDriverRequisitions.Domain.Entities;
 
 public abstract class AuditableEntity : BaseEntity
 {
-    // Created
     public Guid CreatedById { get; set; }
     public required string CreatedByNameSnapshot { get; set; }
-    public DateTimeOffset CreatedAtUtc { get; set; }
-    
-    // Updated
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public Guid? UpdatedById { get; set; }
     public string? UpdatedByNameSnapshot { get; set; }
-    public DateTimeOffset? UpdatedAtUtc { get; set; }
-    
-    // Concurrency
+    public DateTime? UpdatedAtUtc { get; set; }
     public byte[] RowVersion { get; set; } = [];
 }

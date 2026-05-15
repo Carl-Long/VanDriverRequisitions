@@ -2,6 +2,6 @@ namespace VanDriverRequisitions.Domain.Entities.Common;
 
 public class SubmitWindow : AuditableEntity
 {
-    public DateTimeOffset OpenFrom { get; set; } = DateTimeOffset.Now;
-    public DateTimeOffset OpenTo { get; set; } = DateTimeOffset.Now.AddDays(7);
+    public DateTime OpenFrom { get; init; } = DateTime.UtcNow;
+    public DateTime OpenTo { get; init; } = DateTime.UtcNow.AddDays(7);
 }

@@ -17,7 +17,7 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser) : SaveC
         var entries = context.ChangeTracker
             .Entries<AuditableEntity>();
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
 
         foreach (var entry in entries)
         {

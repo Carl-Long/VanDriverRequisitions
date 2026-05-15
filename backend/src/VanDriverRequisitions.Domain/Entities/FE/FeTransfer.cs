@@ -1,21 +1,49 @@
+using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.ValueObjects;
+
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public class FeTransfer : AuditableEntity
 {
-    public Guid FeRequisitionId { get; set; }
-    public DateOnly JobDate { get; set; } =  DateOnly.FromDateTime(DateTime.Now);
-    public Guid ShopIdFrom { get; set; }
-    public Guid ShopIdTo { get; set; }
+    private FeTransfer() { }
     
-    public int? Sunday { get; set; }
-    public int? Monday { get; set; }
-    public int? Tuesday { get; set; }
-    public int? Wednesday { get; set; }
-    public int? Thursday { get; set; }
-    public int? Friday { get; set; }
-    public int? Saturday { get; set; }
+    public FeTransfer(WeeklyQuantities week)
+    {
+        Week = week;
+    }
     
-    public int? TotalNumber  { get; set; }
-    public decimal? RatePerJob { get; set; }
-    public decimal? TotalValue { get; set; }
+    public Guid FeRequisitionId { get; init; }
+    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+    public Guid ShopIdFrom { get; init; }
+    public Guid ShopIdTo { get; init; }
+    public WeeklyQuantities Week { get; private set; } = null!;
+    public int TotalNumber { get; private set; }
+    public decimal? RatePerJob { get; private set; }
+    public decimal? TotalValue { get; private set; }
+
+    public void SetWeekValues(WeeklyQuantities week)
+    {
+        Week = week;
+        RecalculateTotals();
+    }
+
+    public void SetRate(decimal? ratePerJob)
+    {
+        RatePerJob = ratePerJob;
+        RecalculateTotals();
+    }
+
+    private (int totalNumber, decimal? totalValue) CalculateTotals()
+    {
+        var totalNumber = Week.Total;
+        var totalValue = WeeklyCalculator.Calculate(totalNumber, RatePerJob);
+        return (totalNumber, totalValue);
+    }
+
+    private void RecalculateTotals()
+    {
+        var (totalNumber, totalValue) = CalculateTotals();
+        TotalNumber = totalNumber;
+        TotalValue = totalValue;
+    }
 }

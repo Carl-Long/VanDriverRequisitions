@@ -3,29 +3,29 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeRequisition : AuditableEntity
+public sealed class FeRequisition : AuditableEntity
 {
-    public required string RequisitionNumber { get; set; }
-    public DateOnly RequisitionDate { get; set; }
-    public Guid VanDriverId { get; set; }
-    public virtual required VanDriver VanDriver { get; set; }
-    public required string VanDriverName { get; set; }
-    public Guid ShopId { get; set; }
-    public required Shop Shop { get; set; } 
-    public RequisitionStatus Status { get; set; }
-    public Guid? SubmittedById { get; set; }
-    public DateTimeOffset? SubmittedAtUtc { get; set; }
-    public Guid? ProcessedById { get; set; }
-    public DateTimeOffset? ProcessedAtUtc { get; set; }
-    public Guid? RejectedById { get; set; }
-    public DateTimeOffset? RejectedAtUtc { get; set; }
-    public decimal Subtotal { get; set; }
-    public string? RejectionNotes { get; set; }
-    public string? PoNumber { get; set; }
-    public bool IsVatApplicable { get; set; }
+    public required string RequisitionNumber { get; init; }
+    public DateOnly RequisitionDate { get; init; }
+    public Guid VanDriverId { get; init; }
+    public required VanDriver VanDriver { get; init; }
+    public required string VanDriverName { get; init; }
+    public Guid ShopId { get; init; }
+    public required Shop Shop { get; init; } 
+    public RequisitionStatus Status { get; init; }
+    public Guid? SubmittedById { get; init; }
+    public DateTime? SubmittedAtUtc { get; init; }
+    public Guid? ProcessedById { get; init; }
+    public DateTime? ProcessedAtUtc { get; init; }
+    public Guid? RejectedById { get; init; }
+    public DateTime? RejectedAtUtc { get; init; }
+    public decimal Subtotal { get; init; }
+    public string? RejectionNotes { get; init; }
+    public string? PoNumber { get; init; }
+    public bool IsVatApplicable { get; init; }
     
-    public virtual ICollection<FeGeneralTask> FeGeneralTasks { get; set; } = [];
-    public virtual ICollection<FeMileage> FeMileages { get; set; } = [];
-    public virtual ICollection<FeTransfer> FeTransfers { get; set; } = [];
-    public virtual ICollection<FeAdditionalCost> FeAdditionalCosts { get; set; } = [];
+    public ICollection<FeGeneralTask> FeGeneralTasks { get; init; } = [];
+    public ICollection<FeMileage> FeMileages { get; init; } = [];
+    public ICollection<FeTransfer> FeTransfers { get; init; } = [];
+    public ICollection<FeAdditionalCost> FeAdditionalCosts { get; init; } = [];
 }

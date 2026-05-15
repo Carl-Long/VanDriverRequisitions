@@ -13,7 +13,7 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         
         builder.Property(x => x.RequisitionNumber)
             .IsRequired()
-            .HasMaxLength(30);
+            .HasMaxLength(20);
         
         builder.Property(x => x.RequisitionDate)
             .IsRequired()
@@ -84,10 +84,10 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         // Indexes
         builder.HasIndex(x => x.RequisitionNumber).IsUnique();
         builder.HasIndex(x => x.Status);
-        builder.HasIndex(x => x.RequisitionDate);
         builder.HasIndex(x => x.ShopId);
-        builder.HasIndex(x => x.VanDriverId);
         builder.HasIndex(x => new { x.CreatedById, x.Status });
         builder.HasIndex(x => new { x.ShopId, x.Status });
+
+        builder.Apply();
     }
 }
