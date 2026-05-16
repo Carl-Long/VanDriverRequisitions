@@ -16,11 +16,17 @@ public class FeGeneralTaskConfiguration : IEntityTypeConfiguration<FeGeneralTask
             .WithMany(x => x.FeGeneralTasks)
             .HasForeignKey(x => x.FeRequisitionId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Property(x => x.FeTaskTypeId)
+            .IsRequired();
 
-        builder.HasOne(x => x.FeTaskType)
-            .WithMany()
-            .HasForeignKey(x => x.FeTaskTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(x => x.TaskTypeName)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(x => x.TaskTypeCode)
+            .IsRequired()
+            .HasMaxLength(20);
 
         builder.Property(x => x.WeekEndingDate)
             .IsRequired()

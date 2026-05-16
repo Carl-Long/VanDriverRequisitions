@@ -5,7 +5,7 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public class FeTransfer : AuditableEntity
 {
-    private FeTransfer() { }
+    private FeTransfer() { } // For EF core
     
     public FeTransfer(WeeklyQuantities week)
     {
@@ -13,7 +13,7 @@ public class FeTransfer : AuditableEntity
     }
     
     public Guid FeRequisitionId { get; init; }
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public Guid ShopIdFrom { get; init; }
     public Guid ShopIdTo { get; init; }
     public WeeklyQuantities Week { get; private set; } = null!;

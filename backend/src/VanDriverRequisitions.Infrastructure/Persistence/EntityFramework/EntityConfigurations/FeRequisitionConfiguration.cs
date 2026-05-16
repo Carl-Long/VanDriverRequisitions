@@ -29,7 +29,9 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         builder.Property(x => x.ProcessedAtUtc).HasColumnType("datetime2");
         builder.Property(x => x.RejectedById);
         builder.Property(x => x.RejectedAtUtc).HasColumnType("datetime2");
-        builder.Property(x => x.Subtotal).HasPrecision(18, 2);
+        builder.Property(x => x.Subtotal)
+            .HasPrecision(18, 2)
+            .HasDefaultValue(0);
 
         builder.Property(x => x.IsVatApplicable)
             .IsRequired()
@@ -41,25 +43,31 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         builder.Property(x => x.RejectionNotes)
             .HasMaxLength(1000);
         
-        // Relationships
         builder.Property(x => x.VanDriverId)
             .IsRequired();
 
-        builder.HasOne(x => x.VanDriver)
-            .WithMany()
-            .HasForeignKey(x => x.VanDriverId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.Property(x => x.VanDriverName)
+            .IsRequired()
             .HasMaxLength(150);
 
+        builder.Property(x => x.VanDriverCode)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.TradersName)
+            .IsRequired()
+            .HasMaxLength(150);
+        
         builder.Property(x => x.ShopId)
             .IsRequired();
 
-        builder.HasOne(x => x.Shop)
-            .WithMany()
-            .HasForeignKey(x => x.ShopId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(x => x.ShopCode)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.ShopName)
+            .IsRequired()
+            .HasMaxLength(100);
         
         builder.HasMany(x => x.FeGeneralTasks)
             .WithOne()

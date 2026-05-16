@@ -5,7 +5,7 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public class FeMileage : AuditableEntity
 {
-    private FeMileage() { }
+    private FeMileage() { } // For EF core
     
     public FeMileage(WeeklyQuantities week)
     {
@@ -13,7 +13,7 @@ public class FeMileage : AuditableEntity
     }
     
     public Guid FeRequisitionId { get; init; }
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public WeeklyQuantities Week { get; private set; } = null!;
     public int? TotalMiles { get; private set; }
     public decimal? RatePerMile { get; private set; }

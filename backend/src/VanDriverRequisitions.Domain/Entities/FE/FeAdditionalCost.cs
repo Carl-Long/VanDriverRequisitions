@@ -6,9 +6,9 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 public class FeAdditionalCost : AuditableEntity
 {
     public Guid FeRequisitionId { get; init; }
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public Guid ReasonId { get; init; }
-    public required FeReason FeReason { get; init; }
+    public required string ReasonText { get; init; }
     public ChargingOption ChargingOption { get; private set; }
     public int? Miles { get; private set; }
     public decimal? RatePerMile { get; private set; }

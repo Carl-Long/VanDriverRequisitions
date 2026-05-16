@@ -5,7 +5,7 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public class FeGeneralTask : AuditableEntity
 {
-    private FeGeneralTask() { }
+    private FeGeneralTask() { } // For EF core
     
     public FeGeneralTask(WeeklyQuantities week)
     {
@@ -14,7 +14,8 @@ public class FeGeneralTask : AuditableEntity
     
     public Guid FeRequisitionId { get; init; }
     public Guid FeTaskTypeId { get; init; }
-    public required FeTaskType FeTaskType { get; init; }
+    public required string TaskTypeName { get; init; }
+    public required string TaskTypeCode { get; init; }
     public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public WeeklyQuantities Week { get; set; } = null!;
     public int TotalNumber { get; private set; }

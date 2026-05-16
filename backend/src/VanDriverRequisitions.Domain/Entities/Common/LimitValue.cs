@@ -4,10 +4,10 @@ namespace VanDriverRequisitions.Domain.Entities.Common;
 
 public class LimitValue : AuditableEntity
 {
-    public required string Title { get; set; }
-    public required string NameOfValue { get; set; }
-    public Fascia? Fascia { get; set; }
-    public LimitationType TypeOfLimitation { get; set; }
-    public int? NumericalLimit { get; set; }
-    public decimal? CurrencyLimit { get; set; }
+    public required string Title { get; init; }
+    public required string NameOfValue { get; init; }
+    public Fascia? Fascia { get; init; }
+    public LimitationType TypeOfLimitation { get; init; }
+    public int? NumericalLimit { get; init; }
+    public decimal? CurrencyLimit { get; init; }
 }

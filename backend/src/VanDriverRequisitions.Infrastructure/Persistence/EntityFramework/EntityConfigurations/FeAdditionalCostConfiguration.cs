@@ -21,6 +21,13 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
             .IsRequired()
             .HasColumnType("date");
 
+        builder.Property(x => x.ReasonId)
+            .IsRequired();
+
+        builder.Property(x => x.ReasonText)
+            .IsRequired()
+            .HasMaxLength(500);
+
         builder.Property(x => x.Miles);
 
         builder.Property(x => x.RatePerMile)
@@ -37,14 +44,6 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
         builder.Property(x => x.ChargingOption)
             .IsRequired()
             .HasConversion<int>();
-
-        builder.Property(x => x.ReasonId)
-            .IsRequired();
-
-        builder.HasOne(x => x.FeReason)
-            .WithMany()
-            .HasForeignKey(x => x.ReasonId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         builder.HasIndex(x => x.FeRequisitionId);
