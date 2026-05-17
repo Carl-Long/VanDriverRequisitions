@@ -48,6 +48,9 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     b.Property<int?>("Fascia")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NameOfValue")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -174,6 +177,16 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DeletedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeletedByNameSnapshot")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("OpenFrom")
                         .HasColumnType("datetime2");
@@ -528,6 +541,9 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -705,6 +721,9 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

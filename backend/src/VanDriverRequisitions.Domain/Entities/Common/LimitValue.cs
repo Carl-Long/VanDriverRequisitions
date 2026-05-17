@@ -1,8 +1,9 @@
+using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Domain.Entities.Common;
 
-public class LimitValue : AuditableEntity
+public class LimitValue : LookupEntity
 {
     public required string Title { get; init; }
     public required string NameOfValue { get; init; }

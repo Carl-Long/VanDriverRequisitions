@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Interfaces;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Extensions;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
 public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
-    : DbContext(options)
+    : DbContext(options), IApplicationDbContext
 {
     public DbSet<FeRequisition> Requisitions => Set<FeRequisition>();
     public DbSet<FeTaskType> FeTaskTypes => Set<FeTaskType>();
@@ -20,9 +23,20 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
         base.OnModelCreating(modelBuilder);
         
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(VanDriverDbContext).Assembly);
+        modelBuilder.ApplySequences();
         
-        modelBuilder.HasSequence<long>("FeRequisitionNumber")
-            .StartsAt(1)
-            .IncrementsBy(1);
+        // Applies filters to mean only active and non-deleted items returned by default:
+        // - IActivatable => IsActive == true
+        // - ISoftDeletable => DeletedAtUtc == null
+        modelBuilder.ApplyGlobalQueryFilters();
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property(nameof(ISoftDeletable.DeletedByNameSnapshot))
+                    .HasMaxLength(200);
+            }
+        }
     }
 }

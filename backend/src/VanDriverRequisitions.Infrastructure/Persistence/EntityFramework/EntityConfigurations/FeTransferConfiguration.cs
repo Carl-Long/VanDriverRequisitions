@@ -83,6 +83,6 @@ public class FeTransferConfiguration : IEntityTypeConfiguration<FeTransfer>
             );
         });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

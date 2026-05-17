@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VanDriverRequisitions.Domain.Entities;
+using VanDriverRequisitions.Domain.Entities.Base;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.EntityConfigurations;
 
 public static class AuditableEntityConfiguration
 {
-    public static void Apply<T>(this EntityTypeBuilder<T> builder)
+    public static void ApplyAuditableConfiguration<T>(this EntityTypeBuilder<T> builder)
         where T : AuditableEntity
     {
         builder.Property(x => x.CreatedById)

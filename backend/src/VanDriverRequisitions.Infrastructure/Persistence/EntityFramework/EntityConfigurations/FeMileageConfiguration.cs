@@ -64,6 +64,6 @@ public class FeMileageConfiguration : IEntityTypeConfiguration<FeMileage>
             );
         });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

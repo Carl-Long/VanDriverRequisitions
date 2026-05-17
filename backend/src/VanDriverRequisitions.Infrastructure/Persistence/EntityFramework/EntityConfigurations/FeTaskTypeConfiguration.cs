@@ -24,6 +24,6 @@ public class FeTaskTypeConfiguration : IEntityTypeConfiguration<FeTaskType>
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.Name);
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

@@ -56,6 +56,6 @@ public class LimitValueConfiguration : IEntityTypeConfiguration<LimitValue>
             );
         });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

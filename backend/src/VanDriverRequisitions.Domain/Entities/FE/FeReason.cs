@@ -1,6 +1,8 @@
+using VanDriverRequisitions.Domain.Entities.Base;
+
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeReason : AuditableEntity
+public class FeReason : LookupEntity
 {
     public required string Reason { get; init; }
 }

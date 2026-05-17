@@ -1,3 +1,4 @@
+using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.Helpers;
 

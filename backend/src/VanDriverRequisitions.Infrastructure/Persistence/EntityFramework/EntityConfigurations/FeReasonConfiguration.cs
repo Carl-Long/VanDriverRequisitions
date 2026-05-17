@@ -19,6 +19,6 @@ public class FeReasonConfiguration : IEntityTypeConfiguration<FeReason>
         // Indexes
         builder.HasIndex(x => x.Reason);
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace VanDriverRequisitions.Domain.Entities;
+namespace VanDriverRequisitions.Domain.Entities.Base;
 
 public abstract class BaseEntity
 {

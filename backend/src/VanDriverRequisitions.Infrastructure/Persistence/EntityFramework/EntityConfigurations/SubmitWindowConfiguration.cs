@@ -29,6 +29,7 @@ public class SubmitWindowConfiguration : IEntityTypeConfiguration<SubmitWindow>
             );
         });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
+        builder.ApplySoftDeleteConfiguration();
     }
 }

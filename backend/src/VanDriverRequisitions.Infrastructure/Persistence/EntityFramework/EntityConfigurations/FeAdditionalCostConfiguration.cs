@@ -85,6 +85,6 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
             );
         });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

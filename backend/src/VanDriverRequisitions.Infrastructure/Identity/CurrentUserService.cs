@@ -1,31 +1,33 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Common.Models;
 
 namespace VanDriverRequisitions.Infrastructure.Identity;
 
-public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
+    : ICurrentUserService
 {
-    private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
+    private ClaimsPrincipal UserPrincipal =>
+        httpContextAccessor.HttpContext?.User
+        ?? throw new UnauthorizedAccessException("No HTTP context user.");
 
-    public bool IsAuthenticated =>
-        User?.Identity?.IsAuthenticated ?? false;
-
-    public Guid UserId =>
-        Guid.Parse(User?.FindFirstValue("oid")
-                   ?? throw new UnauthorizedAccessException("Missing Entra ID 'oid' claim"));
-
-    public string UserName =>
-        User?.FindFirstValue("preferred_username")
-        ?? User?.FindFirstValue("name")
-        ?? "unknown";
-    
-    public IEnumerable<string> Roles =>
-        User?.FindAll("roles").Select(c => c.Value)
-        ?? Enumerable.Empty<string>();
-
-    public bool IsInRole(string role)
+    public LoggedInUser User
     {
-        return Roles.Contains(role, StringComparer.OrdinalIgnoreCase);
+        get
+        {
+            var oid = UserPrincipal.FindFirstValue("oid")
+                      ?? throw new UnauthorizedAccessException("Missing 'oid' claim.");
+
+            if (!Guid.TryParse(oid, out var id))
+                throw new UnauthorizedAccessException("Invalid 'oid' claim format.");
+
+            var name =
+                UserPrincipal.FindFirstValue("preferred_username")
+                ?? UserPrincipal.FindFirstValue("name")
+                ?? throw new UnauthorizedAccessException("Missing user name claim.");
+
+            return new LoggedInUser(id, name);
+        }
     }
 }

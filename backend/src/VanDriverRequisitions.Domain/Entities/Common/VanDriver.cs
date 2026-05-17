@@ -1,3 +1,5 @@
+using VanDriverRequisitions.Domain.Entities.Base;
+
 namespace VanDriverRequisitions.Domain.Entities.Common;
 
 public class VanDriver : BaseEntity

@@ -96,6 +96,6 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         builder.HasIndex(x => new { x.CreatedById, x.Status });
         builder.HasIndex(x => new { x.ShopId, x.Status });
 
-        builder.Apply();
+        builder.ApplyAuditableConfiguration();
     }
 }

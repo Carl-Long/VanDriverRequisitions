@@ -1,7 +1,10 @@
+using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Interfaces;
+
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeTaskType : AuditableEntity
+public class FeTaskType : LookupEntity
 {
-    public required string Name { get; init; }
-    public required string Code { get; init; }
+    public required string Name { get; set; }
+    public required string Code { get; set; }
 }
