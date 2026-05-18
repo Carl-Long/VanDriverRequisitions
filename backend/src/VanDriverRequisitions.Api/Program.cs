@@ -5,6 +5,7 @@ using VanDriverRequisitions.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApi();
+builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 

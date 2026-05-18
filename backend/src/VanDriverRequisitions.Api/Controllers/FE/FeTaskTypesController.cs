@@ -10,6 +10,7 @@ namespace VanDriverRequisitions.Api.Controllers.FE;
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/fe-task-types")]
+[Authorize]
 public class FeTaskTypesController(
     IFeTaskTypeService feTaskTypeService) : ControllerBase
 {

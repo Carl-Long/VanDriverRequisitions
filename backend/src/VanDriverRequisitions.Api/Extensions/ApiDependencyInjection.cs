@@ -1,5 +1,10 @@
+using System.Security.Claims;
+using System.Text;
 using Asp.Versioning;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using VanDriverRequisitions.Api.Auth.Dev;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Validators;
 
@@ -17,10 +22,6 @@ public static class ApiDependencyInjection
             options.ReportApiVersions = true;
         });
         
-        //builder.Services
-        //    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
