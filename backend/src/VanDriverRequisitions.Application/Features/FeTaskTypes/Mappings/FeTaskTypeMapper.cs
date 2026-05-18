@@ -5,7 +5,7 @@ namespace VanDriverRequisitions.Application.Features.FeTaskTypes.Mappings;
 
 public static class FeTaskTypeMapper
 {
-    public static FeTaskTypeDto ToDto(FeTaskType entity)
+    public static FeTaskTypeDto ToSummaryDto(FeTaskType entity)
     {
         return new FeTaskTypeDto
         {

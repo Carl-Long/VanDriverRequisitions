@@ -8,73 +8,63 @@ public class GlobalExceptionHandler(
     ILogger<GlobalExceptionHandler> logger,
     IHostEnvironment env) : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(
-        HttpContext context,
-        Exception exception,
-        CancellationToken cancellationToken)
+   public async ValueTask<bool> TryHandleAsync(
+    HttpContext context,
+    Exception exception,
+    CancellationToken cancellationToken)
+{
+    logger.LogError(exception, exception.Message);
+
+    context.Response.StatusCode = exception switch
     {
-        logger.LogError(exception, exception.Message);
+        ValidationException => StatusCodes.Status400BadRequest,
+        NotFoundException => StatusCodes.Status404NotFound,
+        ConflictException => StatusCodes.Status409Conflict,
+        ForbiddenException => StatusCodes.Status403Forbidden,
+        BadRequestException => StatusCodes.Status400BadRequest,
+        UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+        _ => StatusCodes.Status500InternalServerError
+    };
 
-        var problemDetails = exception switch
-        {
-            ValidationException validationException
-                => CreateValidationProblemDetails(
-                    context,
-                    validationException),
+    context.Response.ContentType = "application/json";
 
-            NotFoundException
-                => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status404NotFound,
-                    "Resource not found",
-                    exception.Message),
-
-            ConflictException
-                => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status409Conflict,
-                    "Conflict",
-                    exception.Message),
-
-            ForbiddenException
-                => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status403Forbidden,
-                    "Forbidden",
-                    exception.Message),
-
-            BadRequestException
-                => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status400BadRequest,
-                    "Bad request",
-                    exception.Message),
-
-            UnauthorizedAccessException
-                => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status401Unauthorized,
-                    "Unauthorized",
-                    "Authentication is required."),
-
-            _ => CreateProblemDetails(
-                    context,
-                    StatusCodes.Status500InternalServerError,
-                    "Server error",
-                    env.IsDevelopment()
-                        ? exception.Message
-                        : "An unexpected error occurred.")
-        };
-
-        context.Response.StatusCode =
-            problemDetails.Status ?? 500;
+    if (exception is ValidationException validationException)
+    {
+        var errors = validationException.Errors
+            .GroupBy(x => x.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(x => x.ErrorMessage).ToArray());
 
         await context.Response.WriteAsJsonAsync(
-            problemDetails,
+            new
+            {
+                type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                title = "Validation failed",
+                status = StatusCodes.Status400BadRequest,
+                detail = "One or more validation errors occurred.",
+                instance = context.Request.Path,
+                errors = errors,
+                traceId = context.TraceIdentifier
+            },
             cancellationToken);
 
         return true;
     }
+
+    var problemDetails = exception switch
+    {
+        NotFoundException => CreateProblemDetails(context, StatusCodes.Status404NotFound, "Resource not found", exception.Message),
+        ConflictException => CreateProblemDetails(context, StatusCodes.Status409Conflict, "Conflict", exception.Message),
+        ForbiddenException => CreateProblemDetails(context, StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
+        BadRequestException => CreateProblemDetails(context, StatusCodes.Status400BadRequest, "Bad request", exception.Message),
+        UnauthorizedAccessException => CreateProblemDetails(context, StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
+        _ => CreateProblemDetails(context, StatusCodes.Status500InternalServerError, "Server error", env.IsDevelopment() ? exception.Message : "An unexpected error occurred.")
+    };
+
+    await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+    return true;
+}
 
     private static ProblemDetails CreateProblemDetails(
         HttpContext context,
@@ -87,34 +77,11 @@ public class GlobalExceptionHandler(
             Status = statusCode,
             Title = title,
             Detail = detail,
-            Instance = context.Request.Path
+            Instance = context.Request.Path.Value
         };
 
         problemDetails.Extensions["traceId"] =
             context.TraceIdentifier;
-
-        return problemDetails;
-    }
-
-    private static ValidationProblemDetails CreateValidationProblemDetails(
-        HttpContext context,
-        ValidationException exception)
-    {
-        var errors = exception.Errors
-            .GroupBy(x => x.PropertyName)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(x => x.ErrorMessage).ToArray());
-
-        var problemDetails = new ValidationProblemDetails(errors)
-        {
-            Status = StatusCodes.Status400BadRequest,
-            Title = "Validation failed",
-            Detail = "One or more validation errors occurred.",
-            Instance = context.Request.Path
-        };
-
-        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
 
         return problemDetails;
     }

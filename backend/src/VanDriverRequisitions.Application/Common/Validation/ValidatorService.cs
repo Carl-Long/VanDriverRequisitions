@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
 using VanDriverRequisitions.Application.Common.Interfaces;
 
@@ -8,22 +9,16 @@ public class ValidatorService(IServiceProvider serviceProvider) : IValidatorServ
 {
     public async Task ValidateAsync<T>(T model, CancellationToken cancellationToken = default)
     {
-        var validators = serviceProvider.GetServices<IValidator<T>>();
-
-        if (!validators.Any())
-            return;
-
         var context = new ValidationContext<T>(model);
+        var failures = new List<ValidationFailure>();
 
-        var failures = new List<FluentValidation.Results.ValidationFailure>();
-
-        foreach (var validator in validators)
+        foreach (var validator in serviceProvider.GetServices<IValidator<T>>())
         {
             var result = await validator.ValidateAsync(context, cancellationToken);
             failures.AddRange(result.Errors);
         }
 
-        if (failures.Any())
+        if (failures.Count != 0)
             throw new ValidationException(failures);
     }
 }

@@ -7,115 +7,99 @@ using VanDriverRequisitions.Domain.Entities.FE;
 
 namespace VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
 
-public class FeTaskTypeService(
-    IApplicationDbContext context,
-    IValidatorService validator) : IFeTaskTypeService
+public class FeTaskTypeService(IApplicationDbContext context, IValidatorService validator) : IFeTaskTypeService
 {
-    public async Task<List<FeTaskTypeDto>> GetAllAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<List<FeTaskTypeDto>> GetAllAsync(bool includeInactive, CancellationToken cancellationToken = default)
     {
-        return await context.FeTaskTypes
-            .Select(FeTaskTypeProjections.AsDto)
+        IQueryable<FeTaskType> query = context.FeTaskTypes;
+
+        if (includeInactive)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
+        return await query
+            .Select(FeTaskTypeProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<FeTaskTypeDto>> GetAllIncludingInactiveAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<FeTaskTypeDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .Select(FeTaskTypeProjections.AsDto)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<FeTaskTypeDto> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        var dto = await context.FeTaskTypes
+        var feTaskType = await context.FeTaskTypes
             .Where(x => x.Id == id)
-            .Select(FeTaskTypeProjections.AsDto)
+            .Select(FeTaskTypeProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return dto ?? throw new NotFoundException(
+        return feTaskType ?? throw new NotFoundException(
             $"FE Task Type with ID '{id}' was not found.");
     }
 
-    public async Task<FeTaskTypeDto> CreateAsync(
-        CreateFeTaskTypeDto dto,
-        CancellationToken cancellationToken = default)
+    public async Task<FeTaskTypeDto> CreateAsync(CreateFeTaskTypeDto createFeTaskTypeDto, CancellationToken cancellationToken = default)
     {
-        await validator.ValidateAsync(dto, cancellationToken);
+        await validator.ValidateAsync(createFeTaskTypeDto, cancellationToken);
 
-        var entity = new FeTaskType
+        var newTaskType = new FeTaskType
         {
-            Name = dto.Name,
-            Code = dto.Code
+            Name = createFeTaskTypeDto.Name.Trim(),
+            Code = createFeTaskTypeDto.Code.Trim(),
         };
 
-        context.FeTaskTypes.Add(entity);
+        context.FeTaskTypes.Add(newTaskType);
         await context.SaveChangesAsync(cancellationToken);
 
-        return FeTaskTypeMapper.ToDto(entity);
+        return FeTaskTypeMapper.ToSummaryDto(newTaskType);
     }
 
-    public async Task<FeTaskTypeDto> UpdateAsync(
-        Guid id,
-        UpdateFeTaskTypeDto dto,
-        CancellationToken cancellationToken = default)
+    public async Task<FeTaskTypeDto> UpdateAsync(Guid id, UpdateFeTaskTypeDto updateFeTaskTypeDto, CancellationToken cancellationToken = default)
     {
-        await validator.ValidateAsync(dto, cancellationToken);
+        await validator.ValidateAsync(updateFeTaskTypeDto, cancellationToken);
 
-        var entity = await context.FeTaskTypes
+        var existingTaskType = await context.FeTaskTypes
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (entity is null)
+        if (existingTaskType is null)
         {
             throw new NotFoundException(
                 $"FE Task Type with ID '{id}' was not found.");
         }
 
-        entity.Name = dto.Name;
-        entity.Code = dto.Code;
+        existingTaskType.Name = updateFeTaskTypeDto.Name.Trim();
+        existingTaskType.Code = updateFeTaskTypeDto.Code.Trim();
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return FeTaskTypeMapper.ToDto(entity);
+        return FeTaskTypeMapper.ToSummaryDto(existingTaskType);
     }
 
-    public async Task ActivateAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await context.FeTaskTypes
+        var existingTaskType = await context.FeTaskTypes
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (entity is null)
+        if (existingTaskType is null)
         {
             throw new NotFoundException(
                 $"FE Task Type with ID '{id}' was not found.");
         }
 
-        entity.IsActive = true;
+        existingTaskType.IsActive = true;
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeactivateAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    public async Task DeactivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await context.FeTaskTypes
+        var existingTaskType = await context.FeTaskTypes
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (entity is null)
+        if (existingTaskType is null)
         {
             throw new NotFoundException(
                 $"FE Task Type with ID '{id}' was not found.");
         }
 
-        entity.IsActive = false;
+        existingTaskType.IsActive = false;
         await context.SaveChangesAsync(cancellationToken);
     }
 }

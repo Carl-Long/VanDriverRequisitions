@@ -16,6 +16,11 @@ public static class ApiDependencyInjection
             options.DefaultApiVersion = new ApiVersion(1, 0);
             options.ReportApiVersions = true;
         });
+        
+        //builder.Services
+        //    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
