@@ -1,6 +1,7 @@
 using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Application.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.DependencyInjection;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,5 +43,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<VanDriverDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    await DevDataSeeder.SeedAsync(db, logger);
+}
 
 await app.RunAsync();
