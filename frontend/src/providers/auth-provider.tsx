@@ -12,6 +12,7 @@ import {
 } from "react";
 import { configureAuth } from "@/lib/api/client";
 
+
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:50815";
 

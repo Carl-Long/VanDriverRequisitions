@@ -9,11 +9,14 @@ import { navigation, adminNavigation } from "@/lib/navigation";
 import { NavItem } from "@/components/layout/nav-item";
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
+import { useAuth } from "@/providers/auth-provider";
+import { isAdmin } from "@/lib/auth/roles";
 
 export function Sidebar() {
     const pathname = usePathname();
-
     const [collapsed, setCollapsed] = useState(false);
+    const { user } = useAuth();
+    const showAdmin = isAdmin(user);
 
     // Auto-collapse on small screens; restore persisted state on large screens
     useEffect(() => {
@@ -102,34 +105,35 @@ export function Sidebar() {
                 </div>
 
                 {/* ADMIN */}
-                <div className="mt-6">
-                    {!collapsed && (
-                        <p className="px-3 mb-2 text-xs font-semibold uppercase text-muted-foreground">
-                            Admin
-                        </p>
-                    )}
+                {showAdmin && (
+                    <div className="mt-6">
+                        {!collapsed && (
+                            <p className="px-3 mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                                Admin
+                            </p>
+                        )}
 
-                    <div className="space-y-1">
-                        {adminNavigation[0].items.map((item) => (
-                            <NavItem
-                                key={item.href}
-                                href={item.href}
-                                label={item.title}
-                                icon={item.icon}
-                                active={isActive(item.href)}
-                                collapsed={collapsed}
-                                showBadge={
-                                    item.href === "/admin/submit-windows" &&
-                                    windowStatus !== null &&
-                                    !windowStatus.currentWindow &&
-                                    !windowStatus.hasUpcoming
-                                }
-                            />
-                        ))}
+                        <div className="space-y-1">
+                            {adminNavigation[0].items.map((item) => (
+                                <NavItem
+                                    key={item.href}
+                                    href={item.href}
+                                    label={item.title}
+                                    icon={item.icon}
+                                    active={isActive(item.href)}
+                                    collapsed={collapsed}
+                                    showBadge={
+                                        item.href === "/admin/submit-windows" &&
+                                        windowStatus !== null &&
+                                        !windowStatus.currentWindow &&
+                                        !windowStatus.hasUpcoming
+                                    }
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
-
         </aside>
     );
 }
