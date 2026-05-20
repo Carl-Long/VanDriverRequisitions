@@ -3,6 +3,7 @@ using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Interfaces;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Constants;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Extensions;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
@@ -14,17 +15,17 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
     public DbSet<FeTaskType> FeTaskTypes => Set<FeTaskType>();
     public DbSet<FeReason> FeReasons => Set<FeReason>();
     public DbSet<LimitValue> LimitValues => Set<LimitValue>();
-    public DbSet<SubmitWindow>  SubmitWindows => Set<SubmitWindow>();
+    public DbSet<SubmitWindow> SubmitWindows => Set<SubmitWindow>();
     public DbSet<Shop> Shops => Set<Shop>();
     public DbSet<VanDriver> VanDrivers => Set<VanDriver>();
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(VanDriverDbContext).Assembly);
         modelBuilder.ApplySequences();
-        
+
         // Applies filters to mean only active and non-deleted items returned by default:
         // - IActivatable => IsActive == true
         // - ISoftDeletable => DeletedAtUtc == null
@@ -38,5 +39,14 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
                     .HasMaxLength(200);
             }
         }
+    }
+
+    public async Task<string> NextFeRequisitionNumberAsync(CancellationToken cancellationToken)
+    {
+        var result = await Database
+            .SqlQueryRaw<long>($"SELECT NEXT VALUE FOR {DbSequences.FeRequisitionNumber} AS Value")
+            .ToListAsync(cancellationToken);
+
+        return $"F{result[0]:D9}";
     }
 }

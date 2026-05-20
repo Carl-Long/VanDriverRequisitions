@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -116,6 +117,7 @@ const DEFAULT_FILTERS: Filters = {
 
 export default function HomeVanDriversPage() {
     const { user } = useAuth();
+    const router = useRouter();
 
     // Data
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
@@ -238,7 +240,7 @@ export default function HomeVanDriversPage() {
                 title="Home Van Drivers"
                 description="View and manage FE requisitions for home van drivers."
             >
-                <Button disabled>
+                <Button onClick={() => router.push("/home-van-drivers/new")}>
                     <Plus size={16} />
                     <span>New Requisition</span>
                 </Button>
@@ -374,7 +376,8 @@ export default function HomeVanDriversPage() {
                             {data.items.map((req) => (
                                 <tr
                                     key={req.id}
-                                    className="border-b border-border bg-surface transition-colors last:border-b-0 hover:bg-muted/30"
+                                    onClick={() => router.push(`/home-van-drivers/${req.id}`)}
+                                    className="cursor-pointer border-b border-border bg-surface transition-colors last:border-b-0 hover:bg-muted/30"
                                 >
                                     <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                                         {req.requisitionNumber}

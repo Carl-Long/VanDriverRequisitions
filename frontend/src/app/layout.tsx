@@ -6,6 +6,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { AuthGate } from "@/components/auth/auth-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
+import { ToastProvider } from "@/components/ui/toast";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -38,7 +39,9 @@ export default function RootLayout({
                     <ThemeProvider>
                         <AuthProvider>
                             <AuthGate>
-                                <AppShell>{children}</AppShell>
+                                <ToastProvider>
+                                    <AppShell>{children}</AppShell>
+                                </ToastProvider>
                             </AuthGate>
                         </AuthProvider>
                     </ThemeProvider>

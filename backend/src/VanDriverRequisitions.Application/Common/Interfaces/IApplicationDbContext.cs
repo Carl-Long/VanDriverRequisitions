@@ -16,4 +16,6 @@ public interface IApplicationDbContext
 
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken);
+
+    Task<string> NextFeRequisitionNumberAsync(CancellationToken cancellationToken);
 }
