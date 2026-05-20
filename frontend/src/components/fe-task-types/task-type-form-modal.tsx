@@ -1,44 +1,40 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 
+// Zod schema — mirrors backend FluentValidation rules exactly
+const taskTypeSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(1, "Name is required.")
+        .max(100, "Name must be between 1 and 100 characters."),
+    code: z
+        .string()
+        .trim()
+        .min(1, "Code is required.")
+        .max(20, "Code must be between 1 and 20 characters.")
+        .regex(
+            /^[A-Z0-9_-]+$/,
+            "Code must contain only uppercase letters, numbers, hyphens, and underscores.",
+        ),
+});
+
+type TaskTypeFormData = z.infer<typeof taskTypeSchema>;
+
 type TaskTypeFormModalProps = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: { name: string; code: string }) => Promise<void>;
+    onSubmit: (data: TaskTypeFormData) => Promise<void>;
     initial?: FeTaskType | null;
 };
-
-type FieldErrors = Partial<Record<"name" | "code", string>>;
-
-function validate(name: string, code: string): FieldErrors {
-    const errors: FieldErrors = {};
-
-    if (!name.trim()) {
-        errors.name = "Name is required.";
-    } else if (name.trim().length > 100) {
-        errors.name = "Name must be between 1 and 100 characters.";
-    }
-
-    if (!code.trim()) {
-        errors.code = "Code is required.";
-    } else if (code.trim().length > 20) {
-        errors.code = "Code must be between 1 and 20 characters.";
-    } else if (!/^[A-Z0-9_-]+$/.test(code.trim())) {
-        errors.code =
-            "Code must contain only uppercase letters, numbers, hyphens, and underscores.";
-    }
-
-    return errors;
-}
-
-function getSubmitLabel(isEditing: boolean): string {
-    return isEditing ? "Save Changes" : "Create";
-}
 
 export function TaskTypeFormModal({
     open,
@@ -47,34 +43,44 @@ export function TaskTypeFormModal({
     initial,
 }: Readonly<TaskTypeFormModalProps>) {
     const isEditing = !!initial;
-
-    const [name, setName] = useState(initial?.name ?? "");
-    const [code, setCode] = useState(initial?.code ?? "");
-    const [errors, setErrors] = useState<FieldErrors>({});
     const [serverError, setServerError] = useState<string | null>(null);
-    const [submitting, setSubmitting] = useState(false);
 
-    // Reset form when modal opens with new data
-    const handleClose = useCallback(() => {
-        setName(initial?.name ?? "");
-        setCode(initial?.code ?? "");
-        setErrors({});
+    const {
+        register,
+        handleSubmit,
+        reset,
+        setError,
+        setValue,
+        formState: { errors, isSubmitting },
+    } = useForm<TaskTypeFormData>({
+        resolver: zodResolver(taskTypeSchema),
+        defaultValues: {
+            name: initial?.name ?? "",
+            code: initial?.code ?? "",
+        },
+    });
+
+    // Reset form when modal opens with new initial data
+    useEffect(() => {
+        if (open) {
+            reset({
+                name: initial?.name ?? "",
+                code: initial?.code ?? "",
+            });
+            setServerError(null);
+        }
+    }, [open, initial, reset]);
+
+    function handleClose() {
+        reset();
         setServerError(null);
         onClose();
-    }, [initial, onClose]);
+    }
 
-    async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function onValid(data: TaskTypeFormData) {
         setServerError(null);
-
-        const fieldErrors = validate(name, code);
-        setErrors(fieldErrors);
-
-        if (Object.keys(fieldErrors).length > 0) return;
-
-        setSubmitting(true);
         try {
-            await onSubmit({ name: name.trim(), code: code.trim() });
+            await onSubmit(data);
             handleClose();
         } catch (err: unknown) {
             const apiErr = err as {
@@ -82,21 +88,17 @@ export function TaskTypeFormModal({
                 errors?: Record<string, string[]>;
             };
             if (apiErr.errors) {
-                const mapped: FieldErrors = {};
                 for (const [key, msgs] of Object.entries(apiErr.errors)) {
-                    const field = key.toLowerCase() as keyof FieldErrors;
+                    const field = key.toLowerCase();
                     if (field === "name" || field === "code") {
-                        mapped[field] = msgs[0];
+                        setError(field, { message: msgs[0] });
                     }
                 }
-                setErrors(mapped);
             } else {
                 setServerError(
                     apiErr.detail ?? "Something went wrong. Please try again.",
                 );
             }
-        } finally {
-            setSubmitting(false);
         }
     }
 
@@ -106,7 +108,7 @@ export function TaskTypeFormModal({
             onClose={handleClose}
             title={isEditing ? "Edit Task Type" : "New Task Type"}
         >
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (
                     <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
                         {serverError}
@@ -124,8 +126,7 @@ export function TaskTypeFormModal({
                     <input
                         id="name"
                         type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        {...register("name")}
                         maxLength={100}
                         className={cn(
                             "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
@@ -140,7 +141,7 @@ export function TaskTypeFormModal({
                     />
                     {errors.name && (
                         <p className="mt-1 text-xs text-red-500">
-                            {errors.name}
+                            {errors.name.message}
                         </p>
                     )}
                 </div>
@@ -156,10 +157,12 @@ export function TaskTypeFormModal({
                     <input
                         id="code"
                         type="text"
-                        value={code}
-                        onChange={(e) =>
-                            setCode(e.target.value.toUpperCase())
-                        }
+                        {...register("code", {
+                            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                setValue("code", e.target.value.toUpperCase(), {
+                                    shouldValidate: false,
+                                }),
+                        })}
                         maxLength={20}
                         className={cn(
                             "w-full rounded-lg border bg-surface px-3 py-2 font-mono text-sm text-foreground",
@@ -174,7 +177,7 @@ export function TaskTypeFormModal({
                     />
                     {errors.code && (
                         <p className="mt-1 text-xs text-red-500">
-                            {errors.code}
+                            {errors.code.message}
                         </p>
                     )}
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -192,10 +195,10 @@ export function TaskTypeFormModal({
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={submitting}>
-                        {submitting
-                            ? "Saving..."
-                            : getSubmitLabel(isEditing)}
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && "Saving..."}
+                        {!isSubmitting && isEditing && "Save Changes"}
+                        {!isSubmitting && !isEditing && "Create"}
                     </Button>
                 </div>
             </form>

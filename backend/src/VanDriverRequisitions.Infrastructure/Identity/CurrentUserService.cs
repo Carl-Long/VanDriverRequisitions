@@ -23,8 +23,8 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
                 throw new UnauthorizedAccessException("Invalid 'oid' claim format.");
 
             var name =
-                UserPrincipal.FindFirstValue("preferred_username")
-                ?? UserPrincipal.FindFirstValue("name")
+                UserPrincipal.FindFirstValue("name")
+                ?? UserPrincipal.FindFirstValue("preferred_username")
                 ?? throw new UnauthorizedAccessException("Missing user name claim.");
 
             return new LoggedInUser(id, name);

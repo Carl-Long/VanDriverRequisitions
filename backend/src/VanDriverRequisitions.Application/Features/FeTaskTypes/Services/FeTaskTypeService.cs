@@ -38,6 +38,13 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
     {
         await validator.ValidateAsync(createFeTaskTypeDto, cancellationToken);
 
+        var codeExists = await context.FeTaskTypes
+            .IgnoreQueryFilters()
+            .AnyAsync(x => x.Code == createFeTaskTypeDto.Code.Trim(), cancellationToken);
+
+        if (codeExists)
+            throw new ConflictException($"A task type with code '{createFeTaskTypeDto.Code.Trim()}' already exists.");
+
         var newTaskType = new FeTaskType
         {
             Name = createFeTaskTypeDto.Name.Trim(),
@@ -62,6 +69,13 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
             throw new NotFoundException(
                 $"FE Task Type with ID '{id}' was not found.");
         }
+
+        var codeExists = await context.FeTaskTypes
+            .IgnoreQueryFilters()
+            .AnyAsync(x => x.Code == updateFeTaskTypeDto.Code.Trim() && x.Id != id, cancellationToken);
+
+        if (codeExists)
+            throw new ConflictException($"A task type with code '{updateFeTaskTypeDto.Code.Trim()}' already exists.");
 
         existingTaskType.Name = updateFeTaskTypeDto.Name.Trim();
         existingTaskType.Code = updateFeTaskTypeDto.Code.Trim();
