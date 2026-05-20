@@ -82,6 +82,9 @@ public class FeRequisitionService(
         var reasons = await LoadReasonsAsync(dto.FeAdditionalCosts.Select(x => x.ReasonId).Distinct().ToList(), cancellationToken);
         await EnsureTransferShopsExistAsync(dto.FeTransfers, cancellationToken);
 
+        var wellKnownLimits = await LoadWellKnownLimitsAsync(cancellationToken);
+        ValidateLimits(dto, taskTypes, wellKnownLimits);
+
         var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
 
         var requisition = new FeRequisition
@@ -123,6 +126,9 @@ public class FeRequisitionService(
         var taskTypes = await LoadTaskTypesAsync(dto.FeGeneralTasks.Select(x => x.FeTaskTypeId).Distinct().ToList(), cancellationToken);
         var reasons = await LoadReasonsAsync(dto.FeAdditionalCosts.Select(x => x.ReasonId).Distinct().ToList(), cancellationToken);
         await EnsureTransferShopsExistAsync(dto.FeTransfers, cancellationToken);
+
+        var wellKnownLimits = await LoadWellKnownLimitsAsync(cancellationToken);
+        ValidateLimits(dto, taskTypes, wellKnownLimits);
 
         requisition.RequisitionDate = dto.RequisitionDate;
         requisition.VanDriverId = driver.Id;
@@ -223,6 +229,8 @@ public class FeRequisitionService(
             return new Dictionary<Guid, FeTaskType>();
 
         var items = await context.FeTaskTypes
+            .Include(x => x.DailyQuantityLimit)
+            .Include(x => x.RateLimit)
             .Where(x => ids.Contains(x.Id))
             .ToListAsync(cancellationToken);
 
@@ -270,6 +278,105 @@ public class FeRequisitionService(
         var missing = ids.Except(existing).ToList();
         if (missing.Count > 0)
             throw new NotFoundException($"Shop(s) not found: {string.Join(", ", missing)}");
+    }
+
+    private async Task<IReadOnlyDictionary<string, LimitValue>> LoadWellKnownLimitsAsync(
+        CancellationToken cancellationToken)
+    {
+        var names = new[] { "MILEAGE_DAILY_QTY", "MILEAGE_RATE", "TRANSFER_DAILY_QTY", "TRANSFER_RATE" };
+
+        var items = await context.LimitValues
+            .Where(x => names.Contains(x.NameOfValue))
+            .ToListAsync(cancellationToken);
+
+        return items.ToDictionary(x => x.NameOfValue);
+    }
+
+    private static void ValidateLimits(
+        SaveFeRequisitionDto dto,
+        IReadOnlyDictionary<Guid, FeTaskType> taskTypes,
+        IReadOnlyDictionary<string, LimitValue> wellKnownLimits)
+    {
+        var errors = new List<string>();
+
+        ValidateGeneralTaskLimits(dto.FeGeneralTasks, taskTypes, errors);
+        ValidateRateLimit(wellKnownLimits, "MILEAGE_RATE", dto.FeMileages.Select(m => (m.RatePerMile, "Mileage", "Rate per mile")), errors);
+        ValidateQtyLimit(wellKnownLimits, "MILEAGE_DAILY_QTY", dto.FeMileages.Select(m => (m.Week, "Mileage")), errors);
+        ValidateRateLimit(wellKnownLimits, "TRANSFER_RATE", dto.FeTransfers.Select(t => (t.RatePerJob, "Transfers", "Rate per job")), errors);
+        ValidateQtyLimit(wellKnownLimits, "TRANSFER_DAILY_QTY", dto.FeTransfers.Select(t => (t.Week, "Transfers")), errors);
+
+        if (errors.Count > 0)
+            throw new BadRequestException(string.Join(" ", errors));
+    }
+
+    private static void ValidateGeneralTaskLimits(
+        IReadOnlyList<SaveFeGeneralTaskDto> tasks,
+        IReadOnlyDictionary<Guid, FeTaskType> taskTypes,
+        List<string> errors)
+    {
+        foreach (var task in tasks)
+        {
+            var type = taskTypes[task.FeTaskTypeId];
+
+            if (type.RateLimit is { TypeOfLimitation: LimitationType.Max, CurrencyLimit: { } maxRate }
+                && task.RatePerJob.HasValue && task.RatePerJob.Value > maxRate)
+            {
+                errors.Add($"{type.Name}: Rate per job ({task.RatePerJob.Value:C}) exceeds the maximum of {maxRate:C}.");
+            }
+
+            if (type.DailyQuantityLimit is { TypeOfLimitation: LimitationType.Max, NumericalLimit: { } maxQty })
+            {
+                ValidateDailyQuantities(task.Week, maxQty, type.Name, errors);
+            }
+        }
+    }
+
+    private static void ValidateRateLimit(
+        IReadOnlyDictionary<string, LimitValue> limits,
+        string limitName,
+        IEnumerable<(decimal? Rate, string Label, string RateLabel)> rows,
+        List<string> errors)
+    {
+        if (!limits.TryGetValue(limitName, out var limit)
+            || limit is not { TypeOfLimitation: LimitationType.Max, CurrencyLimit: { } maxRate })
+            return;
+
+        foreach (var (rate, label, rateLabel) in rows)
+        {
+            if (rate.HasValue && rate.Value > maxRate)
+                errors.Add($"{label}: {rateLabel} ({rate.Value:C}) exceeds the maximum of {maxRate:C}.");
+        }
+    }
+
+    private static void ValidateQtyLimit(
+        IReadOnlyDictionary<string, LimitValue> limits,
+        string limitName,
+        IEnumerable<(WeeklyQuantitiesDto Week, string Label)> rows,
+        List<string> errors)
+    {
+        if (!limits.TryGetValue(limitName, out var limit)
+            || limit is not { TypeOfLimitation: LimitationType.Max, NumericalLimit: { } maxQty })
+            return;
+
+        foreach (var (week, label) in rows)
+            ValidateDailyQuantities(week, maxQty, label, errors);
+    }
+
+    private static void ValidateDailyQuantities(
+        WeeklyQuantitiesDto week, int maxPerDay, string label, List<string> errors)
+    {
+        ReadOnlySpan<(string Name, int? Value)> days =
+        [
+            ("Sunday", week.Sunday), ("Monday", week.Monday), ("Tuesday", week.Tuesday),
+            ("Wednesday", week.Wednesday), ("Thursday", week.Thursday),
+            ("Friday", week.Friday), ("Saturday", week.Saturday),
+        ];
+
+        foreach (var (name, value) in days)
+        {
+            if (value.HasValue && value.Value > maxPerDay)
+                errors.Add($"{label}: {name} quantity ({value.Value}) exceeds the maximum of {maxPerDay}.");
+        }
     }
 
     private static void EnsureEditable(FeRequisition requisition)
