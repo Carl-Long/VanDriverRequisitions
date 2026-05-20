@@ -1,0 +1,50 @@
+import {
+  HeartHandshake,
+  CalendarClock,
+  ListChecks,
+  Tags,
+  Sofa,
+  Shirt,
+} from "lucide-react";
+
+export const navigation = [
+  {
+    title: "Home Van Drivers",
+    href: "/home-drivers",
+    icon: Sofa,
+  },
+  {
+    title: "Standard Van Drivers",
+    href: "/standard-drivers",
+    icon: Shirt,
+  },
+  {
+    title: "Volunteer Van Drivers",
+    href: "/volunteer-drivers",
+    icon: HeartHandshake,
+  },
+];
+
+
+export const adminNavigation = [
+  {
+    label: "Administration",
+    items: [
+      {
+        title: "Submit Windows",
+        href: "/admin/submit-windows",
+        icon: CalendarClock,
+      },
+      {
+        title: "FE Task Types",
+        href: "/admin/fe-task-types",
+        icon: ListChecks,
+      },
+      {
+        title: "Reasons",
+        href: "/admin/reasons",
+        icon: Tags,
+      },
+    ],
+  },
+];
