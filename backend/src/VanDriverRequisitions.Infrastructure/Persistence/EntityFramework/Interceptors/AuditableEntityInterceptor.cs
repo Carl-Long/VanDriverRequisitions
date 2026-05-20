@@ -9,22 +9,33 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Inter
 public class AuditableEntityInterceptor(ICurrentUserService currentUser)
     : SaveChangesInterceptor
 {
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
+    {
+        UpdateEntities(eventData.Context);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData,
         InterceptionResult<int> result)
     {
-        var context = eventData.Context;
+        UpdateEntities(eventData.Context);
+        return base.SavingChanges(eventData, result);
+    }
+
+    private void UpdateEntities(DbContext? context)
+    {
         if (context is null)
-            return result;
+            return;
 
         var now = DateTime.UtcNow;
         var user = currentUser.User;
 
         foreach (var entry in context.ChangeTracker.Entries())
         {
-            // -------------------------
-            // AUDITING
-            // -------------------------
             if (entry.Entity is AuditableEntity auditable)
             {
                 if (entry.State == EntityState.Added)
@@ -46,9 +57,6 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
                 }
             }
 
-            // -------------------------
-            // SOFT DELETE
-            // -------------------------
             if (entry.Entity is ISoftDeletable soft &&
                 entry.State == EntityState.Deleted)
             {
@@ -59,7 +67,5 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
                 soft.DeletedByNameSnapshot = user.Name;
             }
         }
-        
-        return result;
     }
 }
