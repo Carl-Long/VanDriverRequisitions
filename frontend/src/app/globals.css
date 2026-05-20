@@ -1,90 +1,90 @@
 @import "tailwindcss";
 
-@content "./src/**/*.{js,ts,jsx,tsx,mdx}";
+@source "./src/**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
-  --radius: 1rem;
+    --radius: 1rem;
 }
 
 .light-brand {
-  --background: 245 245 247;
+    --background: 245 245 247;
 
-  --surface: 255 255 255;
-  --surface-elevated: 250 250 252;
-  --surface-hover: 245 245 248;
+    --surface: 255 255 255;
+    --surface-elevated: 250 250 252;
+    --surface-hover: 245 245 248;
 
-  --foreground: 15 23 42;
-  --muted-foreground: 100 116 139;
+    --foreground: 15 23 42;
+    --muted-foreground: 100 116 139;
 
-  --primary: 237 0 45;
-  --primary-foreground: 255 255 255;
+    --primary: 237 0 45;
+    --primary-foreground: 255 255 255;
 
-  --secondary: 140 0 50;
-  --secondary-foreground: 255 255 255;
+    --secondary: 140 0 50;
+    --secondary-foreground: 255 255 255;
 
-  --accent: 71 78 90;
-  --accent-foreground: 255 255 255;
+    --accent: 71 78 90;
+    --accent-foreground: 255 255 255;
 
-  --border: 226 232 240;
-  --border-subtle: 241 245 249;
+    --border: 226 232 240;
+    --border-subtle: 241 245 249;
 
-  --muted: 241 245 249;
+    --muted: 241 245 249;
 
-  --ring: 237 0 45;
+    --ring: 237 0 45;
 }
 
 .dark-brand {
-  --background: 8 12 20;
+    --background: 8 12 20;
 
-  --surface: 18 22 30;
-  --surface-elevated: 28 34 44;
-  --surface-hover: 32 38 50;
+    --surface: 18 22 30;
+    --surface-elevated: 28 34 44;
+    --surface-hover: 32 38 50;
 
-  --foreground: 248 250 252;
-  --muted-foreground: 148 163 184;
+    --foreground: 248 250 252;
+    --muted-foreground: 148 163 184;
 
-  --primary: 237 0 45;
-  --primary-foreground: 255 255 255;
+    --primary: 237 0 45;
+    --primary-foreground: 255 255 255;
 
-  --secondary: 140 0 50;
-  --secondary-foreground: 255 255 255;
+    --secondary: 140 0 50;
+    --secondary-foreground: 255 255 255;
 
-  --accent: 71 78 90;
-  --accent-foreground: 255 255 255;
+    --accent: 71 78 90;
+    --accent-foreground: 255 255 255;
 
-  --border: 42 52 68;
-  --border-subtle: 55 65 81;
+    --border: 42 52 68;
+    --border-subtle: 55 65 81;
 
-  --muted: 30 41 59;
+    --muted: 30 41 59;
 
-  --ring: 237 0 45;
+    --ring: 237 0 45;
 }
 
 .light-mono {
-  --background: 245 245 245;
+    --background: 245 245 245;
 
-  --surface: 255 255 255;
-  --surface-elevated: 250 250 250;
-  --surface-hover: 244 244 245;
+    --surface: 255 255 255;
+    --surface-elevated: 250 250 250;
+    --surface-hover: 244 244 245;
 
-  --foreground: 24 24 27;
-  --muted-foreground: 113 113 122;
+    --foreground: 24 24 27;
+    --muted-foreground: 113 113 122;
 
-  --primary: 39 39 42;
-  --primary-foreground: 255 255 255;
+    --primary: 39 39 42;
+    --primary-foreground: 255 255 255;
 
-  --secondary: 82 82 91;
-  --secondary-foreground: 255 255 255;
+    --secondary: 82 82 91;
+    --secondary-foreground: 255 255 255;
 
-  --accent: 113 113 122;
-  --accent-foreground: 255 255 255;
+    --accent: 113 113 122;
+    --accent-foreground: 255 255 255;
 
-  --border: 228 228 231;
-  --border-subtle: 244 244 245;
+    --border: 228 228 231;
+    --border-subtle: 244 244 245;
 
-  --muted: 244 244 245;
+    --muted: 244 244 245;
 
-  --ring: 39 39 42;
+    --ring: 39 39 42;
 }
 
 /* =========================================
@@ -92,79 +92,86 @@
 ========================================= */
 
 .dark-mono {
-  --background: 10 10 11;
+    --background: 10 10 11;
 
-  --surface: 24 24 27;
-  --surface-elevated: 39 39 42;
-  --surface-hover: 50 50 54;
+    --surface: 24 24 27;
+    --surface-elevated: 39 39 42;
+    --surface-hover: 50 50 54;
 
-  --foreground: 250 250 250;
-  --muted-foreground: 161 161 170;
+    --foreground: 250 250 250;
+    --muted-foreground: 161 161 170;
 
-  --primary: 245 245 245;
-  --primary-foreground: 24 24 27;
+    --primary: 245 245 245;
+    --primary-foreground: 24 24 27;
 
-  --secondary: 82 82 91;
-  --secondary-foreground: 255 255 255;
+    --secondary: 82 82 91;
+    --secondary-foreground: 255 255 255;
 
-  --accent: 113 113 122;
-  --accent-foreground: 255 255 255;
+    --accent: 113 113 122;
+    --accent-foreground: 255 255 255;
 
-  --border: 50 50 54;
-  --border-subtle: 63 63 70;
+    --border: 50 50 54;
+    --border-subtle: 63 63 70;
 
-  --muted: 32 32 35;
+    --muted: 32 32 35;
 
-  --ring: 245 245 245;
+    --ring: 245 245 245;
 }
 
 html {
-  background: rgb(var(--background));
-  color: rgb(var(--foreground));
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
 }
 
 body {
-  background: rgb(var(--background));
-  color: rgb(var(--foreground));
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
 
-  min-height: 100vh;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    font-optical-sizing: auto;
 
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
 }
 
 
 @theme {
-  --color-background: rgb(var(--background));
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 
-  --color-surface: rgb(var(--surface));
-  --color-surface-elevated: rgb(var(--surface-elevated));
-  --color-surface-hover: rgb(var(--surface-hover));
+    --color-background: rgb(var(--background));
 
-  --color-foreground: rgb(var(--foreground));
-  --color-muted-foreground: rgb(var(--muted-foreground));
+    --color-surface: rgb(var(--surface));
+    --color-surface-elevated: rgb(var(--surface-elevated));
+    --color-surface-hover: rgb(var(--surface-hover));
 
-  --color-primary: rgb(var(--primary));
-  --color-primary-foreground: rgb(var(--primary-foreground));
+    --color-foreground: rgb(var(--foreground));
+    --color-muted-foreground: rgb(var(--muted-foreground));
 
-  --color-secondary: rgb(var(--secondary));
-  --color-secondary-foreground: rgb(var(--secondary-foreground));
+    --color-primary: rgb(var(--primary));
+    --color-primary-foreground: rgb(var(--primary-foreground));
 
-  --color-accent: rgb(var(--accent));
-  --color-accent-foreground: rgb(var(--accent-foreground));
+    --color-secondary: rgb(var(--secondary));
+    --color-secondary-foreground: rgb(var(--secondary-foreground));
 
-  --color-border: rgb(var(--border));
-  --color-border-subtle: rgb(var(--border-subtle));
+    --color-accent: rgb(var(--accent));
+    --color-accent-foreground: rgb(var(--accent-foreground));
 
-  --color-muted: rgb(var(--muted));
+    --color-border: rgb(var(--border));
+    --color-border-subtle: rgb(var(--border-subtle));
 
-  --color-ring: rgb(var(--ring));
+    --color-muted: rgb(var(--muted));
 
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 3px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
-  --radius-2xl: calc(var(--radius) + 12px);
+    --color-ring: rgb(var(--ring));
+
+    --radius-sm: calc(var(--radius) - 6px);
+    --radius-md: calc(var(--radius) - 3px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 6px);
+    --radius-2xl: calc(var(--radius) + 12px);
 }
 
 
@@ -173,76 +180,102 @@ a,
 input,
 select,
 textarea {
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
 
 
 ::selection {
-  background: rgb(var(--primary) / 0.2);
+    background: rgb(var(--primary) / 0.2);
 }
 
 
 *:focus-visible {
-  outline: none;
+    outline: none;
 
-  box-shadow:
-    0 0 0 2px rgb(var(--background)),
-    0 0 0 4px rgb(var(--ring));
+    box-shadow:
+        0 0 0 2px rgb(var(--background)),
+        0 0 0 4px rgb(var(--ring));
 }
 
 
 * {
-  scrollbar-width: thin;
-  scrollbar-color:
-    rgb(var(--border))
-    transparent;
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgb(var(--border)) transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--border));
-  border-radius: 9999px;
+    background: rgb(var(--border));
+    border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--muted-foreground));
+    background: rgb(var(--muted-foreground));
 }
 
 .card-shadow {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 8px 24px rgb(0 0 0 / 0.06);
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 8px 24px rgb(0 0 0 / 0.06);
 }
 
 .card-shadow-hover {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 20px 48px rgb(0 0 0 / 0.12);
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 20px 48px rgb(0 0 0 / 0.12);
+}
+
+/* Combines default + hover shadow, including dark-theme variants */
+.card-shadow-interactive {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 8px 24px rgb(0 0 0 / 0.06);
+}
+
+.card-shadow-interactive:hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 20px 48px rgb(0 0 0 / 0.12);
 }
 
 .dark-brand .card-shadow,
 .dark-mono .card-shadow {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.25),
-    0 8px 32px rgb(0 0 0 / 0.35);
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 8px 32px rgb(0 0 0 / 0.35);
 }
 
 .dark-brand .card-shadow-hover,
 .dark-mono .card-shadow-hover {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.25),
-    0 24px 64px rgb(0 0 0 / 0.45);
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.dark-brand .card-shadow-interactive,
+.dark-mono .card-shadow-interactive {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 8px 32px rgb(0 0 0 / 0.35);
+}
+
+.dark-brand .card-shadow-interactive:hover,
+.dark-mono .card-shadow-interactive:hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 24px 64px rgb(0 0 0 / 0.45);
 }
