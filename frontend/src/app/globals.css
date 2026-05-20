@@ -25,6 +25,9 @@
     --accent: 71 78 90;
     --accent-foreground: 255 255 255;
 
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+
     --border: 226 232 240;
     --border-subtle: 241 245 249;
 
@@ -52,6 +55,9 @@
     --accent: 71 78 90;
     --accent-foreground: 255 255 255;
 
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+
     --border: 42 52 68;
     --border-subtle: 55 65 81;
 
@@ -78,6 +84,9 @@
 
     --accent: 113 113 122;
     --accent-foreground: 255 255 255;
+
+    --success: 39 39 42;
+    --success-foreground: 255 255 255;
 
     --border: 228 228 231;
     --border-subtle: 244 244 245;
@@ -109,6 +118,9 @@
 
     --accent: 113 113 122;
     --accent-foreground: 255 255 255;
+
+    --success: 228 228 231;
+    --success-foreground: 10 10 11;
 
     --border: 50 50 54;
     --border-subtle: 63 63 70;
