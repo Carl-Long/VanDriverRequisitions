@@ -13,7 +13,7 @@ const cards = [
         title: "Home Van Drivers",
         description:
             "Raise home van driver requisitions for FE stores",
-        href: "/home-drivers",
+        href: "/home-van-drivers",
         icon: Sofa,
     },
     {
