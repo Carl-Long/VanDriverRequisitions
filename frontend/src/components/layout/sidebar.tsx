@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 import { navigation, adminNavigation } from "@/lib/navigation";
 import { NavItem } from "@/components/layout/nav-item";
+import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
 
 export function Sidebar() {
@@ -40,6 +41,8 @@ export function Sidebar() {
     }, [collapsed]);
 
     const isActive = (href: string) => pathname === href;
+
+    const { status: windowStatus } = useSubmitWindowStatus();
 
     return (
         <aside
@@ -115,6 +118,12 @@ export function Sidebar() {
                                 icon={item.icon}
                                 active={isActive(item.href)}
                                 collapsed={collapsed}
+                                showBadge={
+                                    item.href === "/admin/submit-windows" &&
+                                    windowStatus !== null &&
+                                    !windowStatus.currentWindow &&
+                                    !windowStatus.hasUpcoming
+                                }
                             />
                         ))}
                     </div>

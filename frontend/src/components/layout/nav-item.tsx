@@ -10,6 +10,7 @@ export function NavItem({
     icon: Icon,
     active,
     collapsed,
+    showBadge,
 }: Readonly<NavItemProps>) {
     return (
         <div className="relative group">
@@ -24,7 +25,12 @@ export function NavItem({
                         : "hover:bg-muted text-foreground"
                 )}
             >
-                <Icon size={18} />
+                <div className="relative">
+                    <Icon size={18} />
+                    {showBadge && (
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-surface" />
+                    )}
+                </div>
                 {!collapsed && <span className="text-sm">{label}</span>}
             </Link>
 
