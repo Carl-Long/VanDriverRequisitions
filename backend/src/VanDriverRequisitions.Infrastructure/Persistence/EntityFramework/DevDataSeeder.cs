@@ -52,7 +52,15 @@ public static class DevDataSeeder
             .IgnoreQueryFilters()
             .AnyAsync();
 
-        if (hasLimits && hasTaskTypes)
+        var hasShops = await context.Shops
+            .IgnoreQueryFilters()
+            .AnyAsync();
+
+        var hasDrivers = await context.VanDrivers
+            .IgnoreQueryFilters()
+            .AnyAsync();
+
+        if (hasLimits && hasTaskTypes && hasShops && hasDrivers)
         {
             logger?.LogInformation("Dev seed data already exists — skipping.");
             return;
@@ -120,6 +128,149 @@ public static class DevDataSeeder
             logger?.LogInformation("Seeded {Count} task types.", 5);
         }
 
+        // ─── Shops ─────────────────────────────────────────────────────
+        if (!hasShops)
+        {
+            await SeedShopsAsync(context, logger);
+        }
+
+        // ─── Van Drivers ───────────────────────────────────────────────
+        if (!hasDrivers)
+        {
+            await SeedVanDriversAsync(context, logger);
+        }
+
         logger?.LogInformation("Development seeding complete.");
     }
+
+    // ─── Shop seed data ────────────────────────────────────────────────────
+
+    private static readonly string[] Towns =
+    [
+        "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
+        "Liverpool", "Bristol", "Newcastle", "Nottingham", "Southampton",
+        "Leicester", "Coventry", "Bradford", "Cardiff", "Belfast",
+        "Edinburgh", "Glasgow", "Aberdeen", "Swansea", "Oxford",
+        "Cambridge", "Brighton", "Plymouth", "Wolverhampton", "Derby",
+        "Stoke-on-Trent", "Sunderland", "York", "Portsmouth", "Reading",
+        "Luton", "Bournemouth", "Middlesbrough", "Blackpool", "Bolton",
+        "Ipswich", "Peterborough", "Telford", "Huddersfield", "Slough",
+    ];
+
+    private static readonly string[] Counties =
+    [
+        "Greater London", "West Midlands", "Greater Manchester", "West Yorkshire", "South Yorkshire",
+        "Merseyside", "Avon", "Tyne and Wear", "Nottinghamshire", "Hampshire",
+        "Leicestershire", "West Midlands", "West Yorkshire", "South Glamorgan", "Antrim",
+        "Midlothian", "Lanarkshire", "Aberdeenshire", "West Glamorgan", "Oxfordshire",
+        "Cambridgeshire", "East Sussex", "Devon", "West Midlands", "Derbyshire",
+        "Staffordshire", "Tyne and Wear", "North Yorkshire", "Hampshire", "Berkshire",
+        "Bedfordshire", "Dorset", "Cleveland", "Lancashire", "Greater Manchester",
+        "Suffolk", "Cambridgeshire", "Shropshire", "West Yorkshire", "Berkshire",
+    ];
+
+    private static readonly string[] StreetNames =
+    [
+        "High Street", "Station Road", "Church Lane", "Park Avenue", "Mill Road",
+        "Victoria Street", "King Street", "Queen Street", "London Road", "Market Street",
+        "Bridge Street", "Castle Road", "Elm Grove", "Oak Drive", "Cedar Close",
+        "Maple Way", "Willow Lane", "Birch Road", "Ash Street", "Pine Avenue",
+    ];
+
+    private static readonly string[] ShopPrefixes =
+    [
+        "Central", "North", "South", "East", "West", "Upper", "Lower", "Old", "New", "Great",
+        "Little", "Market", "Royal", "City", "Town", "Valley", "Hill", "Park", "Lake", "River",
+    ];
+
+    private static readonly string[] ShopSuffixes =
+    [
+        "Store", "Shop", "Market", "Express", "Local", "Depot", "Branch", "Outlet",
+        "Centre", "Point", "Hub", "Place", "Corner", "Square", "Yard",
+    ];
+
+    private static async Task SeedShopsAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 1000;
+        var rng = new Random(42); // deterministic
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("INSERT INTO Shops (Id, Code, Name, Address, Address2, Town, County, Postcode, Phone, IsActive) VALUES");
+
+        for (var i = 0; i < count; i++)
+        {
+            var id = new Guid($"d0000000-0000-0000-0000-{i:D12}");
+            var code = $"T{i + 1:D4}";
+            var townIdx = i % Towns.Length;
+            var town = Towns[townIdx];
+            var county = Counties[townIdx];
+            var prefix = ShopPrefixes[i % ShopPrefixes.Length];
+            var suffix = ShopSuffixes[i % ShopSuffixes.Length];
+            var name = $"{prefix} {town} {suffix}";
+            var address = $"{rng.Next(1, 200)} {StreetNames[i % StreetNames.Length]}";
+            var postcode = $"{(char)('A' + (i % 26))}{(char)('A' + (i / 26 % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var phone = $"0{rng.Next(1000, 9999)} {rng.Next(100000, 999999)}";
+            var isActive = i < 800 ? 1 : 0; // 80% active
+
+            var separator = i < count - 1 ? "," : ";";
+            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(name)}', '{Esc(address)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {isActive}){separator}");
+        }
+
+        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        logger?.LogInformation("Seeded {Count} shops ({Active} active, {Inactive} inactive).", count, 800, 200);
+    }
+
+    // ─── Van Driver seed data ──────────────────────────────────────────────
+
+    private static readonly string[] FirstNames =
+    [
+        "James", "John", "Robert", "Michael", "David", "William", "Richard", "Thomas", "Daniel", "Matthew",
+        "Andrew", "Christopher", "Joseph", "Mark", "Paul", "Steven", "George", "Edward", "Brian", "Kevin",
+        "Ian", "Peter", "Alan", "Simon", "Gary", "Stephen", "Philip", "Colin", "Martin", "Graham",
+        "Barry", "Stuart", "Craig", "Derek", "Neil", "Keith", "Gordon", "Ross", "Darren", "Lee",
+    ];
+
+    private static readonly string[] LastNames =
+    [
+        "Smith", "Jones", "Williams", "Brown", "Taylor", "Davies", "Wilson", "Evans", "Thomas", "Johnson",
+        "Roberts", "Walker", "Wright", "Robinson", "Thompson", "White", "Hughes", "Edwards", "Green", "Hall",
+        "Lewis", "Harris", "Clarke", "Patel", "Jackson", "Wood", "Turner", "Martin", "Cooper", "Hill",
+        "Ward", "Morris", "Moore", "Clark", "King", "Baker", "Harrison", "Morgan", "Allen", "James",
+    ];
+
+    private static async Task SeedVanDriversAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 1000;
+        var rng = new Random(99); // deterministic, different from shops
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("INSERT INTO VanDrivers (Id, Code, TradersName, Address1, Address2, Town, County, Postcode, Phone, VatNumber, IsActive) VALUES");
+
+        for (var i = 0; i < count; i++)
+        {
+            var id = new Guid($"e0000000-0000-0000-0000-{i:D12}");
+            var code = $"81{i + 1:D4}";
+            var first = FirstNames[i % FirstNames.Length];
+            var last = LastNames[(i / FirstNames.Length + i) % LastNames.Length];
+            var tradersName = $"{first} {last}";
+            var townIdx = (i + 7) % Towns.Length; // offset from shops
+            var town = Towns[townIdx];
+            var county = Counties[townIdx];
+            var address1 = $"{rng.Next(1, 300)} {StreetNames[(i + 3) % StreetNames.Length]}";
+            var postcode = $"{(char)('A' + ((i + 5) % 26))}{(char)('A' + ((i / 26 + 3) % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var phone = $"07{rng.Next(100, 999)} {rng.Next(100000, 999999)}";
+            var hasVat = i % 3 == 0; // ~33% with VAT
+            var vatNumber = hasVat ? $"GB{rng.Next(100000000, 999999999)}" : "NULL";
+            var isActive = i < 800 ? 1 : 0; // 80% active
+
+            var vatValue = hasVat ? $"'{vatNumber}'" : "NULL";
+            var separator = i < count - 1 ? "," : ";";
+            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(tradersName)}', '{Esc(address1)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {vatValue}, {isActive}){separator}");
+        }
+
+        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        logger?.LogInformation("Seeded {Count} van drivers ({Active} active, {Inactive} inactive).", count, 800, 200);
+    }
+
+    private static string Esc(string value) => value.Replace("'", "''");
 }

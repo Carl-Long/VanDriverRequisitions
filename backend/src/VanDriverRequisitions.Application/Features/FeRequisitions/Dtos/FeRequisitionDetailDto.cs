@@ -18,6 +18,8 @@ public class FeRequisitionDetailDto
     public string? RejectionNotes { get; init; }
     public decimal Subtotal { get; init; }
     public bool IsEditable { get; init; }
+    public bool IsVanDriverActive { get; init; }
+    public bool IsShopActive { get; init; }
 
     public IReadOnlyList<FeGeneralTaskDto> FeGeneralTasks { get; init; } = [];
     public IReadOnlyList<FeMileageDto> FeMileages { get; init; } = [];

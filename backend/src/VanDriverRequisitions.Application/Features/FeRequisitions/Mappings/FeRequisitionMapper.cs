@@ -9,7 +9,9 @@ public static class FeRequisitionMapper
 {
     public static FeRequisitionDetailDto ToDetailDto(
         FeRequisition requisition,
-        IReadOnlyDictionary<Guid, (string Code, string Name)> shopLookup)
+        IReadOnlyDictionary<Guid, (string Code, string Name)> shopLookup,
+        bool isVanDriverActive = true,
+        bool isShopActive = true)
     {
         return new FeRequisitionDetailDto
         {
@@ -29,6 +31,8 @@ public static class FeRequisitionMapper
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
             IsEditable = IsEditable(requisition.Status),
+            IsVanDriverActive = isVanDriverActive,
+            IsShopActive = isShopActive,
             FeGeneralTasks = requisition.FeGeneralTasks
                 .OrderBy(x => x.WeekEndingDate)
                 .Select(ToDto)

@@ -69,7 +69,13 @@ public class FeRequisitionService(
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
         var shopLookup = await LoadShopLookupAsync(requisition, cancellationToken);
-        return FeRequisitionMapper.ToDetailDto(requisition, shopLookup);
+
+        var isDriverActive = await context.VanDrivers
+            .AnyAsync(x => x.Id == requisition.VanDriverId && x.IsActive, cancellationToken);
+        var isShopActive = await context.Shops
+            .AnyAsync(x => x.Id == requisition.ShopId && x.IsActive, cancellationToken);
+
+        return FeRequisitionMapper.ToDetailDto(requisition, shopLookup, isDriverActive, isShopActive);
     }
 
     public async Task<FeRequisitionDetailDto> CreateAsync(SaveFeRequisitionDto dto, CancellationToken cancellationToken = default)

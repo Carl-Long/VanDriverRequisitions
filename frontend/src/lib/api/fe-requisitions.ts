@@ -106,6 +106,8 @@ export type FeRequisitionDetail = {
     rejectionNotes: string | null;
     subtotal: number;
     isEditable: boolean;
+    isVanDriverActive: boolean;
+    isShopActive: boolean;
     feGeneralTasks: FeGeneralTask[];
     feMileages: FeMileage[];
     feTransfers: FeTransfer[];

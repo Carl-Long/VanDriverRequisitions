@@ -625,6 +625,8 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
                             setSelectedShop={setSelectedShop}
                             fetchDrivers={fetchDrivers}
                             fetchShops={fetchShops}
+                            isVanDriverActive={initial?.isVanDriverActive}
+                            isShopActive={initial?.isShopActive}
                         />
                     )}
 
@@ -733,6 +735,8 @@ type HomeTabProps = {
     setSelectedShop: (s: ShopLookup | null) => void;
     fetchDrivers: (search: string) => Promise<ComboboxOption<VanDriverLookup>[]>;
     fetchShops: (search: string) => Promise<ComboboxOption<ShopLookup>[]>;
+    isVanDriverActive?: boolean;
+    isShopActive?: boolean;
 };
 
 function HomeTab({
@@ -746,6 +750,8 @@ function HomeTab({
     setSelectedShop,
     fetchDrivers,
     fetchShops,
+    isVanDriverActive = true,
+    isShopActive = true,
 }: Readonly<HomeTabProps>) {
     const vanDriverId = useWatch({ control, name: "vanDriverId" });
     const shopId = useWatch({ control, name: "shopId" });
@@ -815,6 +821,12 @@ function HomeTab({
                             {errors.vanDriverId.message}
                         </p>
                     )}
+                    {!isVanDriverActive && vanDriverId && (
+                        <p className="mt-1.5 rounded bg-amber-500/10 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+                            <AlertCircle size={12} className="mr-1 inline -translate-y-px" />
+                            This van driver is inactive. If you change it, the current selection will no longer be available.
+                        </p>
+                    )}
                 </div>
 
                 <div>
@@ -855,6 +867,12 @@ function HomeTab({
                     />
                     {errors.shopId && (
                         <p className="mt-1 text-xs text-red-500">{errors.shopId.message}</p>
+                    )}
+                    {!isShopActive && shopId && (
+                        <p className="mt-1.5 rounded bg-amber-500/10 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+                            <AlertCircle size={12} className="mr-1 inline -translate-y-px" />
+                            This shop is inactive. If you change it, the current selection will no longer be available.
+                        </p>
                     )}
                 </div>
 

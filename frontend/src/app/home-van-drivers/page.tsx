@@ -167,6 +167,21 @@ export default function HomeVanDriversPage() {
 
     // ── Search handler ───────────────────────────────────────────────────────
 
+    // Debounced search: auto-update filter after 400ms of inactivity
+    useEffect(() => {
+        const trimmed = searchInput.trim();
+        if (trimmed === filters.requisitionNumber) return;
+
+        const timer = setTimeout(() => {
+            setFilters((prev) => ({
+                ...prev,
+                requisitionNumber: trimmed,
+            }));
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [searchInput, filters.requisitionNumber]);
+
     function handleSearch(e: React.FormEvent) {
         e.preventDefault();
         setFilters((prev) => ({
