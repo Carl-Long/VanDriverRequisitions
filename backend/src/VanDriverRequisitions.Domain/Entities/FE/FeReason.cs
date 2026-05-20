@@ -4,5 +4,5 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public class FeReason : LookupEntity
 {
-    public required string Reason { get; init; }
+    public required string Reason { get; set; }
 }

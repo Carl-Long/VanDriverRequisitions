@@ -17,7 +17,7 @@ public class FeReasonConfiguration : IEntityTypeConfiguration<FeReason>
             .HasMaxLength(200);
 
         // Indexes
-        builder.HasIndex(x => x.Reason);
+        builder.HasIndex(x => x.Reason).IsUnique();
 
         builder.ApplyAuditableConfiguration();
     }
