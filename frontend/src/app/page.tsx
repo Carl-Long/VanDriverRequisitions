@@ -1,4 +1,5 @@
 import { LaunchCard } from "@/components/landing-page/launch-card";
+import { WelcomeHeading } from "@/components/landing-page/welcome-heading";
 import { PageContainer } from "@/components/layout/page-container";
 
 import {
@@ -42,10 +43,7 @@ export default function HomePage() {
                     <span>Van Driver Portal</span>
                 </div>
 
-                <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                    Welcome back,{" "}
-                    <span className="text-primary">User</span>
-                </h1>
+                <WelcomeHeading />
 
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
                     Manage van driver requisitions, volunteer claims, and

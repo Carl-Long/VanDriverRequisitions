@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { AuthProvider } from "@/providers/auth-provider";
+import { AuthGate } from "@/components/auth/auth-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
 
@@ -34,7 +36,11 @@ export default function RootLayout({
             <body>
                 <ErrorBoundary>
                     <ThemeProvider>
-                        <AppShell>{children}</AppShell>
+                        <AuthProvider>
+                            <AuthGate>
+                                <AppShell>{children}</AppShell>
+                            </AuthGate>
+                        </AuthProvider>
                     </ThemeProvider>
                 </ErrorBoundary>
             </body>

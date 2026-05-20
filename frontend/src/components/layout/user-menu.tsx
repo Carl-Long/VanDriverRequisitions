@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { LogOut, User } from "lucide-react";
-import clsx from "clsx";
+import { useAuth } from "@/providers/auth-provider";
 
 export function UserMenu() {
+    const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
+
+    if (!user) return null;
 
     return (
         <div className="relative">
@@ -21,7 +24,7 @@ export function UserMenu() {
                 )}
                 title="User profile"
             >
-                C
+                {user.initial}
             </button>
 
             {/* BACKDROP */}
@@ -36,20 +39,21 @@ export function UserMenu() {
 
             {/* DROPDOWN MENU */}
             {open && (
-                <div className={clsx(
+                <div className={cn(
                     "absolute top-full mt-2 right-0 w-56",
                     "rounded-lg border border-border bg-surface",
                     "shadow-lg z-50"
                 )}>
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-border/50">
-                        <p className="text-sm font-medium">Carl</p>
-                        <p className="text-xs text-muted-foreground">carl@example.com</p>
+                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="mt-1 text-xs text-muted-foreground/60">{user.role}</p>
                     </div>
 
                     {/* Menu Items */}
                     <div className="py-1">
-                        <button className={clsx(
+                        <button className={cn(
                             "w-full flex items-center gap-3 px-4 py-2 text-sm",
                             "hover:bg-muted transition text-left"
                         )}>
@@ -57,10 +61,16 @@ export function UserMenu() {
                             Profile
                         </button>
 
-                        <button className={clsx(
-                            "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                            "hover:bg-muted transition text-left text-red-600"
-                        )}>
+                        <button
+                            onClick={() => {
+                                setOpen(false);
+                                logout();
+                            }}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                "hover:bg-muted transition text-left text-red-600"
+                            )}
+                        >
                             <LogOut size={16} />
                             Sign out
                         </button>

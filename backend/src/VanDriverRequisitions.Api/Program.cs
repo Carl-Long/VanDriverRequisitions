@@ -9,6 +9,19 @@ builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -19,6 +32,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 

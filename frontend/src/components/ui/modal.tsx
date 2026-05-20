@@ -1,0 +1,66 @@
+"use client";
+
+import { useEffect, useRef, type ReactNode } from "react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type ModalProps = {
+    open: boolean;
+    onClose: () => void;
+    title: string;
+    children: ReactNode;
+};
+
+export function Modal({
+    open,
+    onClose,
+    title,
+    children,
+}: Readonly<ModalProps>) {
+    const dialogRef = useRef<HTMLDialogElement>(null);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+
+        if (open) {
+            dialog.showModal();
+        } else {
+            dialog.close();
+        }
+    }, [open]);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+        if (!dialog) return;
+
+        const handleClose = () => onClose();
+        dialog.addEventListener("close", handleClose);
+        return () => dialog.removeEventListener("close", handleClose);
+    }, [onClose]);
+
+    return (
+        <dialog
+            ref={dialogRef}
+            className={cn(
+                "m-auto w-full max-w-lg rounded-2xl border border-border bg-surface p-0",
+                "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
+                "shadow-xl",
+            )}
+        >
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                    {title}
+                </h2>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
+                    <X size={18} />
+                </button>
+            </div>
+            <div className="px-6 py-5">{children}</div>
+        </dialog>
+    );
+}
