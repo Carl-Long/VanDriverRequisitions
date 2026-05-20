@@ -3,23 +3,32 @@
 import { Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { FeTaskType } from "@/lib/api/fe-task-types";
+import {
+    type LimitValue,
+    FASCIA_LABELS,
+    LIMITATION_TYPE_LABELS,
+} from "@/lib/api/limit-values";
 
-type TaskTypeCardProps = {
-    taskType: FeTaskType;
-    onEdit: (taskType: FeTaskType) => void;
-    onToggleActive: (taskType: FeTaskType) => void;
+type LimitValueCardProps = {
+    limitValue: LimitValue;
+    onEdit: (limitValue: LimitValue) => void;
+    onToggleActive: (limitValue: LimitValue) => void;
 };
 
-export function TaskTypeCard({
-    taskType,
+export function LimitValueCard({
+    limitValue,
     onEdit,
     onToggleActive,
-}: Readonly<TaskTypeCardProps>) {
-    const formattedDate = new Date(taskType.createdAtUtc).toLocaleDateString(
+}: Readonly<LimitValueCardProps>) {
+    const formattedDate = new Date(limitValue.createdAtUtc).toLocaleDateString(
         "en-GB",
         { day: "numeric", month: "short", year: "numeric" },
     );
+
+    const valueDisplay =
+        limitValue.currencyLimit === null
+            ? `${limitValue.numericalLimit?.toLocaleString("en-GB")}`
+            : `£${limitValue.currencyLimit.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     return (
         <div
@@ -34,33 +43,35 @@ export function TaskTypeCard({
                 <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                         <h3 className="truncate text-sm font-semibold text-foreground">
-                            {taskType.name}
+                            {limitValue.title}
                         </h3>
-                        <p className="mt-1 font-mono text-xs text-muted-foreground">
-                            {taskType.code}
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            {limitValue.nameOfValue}
                         </p>
                     </div>
-                    <StatusBadge active={taskType.isActive} />
+                    <StatusBadge active={limitValue.isActive} />
+                </div>
+
+                {/* Tags row */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {LIMITATION_TYPE_LABELS[limitValue.typeOfLimitation]}
+                    </span>
+                    {limitValue.fascia !== null && (
+                        <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            {FASCIA_LABELS[limitValue.fascia]}
+                        </span>
+                    )}
+                    <span className="rounded-md bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+                        {valueDisplay}
+                    </span>
                 </div>
 
                 {/* Metadata */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                    {taskType.dailyQuantityMax !== null && (
-                        <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            Daily max: {taskType.dailyQuantityMax}
-                        </span>
-                    )}
-                    {taskType.rateMax !== null && (
-                        <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            Rate max: £{taskType.rateMax.toFixed(2)}
-                        </span>
-                    )}
-                </div>
-
                 <p className="mt-4 text-xs text-muted-foreground">
                     Created {formattedDate}
-                    {taskType.createdByNameSnapshot &&
-                        ` by ${taskType.createdByNameSnapshot}`}
+                    {limitValue.createdByNameSnapshot &&
+                        ` by ${limitValue.createdByNameSnapshot}`}
                 </p>
             </div>
 
@@ -68,7 +79,7 @@ export function TaskTypeCard({
             <div className="flex border-t border-border">
                 <button
                     type="button"
-                    onClick={() => onEdit(taskType)}
+                    onClick={() => onEdit(limitValue)}
                     className={cn(
                         "flex flex-1 items-center justify-center gap-2 py-2.5",
                         "text-xs font-medium text-foreground transition",
@@ -81,18 +92,18 @@ export function TaskTypeCard({
                 </button>
                 <button
                     type="button"
-                    onClick={() => onToggleActive(taskType)}
+                    onClick={() => onToggleActive(limitValue)}
                     className={cn(
                         "flex flex-1 items-center justify-center gap-2 py-2.5",
                         "text-xs font-medium transition",
                         "hover:bg-muted",
                         "rounded-br-2xl",
-                        taskType.isActive
+                        limitValue.isActive
                             ? "text-muted-foreground"
                             : "text-emerald-600",
                     )}
                 >
-                    {taskType.isActive ? (
+                    {limitValue.isActive ? (
                         <>
                             <ToggleRight size={14} />
                             Deactivate

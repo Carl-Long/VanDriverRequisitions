@@ -6,32 +6,28 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
-import { TaskTypeCard } from "@/components/fe-task-types/task-type-card";
-import { TaskTypeFormModal } from "@/components/fe-task-types/task-type-form-modal";
-import {
-    feTaskTypesApi,
-    type FeTaskType,
-} from "@/lib/api/fe-task-types";
+import { LimitValueCard } from "@/components/limit-values/limit-value-card";
+import { LimitValueFormModal } from "@/components/limit-values/limit-value-form-modal";
+import { limitValuesApi, type LimitValue } from "@/lib/api/limit-values";
 
-export default function FeTaskTypesPage() {
-    const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
+export default function LimitValuesPage() {
+    const [limitValues, setLimitValues] = useState<LimitValue[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
 
-    // Modal state
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState<FeTaskType | null>(null);
+    const [editing, setEditing] = useState<LimitValue | null>(null);
 
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await feTaskTypesApi.getAll(showInactive);
-            setTaskTypes(data);
+            const data = await limitValuesApi.getAll(showInactive);
+            setLimitValues(data);
         } catch {
-            setError("Failed to load task types. Is the API running?");
+            setError("Failed to load limit values. Is the API running?");
         } finally {
             setLoading(false);
         }
@@ -42,42 +38,49 @@ export default function FeTaskTypesPage() {
     }, [load]);
 
     const filtered = useMemo(() => {
-        if (!search.trim()) return taskTypes;
+        if (!search.trim()) return limitValues;
         const q = search.toLowerCase();
-        return taskTypes.filter(
-            (t) =>
-                t.name.toLowerCase().includes(q) ||
-                t.code.toLowerCase().includes(q),
+        return limitValues.filter(
+            (lv) =>
+                lv.title.toLowerCase().includes(q) ||
+                lv.nameOfValue.toLowerCase().includes(q),
         );
-    }, [taskTypes, search]);
+    }, [limitValues, search]);
 
     function openCreate() {
         setEditing(null);
         setModalOpen(true);
     }
 
-    function openEdit(taskType: FeTaskType) {
-        setEditing(taskType);
+    function openEdit(limitValue: LimitValue) {
+        setEditing(limitValue);
         setModalOpen(true);
     }
 
-    async function handleSubmit(data: { name: string; code: string; dailyQuantityLimitId: string | null; rateLimitId: string | null }) {
+    async function handleSubmit(data: {
+        title: string;
+        nameOfValue: string;
+        fascia: number | null;
+        typeOfLimitation: number;
+        numericalLimit: number | null;
+        currencyLimit: number | null;
+    }) {
         if (editing) {
-            await feTaskTypesApi.update(editing.id, data);
+            await limitValuesApi.update(editing.id, data);
         } else {
-            await feTaskTypesApi.create(data);
+            await limitValuesApi.create(data);
         }
         setModalOpen(false);
         setEditing(null);
         await load();
     }
 
-    async function handleToggleActive(taskType: FeTaskType) {
+    async function handleToggleActive(limitValue: LimitValue) {
         try {
-            if (taskType.isActive) {
-                await feTaskTypesApi.deactivate(taskType.id);
+            if (limitValue.isActive) {
+                await limitValuesApi.deactivate(limitValue.id);
             } else {
-                await feTaskTypesApi.activate(taskType.id);
+                await limitValuesApi.activate(limitValue.id);
             }
             await load();
         } catch {
@@ -88,12 +91,12 @@ export default function FeTaskTypesPage() {
     return (
         <PageContainer>
             <PageHeader
-                title="FE Task Types"
-                description="Manage task type codes used across FE store requisitions."
+                title="Limit Values"
+                description="Manage numerical and currency limits applied across requisitions."
             >
                 <Button onClick={openCreate}>
                     <Plus size={16} />
-                    New Task Type
+                    New Limit Value
                 </Button>
             </PageHeader>
 
@@ -102,7 +105,7 @@ export default function FeTaskTypesPage() {
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search by name or code..."
+                    placeholder="Search by title or name..."
                     className="sm:max-w-xs"
                 />
                 <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -129,7 +132,7 @@ export default function FeTaskTypesPage() {
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div
                             key={`skeleton-${i}`}
-                            className="h-40 animate-pulse rounded-2xl border border-border bg-surface"
+                            className="h-44 animate-pulse rounded-2xl border border-border bg-surface"
                         />
                     ))}
                 </div>
@@ -140,8 +143,8 @@ export default function FeTaskTypesPage() {
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                     <p className="text-sm text-muted-foreground">
                         {search
-                            ? "No task types match your search."
-                            : "No task types yet. Create one to get started."}
+                            ? "No limit values match your search."
+                            : "No limit values yet. Create one to get started."}
                     </p>
                 </div>
             )}
@@ -149,10 +152,10 @@ export default function FeTaskTypesPage() {
             {/* Grid */}
             {!loading && filtered.length > 0 && (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {filtered.map((taskType) => (
-                        <TaskTypeCard
-                            key={taskType.id}
-                            taskType={taskType}
+                    {filtered.map((lv) => (
+                        <LimitValueCard
+                            key={lv.id}
+                            limitValue={lv}
                             onEdit={openEdit}
                             onToggleActive={handleToggleActive}
                         />
@@ -161,7 +164,7 @@ export default function FeTaskTypesPage() {
             )}
 
             {/* Form modal */}
-            <TaskTypeFormModal
+            <LimitValueFormModal
                 key={editing?.id ?? "new"}
                 open={modalOpen}
                 onClose={() => {

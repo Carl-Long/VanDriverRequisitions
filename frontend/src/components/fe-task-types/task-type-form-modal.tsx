@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
+import { limitValuesApi, type LimitValue } from "@/lib/api/limit-values";
 
 // Zod schema — mirrors backend FluentValidation rules exactly
 const taskTypeSchema = z.object({
@@ -25,6 +26,8 @@ const taskTypeSchema = z.object({
             /^[A-Z0-9_-]+$/,
             "Code must contain only uppercase letters, numbers, hyphens, and underscores.",
         ),
+    dailyQuantityLimitId: z.string().nullable(),
+    rateLimitId: z.string().nullable(),
 });
 
 type TaskTypeFormData = z.infer<typeof taskTypeSchema>;
@@ -44,6 +47,15 @@ export function TaskTypeFormModal({
 }: Readonly<TaskTypeFormModalProps>) {
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
+    const [numericalLimits, setNumericalLimits] = useState<LimitValue[]>([]);
+    const [currencyLimits, setCurrencyLimits] = useState<LimitValue[]>([]);
+
+    useEffect(() => {
+        limitValuesApi.getAll(false).then((all) => {
+            setNumericalLimits(all.filter((lv) => lv.numericalLimit !== null));
+            setCurrencyLimits(all.filter((lv) => lv.currencyLimit !== null));
+        }).catch(() => { /* silently degrade — limits are optional */ });
+    }, []);
 
     const {
         register,
@@ -57,6 +69,8 @@ export function TaskTypeFormModal({
         defaultValues: {
             name: initial?.name ?? "",
             code: initial?.code ?? "",
+            dailyQuantityLimitId: initial?.dailyQuantityLimitId ?? null,
+            rateLimitId: initial?.rateLimitId ?? null,
         },
     });
 
@@ -66,6 +80,8 @@ export function TaskTypeFormModal({
             reset({
                 name: initial?.name ?? "",
                 code: initial?.code ?? "",
+                dailyQuantityLimitId: initial?.dailyQuantityLimitId ?? null,
+                rateLimitId: initial?.rateLimitId ?? null,
             });
             setServerError(null);
         }
@@ -101,6 +117,12 @@ export function TaskTypeFormModal({
             }
         }
     }
+
+    const selectClass = cn(
+        "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
+        "focus:outline-none focus:ring-2 focus:ring-ring/20",
+        "transition-colors border-border focus:border-primary/30",
+    );
 
     return (
         <Modal
@@ -184,6 +206,61 @@ export function TaskTypeFormModal({
                         Uppercase letters, numbers, hyphens, and underscores
                         only.
                     </p>
+                </div>
+
+                {/* Limits */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            htmlFor="dailyQuantityLimitId"
+                            className="mb-1.5 block text-sm font-medium text-foreground"
+                        >
+                            Daily Qty Limit
+                        </label>
+                        <select
+                            id="dailyQuantityLimitId"
+                            {...register("dailyQuantityLimitId", {
+                                setValueAs: (v) => (v === "" ? null : v),
+                            })}
+                            className={selectClass}
+                        >
+                            <option value="">None</option>
+                            {numericalLimits.map((lv) => (
+                                <option key={lv.id} value={lv.id}>
+                                    {lv.title} ({lv.numericalLimit})
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Max value per day (Sun–Sat).
+                        </p>
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="rateLimitId"
+                            className="mb-1.5 block text-sm font-medium text-foreground"
+                        >
+                            Rate Limit
+                        </label>
+                        <select
+                            id="rateLimitId"
+                            {...register("rateLimitId", {
+                                setValueAs: (v) => (v === "" ? null : v),
+                            })}
+                            className={selectClass}
+                        >
+                            <option value="">None</option>
+                            {currencyLimits.map((lv) => (
+                                <option key={lv.id} value={lv.id}>
+                                    {lv.title} (£{lv.currencyLimit?.toFixed(2)})
+                                </option>
+                            ))}
+                        </select>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Max rate per job.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Actions */}

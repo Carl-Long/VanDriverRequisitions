@@ -4,6 +4,7 @@ using VanDriverRequisitions.Application.Common.Validation;
 using VanDriverRequisitions.Application.Features.FeReasons.Services;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
+using VanDriverRequisitions.Application.Features.LimitValues.Services;
 using VanDriverRequisitions.Application.Features.Shops.Services;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Services;
@@ -17,6 +18,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IFeTaskTypeService, FeTaskTypeService>();
         services.AddScoped<IFeReasonService, FeReasonService>();
         services.AddScoped<IFeRequisitionService, FeRequisitionService>();
+        services.AddScoped<ILimitValueService, LimitValueService>();
         services.AddScoped<ISubmitWindowService, SubmitWindowService>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IVanDriverService, VanDriverService>();

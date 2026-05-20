@@ -7,6 +7,10 @@ export type FeTaskType = {
     name: string;
     code: string;
     isActive: boolean;
+    dailyQuantityLimitId: string | null;
+    dailyQuantityMax: number | null;
+    rateLimitId: string | null;
+    rateMax: number | null;
     createdAtUtc: string;
     createdByNameSnapshot: string;
     updatedAtUtc: string | null;
@@ -16,11 +20,15 @@ export type FeTaskType = {
 export type CreateFeTaskType = {
     name: string;
     code: string;
+    dailyQuantityLimitId: string | null;
+    rateLimitId: string | null;
 };
 
 export type UpdateFeTaskType = {
     name: string;
     code: string;
+    dailyQuantityLimitId: string | null;
+    rateLimitId: string | null;
 };
 
 export const feTaskTypesApi = {

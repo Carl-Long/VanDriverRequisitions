@@ -49,12 +49,14 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
         {
             Name = createFeTaskTypeDto.Name.Trim(),
             Code = createFeTaskTypeDto.Code.Trim(),
+            DailyQuantityLimitId = createFeTaskTypeDto.DailyQuantityLimitId,
+            RateLimitId = createFeTaskTypeDto.RateLimitId,
         };
 
         context.FeTaskTypes.Add(newTaskType);
         await context.SaveChangesAsync(cancellationToken);
 
-        return FeTaskTypeMapper.ToSummaryDto(newTaskType);
+        return await GetByIdAsync(newTaskType.Id, cancellationToken);
     }
 
     public async Task<FeTaskTypeDto> UpdateAsync(Guid id, UpdateFeTaskTypeDto updateFeTaskTypeDto, CancellationToken cancellationToken = default)
@@ -79,10 +81,12 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
 
         existingTaskType.Name = updateFeTaskTypeDto.Name.Trim();
         existingTaskType.Code = updateFeTaskTypeDto.Code.Trim();
+        existingTaskType.DailyQuantityLimitId = updateFeTaskTypeDto.DailyQuantityLimitId;
+        existingTaskType.RateLimitId = updateFeTaskTypeDto.RateLimitId;
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return FeTaskTypeMapper.ToSummaryDto(existingTaskType);
+        return await GetByIdAsync(id, cancellationToken);
     }
 
     public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)

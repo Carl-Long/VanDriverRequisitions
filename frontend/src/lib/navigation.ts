@@ -5,6 +5,7 @@ import {
     Tags,
     Sofa,
     Shirt,
+    Gauge,
 } from "lucide-react";
 
 export const navigation = [
@@ -44,6 +45,11 @@ export const adminNavigation = [
                 title: "Reasons",
                 href: "/admin/reasons",
                 icon: Tags,
+            },
+            {
+                title: "Limit Values",
+                href: "/admin/limit-values",
+                icon: Gauge,
             },
         ],
     },

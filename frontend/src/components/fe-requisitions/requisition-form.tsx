@@ -41,6 +41,12 @@ import { shopsApi, type ShopLookup } from "@/lib/api/shops";
 import { vanDriversApi, type VanDriverLookup } from "@/lib/api/van-drivers";
 import { feTaskTypesApi, type FeTaskType } from "@/lib/api/fe-task-types";
 import { feReasonsApi, type FeReason } from "@/lib/api/fe-reasons";
+import {
+    limitValuesApi,
+    type LimitValue,
+    WELL_KNOWN_LIMITS,
+    buildLimitLookup,
+} from "@/lib/api/limit-values";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -217,6 +223,7 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
     // ─── Lookups ─────────────────────────────────────────────────────────────
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
     const [reasons, setReasons] = useState<FeReason[]>([]);
+    const [limitLookup, setLimitLookup] = useState<Record<string, LimitValue>>({});
     const [selectedDriver, setSelectedDriver] = useState<VanDriverLookup | null>(null);
     const [selectedShop, setSelectedShop] = useState<ShopLookup | null>(null);
     const [transferShopCache, setTransferShopCache] = useState<Record<string, ShopLookup>>({});
@@ -228,6 +235,9 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
         feReasonsApi.getAll().then((items) => {
             setReasons(items.filter((x) => x.isActive));
         }).catch(() => toast.error("Failed to load reasons."));
+        limitValuesApi.getAll(false).then((items) => {
+            setLimitLookup(buildLimitLookup(items));
+        }).catch(() => { /* limits are optional — degrade silently */ });
     }, [toast]);
 
     // Load initial driver/shop labels if editing
@@ -638,6 +648,8 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
                             arr={mileagesArr}
                             register={register}
                             errors={errors}
+                            maxPerDay={limitLookup[WELL_KNOWN_LIMITS.MILEAGE_DAILY_QTY]?.numericalLimit}
+                            maxRate={limitLookup[WELL_KNOWN_LIMITS.MILEAGE_RATE]?.currencyLimit}
                         />
                     )}
 
@@ -651,6 +663,8 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
                             shopCache={transferShopCache}
                             setShopCache={setTransferShopCache}
                             fetchShops={fetchShops}
+                            maxPerDay={limitLookup[WELL_KNOWN_LIMITS.TRANSFER_DAILY_QTY]?.numericalLimit}
+                            maxRate={limitLookup[WELL_KNOWN_LIMITS.TRANSFER_RATE]?.currencyLimit}
                         />
                     )}
 
@@ -930,11 +944,13 @@ function WeekFields({
     register,
     pathPrefix,
     errorMessage,
+    maxPerDay,
 }: Readonly<{
     register: UseFormRegister<RequisitionFormData>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pathPrefix: any;
     errorMessage?: string;
+    maxPerDay?: number | null;
 }>) {
     return (
         <div>
@@ -947,6 +963,7 @@ function WeekFields({
                         <input
                             type="number"
                             min={0}
+                            max={maxPerDay ?? undefined}
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             {...register(`${pathPrefix}.week.${d}` as any, {
                                 setValueAs: (v) => (v === "" || v == null ? null : Number(v)),
@@ -957,6 +974,9 @@ function WeekFields({
                     </div>
                 ))}
             </div>
+            {maxPerDay != null && (
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Max per day: {maxPerDay}</p>
+            )}
             {errorMessage && (
                 <p className="mt-1 text-xs text-red-500">{errorMessage}</p>
             )}
@@ -1040,6 +1060,7 @@ function GeneralTasksTab({
                             register={register}
                             pathPrefix={`feGeneralTasks.${index}`}
                             errorMessage={rowErrors?.week?.message ?? rowErrors?.week?.root?.message}
+                            maxPerDay={taskType.dailyQuantityMax}
                         />
                         <div>
                             <span className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1049,11 +1070,15 @@ function GeneralTasksTab({
                                 type="number"
                                 step="0.01"
                                 min={0}
+                                max={taskType.rateMax ?? undefined}
                                 {...register(`feGeneralTasks.${index}.ratePerJob`, {
                                     valueAsNumber: true,
                                 })}
                                 className={inputClass(!!rowErrors?.ratePerJob)}
                             />
+                            {taskType.rateMax != null && (
+                                <p className="mt-0.5 text-[10px] text-muted-foreground">Max: £{taskType.rateMax.toFixed(2)}</p>
+                            )}
                             {rowErrors?.ratePerJob && (
                                 <p className="mt-1 text-xs text-red-500">
                                     {rowErrors.ratePerJob.message}
@@ -1084,10 +1109,14 @@ function MileageTab({
     arr,
     register,
     errors,
+    maxPerDay,
+    maxRate,
 }: Readonly<{
     arr: FieldArrayReturn<"feMileages">;
     register: UseFormRegister<RequisitionFormData>;
     errors: FieldErrors<RequisitionFormData>;
+    maxPerDay?: number | null;
+    maxRate?: number | null;
 }>) {
     return (
         <div className="space-y-3">
@@ -1125,6 +1154,7 @@ function MileageTab({
                             register={register}
                             pathPrefix={`feMileages.${index}`}
                             errorMessage={rowErrors?.week?.message ?? rowErrors?.week?.root?.message}
+                            maxPerDay={maxPerDay}
                         />
                         <div>
                             <span className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1134,11 +1164,15 @@ function MileageTab({
                                 type="number"
                                 step="0.01"
                                 min={0}
+                                max={maxRate ?? undefined}
                                 {...register(`feMileages.${index}.ratePerMile`, {
                                     valueAsNumber: true,
                                 })}
                                 className={inputClass(!!rowErrors?.ratePerMile)}
                             />
+                            {maxRate != null && (
+                                <p className="mt-0.5 text-[10px] text-muted-foreground">Max: £{maxRate.toFixed(2)}</p>
+                            )}
                             {rowErrors?.ratePerMile && (
                                 <p className="mt-1 text-xs text-red-500">
                                     {rowErrors.ratePerMile.message}
@@ -1174,6 +1208,8 @@ function TransfersTab({
     shopCache,
     setShopCache,
     fetchShops,
+    maxPerDay,
+    maxRate,
 }: Readonly<{
     arr: FieldArrayReturn<"feTransfers">;
     register: UseFormRegister<RequisitionFormData>;
@@ -1183,6 +1219,8 @@ function TransfersTab({
     shopCache: Record<string, ShopLookup>;
     setShopCache: (next: Record<string, ShopLookup>) => void;
     fetchShops: (search: string) => Promise<ComboboxOption<ShopLookup>[]>;
+    maxPerDay?: number | null;
+    maxRate?: number | null;
 }>) {
     function setShop(index: number, side: "From" | "To", value: string | null, data: ShopLookup | null) {
         const field = side === "From" ? "shopIdFrom" : "shopIdTo";
@@ -1263,6 +1301,7 @@ function TransfersTab({
                             register={register}
                             pathPrefix={`feTransfers.${index}`}
                             errorMessage={rowErrors?.week?.message ?? rowErrors?.week?.root?.message}
+                            maxPerDay={maxPerDay}
                         />
                         <div>
                             <span className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1272,6 +1311,7 @@ function TransfersTab({
                                 type="number"
                                 step="0.01"
                                 min={0}
+                                max={maxRate ?? undefined}
                                 {...register(`feTransfers.${index}.ratePerJob`, {
                                     valueAsNumber: true,
                                 })}

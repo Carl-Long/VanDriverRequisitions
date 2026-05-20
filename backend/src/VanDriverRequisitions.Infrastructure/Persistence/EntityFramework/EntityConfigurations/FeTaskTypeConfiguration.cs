@@ -24,6 +24,17 @@ public class FeTaskTypeConfiguration : IEntityTypeConfiguration<FeTaskType>
         builder.HasIndex(x => x.Code).IsUnique();
         builder.HasIndex(x => x.Name);
 
+        // Limit value relationships
+        builder.HasOne(x => x.DailyQuantityLimit)
+            .WithMany()
+            .HasForeignKey(x => x.DailyQuantityLimitId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(x => x.RateLimit)
+            .WithMany()
+            .HasForeignKey(x => x.RateLimitId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.ApplyAuditableConfiguration();
     }
 }
