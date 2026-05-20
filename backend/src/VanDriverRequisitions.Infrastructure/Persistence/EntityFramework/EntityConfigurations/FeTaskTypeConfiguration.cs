@@ -33,7 +33,7 @@ public class FeTaskTypeConfiguration : IEntityTypeConfiguration<FeTaskType>
         builder.HasOne(x => x.RateLimit)
             .WithMany()
             .HasForeignKey(x => x.RateLimitId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.ApplyAuditableConfiguration();
     }
