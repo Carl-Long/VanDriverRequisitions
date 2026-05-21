@@ -2,7 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button/button";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import type { RequisitionFormData } from "@/lib/schemas/requisition";
 import { RowTotal, WeekFields } from "./week-fields";

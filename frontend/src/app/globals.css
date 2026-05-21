@@ -12,8 +12,10 @@
     --surface: 255 255 255;
     --surface-elevated: 250 250 252;
     --surface-hover: 245 245 248;
+    --surface-subtle: 248 250 252;
 
     --foreground: 15 23 42;
+    --foreground-subtle: 71 85 105;
     --muted-foreground: 100 116 139;
 
     --primary: 237 0 45;
@@ -42,9 +44,11 @@
     --surface: 18 22 30;
     --surface-elevated: 28 34 44;
     --surface-hover: 32 38 50;
+    --surface-subtle: 20 24 32;
 
-    --foreground: 248 250 252;
-    --muted-foreground: 148 163 184;
+--foreground: 248 250 252;
+--foreground-subtle: 203 213 225;
+--muted-foreground: 148 163 184;
 
     --primary: 237 0 45;
     --primary-foreground: 255 255 255;
@@ -72,9 +76,11 @@
     --surface: 255 255 255;
     --surface-elevated: 250 250 250;
     --surface-hover: 244 244 245;
+    --surface-subtle: 250 250 250;
 
-    --foreground: 24 24 27;
-    --muted-foreground: 113 113 122;
+--foreground: 24 24 27;
+--foreground-subtle: 82 82 91;
+--muted-foreground: 113 113 122;
 
     --primary: 39 39 42;
     --primary-foreground: 255 255 255;
@@ -106,12 +112,14 @@
     --surface: 24 24 27;
     --surface-elevated: 39 39 42;
     --surface-hover: 50 50 54;
+    --surface-subtle: 17 17 20;
 
     --foreground: 250 250 250;
     --muted-foreground: 161 161 170;
 
-    --primary: 245 245 245;
-    --primary-foreground: 24 24 27;
+--foreground: 250 250 250;
+--foreground-subtle: 212 212 216;
+--muted-foreground: 161 161 170;
 
     --secondary: 82 82 91;
     --secondary-foreground: 255 255 255;
@@ -159,8 +167,10 @@ body {
     --color-surface: rgb(var(--surface));
     --color-surface-elevated: rgb(var(--surface-elevated));
     --color-surface-hover: rgb(var(--surface-hover));
+    --color-surface-subtle: rgb(var(--surface-subtle));
 
     --color-foreground: rgb(var(--foreground));
+    --color-foreground-subtle: rgb(var(--foreground-subtle));
     --color-muted-foreground: rgb(var(--muted-foreground));
 
     --color-primary: rgb(var(--primary));
@@ -168,6 +178,9 @@ body {
 
     --color-secondary: rgb(var(--secondary));
     --color-secondary-foreground: rgb(var(--secondary-foreground));
+
+    --color-success: rgb(var(--success));
+    --color-success-foreground: rgb(var(--success-foreground));
 
     --color-accent: rgb(var(--accent));
     --color-accent-foreground: rgb(var(--accent-foreground));

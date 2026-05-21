@@ -7,7 +7,7 @@ import type {
     UseFormRegister,
     UseFormSetValue,
 } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button/button";
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import type { ShopLookup } from "@/lib/api/shops";
 import type { RequisitionFormData } from "@/lib/schemas/requisition";

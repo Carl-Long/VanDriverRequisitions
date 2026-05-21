@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button/button";
 import { cn } from "@/lib/utils";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import { limitValuesApi, type LimitValue } from "@/lib/api/limit-values";
@@ -50,13 +50,6 @@ export function TaskTypeFormModal({
     const [numericalLimits, setNumericalLimits] = useState<LimitValue[]>([]);
     const [currencyLimits, setCurrencyLimits] = useState<LimitValue[]>([]);
 
-    useEffect(() => {
-        limitValuesApi.getAll(false).then((all) => {
-            setNumericalLimits(all.filter((lv) => lv.numericalLimit !== null));
-            setCurrencyLimits(all.filter((lv) => lv.currencyLimit !== null));
-        }).catch(() => { /* silently degrade — limits are optional */ });
-    }, []);
-
     const {
         register,
         handleSubmit,
@@ -74,16 +67,31 @@ export function TaskTypeFormModal({
         },
     });
 
-    // Reset form when modal opens with new initial data
+    // Load limits and reset form when modal opens
     useEffect(() => {
         if (open) {
-            reset({
-                name: initial?.name ?? "",
-                code: initial?.code ?? "",
-                dailyQuantityLimitId: initial?.dailyQuantityLimitId ?? null,
-                rateLimitId: initial?.rateLimitId ?? null,
+            limitValuesApi.getAll(false).then((all) => {
+                setNumericalLimits(all.filter((lv) => lv.numericalLimit !== null));
+                setCurrencyLimits(all.filter((lv) => lv.currencyLimit !== null));
+
+                // Reset form after limits are loaded
+                reset({
+                    name: initial?.name ?? "",
+                    code: initial?.code ?? "",
+                    dailyQuantityLimitId: initial?.dailyQuantityLimitId ?? null,
+                    rateLimitId: initial?.rateLimitId ?? null,
+                });
+                setServerError(null);
+            }).catch(() => {
+                /* silently degrade — limits are optional */
+                reset({
+                    name: initial?.name ?? "",
+                    code: initial?.code ?? "",
+                    dailyQuantityLimitId: initial?.dailyQuantityLimitId ?? null,
+                    rateLimitId: initial?.rateLimitId ?? null,
+                });
+                setServerError(null);
             });
-            setServerError(null);
         }
     }, [open, initial, reset]);
 
@@ -209,58 +217,56 @@ export function TaskTypeFormModal({
                 </div>
 
                 {/* Limits */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            htmlFor="dailyQuantityLimitId"
-                            className="mb-1.5 block text-sm font-medium text-foreground"
-                        >
-                            Daily Qty Limit
-                        </label>
-                        <select
-                            id="dailyQuantityLimitId"
-                            {...register("dailyQuantityLimitId", {
-                                setValueAs: (v) => (v === "" ? null : v),
-                            })}
-                            className={selectClass}
-                        >
-                            <option value="">None</option>
-                            {numericalLimits.map((lv) => (
-                                <option key={lv.id} value={lv.id}>
-                                    {lv.title} ({lv.numericalLimit})
-                                </option>
-                            ))}
-                        </select>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            Max value per day (Sun–Sat).
-                        </p>
-                    </div>
+                <div>
+                    <label
+                        htmlFor="dailyQuantityLimitId"
+                        className="mb-1.5 block text-sm font-medium text-foreground"
+                    >
+                        Daily Qty Limit
+                    </label>
+                    <select
+                        id="dailyQuantityLimitId"
+                        {...register("dailyQuantityLimitId", {
+                            setValueAs: (v) => (v === "" ? null : v),
+                        })}
+                        className={selectClass}
+                    >
+                        <option value="">None</option>
+                        {numericalLimits.map((lv) => (
+                            <option key={lv.id} value={lv.id}>
+                                {lv.title} ({lv.numericalLimit})
+                            </option>
+                        ))}
+                    </select>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Max value per day (Sun–Sat).
+                    </p>
+                </div>
 
-                    <div>
-                        <label
-                            htmlFor="rateLimitId"
-                            className="mb-1.5 block text-sm font-medium text-foreground"
-                        >
-                            Rate Limit
-                        </label>
-                        <select
-                            id="rateLimitId"
-                            {...register("rateLimitId", {
-                                setValueAs: (v) => (v === "" ? null : v),
-                            })}
-                            className={selectClass}
-                        >
-                            <option value="">None</option>
-                            {currencyLimits.map((lv) => (
-                                <option key={lv.id} value={lv.id}>
-                                    {lv.title} (£{lv.currencyLimit?.toFixed(2)})
-                                </option>
-                            ))}
-                        </select>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                            Max rate per job.
-                        </p>
-                    </div>
+                <div>
+                    <label
+                        htmlFor="rateLimitId"
+                        className="mb-1.5 block text-sm font-medium text-foreground"
+                    >
+                        Rate Limit
+                    </label>
+                    <select
+                        id="rateLimitId"
+                        {...register("rateLimitId", {
+                            setValueAs: (v) => (v === "" ? null : v),
+                        })}
+                        className={selectClass}
+                    >
+                        <option value="">None</option>
+                        {currencyLimits.map((lv) => (
+                            <option key={lv.id} value={lv.id}>
+                                {lv.title} (£{lv.currencyLimit?.toFixed(2)})
+                            </option>
+                        ))}
+                    </select>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Max rate per job.
+                    </p>
                 </div>
 
                 {/* Actions */}
@@ -272,10 +278,8 @@ export function TaskTypeFormModal({
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && "Saving..."}
-                        {!isSubmitting && isEditing && "Save Changes"}
-                        {!isSubmitting && !isEditing && "Create"}
+                    <Button type="submit" loading={isSubmitting}>
+                        {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>
             </form>

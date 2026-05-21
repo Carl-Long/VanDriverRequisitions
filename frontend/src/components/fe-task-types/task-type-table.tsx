@@ -1,5 +1,8 @@
-import { FeTaskType } from "@/lib/api/fe-task-types";
 import { Pencil } from "lucide-react";
+import { FeTaskType } from "@/lib/api/fe-task-types";
+import { IconButton } from "@/components/ui/button/icon-button";
+import { Surface } from "../ui/surface";
+import { Toggle } from "../ui/toggle";
 
 type Props = {
     items: FeTaskType[];
@@ -13,96 +16,94 @@ export function TaskTypeTable({
     onToggleActive,
 }: Readonly<Props>) {
     return (
-        <div className="overflow-x-auto rounded-xl border border-[rgb(var(--border))] bg-[rgb(var(--surface))] shadow-sm">
+        <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
                 {/* HEADER */}
-                <thead className="sticky top-0 z-10 bg-[rgb(var(--surface-elevated))]">
-                    <tr className="border-b border-[rgb(var(--border))]">
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]">
+                <thead className="sticky top-0 z-10 bg-surface-elevated">
+                    <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-foreground-subtle">
+                        <th className="px-4 py-3">
                             Name
                         </th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]">
+                        <th className="px-4 py-3">
                             Code
                         </th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]">
+                        <th className="px-4 py-3">
                             Active
                         </th>
-                        <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]">
+                        <th className="px-4 py-3">
                             Last modified
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[rgb(var(--muted-foreground))]">
+                        <th className="px-4 py-3 text-right">
                             Actions
                         </th>
                     </tr>
                 </thead>
 
                 {/* BODY */}
-                <tbody className="divide-y divide-[rgb(var(--border-subtle))]">
+                <tbody className="divide-y divide-border-subtle">
                     {items.map((item) => {
-                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
+                        const lastDate =
+                            item.updatedAtUtc ?? item.createdAtUtc;
+
                         const lastUser =
-                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
+                            item.updatedByNameSnapshot ??
+                            item.createdByNameSnapshot ??
+                            "System";
 
                         return (
                             <tr
                                 key={item.id}
                                 className="
-                  transition-all duration-150
-                  hover:bg-[rgb(var(--surface-hover))]
-                  hover:shadow-sm
-                "
+                                    group transition-colors duration-150
+                                    hover:bg-surface-hover
+                                "
                             >
                                 {/* Name */}
                                 <td className="px-4 py-3 align-middle">
-                                    <div className="font-medium text-[rgb(var(--foreground))]">
+                                    <div className="font-medium text-foreground">
                                         {item.name}
                                     </div>
                                 </td>
 
                                 {/* Code */}
-                                <td className="px-4 py-3 align-middle text-[rgb(var(--muted-foreground))]">
+                                <td className="px-4 py-3 align-middle text-foreground-subtle">
                                     {item.code}
                                 </td>
 
-                                {/* Active toggle */}
+                                {/* Active */}
                                 <td className="px-4 py-3 align-middle">
-                                    <button
-                                        onClick={() => onToggleActive(item)}
-                                        className={`
-                      relative inline-flex h-6 w-11 items-center rounded-full
-                      transition-colors cursor-pointer
-                      ${item.isActive ? "bg-[rgb(var(--success))]" : "bg-[rgb(var(--muted))]"}
-                    `}
-                                        aria-label={`Toggle active for ${item.name}`}
-                                    >
-                                        <span
-                                            className={`
-                        inline-block h-4 w-4 transform rounded-full bg-white
-                        transition-transform
-                        ${item.isActive ? "translate-x-6" : "translate-x-1"}
-                      `}
-                                        />
-                                    </button>
+                                    <Toggle
+                                        checked={item.isActive}
+                                        onChange={() =>
+                                            onToggleActive(item)
+                                        }
+                                        ariaLabel={`Toggle active for ${item.name}`}
+                                    />
                                 </td>
 
-                                {/* Last modified */}
+                                {/* Last Modified */}
                                 <td className="px-4 py-3 align-middle">
                                     <div className="flex flex-col leading-tight">
                                         {lastDate ? (
-                                            <span className="text-sm text-[rgb(var(--foreground))]">
-                                                {new Date(lastDate).toLocaleDateString("en-GB", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                })}
+                                            <span className="text-sm text-foreground">
+                                                {new Date(
+                                                    lastDate,
+                                                ).toLocaleDateString(
+                                                    "en-GB",
+                                                    {
+                                                        day: "2-digit",
+                                                        month: "short",
+                                                        year: "numeric",
+                                                    },
+                                                )}
                                             </span>
                                         ) : (
-                                            <span className="text-sm text-[rgb(var(--muted-foreground))]">
+                                            <span className="text-sm text-foreground-subtle">
                                                 —
                                             </span>
                                         )}
 
-                                        <span className="text-xs text-[rgb(var(--muted-foreground))]">
+                                        <span className="text-xs text-muted-foreground">
                                             {lastUser}
                                         </span>
                                     </div>
@@ -110,25 +111,16 @@ export function TaskTypeTable({
 
                                 {/* Actions */}
                                 <td className="px-4 py-3 align-middle text-right">
-                                    <button
-                                        onClick={() => onEdit(item)}
-                                        className="
-                      inline-flex items-center gap-1 rounded-md
-                      px-3 py-1.5 text-sm font-medium
-                      text-[rgb(var(--foreground))]
-                      hover:bg-[rgb(var(--surface-hover))]
-                      transition-colors cursor-pointer
-                    "
-                                    >
+                                    <IconButton onClick={() => onEdit(item)}>
                                         <Pencil size={14} />
                                         Edit
-                                    </button>
+                                    </IconButton>
                                 </td>
                             </tr>
                         );
                     })}
                 </tbody>
             </table>
-        </div>
+        </Surface>
     );
 }

@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { SearchInput } from "@/components/ui/search-input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button/button";
 import { ReasonCard } from "@/components/fe-reasons/reason-card";
 import { ReasonFormModal } from "@/components/fe-reasons/reason-form-modal";
 import {

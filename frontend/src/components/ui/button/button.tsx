@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: "primary" | "secondary" | "ghost" | "danger";
     size?: "sm" | "md";
+    loading?: boolean;
     children: ReactNode;
 };
 
@@ -25,6 +27,8 @@ export function Button({
     size = "md",
     className,
     children,
+    disabled,
+    loading = false,
     ...props
 }: Readonly<ButtonProps>) {
     return (
@@ -34,10 +38,15 @@ export function Button({
                 "disabled:pointer-events-none disabled:opacity-50",
                 variantStyles[variant],
                 sizeStyles[size],
+                loading && "cursor-not-allowed opacity-70",
                 className,
             )}
+            disabled={disabled || loading}
             {...props}
         >
+            {loading && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+            )}
             {children}
         </button>
     );

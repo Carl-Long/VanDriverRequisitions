@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { SearchInput } from "@/components/ui/search-input";
-import { Button } from "@/components/ui/button";
 
 import { TaskTypeTable } from "@/components/fe-task-types/task-type-table";
 import { TaskTypeFormModal } from "@/components/fe-task-types/task-type-form-modal";
@@ -15,15 +15,21 @@ import {
     feTaskTypesApi,
     type FeTaskType,
 } from "@/lib/api/fe-task-types";
+import { Surface } from "@/components/ui/surface";
+import { Toggle } from "@/components/ui/toggle";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
     const [search, setSearch] = useState("");
+
     const [showInactive, setShowInactive] = useState(false);
+
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<FeTaskType | null>(null);
+
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -43,7 +49,9 @@ export default function FeTaskTypesPage() {
     }, [load]);
 
     const filtered = useMemo(() => {
-        if (!search.trim()) return taskTypes;
+        if (!search.trim()) {
+            return taskTypes;
+        }
 
         const q = search.toLowerCase();
 
@@ -78,6 +86,7 @@ export default function FeTaskTypesPage() {
 
         setModalOpen(false);
         setEditing(null);
+
         await load();
     }
 
@@ -116,58 +125,54 @@ export default function FeTaskTypesPage() {
                     className="w-full lg:w-[32rem]"
                 />
 
-                {/* Modern Active / All Toggle */}
-                <div className="inline-flex rounded-lg bg-surface p-1">
-                    <button
-                        type="button"
-                        onClick={() => setShowInactive(false)}
-                        className={[
-                            "cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                            showInactive
-                                ? "text-muted-foreground hover:text-foreground"
-                                : "bg-secondary text-secondary-foreground",
-                        ].join(" ")}
-                    >
-                        Active
-                    </button>
+                {/* Show inactive toggle */}
+                <Surface className="flex items-center gap-3 px-4 py-2">
+                    <span className="text-sm text-muted-foreground">
+                        Show inactive
+                    </span>
 
-                    <button
-                        type="button"
-                        onClick={() => setShowInactive(true)}
-                        className={[
-                            "cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                            showInactive
-                                ? "bg-secondary text-secondary-foreground"
-                                : "text-muted-foreground hover:text-foreground",
-                        ].join(" ")}
-                    >
-                        All
-                    </button>
-                </div>
+                    <Toggle
+                        checked={showInactive}
+                        onChange={() => setShowInactive((v) => !v)}
+                        ariaLabel="Toggle inactive task types"
+                    />
+                </Surface>
             </div>
+
             {/* Error */}
             {error && (
-                <div className="mb-6 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
-                    {error}
-                </div>
+                <Surface className="mb-6 border-destructive bg-destructive/10 px-4 py-3">
+                    <p className="text-sm text-destructive">{error}</p>
+                </Surface>
             )}
 
             {/* Loading */}
             {loading && (
                 <div className="space-y-3">
-                    <div className="h-10 animate-pulse rounded bg-muted" />
-                    <div className="h-10 animate-pulse rounded bg-muted" />
-                    <div className="h-10 animate-pulse rounded bg-muted" />
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
                 </div>
             )}
 
             {/* Empty */}
             {!loading && filtered.length === 0 && (
-                <div className="py-16 text-center text-sm text-muted-foreground">
-                    {search
-                        ? "No task types match your search."
-                        : "No task types yet. Create one to get started."}
-                </div>
+                <Surface className="py-16 text-center">
+                    <p className="text-sm text-muted-foreground">
+                        {search
+                            ? "No task types match your search."
+                            : "No task types yet. Create one to get started."}
+                    </p>
+
+                    {!search && (
+                        <div className="mt-4">
+                            <IconButton onClick={openCreate}>
+                                <Plus size={14} />
+                                Create Task Type
+                            </IconButton>
+                        </div>
+                    )}
+                </Surface>
             )}
 
             {/* Table */}
