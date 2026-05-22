@@ -22,6 +22,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
         }
 
         return await query
+            .AsNoTracking()
             .Select(FeTaskTypeProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
     }
@@ -29,7 +30,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
     public async Task<FeTaskTypeSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var feTaskType = await context.FeTaskTypes
-            .IgnoreQueryFilters()
+            .AsNoTracking()
             .Where(x => x.Id == id)
             .Select(FeTaskTypeProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
@@ -57,8 +58,8 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
         {
             throw new ValidationException([new ValidationFailure("Code", $"This code '{createFeTaskTypeDto.Code}' already exists.")]);
         }
-
-        return await GetByIdAsync(newTaskType.Id, cancellationToken);
+        
+        return FeTaskTypeMapper.ToSummaryDto(newTaskType);
     }
 
     public async Task<FeTaskTypeSummaryDto> UpdateAsync(Guid id, UpdateFeTaskTypeDto updateFeTaskTypeDto, CancellationToken cancellationToken = default)
@@ -84,7 +85,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
             throw new ValidationException([new("Code", $"This code '{updateFeTaskTypeDto.Code}' already exists.")]);
         }
 
-        return await GetByIdAsync(id, cancellationToken);
+        return FeTaskTypeMapper.ToSummaryDto(existingTaskType);
     }
 
     public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)

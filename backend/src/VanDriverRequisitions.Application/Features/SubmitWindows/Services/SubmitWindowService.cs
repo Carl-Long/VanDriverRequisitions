@@ -10,7 +10,7 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 
 public class SubmitWindowService(IApplicationDbContext context, IValidatorService validator) : ISubmitWindowService
 {
-    public async Task<PagedResult<SubmitWindowDto>> GetAllAsync(int page, int pageSize, bool includeDeleted, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(int page, int pageSize, bool includeDeleted, CancellationToken cancellationToken = default)
     {
         IQueryable<SubmitWindow> query = context.SubmitWindows;
 
@@ -28,7 +28,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .Select(SubmitWindowProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<SubmitWindowDto>
+        return new PagedResult<SubmitWindowSummaryDto>
         {
             Items = items,
             TotalCount = totalCount,
@@ -37,7 +37,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         };
     }
 
-    public async Task<SubmitWindowDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<SubmitWindowSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var submitWindow = await context.SubmitWindows
             .Where(x => x.Id == id)
@@ -48,7 +48,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             $"Submit window with ID '{id}' was not found.");
     }
 
-    public async Task<SubmitWindowDto> CreateAsync(CreateSubmitWindowDto createDto, CancellationToken cancellationToken = default)
+    public async Task<SubmitWindowSummaryDto> CreateAsync(CreateSubmitWindowDto createDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(createDto, cancellationToken);
 
@@ -70,7 +70,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         return SubmitWindowMapper.ToSummaryDto(newWindow);
     }
 
-    public async Task<SubmitWindowDto> UpdateAsync(Guid id, UpdateSubmitWindowDto updateDto, CancellationToken cancellationToken = default)
+    public async Task<SubmitWindowSummaryDto> UpdateAsync(Guid id, UpdateSubmitWindowDto updateDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(updateDto, cancellationToken);
 

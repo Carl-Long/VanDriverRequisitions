@@ -1,6 +1,6 @@
 namespace VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 
-public class SubmitWindowDto
+public class SubmitWindowSummaryDto
 {
     public Guid Id { get; init; }
     public DateTime OpenFrom { get; init; }

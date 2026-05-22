@@ -2,7 +2,7 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 
 public class SubmitWindowStatusDto
 {
-    public SubmitWindowDto? CurrentWindow { get; init; }
-    public SubmitWindowDto? NextWindow { get; init; }
+    public SubmitWindowSummaryDto? CurrentWindow { get; init; }
+    public SubmitWindowSummaryDto? NextWindow { get; init; }
     public bool HasUpcoming { get; init; }
 }

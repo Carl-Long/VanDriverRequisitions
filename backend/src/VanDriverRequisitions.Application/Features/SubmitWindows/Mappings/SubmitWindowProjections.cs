@@ -6,8 +6,8 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Mappings;
 
 public static class SubmitWindowProjections
 {
-    public static Expression<Func<SubmitWindow, SubmitWindowDto>> AsSummaryDto =>
-        x => new SubmitWindowDto
+    public static Expression<Func<SubmitWindow, SubmitWindowSummaryDto>> AsSummaryDto =>
+        x => new SubmitWindowSummaryDto()
         {
             Id = x.Id,
             OpenFrom = x.OpenFrom,

@@ -5,9 +5,9 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Mappings;
 
 public static class SubmitWindowMapper
 {
-    public static SubmitWindowDto ToSummaryDto(SubmitWindow entity)
+    public static SubmitWindowSummaryDto ToSummaryDto(SubmitWindow entity)
     {
-        return new SubmitWindowDto
+        return new SubmitWindowSummaryDto()
         {
             Id = entity.Id,
             OpenFrom = entity.OpenFrom,

@@ -26,9 +26,9 @@ public class SubmitWindowsController(
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(SubmitWindowDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<SubmitWindowDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<SubmitWindowSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var submitWindow = await submitWindowService.GetByIdAsync(id, cancellationToken);
         return Ok(submitWindow);
@@ -36,11 +36,11 @@ public class SubmitWindowsController(
 
     [HttpPost]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(SubmitWindowDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<SubmitWindowDto>> Create([FromBody] CreateSubmitWindowDto createDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<SubmitWindowSummaryDto>> Create([FromBody] CreateSubmitWindowDto createDto, CancellationToken cancellationToken)
     {
         var created = await submitWindowService.CreateAsync(createDto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
@@ -48,12 +48,12 @@ public class SubmitWindowsController(
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(SubmitWindowDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<SubmitWindowDto>> Update(
+    public async Task<ActionResult<SubmitWindowSummaryDto>> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateSubmitWindowDto updateDto,
         CancellationToken cancellationToken)

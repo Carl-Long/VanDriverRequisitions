@@ -22,6 +22,7 @@ public class FeReasonService(IApplicationDbContext context, IValidatorService va
         }
 
         return await query
+            .AsNoTracking()
             .Select(FeReasonProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
     }
@@ -29,7 +30,7 @@ public class FeReasonService(IApplicationDbContext context, IValidatorService va
     public async Task<FeReasonSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var feReason = await context.FeReasons
-            .IgnoreQueryFilters()
+            .AsNoTracking()
             .Where(x => x.Id == id)
             .Select(FeReasonProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
