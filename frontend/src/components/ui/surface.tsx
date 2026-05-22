@@ -14,7 +14,7 @@ export function Surface({
     return (
         <div
             className={cn(
-                "rounded-xl border border-border shadow-sm",
+                "rounded-xl border border-border",
                 elevated ? "bg-surface-elevated" : "bg-surface",
                 className
             )}

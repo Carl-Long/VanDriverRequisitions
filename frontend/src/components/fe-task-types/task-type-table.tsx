@@ -4,6 +4,8 @@ import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "../ui/surface";
 import { Toggle } from "../ui/toggle";
 
+import { formatDateGB } from "@/lib/format/date";
+
 type Props = {
     items: FeTaskType[];
     onEdit: (item: FeTaskType) => void;
@@ -18,24 +20,15 @@ export function TaskTypeTable({
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
+
                 {/* HEADER */}
-                <thead className="sticky top-0 z-10 bg-surface-elevated">
-                    <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-foreground-subtle">
-                        <th className="px-4 py-3">
-                            Name
-                        </th>
-                        <th className="px-4 py-3">
-                            Code
-                        </th>
-                        <th className="px-4 py-3">
-                            Active
-                        </th>
-                        <th className="px-4 py-3">
-                            Last modified
-                        </th>
-                        <th className="px-4 py-3 text-right">
-                            Actions
-                        </th>
+                <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+                    <tr className="text-xs font-semibold uppercase tracking-wide text-foreground bg-accent/10">
+                        <th className="px-4 py-3">Name</th>
+                        <th className="px-4 py-3">Code</th>
+                        <th className="px-4 py-3">Active</th>
+                        <th className="px-4 py-3">Last modified</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
                     </tr>
                 </thead>
 
@@ -53,10 +46,7 @@ export function TaskTypeTable({
                         return (
                             <tr
                                 key={item.id}
-                                className="
-                                    group transition-colors duration-150
-                                    hover:bg-surface-hover
-                                "
+                                className="group transition-colors duration-150 hover:bg-surface-hover"
                             >
                                 {/* Name */}
                                 <td className="px-4 py-3 align-middle">
@@ -74,9 +64,7 @@ export function TaskTypeTable({
                                 <td className="px-4 py-3 align-middle">
                                     <Toggle
                                         checked={item.isActive}
-                                        onChange={() =>
-                                            onToggleActive(item)
-                                        }
+                                        onChange={() => onToggleActive(item)}
                                         ariaLabel={`Toggle active for ${item.name}`}
                                     />
                                 </td>
@@ -84,24 +72,9 @@ export function TaskTypeTable({
                                 {/* Last Modified */}
                                 <td className="px-4 py-3 align-middle">
                                     <div className="flex flex-col leading-tight">
-                                        {lastDate ? (
-                                            <span className="text-sm text-foreground">
-                                                {new Date(
-                                                    lastDate,
-                                                ).toLocaleDateString(
-                                                    "en-GB",
-                                                    {
-                                                        day: "2-digit",
-                                                        month: "short",
-                                                        year: "numeric",
-                                                    },
-                                                )}
-                                            </span>
-                                        ) : (
-                                            <span className="text-sm text-foreground-subtle">
-                                                —
-                                            </span>
-                                        )}
+                                        <span className="text-sm text-foreground">
+                                            {formatDateGB(lastDate) ?? "—"}
+                                        </span>
 
                                         <span className="text-xs text-muted-foreground">
                                             {lastUser}

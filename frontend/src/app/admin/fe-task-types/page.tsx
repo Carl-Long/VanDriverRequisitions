@@ -128,17 +128,15 @@ export default function FeTaskTypesPage() {
                     className="w-full lg:w-[32rem]"
                 />
 
-                <Surface className="flex items-center gap-3 px-4 py-2">
+                <Surface className="flex items-center gap-3 px-4 py-2 w-fit">
                     <span className="text-sm text-muted-foreground">
                         Show inactive
                     </span>
 
-
-
                     <Toggle
                         checked={showInactive}
                         onChange={() =>
-                            setShowInactive((v) => !v)
+                            setShowInactive((active) => !active)
                         }
                         ariaLabel="Toggle inactive task types"
                     />
