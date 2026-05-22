@@ -1,10 +1,11 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeTransfer : AuditableEntity
+public class FeTransfer : AuditableEntity, IFeRequisitionChild
 {
     private FeTransfer() { } // For EF core
     

@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
@@ -10,131 +13,174 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 /// </summary>
 public static class DevDataSeeder
 {
-    // ── Fixed GUIDs so the seed is idempotent and FKs resolve ──────────────
+    // ─────────────────────────────────────────────
+    // Task Types (lookup only)
+    // ─────────────────────────────────────────────
 
-    // Limit Values
-    private static readonly Guid CollectionsDailyQtyLimitId = new("a0000001-0001-0001-0001-000000000001");
-    private static readonly Guid CollectionsRateLimitId = new("a0000001-0001-0001-0001-000000000002");
-    private static readonly Guid DeliveriesDailyQtyLimitId = new("a0000001-0001-0001-0001-000000000003");
-    private static readonly Guid DeliveriesRateLimitId = new("a0000001-0001-0001-0001-000000000004");
-    private static readonly Guid WasteDailyQtyLimitId = new("a0000001-0001-0001-0001-000000000005");
-    private static readonly Guid WasteRateLimitId = new("a0000001-0001-0001-0001-000000000006");
-    private static readonly Guid LoadingDailyQtyLimitId = new("a0000001-0001-0001-0001-000000000007");
-    private static readonly Guid LoadingRateLimitId = new("a0000001-0001-0001-0001-000000000008");
-    private static readonly Guid UnloadingDailyQtyLimitId = new("a0000001-0001-0001-0001-000000000009");
-    private static readonly Guid UnloadingRateLimitId = new("a0000001-0001-0001-0001-00000000000a");
-
-    // Global (well-known) limits
-    private static readonly Guid MileageDailyQtyLimitId = new("b0000001-0001-0001-0001-000000000001");
-    private static readonly Guid MileageRateLimitId = new("b0000001-0001-0001-0001-000000000002");
-    private static readonly Guid TransferDailyQtyLimitId = new("b0000001-0001-0001-0001-000000000003");
-    private static readonly Guid TransferRateLimitId = new("b0000001-0001-0001-0001-000000000004");
-
-    // Task Types
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
-    private static readonly Guid DeliveriesTaskTypeId = new("c0000001-0001-0001-0001-000000000002");
-    private static readonly Guid WasteTaskTypeId = new("c0000001-0001-0001-0001-000000000003");
-    private static readonly Guid LoadingTaskTypeId = new("c0000001-0001-0001-0001-000000000004");
-    private static readonly Guid UnloadingTaskTypeId = new("c0000001-0001-0001-0001-000000000005");
+    private static readonly Guid DeliveriesTaskTypeId  = new("c0000001-0001-0001-0001-000000000002");
+    private static readonly Guid WasteTaskTypeId       = new("c0000001-0001-0001-0001-000000000003");
+    private static readonly Guid LoadingTaskTypeId     = new("c0000001-0001-0001-0001-000000000004");
 
-    // Placeholder audit values
+    // ─────────────────────────────────────────────
+    // System user (audit fallback)
+    // ─────────────────────────────────────────────
+
     private static readonly Guid SystemUserId = Guid.Empty;
     private const string SystemUserName = "SYSTEM_SEED";
 
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
-        // Check if data already exists
-        var hasLimits = await context.LimitValues
-            .IgnoreQueryFilters()
-            .AnyAsync();
+        var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
+        var hasRules     = await context.RequisitionLimitRules.AnyAsync();
+        var hasShops     = await context.Shops.AnyAsync();
+        var hasDrivers   = await context.VanDrivers.AnyAsync();
 
-        var hasTaskTypes = await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .AnyAsync();
-
-        var hasShops = await context.Shops
-            .IgnoreQueryFilters()
-            .AnyAsync();
-
-        var hasDrivers = await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AnyAsync();
-
-        if (hasLimits && hasTaskTypes && hasShops && hasDrivers)
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers)
         {
-            logger?.LogInformation("Dev seed data already exists — skipping.");
+            logger?.LogInformation("Dev seed already exists — skipping.");
             return;
         }
 
-        logger?.LogInformation("Seeding development data…");
+        logger?.LogInformation("Seeding development data...");
 
-        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+        var now = DateTime.UtcNow;
 
-        // ─── Limit Values ──────────────────────────────────────────────
-        if (!hasLimits)
-        {
-            // TypeOfLimitation: 0 = Min, 1 = Max
-            // Fascia: 0 = Fe, 1 = Std, NULL = all
-            var limitsSql = $"""
-                INSERT INTO LimitValues
-                    (Id, Title, NameOfValue, Fascia, TypeOfLimitation, NumericalLimit, CurrencyLimit, IsActive, CreatedById, CreatedByNameSnapshot, CreatedAtUtc)
-                VALUES
-                    -- Collections limits
-                    ('{CollectionsDailyQtyLimitId}', 'Collections – Daily Qty Max', 'COLLECTIONS_DAILY_QTY', 0, 1, 30, NULL, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{CollectionsRateLimitId}',     'Collections – Rate Max',      'COLLECTIONS_RATE',     0, 1, NULL, 15.00, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
+        // ─────────────────────────────────────────────
+        // 1. TASK TYPES (pure lookup only)
+        // ─────────────────────────────────────────────
 
-                    -- Deliveries limits
-                    ('{DeliveriesDailyQtyLimitId}', 'Deliveries – Daily Qty Max', 'DELIVERIES_DAILY_QTY', 0, 1, 25, NULL, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{DeliveriesRateLimitId}',     'Deliveries – Rate Max',      'DELIVERIES_RATE',     0, 1, NULL, 20.00, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-
-                    -- Waste Disposal limits
-                    ('{WasteDailyQtyLimitId}', 'Waste Disposal – Daily Qty Max', 'WASTE_DAILY_QTY', 0, 1, 10, NULL, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{WasteRateLimitId}',     'Waste Disposal – Rate Max',      'WASTE_RATE',     0, 1, NULL, 25.00, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-
-                    -- Loading limits
-                    ('{LoadingDailyQtyLimitId}', 'Loading – Daily Qty Max', 'LOADING_DAILY_QTY', 0, 1, 15, NULL, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{LoadingRateLimitId}',     'Loading – Rate Max',      'LOADING_RATE',     0, 1, NULL, 12.50, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-
-                    -- Unloading limits
-                    ('{UnloadingDailyQtyLimitId}', 'Unloading – Daily Qty Max', 'UNLOADING_DAILY_QTY', 0, 1, 15, NULL, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{UnloadingRateLimitId}',     'Unloading – Rate Max',      'UNLOADING_RATE',     0, 1, NULL, 12.50, 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-
-                    -- Global well-known limits (used by Mileage and Transfers tabs)
-                    ('{MileageDailyQtyLimitId}',  'Mileage – Daily Qty Max',  'MILEAGE_DAILY_QTY',  0, 1, 500, NULL,  1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{MileageRateLimitId}',      'Mileage – Rate Max',       'MILEAGE_RATE',       0, 1, NULL, 0.45,  1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{TransferDailyQtyLimitId}', 'Transfer – Daily Qty Max', 'TRANSFER_DAILY_QTY', 0, 1, 20, NULL,   1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{TransferRateLimitId}',     'Transfer – Rate Max',      'TRANSFER_RATE',      0, 1, NULL, 18.00, 1, '{SystemUserId}', '{SystemUserName}', '{now}');
-                """;
-
-            await context.Database.ExecuteSqlRawAsync(limitsSql);
-            logger?.LogInformation("Seeded {Count} limit values.", 14);
-        }
-
-        // ─── Task Types ────────────────────────────────────────────────
         if (!hasTaskTypes)
         {
-            var taskTypesSql = $"""
-                INSERT INTO FeTaskTypes
-                    (Id, Name, Code, DailyQuantityLimitId, RateLimitId, IsActive, CreatedById, CreatedByNameSnapshot, CreatedAtUtc)
-                VALUES
-                    ('{CollectionsTaskTypeId}', 'Collections', 'COL', '{CollectionsDailyQtyLimitId}', '{CollectionsRateLimitId}', 1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{DeliveriesTaskTypeId}',  'Deliveries',  'DEL', '{DeliveriesDailyQtyLimitId}', '{DeliveriesRateLimitId}',  1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{WasteTaskTypeId}',       'Waste Disposal', 'WST', '{WasteDailyQtyLimitId}',  '{WasteRateLimitId}',       1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{LoadingTaskTypeId}',     'Loading',     'LDG', '{LoadingDailyQtyLimitId}',    '{LoadingRateLimitId}',     1, '{SystemUserId}', '{SystemUserName}', '{now}'),
-                    ('{UnloadingTaskTypeId}',   'Unloading',   'UNL', '{UnloadingDailyQtyLimitId}',  '{UnloadingRateLimitId}',  1, '{SystemUserId}', '{SystemUserName}', '{now}');
-                """;
+            context.FeTaskTypes.AddRange(
+                new FeTaskType { Id = CollectionsTaskTypeId, Name = "Collections", Code = "23707" },
+                new FeTaskType { Id = DeliveriesTaskTypeId,  Name = "Deliveries",  Code = "23709" },
+                new FeTaskType { Id = WasteTaskTypeId,       Name = "Waste",       Code = "20097" },
+                new FeTaskType { Id = LoadingTaskTypeId,     Name = "Loading&Unloading", Code = "10119" }
+            );
 
-            await context.Database.ExecuteSqlRawAsync(taskTypesSql);
-            logger?.LogInformation("Seeded {Count} task types.", 5);
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded FeTaskTypes");
         }
 
-        // ─── Shops ─────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────
+        // 2. LIMIT RULES
+        // ─────────────────────────────────────────────
+
+        if (!hasRules)
+        {
+            context.RequisitionLimitRules.AddRange(
+
+                // ─── General Task rules ─────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = CollectionsTaskTypeId,
+                    MaxQuantity = 30,
+                    MaxRate = 15.00m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = DeliveriesTaskTypeId,
+                    MaxQuantity = 25,
+                    MaxRate = 20.00m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = WasteTaskTypeId,
+                    MaxQuantity = 10,
+                    MaxRate = 25.00m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = LoadingTaskTypeId,
+                    MaxQuantity = 15,
+                    MaxRate = 12.50m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Mileage (no task type) ─────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.Mileage,
+                    FeTaskTypeId = null,
+                    MaxQuantity = 500,
+                    MaxRate = 0.45m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Transfers ───────────────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.Transfer,
+                    FeTaskTypeId = null,
+                    MaxQuantity = 20,
+                    MaxRate = 18.00m,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Additional Costs ────────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.AdditionalCost,
+                    FeTaskTypeId = null,
+                    MaxQuantity = null,
+                    MaxRate = null,
+                    IsActive = true,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                }
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded RequisitionLimitRules");
+        }
+
+        // ─────────────────────────────────────────────
+        // 3. Shops
+        // ─────────────────────────────────────────────
+
         if (!hasShops)
         {
             await SeedShopsAsync(context, logger);
         }
 
-        // ─── Van Drivers ───────────────────────────────────────────────
+        // ─────────────────────────────────────────────
+        // 4. Van Drivers
+        // ─────────────────────────────────────────────
+
         if (!hasDrivers)
         {
             await SeedVanDriversAsync(context, logger);
@@ -142,7 +188,6 @@ public static class DevDataSeeder
 
         logger?.LogInformation("Development seeding complete.");
     }
-
     // ─── Shop seed data ────────────────────────────────────────────────────
 
     private static readonly string[] Towns =

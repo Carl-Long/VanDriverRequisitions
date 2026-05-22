@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialNewBuild : Migration
+    public partial class InitialRebuild : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,8 +26,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -73,31 +72,23 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 });
 
             migrationBuilder.CreateTable(
-                name: "LimitValues",
+                name: "FeTaskTypes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    NameOfValue = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Fascia = table.Column<int>(type: "int", nullable: true),
-                    TypeOfLimitation = table.Column<int>(type: "int", nullable: false),
-                    NumericalLimit = table.Column<int>(type: "int", nullable: true),
-                    CurrencyLimit = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LimitValues", x => x.Id);
-                    table.CheckConstraint("CK_LimitValues_CurrencyLimit_NonNegative", "[CurrencyLimit] IS NULL OR [CurrencyLimit] >= 0");
-                    table.CheckConstraint("CK_LimitValues_NumericalLimit_NonNegative", "[NumericalLimit] IS NULL OR [NumericalLimit] >= 0");
-                    table.CheckConstraint("CK_LimitValues_OneValueSet", "([NumericalLimit] IS NOT NULL AND [CurrencyLimit] IS NULL) OR ([NumericalLimit] IS NULL AND [CurrencyLimit] IS NOT NULL)");
+                    table.PrimaryKey("PK_FeTaskTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,8 +126,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -185,8 +175,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,8 +219,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -269,8 +257,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -287,37 +274,34 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 });
 
             migrationBuilder.CreateTable(
-                name: "FeTaskTypes",
+                name: "RequisitionLimitRules",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    DailyQuantityLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RateLimitId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    FeTaskTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Fascia = table.Column<int>(type: "int", nullable: true),
+                    MaxQuantity = table.Column<int>(type: "int", nullable: true),
+                    MaxRate = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FeTaskTypes", x => x.Id);
+                    table.PrimaryKey("PK_RequisitionLimitRules", x => x.Id);
+                    table.CheckConstraint("CK_RequisitionLimitRules_MaxQuantity_NonNegative", "[MaxQuantity] IS NULL OR [MaxQuantity] >= 0");
+                    table.CheckConstraint("CK_RequisitionLimitRules_MaxRate_NonNegative", "[MaxRate] IS NULL OR [MaxRate] >= 0");
                     table.ForeignKey(
-                        name: "FK_FeTaskTypes_LimitValues_DailyQuantityLimitId",
-                        column: x => x.DailyQuantityLimitId,
-                        principalTable: "LimitValues",
+                        name: "FK_RequisitionLimitRules_FeTaskTypes_FeTaskTypeId",
+                        column: x => x.FeTaskTypeId,
+                        principalTable: "FeTaskTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_FeTaskTypes_LimitValues_RateLimitId",
-                        column: x => x.RateLimitId,
-                        principalTable: "LimitValues",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -344,8 +328,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedByNameSnapshot = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -457,19 +440,9 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_FeTaskTypes_DailyQuantityLimitId",
-                table: "FeTaskTypes",
-                column: "DailyQuantityLimitId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_FeTaskTypes_Name",
                 table: "FeTaskTypes",
                 column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FeTaskTypes_RateLimitId",
-                table: "FeTaskTypes",
-                column: "RateLimitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FeTransfers_FeRequisitionId",
@@ -492,20 +465,19 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 column: "WeekEndingDate");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LimitValues_Fascia",
-                table: "LimitValues",
-                column: "Fascia");
+                name: "IX_RequisitionLimitRules_Category",
+                table: "RequisitionLimitRules",
+                column: "Category");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LimitValues_Title",
-                table: "LimitValues",
-                column: "Title",
-                unique: true);
+                name: "IX_RequisitionLimitRules_Category_FeTaskTypeId_Fascia",
+                table: "RequisitionLimitRules",
+                columns: new[] { "Category", "FeTaskTypeId", "Fascia" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LimitValues_TypeOfLimitation",
-                table: "LimitValues",
-                column: "TypeOfLimitation");
+                name: "IX_RequisitionLimitRules_FeTaskTypeId",
+                table: "RequisitionLimitRules",
+                column: "FeTaskTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shops_Code",
@@ -556,10 +528,10 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 name: "FeReasons");
 
             migrationBuilder.DropTable(
-                name: "FeTaskTypes");
+                name: "FeTransfers");
 
             migrationBuilder.DropTable(
-                name: "FeTransfers");
+                name: "RequisitionLimitRules");
 
             migrationBuilder.DropTable(
                 name: "SubmitWindows");
@@ -568,13 +540,13 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                 name: "VanDrivers");
 
             migrationBuilder.DropTable(
-                name: "LimitValues");
-
-            migrationBuilder.DropTable(
                 name: "FeRequisitions");
 
             migrationBuilder.DropTable(
                 name: "Shops");
+
+            migrationBuilder.DropTable(
+                name: "FeTaskTypes");
 
             migrationBuilder.DropSequence(
                 name: "FeRequisitionNumber");

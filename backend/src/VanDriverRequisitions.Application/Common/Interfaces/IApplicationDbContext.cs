@@ -9,7 +9,7 @@ public interface IApplicationDbContext
     DbSet<FeRequisition> Requisitions { get; }
     DbSet<FeTaskType> FeTaskTypes { get; }
     DbSet<FeReason> FeReasons { get; }
-    DbSet<LimitValue> LimitValues { get; }
+    DbSet<RequisitionLimitRule> RequisitionLimitRules { get; }
     DbSet<SubmitWindow> SubmitWindows { get; }
     DbSet<Shop> Shops { get; }
     DbSet<VanDriver> VanDrivers { get; }

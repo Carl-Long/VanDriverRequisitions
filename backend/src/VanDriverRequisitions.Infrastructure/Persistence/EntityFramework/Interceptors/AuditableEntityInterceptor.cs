@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Interceptors;
@@ -9,63 +11,95 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Inter
 public class AuditableEntityInterceptor(ICurrentUserService currentUser)
     : SaveChangesInterceptor
 {
+    public override InterceptionResult<int> SavingChanges(
+        DbContextEventData eventData,
+        InterceptionResult<int> result)
+    {
+        ApplyChanges(eventData.Context);
+        return base.SavingChanges(eventData, result);
+    }
+
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        UpdateEntities(eventData.Context);
+        ApplyChanges(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    public override InterceptionResult<int> SavingChanges(
-        DbContextEventData eventData,
-        InterceptionResult<int> result)
+    private void ApplyChanges(DbContext? context)
     {
-        UpdateEntities(eventData.Context);
-        return base.SavingChanges(eventData, result);
-    }
-
-    private void UpdateEntities(DbContext? context)
-    {
-        if (context is null)
-            return;
+        if (context is null) return;
 
         var now = DateTime.UtcNow;
-        var user = currentUser.User;
+        var user = currentUser.User ?? LoggedInUser.System;
 
-        foreach (var entry in context.ChangeTracker.Entries())
+        ApplyAuditing(context, now, user);
+        TouchRequisitionParents(context, now, user);
+    }
+
+    private static void ApplyAuditing(DbContext context, DateTime now, LoggedInUser user)
+    {
+        foreach (var entry in context.ChangeTracker.Entries<AuditableEntity>())
         {
-            if (entry.Entity is AuditableEntity auditable)
+            if (entry.State == EntityState.Added)
             {
-                if (entry.State == EntityState.Added)
-                {
-                    auditable.CreatedAtUtc = now;
-                    auditable.CreatedById = user.Id;
-                    auditable.CreatedByNameSnapshot = user.Name;
-                }
-
-                if (entry.State == EntityState.Modified)
-                {
-                    auditable.UpdatedAtUtc = now;
-                    auditable.UpdatedById = user.Id;
-                    auditable.UpdatedByNameSnapshot = user.Name;
-
-                    entry.Property(nameof(AuditableEntity.CreatedAtUtc)).IsModified = false;
-                    entry.Property(nameof(AuditableEntity.CreatedById)).IsModified = false;
-                    entry.Property(nameof(AuditableEntity.CreatedByNameSnapshot)).IsModified = false;
-                }
+                entry.Entity.CreatedAtUtc = now;
+                entry.Entity.CreatedById = user.Id;
+                entry.Entity.CreatedByNameSnapshot = user.Name;
             }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAtUtc = now;
+                entry.Entity.UpdatedById = user.Id;
+                entry.Entity.UpdatedByNameSnapshot = user.Name;
 
-            if (entry.Entity is ISoftDeletable soft &&
-                entry.State == EntityState.Deleted)
+                entry.Property(x => x.CreatedAtUtc).IsModified = false;
+                entry.Property(x => x.CreatedById).IsModified = false;
+                entry.Property(x => x.CreatedByNameSnapshot).IsModified = false;
+            }
+        }
+
+        foreach (var entry in context.ChangeTracker.Entries<ISoftDeletable>())
+        {
+            if (entry.State == EntityState.Deleted)
             {
                 entry.State = EntityState.Modified;
 
-                soft.DeletedAtUtc = now;
-                soft.DeletedById = user.Id;
-                soft.DeletedByNameSnapshot = user.Name;
+                entry.Entity.DeletedAtUtc = now;
+                entry.Entity.DeletedById = user.Id;
+                entry.Entity.DeletedByNameSnapshot = user.Name;
             }
+        }
+    }
+
+    private static void TouchRequisitionParents(DbContext context, DateTime now, LoggedInUser user)
+    {
+        var affectedRequisitionIds = context.ChangeTracker
+            .Entries<IFeRequisitionChild>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .Select(e => e.Entity.FeRequisitionId)
+            .Distinct()
+            .ToList();
+
+        if (affectedRequisitionIds.Count == 0)
+            return;
+
+        var requisitions = context.ChangeTracker
+            .Entries<FeRequisition>()
+            .Where(e => affectedRequisitionIds.Contains(e.Entity.Id))
+            .ToList();
+
+        foreach (var entry in requisitions)
+        {
+            entry.Entity.UpdatedAtUtc = now;
+            entry.Entity.UpdatedById = user.Id;
+            entry.Entity.UpdatedByNameSnapshot = user.Name;
+
+            entry.Property(x => x.UpdatedAtUtc).IsModified = true;
+            entry.Property(x => x.UpdatedById).IsModified = true;
+            entry.Property(x => x.UpdatedByNameSnapshot).IsModified = true;
         }
     }
 }

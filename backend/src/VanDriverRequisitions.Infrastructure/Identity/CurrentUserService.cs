@@ -5,29 +5,28 @@ using VanDriverRequisitions.Application.Common.Models;
 
 namespace VanDriverRequisitions.Infrastructure.Identity;
 
-public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
+public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     : ICurrentUserService
 {
-    private ClaimsPrincipal UserPrincipal =>
-        httpContextAccessor.HttpContext?.User
-        ?? throw new UnauthorizedAccessException("No HTTP context user.");
-
-    public LoggedInUser User
+    public LoggedInUser? TryGetUser()
     {
-        get
-        {
-            var oid = UserPrincipal.FindFirstValue("oid")
-                      ?? throw new UnauthorizedAccessException("Missing 'oid' claim.");
+        var principal = httpContextAccessor.HttpContext?.User;
 
-            if (!Guid.TryParse(oid, out var id))
-                throw new UnauthorizedAccessException("Invalid 'oid' claim format.");
+        if (principal?.Identity?.IsAuthenticated != true)
+            return null;
 
-            var name =
-                UserPrincipal.FindFirstValue("name")
-                ?? UserPrincipal.FindFirstValue("preferred_username")
-                ?? throw new UnauthorizedAccessException("Missing user name claim.");
+        var oid = principal.FindFirstValue("oid");
+        if (!Guid.TryParse(oid, out var id))
+            return null;
 
-            return new LoggedInUser(id, name);
-        }
+        var name =
+            principal.FindFirstValue("name")
+            ?? principal.FindFirstValue("preferred_username")
+            ?? "unknown";
+
+        return new LoggedInUser(id, name);
     }
+
+    public LoggedInUser User =>
+        TryGetUser() ?? LoggedInUser.System;
 }

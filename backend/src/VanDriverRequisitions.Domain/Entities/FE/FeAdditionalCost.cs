@@ -1,10 +1,11 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeAdditionalCost : AuditableEntity
+public class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
 {
     public Guid FeRequisitionId { get; init; }
     public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);

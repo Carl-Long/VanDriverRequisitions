@@ -20,9 +20,5 @@ public static class AuditableEntityConfiguration
 
         builder.Property(x => x.CreatedAtUtc)
             .IsRequired();
-
-        builder.Property(x => x.RowVersion)
-            .IsRowVersion()
-            .IsConcurrencyToken();
     }
 }

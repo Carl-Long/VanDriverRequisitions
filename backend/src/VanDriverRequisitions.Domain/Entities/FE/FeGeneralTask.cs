@@ -1,10 +1,11 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeGeneralTask : AuditableEntity
+public class FeGeneralTask : AuditableEntity, IFeRequisitionChild
 {
     private FeGeneralTask() { } // For EF core
     
@@ -15,8 +16,8 @@ public class FeGeneralTask : AuditableEntity
     
     public Guid FeRequisitionId { get; init; }
     public Guid FeTaskTypeId { get; init; }
-    public required string TaskTypeName { get; init; }
-    public required string TaskTypeCode { get; init; }
+    public string TaskTypeName { get; init; } = string.Empty;
+    public string TaskTypeCode { get; init; }  = string.Empty;
     public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public WeeklyQuantities Week { get; set; } = null!;
     public int TotalNumber { get; private set; }

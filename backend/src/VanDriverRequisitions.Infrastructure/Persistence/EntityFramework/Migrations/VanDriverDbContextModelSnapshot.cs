@@ -24,11 +24,14 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.HasSequence("FeRequisitionNumber");
 
-            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.LimitValue", b =>
+            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.RequisitionLimitRule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
@@ -41,37 +44,21 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<decimal?>("CurrencyLimit")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int?>("Fascia")
                         .HasColumnType("int");
+
+                    b.Property<Guid?>("FeTaskTypeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("NameOfValue")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("NumericalLimit")
+                    b.Property<int?>("MaxQuantity")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("TypeOfLimitation")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("MaxRate")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -85,20 +72,17 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Fascia");
+                    b.HasIndex("Category");
 
-                    b.HasIndex("Title")
-                        .IsUnique();
+                    b.HasIndex("FeTaskTypeId");
 
-                    b.HasIndex("TypeOfLimitation");
+                    b.HasIndex("Category", "FeTaskTypeId", "Fascia");
 
-                    b.ToTable("LimitValues", null, t =>
+                    b.ToTable("RequisitionLimitRules", null, t =>
                         {
-                            t.HasCheckConstraint("CK_LimitValues_CurrencyLimit_NonNegative", "[CurrencyLimit] IS NULL OR [CurrencyLimit] >= 0");
+                            t.HasCheckConstraint("CK_RequisitionLimitRules_MaxQuantity_NonNegative", "[MaxQuantity] IS NULL OR [MaxQuantity] >= 0");
 
-                            t.HasCheckConstraint("CK_LimitValues_NumericalLimit_NonNegative", "[NumericalLimit] IS NULL OR [NumericalLimit] >= 0");
-
-                            t.HasCheckConstraint("CK_LimitValues_OneValueSet", "([NumericalLimit] IS NOT NULL AND [CurrencyLimit] IS NULL) OR ([NumericalLimit] IS NULL AND [CurrencyLimit] IS NOT NULL)");
+                            t.HasCheckConstraint("CK_RequisitionLimitRules_MaxRate_NonNegative", "[MaxRate] IS NULL OR [MaxRate] >= 0");
                         });
                 });
 
@@ -193,12 +177,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.Property<DateTime>("OpenTo")
                         .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -323,12 +301,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<int?>("TotalNumber")
                         .HasColumnType("int");
 
@@ -402,12 +374,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<string>("TaskTypeCode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -480,12 +446,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<int?>("TotalMiles")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -542,18 +502,14 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -723,9 +679,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<Guid?>("DailyQuantityLimitId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -733,15 +686,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("RateLimitId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
@@ -758,11 +702,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.HasIndex("DailyQuantityLimitId");
-
                     b.HasIndex("Name");
-
-                    b.HasIndex("RateLimitId");
 
                     b.ToTable("FeTaskTypes", (string)null);
                 });
@@ -790,12 +730,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     b.Property<decimal?>("RatePerJob")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<Guid>("ShopIdFrom")
                         .HasColumnType("uniqueidentifier");
@@ -841,6 +775,16 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                             t.HasCheckConstraint("CK_FeTransfers_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
+                });
+
+            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.RequisitionLimitRule", b =>
+                {
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.FE.FeTaskType", "FeTaskType")
+                        .WithMany()
+                        .HasForeignKey("FeTaskTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("FeTaskType");
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.FE.FeAdditionalCost", b =>
@@ -956,23 +900,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.Navigation("Week")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.FE.FeTaskType", b =>
-                {
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.LimitValue", "DailyQuantityLimit")
-                        .WithMany()
-                        .HasForeignKey("DailyQuantityLimitId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.LimitValue", "RateLimit")
-                        .WithMany()
-                        .HasForeignKey("RateLimitId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("DailyQuantityLimit");
-
-                    b.Navigation("RateLimit");
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.FE.FeTransfer", b =>

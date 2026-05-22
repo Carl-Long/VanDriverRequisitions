@@ -8,5 +8,4 @@ public abstract class AuditableEntity : BaseEntity
     public Guid? UpdatedById { get; set; }
     public string? UpdatedByNameSnapshot { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
-    public byte[] RowVersion { get; set; } = [];
 }

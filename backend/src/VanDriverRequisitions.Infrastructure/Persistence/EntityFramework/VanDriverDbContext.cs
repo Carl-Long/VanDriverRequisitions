@@ -14,7 +14,7 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
     public DbSet<FeRequisition> Requisitions => Set<FeRequisition>();
     public DbSet<FeTaskType> FeTaskTypes => Set<FeTaskType>();
     public DbSet<FeReason> FeReasons => Set<FeReason>();
-    public DbSet<LimitValue> LimitValues => Set<LimitValue>();
+    public DbSet<RequisitionLimitRule> RequisitionLimitRules => Set<RequisitionLimitRule>();
     public DbSet<SubmitWindow> SubmitWindows => Set<SubmitWindow>();
     public DbSet<Shop> Shops => Set<Shop>();
     public DbSet<VanDriver> VanDrivers => Set<VanDriver>();

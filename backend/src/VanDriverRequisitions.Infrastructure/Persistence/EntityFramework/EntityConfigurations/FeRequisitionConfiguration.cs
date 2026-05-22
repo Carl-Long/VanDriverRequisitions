@@ -69,6 +69,10 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
             .IsRequired()
             .HasMaxLength(100);
         
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion()
+            .IsConcurrencyToken();
+        
         builder.HasMany(x => x.FeGeneralTasks)
             .WithOne()
             .HasForeignKey(x => x.FeRequisitionId)

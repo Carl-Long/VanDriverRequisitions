@@ -15,6 +15,10 @@ public class FeReasonConfiguration : IEntityTypeConfiguration<FeReason>
         builder.Property(x => x.Reason)
             .IsRequired()
             .HasMaxLength(200);
+        
+        builder.Property(x => x.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
 
         // Indexes
         builder.HasIndex(x => x.Reason).IsUnique();

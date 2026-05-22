@@ -1,10 +1,11 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeMileage : AuditableEntity
+public class FeMileage : AuditableEntity, IFeRequisitionChild
 {
     private FeMileage() { } // For EF core
     

@@ -4,7 +4,7 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public sealed class FeRequisition : AuditableEntity
+public sealed class FeRequisition : ConcurrencyAwareEntity
 {
     public required string RequisitionNumber { get; init; }
     public DateOnly RequisitionDate { get; set; }

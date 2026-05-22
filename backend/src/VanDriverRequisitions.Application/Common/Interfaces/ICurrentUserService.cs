@@ -4,5 +4,6 @@ namespace VanDriverRequisitions.Application.Common.Interfaces;
 
 public interface ICurrentUserService
 {
-    LoggedInUser User { get; }
+    LoggedInUser? TryGetUser();
+    LoggedInUser? User { get; }
 }
