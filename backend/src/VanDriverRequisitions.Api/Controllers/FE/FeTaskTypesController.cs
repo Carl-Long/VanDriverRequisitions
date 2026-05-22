@@ -15,16 +15,16 @@ public class FeTaskTypesController(
     IFeTaskTypeService feTaskTypeService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<FeTaskTypeDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<FeTaskTypeSummaryDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
         var feTaskTypes = await feTaskTypeService.GetAllAsync(includeInactive, cancellationToken);
         return Ok(feTaskTypes);
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(FeTaskTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FeTaskTypeDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<FeTaskTypeSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var feTaskType = await feTaskTypeService.GetByIdAsync(id, cancellationToken);
         return Ok(feTaskType);
@@ -32,10 +32,10 @@ public class FeTaskTypesController(
     
     [HttpPost]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(FeTaskTypeDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FeTaskTypeDto>> Create([FromBody] CreateFeTaskTypeDto createFeTaskTypeDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<FeTaskTypeSummaryDto>> Create([FromBody] CreateFeTaskTypeDto createFeTaskTypeDto, CancellationToken cancellationToken)
     {
         var createdFeTaskType = await feTaskTypeService.CreateAsync(createFeTaskTypeDto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = createdFeTaskType.Id }, createdFeTaskType);
@@ -43,11 +43,11 @@ public class FeTaskTypesController(
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(FeTaskTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FeTaskTypeDto>> Update(
+    public async Task<ActionResult<FeTaskTypeSummaryDto>> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateFeTaskTypeDto updateFeTaskTypeDto,
         CancellationToken cancellationToken)

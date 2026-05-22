@@ -6,8 +6,8 @@ namespace VanDriverRequisitions.Application.Features.FeTaskTypes.Mappings;
 
 public static class FeTaskTypeProjections
 {
-    public static Expression<Func<FeTaskType, FeTaskTypeDto>> AsSummaryDto =>
-        x => new FeTaskTypeDto
+    public static Expression<Func<FeTaskType, FeTaskTypeSummaryDto>> AsSummaryDto =>
+        x => new FeTaskTypeSummaryDto()
         {
             Id = x.Id,
             Name = x.Name,
