@@ -1,71 +1,180 @@
+// lib/api/client.ts
+
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:50815";
 
 let tokenAccessor: (() => string | null) | null = null;
-let logoutHandler: (() => void) | null = null;
+let unauthorizedHandler: (() => void) | null = null;
 
 /**
- * Called once by AuthProvider to wire token access into the API client
- * without creating a circular dependency.
+ * Configure auth integration without circular dependencies.
  */
 export function configureAuth(
     getToken: () => string | null,
     onUnauthorized: () => void,
 ) {
     tokenAccessor = getToken;
-    logoutHandler = onUnauthorized;
+    unauthorizedHandler = onUnauthorized;
 }
 
-export type ApiError = {
-    title: string;
+/**
+ * Strongly typed API error.
+ */
+export class ApiError extends Error {
     status: number;
     detail?: string;
     errors?: Record<string, string[]>;
+
+    constructor({
+        title,
+        status,
+        detail,
+        errors,
+    }: {
+        title: string;
+        status: number;
+        detail?: string;
+        errors?: Record<string, string[]>;
+    }) {
+        super(title);
+
+        this.name = "ApiError";
+        this.status = status;
+        this.detail = detail;
+        this.errors = errors;
+    }
+}
+
+/**
+ * Override RequestInit.body so callers can pass plain objects.
+ */
+type ApiFetchOptions = Omit<RequestInit, "body"> & {
+    body?: unknown;
+    json?: boolean;
 };
 
-export async function apiFetch<T>(
-    path: string,
-    options: RequestInit = {},
-): Promise<T> {
-    const token = tokenAccessor?.();
-
-    const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        ...(options.headers as Record<string, string>),
-    };
-
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
+function buildUrl(path: string): string {
+    if (path.startsWith("http")) {
+        return path;
     }
 
-    const res = await fetch(`${API_BASE_URL}${path}`, {
-        ...options,
+    return `${API_BASE_URL}${path}`;
+}
+
+async function parseResponseBody(response: Response): Promise<any> {
+    // No Content
+    if (response.status === 204) {
+        return undefined;
+    }
+
+    const contentType = response.headers.get("content-type");
+
+    // No response body
+    if (!contentType) {
+        return undefined;
+    }
+
+    // JSON response
+    if (contentType.includes("application/json")) {
+        const text = await response.text();
+
+        if (!text) {
+            return undefined;
+        }
+
+        return JSON.parse(text);
+    }
+
+    // Fallback to plain text
+    return response.text();
+}
+
+async function buildApiError(response: Response): Promise<ApiError> {
+    let body: any = null;
+
+    try {
+        body = await parseResponseBody(response);
+    } catch {
+        body = null;
+    }
+
+    return new ApiError({
+        title:
+            body?.title ||
+            body?.message ||
+            `Request failed with status ${response.status}`,
+        status: response.status,
+        detail: body?.detail,
+        errors: body?.errors,
+    });
+}
+
+/**
+ * Centralized API client.
+ */
+export async function apiFetch<T>(
+    path: string,
+    options: ApiFetchOptions = {},
+): Promise<T> {
+    const {
+        json = true,
+        headers: incomingHeaders,
+        body,
+        ...rest
+    } = options;
+
+    const headers = new Headers(incomingHeaders);
+
+    // Attach bearer token
+    const token = tokenAccessor?.();
+
+    if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    // Transform body
+    let finalBody: BodyInit | undefined;
+
+    if (body != null) {
+        const isFormData = body instanceof FormData;
+        const isBlob = body instanceof Blob;
+        const isString = typeof body === "string";
+
+        if (json && !isFormData && !isBlob && !isString) {
+            headers.set("Content-Type", "application/json");
+            finalBody = JSON.stringify(body);
+        } else {
+            finalBody = body as BodyInit;
+        }
+    }
+
+    const response = await fetch(buildUrl(path), {
+        ...rest,
         headers,
+        body: finalBody,
+
+        /**
+         * Prevent stale authenticated requests
+         * in Next.js App Router.
+         */
+        cache: "no-store",
     });
 
-    if (res.status === 401) {
-        logoutHandler?.();
-        const error: ApiError = {
+    // Handle unauthorized globally
+    if (response.status === 401) {
+        unauthorizedHandler?.();
+
+        throw new ApiError({
             title: "Unauthorized",
             status: 401,
             detail: "Your session has expired. Please sign in again.",
-        };
-        throw error;
+        });
     }
 
-    if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        const error: ApiError = {
-            title: body?.title ?? "Request failed",
-            status: res.status,
-            detail: body?.detail,
-            errors: body?.errors,
-        };
-        throw error;
+    // Handle failed responses
+    if (!response.ok) {
+        throw await buildApiError(response);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    if (res.status === 204) return undefined!;
-
-    return res.json();
+    return (await parseResponseBody(response)) as T;
 }

@@ -20,11 +20,11 @@ export function PageHeader({
             )}
         >
             <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground pl-1">
                     {title}
                 </h1>
                 {description && (
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground pl-1">
                         {description}
                     </p>
                 )}

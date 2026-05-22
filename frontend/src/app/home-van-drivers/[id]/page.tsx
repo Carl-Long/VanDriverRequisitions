@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { RequisitionForm } from "@/components/fe-requisitions/requisition-form";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/toast/toast";
 import { feRequisitionsApi, type FeRequisitionDetail } from "@/lib/api/fe-requisitions";
 
 export default function EditRequisitionPage() {

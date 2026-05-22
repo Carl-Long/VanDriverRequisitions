@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { Modal } from "@/components/ui/modal";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/toast/toast";
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { cn } from "@/lib/utils";
 import {
@@ -258,7 +258,7 @@ export function RequisitionForm({ initial }: Readonly<RequisitionFormProps>) {
                             const payload = toPayload(data);
                             const result = isCreate
                                 ? await feRequisitionsApi.create(payload)
-                                : await feRequisitionsApi.update(initial!.id, payload);
+                                : await feRequisitionsApi.update(initial.id, payload);
 
                             toast.success(
                                 isCreate

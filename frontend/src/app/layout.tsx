@@ -6,7 +6,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { AuthGate } from "@/components/auth/auth-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
-import { ToastProvider } from "@/components/ui/toast";
+import { ToastProvider } from "@/providers/toast-provider";
 
 const inter = Inter({
     subsets: ["latin"],

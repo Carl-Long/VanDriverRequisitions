@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { SearchInput } from "@/components/ui/search-input";
+import { Surface } from "@/components/ui/surface";
+import { Toggle } from "@/components/ui/toggle";
 
 import { TaskTypeTable } from "@/components/fe-task-types/task-type-table";
 import { TaskTypeFormModal } from "@/components/fe-task-types/task-type-form-modal";
@@ -15,8 +18,9 @@ import {
     feTaskTypesApi,
     type FeTaskType,
 } from "@/lib/api/fe-task-types";
-import { Surface } from "@/components/ui/surface";
-import { Toggle } from "@/components/ui/toggle";
+
+import { ApiError } from "@/lib/api/client";
+import { useToast } from "@/providers/toast-provider";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -24,11 +28,12 @@ export default function FeTaskTypesPage() {
     const [error, setError] = useState<string | null>(null);
 
     const [search, setSearch] = useState("");
-
     const [showInactive, setShowInactive] = useState(false);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<FeTaskType | null>(null);
+
+    const toast = useToast();
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -37,8 +42,12 @@ export default function FeTaskTypesPage() {
         try {
             const data = await feTaskTypesApi.getAll(showInactive);
             setTaskTypes(data);
-        } catch {
-            setError("Failed to load task types. Is the API running?");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.detail ?? err.message);
+            } else {
+                setError("Failed to load task types.");
+            }
         } finally {
             setLoading(false);
         }
@@ -49,16 +58,12 @@ export default function FeTaskTypesPage() {
     }, [load]);
 
     const filtered = useMemo(() => {
-        if (!search.trim()) {
-            return taskTypes;
-        }
+        if (!search.trim()) return taskTypes;
 
-        const q = search.toLowerCase();
+        const query = search.toLowerCase();
 
         return taskTypes.filter(
-            (t) =>
-                t.name.toLowerCase().includes(q) ||
-                t.code.toLowerCase().includes(q),
+            (t) => t.name.toLowerCase().includes(query) || t.code.toLowerCase().includes(query),
         );
     }, [taskTypes, search]);
 
@@ -75,18 +80,13 @@ export default function FeTaskTypesPage() {
     async function handleSubmit(data: {
         name: string;
         code: string;
-        dailyQuantityLimitId: string | null;
-        rateLimitId: string | null;
     }) {
         if (editing) {
             await feTaskTypesApi.update(editing.id, data);
         } else {
             await feTaskTypesApi.create(data);
         }
-
-        setModalOpen(false);
-        setEditing(null);
-
+        toast.success(editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`);
         await load();
     }
 
@@ -97,10 +97,14 @@ export default function FeTaskTypesPage() {
             } else {
                 await feTaskTypesApi.activate(taskType.id);
             }
-
+            toast.success(taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`);
             await load();
-        } catch {
-            setError("Failed to update status.");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.detail ?? err.message);
+            } else {
+                setError("Failed to update task type.");
+            }
         }
     }
 
@@ -108,7 +112,7 @@ export default function FeTaskTypesPage() {
         <PageContainer>
             <PageHeader
                 title="FE Task Types"
-                description="Manage task type codes used across FE store requisitions."
+                description="Manage FE task type codes."
             >
                 <Button onClick={openCreate}>
                     <Plus size={16} />
@@ -116,7 +120,6 @@ export default function FeTaskTypesPage() {
                 </Button>
             </PageHeader>
 
-            {/* Toolbar */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <SearchInput
                     value={search}
@@ -125,28 +128,31 @@ export default function FeTaskTypesPage() {
                     className="w-full lg:w-[32rem]"
                 />
 
-                {/* Show inactive toggle */}
                 <Surface className="flex items-center gap-3 px-4 py-2">
                     <span className="text-sm text-muted-foreground">
                         Show inactive
                     </span>
 
+
+
                     <Toggle
                         checked={showInactive}
-                        onChange={() => setShowInactive((v) => !v)}
+                        onChange={() =>
+                            setShowInactive((v) => !v)
+                        }
                         ariaLabel="Toggle inactive task types"
                     />
                 </Surface>
             </div>
 
-            {/* Error */}
             {error && (
                 <Surface className="mb-6 border-destructive bg-destructive/10 px-4 py-3">
-                    <p className="text-sm text-destructive">{error}</p>
+                    <p className="text-sm text-destructive">
+                        {error}
+                    </p>
                 </Surface>
             )}
 
-            {/* Loading */}
             {loading && (
                 <div className="space-y-3">
                     <Surface className="h-10 animate-pulse bg-surface-hover" />
@@ -155,7 +161,6 @@ export default function FeTaskTypesPage() {
                 </div>
             )}
 
-            {/* Empty */}
             {!loading && filtered.length === 0 && (
                 <Surface className="py-16 text-center">
                     <p className="text-sm text-muted-foreground">
@@ -175,7 +180,6 @@ export default function FeTaskTypesPage() {
                 </Surface>
             )}
 
-            {/* Table */}
             {!loading && filtered.length > 0 && (
                 <TaskTypeTable
                     items={filtered}
@@ -184,7 +188,6 @@ export default function FeTaskTypesPage() {
                 />
             )}
 
-            {/* Modal */}
             <TaskTypeFormModal
                 key={editing?.id ?? "new"}
                 open={modalOpen}

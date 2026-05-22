@@ -1,3 +1,5 @@
+// lib/api/feTaskTypes.ts
+
 import { apiFetch } from "@/lib/api/client";
 
 const BASE = "/api/v1/fe-task-types";
@@ -7,10 +9,6 @@ export type FeTaskType = {
     name: string;
     code: string;
     isActive: boolean;
-    dailyQuantityLimitId: string | null;
-    dailyQuantityMax: number | null;
-    rateLimitId: string | null;
-    rateMax: number | null;
     createdAtUtc: string;
     createdByNameSnapshot: string;
     updatedAtUtc: string | null;
@@ -20,38 +18,51 @@ export type FeTaskType = {
 export type CreateFeTaskType = {
     name: string;
     code: string;
-    dailyQuantityLimitId: string | null;
-    rateLimitId: string | null;
 };
 
 export type UpdateFeTaskType = {
     name: string;
     code: string;
-    dailyQuantityLimitId: string | null;
-    rateLimitId: string | null;
 };
 
 export const feTaskTypesApi = {
-    getAll: (includeInactive = false) =>
-        apiFetch<FeTaskType[]>(`${BASE}?includeInactive=${includeInactive}`),
+    getAll(includeInactive = false) {
+        const params = new URLSearchParams({
+            includeInactive: String(includeInactive),
+        });
 
-    getById: (id: string) => apiFetch<FeTaskType>(`${BASE}/${id}`),
+        return apiFetch<FeTaskType[]>(
+            `${BASE}?${params.toString()}`,
+        );
+    },
 
-    create: (data: CreateFeTaskType) =>
-        apiFetch<FeTaskType>(BASE, {
+    getById(id: string) {
+        return apiFetch<FeTaskType>(`${BASE}/${id}`);
+    },
+
+    create(data: CreateFeTaskType) {
+        return apiFetch<FeTaskType>(BASE, {
             method: "POST",
-            body: JSON.stringify(data),
-        }),
+            body: data,
+        });
+    },
 
-    update: (id: string, data: UpdateFeTaskType) =>
-        apiFetch<FeTaskType>(`${BASE}/${id}`, {
+    update(id: string, data: UpdateFeTaskType) {
+        return apiFetch<FeTaskType>(`${BASE}/${id}`, {
             method: "PUT",
-            body: JSON.stringify(data),
-        }),
+            body: data,
+        });
+    },
 
-    activate: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}/activate`, { method: "POST" }),
+    activate(id: string) {
+        return apiFetch<void>(`${BASE}/${id}/activate`, {
+            method: "POST",
+        });
+    },
 
-    deactivate: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}/deactivate`, { method: "POST" }),
+    deactivate(id: string) {
+        return apiFetch<void>(`${BASE}/${id}/deactivate`, {
+            method: "POST",
+        });
+    },
 };
