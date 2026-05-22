@@ -34,8 +34,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
             .Select(FeTaskTypeProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return feTaskType ?? throw new NotFoundException(
-            $"FE Task Type with ID '{id}' was not found.");
+        return feTaskType ?? throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
     }
 
     public async Task<FeTaskTypeSummaryDto> CreateAsync(CreateFeTaskTypeDto createFeTaskTypeDto, CancellationToken cancellationToken = default)

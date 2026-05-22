@@ -5,9 +5,9 @@ namespace VanDriverRequisitions.Application.Features.FeReasons.Mappings;
 
 public static class FeReasonMapper
 {
-    public static FeReasonDto ToSummaryDto(FeReason entity)
+    public static FeReasonSummaryDto ToSummaryDto(FeReason entity)
     {
-        return new FeReasonDto
+        return new FeReasonSummaryDto()
         {
             Id = entity.Id,
             Reason = entity.Reason,

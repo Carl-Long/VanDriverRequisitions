@@ -6,8 +6,8 @@ namespace VanDriverRequisitions.Application.Features.FeReasons.Mappings;
 
 public static class FeReasonProjections
 {
-    public static Expression<Func<FeReason, FeReasonDto>> AsSummaryDto =>
-        x => new FeReasonDto
+    public static Expression<Func<FeReason, FeReasonSummaryDto>> AsSummaryDto =>
+        x => new FeReasonSummaryDto()
         {
             Id = x.Id,
             Reason = x.Reason,

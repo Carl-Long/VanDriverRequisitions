@@ -15,16 +15,16 @@ public class FeReasonsController(
     IFeReasonService feReasonService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<FeReasonDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<FeReasonSummaryDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
         var feReasons = await feReasonService.GetAllAsync(includeInactive, cancellationToken);
         return Ok(feReasons);
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(FeReasonDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FeReasonSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FeReasonDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<FeReasonSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var feReason = await feReasonService.GetByIdAsync(id, cancellationToken);
         return Ok(feReason);
@@ -32,10 +32,10 @@ public class FeReasonsController(
 
     [HttpPost]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(FeReasonDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(FeReasonSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FeReasonDto>> Create([FromBody] CreateFeReasonDto createFeReasonDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<FeReasonSummaryDto>> Create([FromBody] CreateFeReasonDto createFeReasonDto, CancellationToken cancellationToken)
     {
         var createdFeReason = await feReasonService.CreateAsync(createFeReasonDto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = createdFeReason.Id }, createdFeReason);
@@ -43,11 +43,11 @@ public class FeReasonsController(
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(typeof(FeReasonDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FeReasonSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<FeReasonDto>> Update(
+    public async Task<ActionResult<FeReasonSummaryDto>> Update(
         [FromRoute] Guid id,
         [FromBody] UpdateFeReasonDto updateFeReasonDto,
         CancellationToken cancellationToken)

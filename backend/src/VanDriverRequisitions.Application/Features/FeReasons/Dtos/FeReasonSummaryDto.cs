@@ -1,6 +1,6 @@
 namespace VanDriverRequisitions.Application.Features.FeReasons.Dtos;
 
-public class FeReasonDto
+public class FeReasonSummaryDto
 {
     public Guid Id { get; init; }
     public string Reason { get; init; } = string.Empty;

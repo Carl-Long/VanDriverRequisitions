@@ -14,7 +14,7 @@ public class FeReasonConfiguration : IEntityTypeConfiguration<FeReason>
 
         builder.Property(x => x.Reason)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(100);
         
         builder.Property(x => x.IsActive)
             .IsRequired()
