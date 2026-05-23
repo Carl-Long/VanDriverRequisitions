@@ -17,7 +17,7 @@ public class SubmitWindowsController(
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] int pageSize = 1,
         [FromQuery] bool includeDeleted = false,
         CancellationToken cancellationToken = default)
     {
@@ -71,17 +71,7 @@ public class SubmitWindowsController(
         await submitWindowService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
-
-    [HttpPost("{id:guid}/restore")]
-    [Authorize(Policy = Policies.AdminOnly)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Restore([FromRoute] Guid id, CancellationToken cancellationToken)
-    {
-        await submitWindowService.RestoreAsync(id, cancellationToken);
-        return NoContent();
-    }
-
+    
     [HttpGet("status")]
     [ProducesResponseType(typeof(SubmitWindowStatusDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStatus(CancellationToken cancellationToken)

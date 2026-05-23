@@ -2,36 +2,52 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
+
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button/button";
-import { ReasonCard } from "@/components/fe-reasons/reason-card";
+import { IconButton } from "@/components/ui/button/icon-button";
+import { SearchInput } from "@/components/ui/search-input";
+import { Surface } from "@/components/ui/surface";
+import { Toggle } from "@/components/ui/toggle";
+
 import { ReasonFormModal } from "@/components/fe-reasons/reason-form-modal";
+
 import {
     feReasonsApi,
     type FeReason,
 } from "@/lib/api/fe-reasons";
 
+import { ApiError } from "@/lib/api/client";
+import { useToast } from "@/providers/toast-provider";
+import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
+
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
 
-    // Modal state
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<FeReason | null>(null);
+
+    const toast = useToast();
 
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
+
         try {
             const data = await feReasonsApi.getAll(showInactive);
             setReasons(data);
-        } catch {
-            setError("Failed to load reasons. Is the API running?");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.detail ?? err.message);
+            } else {
+                setError("Failed to load reasons.");
+            }
         } finally {
             setLoading(false);
         }
@@ -43,8 +59,12 @@ export default function FeReasonsPage() {
 
     const filtered = useMemo(() => {
         if (!search.trim()) return reasons;
-        const q = search.toLowerCase();
-        return reasons.filter((r) => r.reason.toLowerCase().includes(q));
+
+        const query = search.toLowerCase();
+
+        return reasons.filter((r) =>
+            r.reason.toLowerCase().includes(query),
+        );
     }, [reasons, search]);
 
     function openCreate() {
@@ -63,8 +83,13 @@ export default function FeReasonsPage() {
         } else {
             await feReasonsApi.create(data);
         }
-        setModalOpen(false);
-        setEditing(null);
+
+        toast.success(
+            editing
+                ? `Reason "${data.reason}" updated`
+                : `Reason "${data.reason}" created`,
+        );
+
         await load();
     }
 
@@ -75,9 +100,19 @@ export default function FeReasonsPage() {
             } else {
                 await feReasonsApi.activate(reason.id);
             }
+
+            toast.success(reason.isActive 
+                ? `${reason.reason} deactivated` 
+                : `${reason.reason} activated`,
+            );
+
             await load();
-        } catch {
-            setError("Failed to update status.");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.detail ?? err.message);
+            } else {
+                setError("Failed to update reason.");
+            }
         }
     }
 
@@ -93,70 +128,72 @@ export default function FeReasonsPage() {
                 </Button>
             </PageHeader>
 
-            {/* Toolbar */}
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search by reason..."
-                    className="sm:max-w-xs"
+                    className="w-full lg:w-[32rem]"
                 />
-                <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <input
-                        type="checkbox"
+
+                <Surface className="flex items-center gap-3 px-4 py-2 w-fit">
+                    <span className="text-sm text-muted-foreground">
+                        Show inactive
+                    </span>
+
+                    <Toggle
                         checked={showInactive}
-                        onChange={(e) => setShowInactive(e.target.checked)}
-                        className="h-4 w-4 rounded border-border accent-primary"
+                        onChange={() =>
+                            setShowInactive((active) => !active)
+                        }
+                        ariaLabel="Toggle inactive reasons"
                     />
-                    <span>Show inactive</span>
-                </label>
+                </Surface>
             </div>
 
-            {/* Error */}
             {error && (
-                <div className="mb-6 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
-                    {error}
-                </div>
+                <Surface className="mb-6 border-destructive bg-destructive/10 px-4 py-3">
+                    <p className="text-sm text-destructive">
+                        {error}
+                    </p>
+                </Surface>
             )}
 
-            {/* Loading skeleton */}
             {loading && (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {["a", "b", "c", "d", "e", "f"].map((key) => (
-                        <div
-                            key={`skeleton-${key}`}
-                            className="h-36 animate-pulse rounded-2xl border border-border bg-surface"
-                        />
-                    ))}
+                <div className="space-y-3">
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
+                    <Surface className="h-10 animate-pulse bg-surface-hover" />
                 </div>
             )}
 
-            {/* Empty state */}
             {!loading && filtered.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
+                <Surface className="py-16 text-center">
                     <p className="text-sm text-muted-foreground">
                         {search
                             ? "No reasons match your search."
                             : "No reasons yet. Create one to get started."}
                     </p>
-                </div>
+
+                    {!search && (
+                        <div className="mt-4">
+                            <IconButton onClick={openCreate}>
+                                <Plus size={14} />
+                                Create Reason
+                            </IconButton>
+                        </div>
+                    )}
+                </Surface>
             )}
 
-            {/* Grid */}
             {!loading && filtered.length > 0 && (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {filtered.map((reason) => (
-                        <ReasonCard
-                            key={reason.id}
-                            reason={reason}
-                            onEdit={openEdit}
-                            onToggleActive={handleToggleActive}
-                        />
-                    ))}
-                </div>
+                <FeReasonsTable
+                    items={filtered}
+                    onEdit={openEdit}
+                    onToggleActive={handleToggleActive}
+                />
             )}
 
-            {/* Form modal */}
             <ReasonFormModal
                 key={editing?.id ?? "new"}
                 open={modalOpen}

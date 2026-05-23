@@ -29,13 +29,13 @@ export const feReasonsApi = {
     create: (data: CreateFeReason) =>
         apiFetch<FeReason>(BASE, {
             method: "POST",
-            body: JSON.stringify(data),
+            body: data,
         }),
 
     update: (id: string, data: UpdateFeReason) =>
         apiFetch<FeReason>(`${BASE}/${id}`, {
             method: "PUT",
-            body: JSON.stringify(data),
+            body: data,
         }),
 
     activate: (id: string) =>

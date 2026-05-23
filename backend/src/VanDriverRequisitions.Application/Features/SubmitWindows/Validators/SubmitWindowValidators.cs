@@ -5,6 +5,7 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Validators;
 
 public class CreateSubmitWindowDtoValidator : AbstractValidator<CreateSubmitWindowDto>
 {
+    
     public CreateSubmitWindowDtoValidator()
     {
         RuleFor(x => x.OpenFrom)

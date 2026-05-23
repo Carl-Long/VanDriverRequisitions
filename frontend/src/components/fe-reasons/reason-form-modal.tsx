@@ -4,18 +4,21 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
 import { cn } from "@/lib/utils";
-import type { FeReason } from "@/lib/api/fe-reasons";
 
-// Zod schema — mirrors backend FluentValidation rules exactly
+import type { FeReason } from "@/lib/api/fe-reasons";
+import { ApiError } from "@/lib/api/client";
+
+// Zod schema (same as backend validation rules)
 const reasonSchema = z.object({
     reason: z
         .string()
         .trim()
         .min(1, "Reason is required.")
-        .max(200, "Reason must be between 1 and 200 characters."),
+        .max(100, "Reason must be between 1 and 100 characters."),
 });
 
 type ReasonFormData = z.infer<typeof reasonSchema>;
@@ -34,6 +37,7 @@ export function ReasonFormModal({
     initial,
 }: Readonly<ReasonFormModalProps>) {
     const isEditing = !!initial;
+
     const [serverError, setServerError] = useState<string | null>(null);
 
     const {
@@ -45,18 +49,18 @@ export function ReasonFormModal({
     } = useForm<ReasonFormData>({
         resolver: zodResolver(reasonSchema),
         defaultValues: {
-            reason: initial?.reason ?? "",
+            reason: "",
         },
     });
 
-    // Reset form when modal opens with new initial data
     useEffect(() => {
-        if (open) {
-            reset({
-                reason: initial?.reason ?? "",
-            });
-            setServerError(null);
-        }
+        if (!open) return;
+
+        reset({
+            reason: initial?.reason ?? "",
+        });
+
+        setServerError(null);
     }, [open, initial, reset]);
 
     function handleClose() {
@@ -65,28 +69,37 @@ export function ReasonFormModal({
         onClose();
     }
 
+    function applyApiValidationErrors(error: ApiError) {
+        if (!error.errors) {
+            setServerError(
+                error.detail ??
+                    error.message ??
+                    "Something went wrong.",
+            );
+            return;
+        }
+
+        // backend likely returns "Reason"
+        if (error.errors.Reason?.[0]) {
+            setError("reason", {
+                message: error.errors.Reason[0],
+            });
+        }
+    }
+
     async function onValid(data: ReasonFormData) {
         setServerError(null);
+
         try {
             await onSubmit(data);
             handleClose();
-        } catch (err: unknown) {
-            const apiErr = err as {
-                detail?: string;
-                errors?: Record<string, string[]>;
-            };
-            if (apiErr.errors) {
-                for (const [key, msgs] of Object.entries(apiErr.errors)) {
-                    const field = key.toLowerCase();
-                    if (field === "reason") {
-                        setError(field, { message: msgs[0] });
-                    }
-                }
-            } else {
-                setServerError(
-                    apiErr.detail ?? "Something went wrong. Please try again.",
-                );
+        } catch (err) {
+            if (err instanceof ApiError) {
+                applyApiValidationErrors(err);
+                return;
             }
+
+            setServerError("Unexpected error occurred.");
         }
     }
 
@@ -103,7 +116,7 @@ export function ReasonFormModal({
                     </div>
                 )}
 
-                {/* Reason field */}
+                {/* Reason */}
                 <div>
                     <label
                         htmlFor="reason"
@@ -111,11 +124,11 @@ export function ReasonFormModal({
                     >
                         Reason
                     </label>
-                    <textarea
+
+                    <input
                         id="reason"
                         {...register("reason")}
-                        maxLength={200}
-                        rows={3}
+                        maxLength={100}
                         className={cn(
                             "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
                             "placeholder:text-muted-foreground",
@@ -127,6 +140,7 @@ export function ReasonFormModal({
                         )}
                         placeholder="e.g. Driver was unavailable due to vehicle breakdown"
                     />
+
                     {errors.reason && (
                         <p className="mt-1 text-xs text-red-500">
                             {errors.reason.message}
@@ -143,10 +157,9 @@ export function ReasonFormModal({
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && "Saving..."}
-                        {!isSubmitting && isEditing && "Save Changes"}
-                        {!isSubmitting && !isEditing && "Create"}
+
+                    <Button type="submit" loading={isSubmitting}>
+                        {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>
             </form>

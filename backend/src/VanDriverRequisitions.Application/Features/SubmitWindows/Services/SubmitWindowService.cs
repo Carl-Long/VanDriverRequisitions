@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -44,24 +45,18 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .Select(SubmitWindowProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return submitWindow ?? throw new NotFoundException(
-            $"Submit window with ID '{id}' was not found.");
+        return submitWindow ?? throw new NotFoundException($"Submit window with ID '{id}' was not found.");
     }
 
     public async Task<SubmitWindowSummaryDto> CreateAsync(CreateSubmitWindowDto createDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(createDto, cancellationToken);
-
-        var overlapping = await context.SubmitWindows
-            .AnyAsync(x => x.OpenFrom < createDto.OpenTo && x.OpenTo > createDto.OpenFrom, cancellationToken);
-
-        if (overlapping)
-            throw new ConflictException("This window overlaps with an existing submit window.");
+        await CheckForOverlappingAsync(createDto.OpenFrom, createDto.OpenTo, cancellationToken);
 
         var newWindow = new SubmitWindow
         {
-            OpenFrom = createDto.OpenFrom,
-            OpenTo = createDto.OpenTo,
+            OpenFrom = createDto.OpenFrom.ToUniversalTime(),
+            OpenTo = createDto.OpenTo.ToUniversalTime(),
         };
 
         context.SubmitWindows.Add(newWindow);
@@ -76,21 +71,14 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
 
         var existingWindow = await context.SubmitWindows
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
+        
         if (existingWindow is null)
-        {
-            throw new NotFoundException(
-                $"Submit window with ID '{id}' was not found.");
-        }
-
-        var overlapping = await context.SubmitWindows
-            .AnyAsync(x => x.Id != id && x.OpenFrom < updateDto.OpenTo && x.OpenTo > updateDto.OpenFrom, cancellationToken);
-
-        if (overlapping)
-            throw new ConflictException("This window overlaps with an existing submit window.");
-
-        existingWindow.OpenFrom = updateDto.OpenFrom;
-        existingWindow.OpenTo = updateDto.OpenTo;
+            throw new NotFoundException($"Submit window with ID '{id}' was not found.");
+        
+        await CheckForOverlappingAsync(updateDto.OpenFrom, updateDto.OpenTo, cancellationToken, id);
+        
+        existingWindow.OpenFrom = updateDto.OpenFrom.ToUniversalTime();
+        existingWindow.OpenTo = updateDto.OpenTo.ToUniversalTime();
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -103,40 +91,19 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (existingWindow is null)
-        {
-            throw new NotFoundException(
-                $"Submit window with ID '{id}' was not found.");
-        }
-
+            throw new NotFoundException($"Submit window with ID '{id}' was not found.");
+        
         context.SubmitWindows.Remove(existingWindow);
         await context.SaveChangesAsync(cancellationToken);
     }
-
-    public async Task RestoreAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var existingWindow = await context.SubmitWindows
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingWindow is null)
-        {
-            throw new NotFoundException(
-                $"Submit window with ID '{id}' was not found.");
-        }
-
-        existingWindow.DeletedAtUtc = null;
-        existingWindow.DeletedById = null;
-        existingWindow.DeletedByNameSnapshot = null;
-
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
+    
     public async Task<SubmitWindowStatusDto> GetStatusAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
 
         var currentWindow = await context.SubmitWindows
             .Where(x => x.OpenFrom <= now && x.OpenTo >= now)
+            .OrderBy(x => x.OpenFrom)
             .Select(SubmitWindowProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -152,5 +119,14 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             NextWindow = nextWindow,
             HasUpcoming = nextWindow is not null,
         };
+    }
+
+    private async Task CheckForOverlappingAsync(DateTime openFrom, DateTime openTo, CancellationToken cancellationToken, Guid? id = null)
+    {
+        var overlapping = await context.SubmitWindows
+            .AnyAsync(x => x.Id != id && x.OpenFrom < openTo && x.OpenTo > openFrom, cancellationToken);
+
+        if (overlapping)
+            throw new ValidationException("This window overlaps with an existing submit window.");
     }
 }
