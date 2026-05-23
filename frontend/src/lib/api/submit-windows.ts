@@ -43,18 +43,16 @@ export const submitWindowsApi = {
     create: (data: CreateSubmitWindow) =>
         apiFetch<SubmitWindow>(BASE, {
             method: "POST",
-            body: JSON.stringify(data),
+            body: data
         }),
 
     update: (id: string, data: UpdateSubmitWindow) =>
         apiFetch<SubmitWindow>(`${BASE}/${id}`, {
             method: "PUT",
-            body: JSON.stringify(data),
+            body: data
         }),
 
     delete: (id: string) =>
         apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" }),
 
-    restore: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}/restore`, { method: "POST" }),
 };
