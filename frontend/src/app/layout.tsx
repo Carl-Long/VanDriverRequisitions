@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "Van Driver Requisitions",
     description: "Manage van driver requisitions and process payments",
     keywords: ["van drivers", "requisitions", "payments", "management"],
-    authors: [{ name: "Van Driver Team" }],
+    authors: [{ name: "Carl Long" }],
 };
 
 export const viewport: Viewport = {

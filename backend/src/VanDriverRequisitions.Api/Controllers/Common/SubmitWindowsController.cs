@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Api.Controllers.Common;
 
@@ -18,10 +19,10 @@ public class SubmitWindowsController(
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 1,
-        [FromQuery] bool includeDeleted = false,
+        [FromQuery] SubmitWindowFilter filter = SubmitWindowFilter.Active,
         CancellationToken cancellationToken = default)
     {
-        var result = await submitWindowService.GetAllAsync(page, pageSize, includeDeleted, cancellationToken);
+        var result = await submitWindowService.GetAllAsync(page, pageSize, filter, cancellationToken);
         return Ok(result);
     }
 

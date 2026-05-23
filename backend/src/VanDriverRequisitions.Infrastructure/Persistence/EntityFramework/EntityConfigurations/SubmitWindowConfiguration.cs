@@ -13,13 +13,17 @@ public class SubmitWindowConfiguration : IEntityTypeConfiguration<SubmitWindow>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.OpenFrom)
-            .IsRequired()
-            .HasColumnType("datetime2");
+            .HasColumnType("datetime2")
+            .HasConversion(
+                v => v,
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
 
         builder.Property(x => x.OpenTo)
-            .IsRequired()
-            .HasColumnType("datetime2");
-        
+            .HasColumnType("datetime2")
+            .HasConversion(
+                v => v,
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
         // Check constraints
         builder.ToTable(t =>
         {

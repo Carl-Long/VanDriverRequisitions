@@ -19,6 +19,16 @@ public static class AuditableEntityConfiguration
             .HasMaxLength(256);
 
         builder.Property(x => x.CreatedAtUtc)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(
+                v => v,
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+        builder.Property(x => x.UpdatedAtUtc)
+            .HasConversion(
+                v => v,
+                v => v.HasValue
+                    ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+                    : v);
     }
 }

@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
 import { Surface } from "@/components/ui/surface";
-import { Toggle } from "@/components/ui/toggle";
 
 import { SubmitWindowHero } from "@/components/submit-windows/submit-window-hero";
 import { SubmitWindowFormModal } from "@/components/submit-windows/submit-window-form-modal";
@@ -17,11 +16,13 @@ import { SubmitWindowTable } from "@/components/submit-windows/submit-window-tab
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 
 import {
+    SubmitWindowFilter,
     submitWindowsApi,
     type SubmitWindow,
 } from "@/lib/api/submit-windows";
 
 import type { PagedResult } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
 
@@ -33,7 +34,7 @@ export default function SubmitWindowsPage() {
     const [error, setError] = useState<string | null>(null);
 
     const [page, setPage] = useState(1);
-    const [showDeleted, setShowDeleted] = useState(false);
+    const [filter, setFilter] = useState<SubmitWindowFilter>("active");
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function SubmitWindowsPage() {
                 await submitWindowsApi.getAll(
                     page,
                     PAGE_SIZE,
-                    showDeleted,
+                    filter,
                 );
 
             setData(result);
@@ -67,7 +68,7 @@ export default function SubmitWindowsPage() {
         } finally {
             setLoading(false);
         }
-    }, [page, showDeleted]);
+    }, [page, filter]);
 
     useEffect(() => {
         load();
@@ -76,7 +77,7 @@ export default function SubmitWindowsPage() {
     // Reset to first page when filters change
     useEffect(() => {
         setPage(1);
-    }, [showDeleted]);
+    }, [filter]);
 
     function openCreate() {
         setEditing(null);
@@ -135,72 +136,94 @@ export default function SubmitWindowsPage() {
                 </Button>
             </PageHeader>
 
-  <SubmitWindowHero
-    status={windowStatus}
-    loading={statusLoading}
-    onCreateClick={openCreate}
-/>
+            <SubmitWindowHero
+                status={windowStatus}
+                loading={statusLoading}
+            />
 
-            {/* Toolbar */}
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <p className="text-sm text-muted-foreground">
-                    {data && !loading
-                        ? `${data.totalCount} window${
-                              data.totalCount === 1
-                                  ? ""
-                                  : "s"
-                          }`
-                        : "\u00A0"}
-                </p>
+            <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 mb-2">
+                <button
+                    type="button"
+                    onClick={() => setFilter("active")}
+                    className={cn(
+                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                        filter === "active"
+                            ? "bg-success/20 text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                    )}
+                >
+                    Current & Upcoming
+                </button>
 
-                <Surface className="flex w-fit items-center gap-3 px-4 py-2">
-                    <span className="text-sm text-muted-foreground">
-                        Show deleted
-                    </span>
+                <button
+                    type="button"
+                    onClick={() => setFilter("past")}
+                    className={cn(
+                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                        filter === "past"
+                            ? "bg-accent/20 text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                    )}
+                >
+                    Completed
+                </button>
 
-                    <Toggle
-                        checked={showDeleted}
-                        onChange={() =>
-                            setShowDeleted(
-                                (prev) => !prev,
-                            )
-                        }
-                        ariaLabel="Toggle deleted submit windows"
-                    />
-                </Surface>
-            </div>
+                <button
+                    type="button"
+                    onClick={() => setFilter("deleted")}
+                    className={cn(
+                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                        filter === "deleted"
+                            ? "bg-danger/20 text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                    )}
+                >
+                    Deleted
+                </button>
+            </div>`
 
             {/* Error */}
-            {error && (
-                <Surface className="mb-6 border-destructive bg-destructive/10 px-4 py-3">
-                    <p className="text-sm text-destructive">
-                        {error}
-                    </p>
-                </Surface>
-            )}
+            {
+                error && (
+                    <Surface className="mb-6 border-danger-border bg-danger-surface px-4 py-3">
+                        <p className="text-sm text-danger">
+                            {error}
+                        </p>
+                    </Surface>
+                )
+            }
 
             {/* Loading */}
-            {loading && (
-                <div className="space-y-3">
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                </div>
-            )}
+            {
+                loading && (
+                    <div className="space-y-3">
+                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
+                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
+                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
+                    </div>
+                )
+            }
 
             {/* Empty state */}
             {!loading &&
                 data?.items.length === 0 && (
                     <Surface className="py-16 text-center">
                         <p className="text-sm text-muted-foreground">
-                            No submit windows yet.
-                            Create one to get started.
+                            {{
+                                active:
+                                    "No current or upcoming submit windows.",
+                                past:
+                                    "No past submit windows.",
+                                deleted:
+                                    "No deleted submit windows.",
+                            }[filter]}
                         </p>
                     </Surface>
                 )}
 
             {/* Table */}
-            {!loading &&
+            {
+                !loading &&
                 data &&
                 data.items.length > 0 && (
                     <SubmitWindowTable
@@ -208,17 +231,20 @@ export default function SubmitWindowsPage() {
                         onEdit={openEdit}
                         onDelete={handleDelete}
                     />
-                )}
+                )
+            }
 
             {/* Pagination */}
-            {data && data.totalPages > 1 && (
-                <Pagination
-                    page={data.page}
-                    totalPages={data.totalPages}
-                    onPageChange={handlePageChange}
-                    className="mt-6"
-                />
-            )}
+            {
+                data && data.totalPages > 1 && (
+                    <Pagination
+                        page={data.page}
+                        totalPages={data.totalPages}
+                        onPageChange={handlePageChange}
+                        className="mt-6"
+                    />
+                )
+            }
 
             {/* Modal */}
             <SubmitWindowFormModal
@@ -231,6 +257,6 @@ export default function SubmitWindowsPage() {
                 onSubmit={handleSubmit}
                 initial={editing}
             />
-        </PageContainer>
+        </PageContainer >
     );
 }

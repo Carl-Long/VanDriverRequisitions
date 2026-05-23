@@ -6,24 +6,41 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 
 public class SubmitWindowService(IApplicationDbContext context, IValidatorService validator) : ISubmitWindowService
 {
-    public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(int page, int pageSize, bool includeDeleted, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(
+        int page,
+        int pageSize,
+        SubmitWindowFilter filter,
+        CancellationToken cancellationToken = default)
     {
+        var now = DateTime.UtcNow;
+
         IQueryable<SubmitWindow> query = context.SubmitWindows;
 
-        if (includeDeleted)
+        query = filter switch
         {
-            query = query.IgnoreQueryFilters();
-        }
+            SubmitWindowFilter.Active => query.Where(x => x.OpenTo >= now),
+            SubmitWindowFilter.Past => query.Where(x => x.OpenTo < now),
+            SubmitWindowFilter.Deleted => query.IgnoreQueryFilters().Where(x => x.DeletedAtUtc != null),
+            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
+        };
+
+        query = filter switch
+        {
+            SubmitWindowFilter.Active => query.OrderBy(x => x.OpenFrom),
+            SubmitWindowFilter.Past => query.OrderByDescending(x => x.OpenTo),
+            SubmitWindowFilter.Deleted => query.OrderByDescending(x => x.UpdatedAtUtc),
+            _ => query
+        };
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderByDescending(x => x.OpenFrom)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(SubmitWindowProjections.AsSummaryDto)
@@ -55,8 +72,8 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
 
         var newWindow = new SubmitWindow
         {
-            OpenFrom = createDto.OpenFrom.ToUniversalTime(),
-            OpenTo = createDto.OpenTo.ToUniversalTime(),
+            OpenFrom = createDto.OpenFrom,
+            OpenTo = createDto.OpenTo
         };
 
         context.SubmitWindows.Add(newWindow);
@@ -77,8 +94,8 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         
         await CheckForOverlappingAsync(updateDto.OpenFrom, updateDto.OpenTo, cancellationToken, id);
         
-        existingWindow.OpenFrom = updateDto.OpenFrom.ToUniversalTime();
-        existingWindow.OpenTo = updateDto.OpenTo.ToUniversalTime();
+        existingWindow.OpenFrom = updateDto.OpenFrom;
+        existingWindow.OpenTo = updateDto.OpenTo;
 
         await context.SaveChangesAsync(cancellationToken);
 

@@ -30,10 +30,19 @@ export type SubmitWindowStatus = {
     hasUpcoming: boolean;
 };
 
+export type SubmitWindowFilter =
+    | "active"
+    | "past"
+    | "deleted";
+
 export const submitWindowsApi = {
-    getAll: (page = 1, pageSize = 10, includeDeleted = false) =>
+    getAll: (
+        page = 1,
+        pageSize = 10,
+        filter: SubmitWindowFilter = "active",
+    ) =>
         apiFetch<PagedResult<SubmitWindow>>(
-            `${BASE}?page=${page}&pageSize=${pageSize}&includeDeleted=${includeDeleted}`,
+            `${BASE}?page=${page}&pageSize=${pageSize}&filter=${filter}`,
         ),
 
     getById: (id: string) => apiFetch<SubmitWindow>(`${BASE}/${id}`),

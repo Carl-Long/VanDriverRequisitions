@@ -130,7 +130,7 @@ export default function FeTaskTypesPage() {
 
                 <Surface className="flex items-center gap-3 px-4 py-2 w-fit">
                     <span className="text-sm text-muted-foreground">
-                        Show inactive
+                        Include inactive
                     </span>
 
                     <Toggle

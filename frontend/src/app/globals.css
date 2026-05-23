@@ -29,6 +29,27 @@
 
     --success: 34 197 94;
     --success-foreground: 255 255 255;
+    --success-surface: 240 253 244;
+    --success-surface-hover: 220 252 231;
+    --success-border: 187 247 208;
+
+    --info: 37 99 235;
+    --info-foreground: 255 255 255;
+    --info-surface: 239 246 255;
+    --info-surface-hover: 219 234 254;
+    --info-border: 191 219 254;
+
+    --warning: 217 119 6;
+    --warning-foreground: 255 255 255;
+    --warning-surface: 255 251 235;
+    --warning-surface-hover: 254 243 199;
+    --warning-border: 253 224 71;
+
+    --danger: 190 24 93;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 255 241 242;
+    --danger-surface-hover: 255 228 230;
+    --danger-border: 254 202 202;
 
     --border: 226 232 240;
     --border-subtle: 241 245 249;
@@ -46,9 +67,9 @@
     --surface-hover: 32 38 50;
     --surface-subtle: 20 24 32;
 
---foreground: 248 250 252;
---foreground-subtle: 203 213 225;
---muted-foreground: 148 163 184;
+    --foreground: 248 250 252;
+    --foreground-subtle: 203 213 225;
+    --muted-foreground: 148 163 184;
 
     --primary: 237 0 45;
     --primary-foreground: 255 255 255;
@@ -61,6 +82,27 @@
 
     --success: 34 197 94;
     --success-foreground: 255 255 255;
+    --success-surface: 20 38 28;
+    --success-surface-hover: 22 52 35;
+    --success-border: 34 197 94;
+
+    --info: 59 130 246;
+    --info-foreground: 255 255 255;
+    --info-surface: 15 23 42;
+    --info-surface-hover: 30 41 59;
+    --info-border: 59 130 246;
+
+    --warning: 245 158 11;
+    --warning-foreground: 15 23 42;
+    --warning-surface: 69 26 3;
+    --warning-surface-hover: 92 39 5;
+    --warning-border: 245 158 11;
+
+    --danger: 244 63 94;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 76 5 25;
+    --danger-surface-hover: 103 8 39;
+    --danger-border: 244 63 94;
 
     --border: 42 52 68;
     --border-subtle: 55 65 81;
@@ -78,9 +120,9 @@
     --surface-hover: 244 244 245;
     --surface-subtle: 250 250 250;
 
---foreground: 24 24 27;
---foreground-subtle: 82 82 91;
---muted-foreground: 113 113 122;
+    --foreground: 24 24 27;
+    --foreground-subtle: 82 82 91;
+    --muted-foreground: 113 113 122;
 
     --primary: 39 39 42;
     --primary-foreground: 255 255 255;
@@ -93,6 +135,27 @@
 
     --success: 39 39 42;
     --success-foreground: 255 255 255;
+    --success-surface: 244 244 245;
+    --success-surface-hover: 228 228 231;
+    --success-border: 212 212 216;
+
+    --info: 59 130 246;
+    --info-foreground: 255 255 255;
+    --info-surface: 239 246 255;
+    --info-surface-hover: 219 234 254;
+    --info-border: 191 219 254;
+
+    --warning: 202 138 4;
+    --warning-foreground: 255 255 255;
+    --warning-surface: 254 252 232;
+    --warning-surface-hover: 254 249 195;
+    --warning-border: 253 224 71;
+
+    --danger: 220 38 38;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 254 242 242;
+    --danger-surface-hover: 254 226 226;
+    --danger-border: 254 202 202;
 
     --border: 228 228 231;
     --border-subtle: 244 244 245;
@@ -101,10 +164,6 @@
 
     --ring: 39 39 42;
 }
-
-/* =========================================
-   DARK MONO
-========================================= */
 
 .dark-mono {
     --background: 10 10 11;
@@ -115,11 +174,11 @@
     --surface-subtle: 17 17 20;
 
     --foreground: 250 250 250;
+    --foreground-subtle: 212 212 216;
     --muted-foreground: 161 161 170;
 
---foreground: 250 250 250;
---foreground-subtle: 212 212 216;
---muted-foreground: 161 161 170;
+    --primary: 245 245 245;
+    --primary-foreground: 10 10 11;
 
     --secondary: 82 82 91;
     --secondary-foreground: 255 255 255;
@@ -129,6 +188,27 @@
 
     --success: 228 228 231;
     --success-foreground: 10 10 11;
+    --success-surface: 39 39 42;
+    --success-surface-hover: 63 63 70;
+    --success-border: 82 82 91;
+
+    --info: 96 165 250;
+    --info-foreground: 10 10 11;
+    --info-surface: 23 37 84;
+    --info-surface-hover: 30 41 59;
+    --info-border: 96 165 250;
+
+    --warning: 250 204 21;
+    --warning-foreground: 10 10 11;
+    --warning-surface: 66 32 6;
+    --warning-surface-hover: 113 63 18;
+    --warning-border: 250 204 21;
+
+    --danger: 248 113 113;
+    --danger-foreground: 10 10 11;
+    --danger-surface: 69 10 10;
+    --danger-surface-hover: 127 29 29;
+    --danger-border: 248 113 113;
 
     --border: 50 50 54;
     --border-subtle: 63 63 70;
@@ -173,24 +253,45 @@ body {
     --color-foreground-subtle: rgb(var(--foreground-subtle));
     --color-muted-foreground: rgb(var(--muted-foreground));
 
-    --color-primary: rgb(var(--primary));
-    --color-primary-foreground: rgb(var(--primary-foreground));
-
-    --color-secondary: rgb(var(--secondary));
-    --color-secondary-foreground: rgb(var(--secondary-foreground));
-
-    --color-success: rgb(var(--success));
-    --color-success-foreground: rgb(var(--success-foreground));
-
-    --color-accent: rgb(var(--accent));
-    --color-accent-foreground: rgb(var(--accent-foreground));
-
     --color-border: rgb(var(--border));
     --color-border-subtle: rgb(var(--border-subtle));
 
     --color-muted: rgb(var(--muted));
 
     --color-ring: rgb(var(--ring));
+
+    --color-primary: rgb(var(--primary));
+    --color-primary-foreground: rgb(var(--primary-foreground));
+
+    --color-secondary: rgb(var(--secondary));
+    --color-secondary-foreground: rgb(var(--secondary-foreground));
+
+    --color-accent: rgb(var(--accent));
+    --color-accent-foreground: rgb(var(--accent-foreground));
+
+    --color-success: rgb(var(--success));
+    --color-success-foreground: rgb(var(--success-foreground));
+    --color-success-surface: rgb(var(--success-surface));
+    --color-success-surface-hover: rgb(var(--success-surface-hover));
+    --color-success-border: rgb(var(--success-border));
+
+    --color-info: rgb(var(--info));
+    --color-info-foreground: rgb(var(--info-foreground));
+    --color-info-surface: rgb(var(--info-surface));
+    --color-info-surface-hover: rgb(var(--info-surface-hover));
+    --color-info-border: rgb(var(--info-border));
+
+    --color-warning: rgb(var(--warning));
+    --color-warning-foreground: rgb(var(--warning-foreground));
+    --color-warning-surface: rgb(var(--warning-surface));
+    --color-warning-surface-hover: rgb(var(--warning-surface-hover));
+    --color-warning-border: rgb(var(--warning-border));
+
+    --color-danger: rgb(var(--danger));
+    --color-danger-foreground: rgb(var(--danger-foreground));
+    --color-danger-surface: rgb(var(--danger-surface));
+    --color-danger-surface-hover: rgb(var(--danger-surface-hover));
+    --color-danger-border: rgb(var(--danger-border));
 
     --radius-sm: calc(var(--radius) - 6px);
     --radius-md: calc(var(--radius) - 3px);

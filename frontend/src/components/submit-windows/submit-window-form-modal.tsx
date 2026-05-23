@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
 import { cn } from "@/lib/utils";
 import type { SubmitWindow } from "@/lib/api/submit-windows";
+import { toLocalInput, toUtcIso } from "@/lib/format/date";
 
 // Zod schema — mirrors backend FluentValidation rules
 const submitWindowSchema = z
@@ -59,19 +60,6 @@ type SubmitWindowFormModalProps = {
     onSubmit: (data: { openFrom: string; openTo: string }) => Promise<void>;
     initial?: SubmitWindow | null;
 };
-
-/** Convert UTC ISO string to local datetime-local input value */
-function toLocalInput(utcIso: string): string {
-    const d = new Date(utcIso);
-    const offset = d.getTimezoneOffset();
-    const local = new Date(d.getTime() - offset * 60000);
-    return local.toISOString().slice(0, 16);
-}
-
-/** Convert datetime-local input value to UTC ISO string */
-function toUtcIso(localValue: string): string {
-    return new Date(localValue).toISOString();
-}
 
 export function SubmitWindowFormModal({
     open,
