@@ -10,6 +10,7 @@ type SubmitWindowHeroProps = {
     onCreateClick: () => void;
 };
 
+
 function formatDateTime(iso: string): string {
     return new Date(iso).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -29,6 +30,8 @@ function timeUntil(iso: string): string {
     if (hours > 0) return `${hours}h`;
     return "soon";
 }
+
+
 
 export function SubmitWindowHero({
     status,
@@ -67,7 +70,8 @@ export function SubmitWindowHero({
                         {formatDateTime(status.currentWindow.openTo)}
                     </p>
                     <p className="mt-1 text-xs text-emerald-600">
-                        Submissions are currently being accepted. This window cannot be edited while active.
+                        Submissions are currently being accepted.
+                        Changes to this window take effect immediately.
                     </p>
                 </div>
             </div>
@@ -76,6 +80,7 @@ export function SubmitWindowHero({
 
     // Upcoming window exists
     if (status.nextWindow) {
+        const opensIn = timeUntil(status.nextWindow.openFrom);
         return (
             <div
                 className={cn(
@@ -88,7 +93,9 @@ export function SubmitWindowHero({
                 </div>
                 <div className="flex-1">
                     <h3 className="text-sm font-semibold text-foreground">
-                        Next Window Opens in {timeUntil(status.nextWindow.openFrom)}
+                        {opensIn === "soon"
+                            ? "Next Window Opening Soon"
+                            : `Next Window Opens in ${opensIn}`}
                     </h3>
                     <p className="mt-0.5 text-sm text-muted-foreground">
                         {formatDateTime(status.nextWindow.openFrom)} —{" "}

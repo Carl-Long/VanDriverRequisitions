@@ -135,11 +135,11 @@ export default function SubmitWindowsPage() {
                 </Button>
             </PageHeader>
 
-            <SubmitWindowHero
-                status={windowStatus}
-                loading={statusLoading}
-                onCreateClick={openCreate}
-            />
+  <SubmitWindowHero
+    status={windowStatus}
+    loading={statusLoading}
+    onCreateClick={openCreate}
+/>
 
             {/* Toolbar */}
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -190,8 +190,7 @@ export default function SubmitWindowsPage() {
 
             {/* Empty state */}
             {!loading &&
-                data &&
-                data.items.length === 0 && (
+                data?.items.length === 0 && (
                     <Surface className="py-16 text-center">
                         <p className="text-sm text-muted-foreground">
                             No submit windows yet.
