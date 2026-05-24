@@ -1,63 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays, setHours, setMinutes } from "date-fns";
 import { z } from "zod";
+
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
-import { cn } from "@/lib/utils";
-import type { SubmitWindow } from "@/lib/api/submit-windows";
-import { toLocalInput, toUtcIso } from "@/lib/format/date";
 
-// Zod schema — mirrors backend FluentValidation rules
+import type { SubmitWindow } from "@/lib/api/submit-windows";
+import { DateTimePicker } from "../ui/date/date-time-picker";
+
 const submitWindowSchema = z
     .object({
-        openFrom: z.string().min(1, "Open from date is required."),
-        openTo: z.string().min(1, "Open to date is required."),
+        openFrom: z.date({
+            message: "Open from date is required.",
+        }),
+        openTo: z.date({
+            message: "Open to date is required.",
+        }),
     })
-    .refine(
-        (data) => {
-            const from = new Date(data.openFrom);
-            const to = new Date(data.openTo);
-            return to > from;
-        },
-        {
-            message: "Open to date must be after the open from date.",
-            path: ["openTo"],
-        },
-    );
+    .refine((data) => data.openTo > data.openFrom, {
+        message: "Open to date must be after the open from date.",
+        path: ["openTo"],
+    });
 
-// Separate schema for create that also enforces future dates
-const createSubmitWindowSchema = z
-    .object({
-        openFrom: z
-            .string()
-            .min(1, "Open from date is required.")
-            .refine(
-                (val) => new Date(val) > new Date(),
-                "Open from date must be in the future.",
-            ),
-        openTo: z.string().min(1, "Open to date is required."),
-    })
-    .refine(
-        (data) => {
-            const from = new Date(data.openFrom);
-            const to = new Date(data.openTo);
-            return to > from;
-        },
-        {
-            message: "Open to date must be after the open from date.",
-            path: ["openTo"],
-        },
-    );
+const createSubmitWindowSchema = submitWindowSchema.refine(
+    (data) => data.openFrom > new Date(),
+    {
+        message: "Open from date must be in the future.",
+        path: ["openFrom"],
+    }
+);
 
 type SubmitWindowFormData = z.infer<typeof submitWindowSchema>;
 
 type SubmitWindowFormModalProps = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: { openFrom: string; openTo: string }) => Promise<void>;
+    onSubmit: (data: {
+        openFrom: string;
+        openTo: string;
+    }) => Promise<void>;
     initial?: SubmitWindow | null;
 };
 
@@ -68,37 +53,60 @@ export function SubmitWindowFormModal({
     initial,
 }: Readonly<SubmitWindowFormModalProps>) {
     const isEditing = !!initial;
-    const [serverError, setServerError] = useState<string | null>(null);
 
-    const schema = isEditing ? submitWindowSchema : createSubmitWindowSchema;
+    const [serverError, setServerError] = useState<string | null>(null);
+    const [openFromTouched, setOpenFromTouched] = useState(false);
+    const [openToTouched, setOpenToTouched] = useState(false);
+
+    const schema = isEditing
+        ? submitWindowSchema
+        : createSubmitWindowSchema;
 
     const {
-        register,
+        control,
         handleSubmit,
         reset,
         setError,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<SubmitWindowFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            openFrom: initial ? toLocalInput(initial.openFrom) : "",
-            openTo: initial ? toLocalInput(initial.openTo) : "",
+            openFrom: initial
+                ? new Date(initial.openFrom)
+                : undefined,
+            openTo: initial
+                ? new Date(initial.openTo)
+                : undefined,
         },
     });
 
     useEffect(() => {
-        if (open) {
-            reset({
-                openFrom: initial ? toLocalInput(initial.openFrom) : "",
-                openTo: initial ? toLocalInput(initial.openTo) : "",
-            });
-            setServerError(null);
+        if (!open) return;
+
+        reset({
+            openFrom: initial
+                ? new Date(initial.openFrom)
+                : undefined,
+            openTo: initial
+                ? new Date(initial.openTo)
+                : undefined,
+        });
+
+        // Only reset auto-behavior flags in CREATE mode
+        if (!isEditing) {
+            setOpenFromTouched(false);
+            setOpenToTouched(false);
         }
-    }, [open, initial, reset]);
+
+        setServerError(null);
+    }, [open, initial, reset, isEditing]);
 
     function handleClose() {
         reset();
         setServerError(null);
+        setOpenFromTouched(false);
+        setOpenToTouched(false);
         onClose();
     }
 
@@ -109,46 +117,56 @@ export function SubmitWindowFormModal({
         if (apiErr.errors) {
             for (const [key, msgs] of Object.entries(apiErr.errors)) {
                 const field = key.toLowerCase();
-                if (field === "openfrom") setError("openFrom", { message: msgs[0] });
-                if (field === "opento") setError("openTo", { message: msgs[0] });
+
+                if (field === "openfrom") {
+                    setError("openFrom", {
+                        message: msgs[0],
+                    });
+                }
+
+                if (field === "opento") {
+                    setError("openTo", {
+                        message: msgs[0],
+                    });
+                }
             }
         } else {
             setServerError(
-                apiErr.detail ?? "Something went wrong. Please try again.",
+                apiErr.detail ??
+                "Something went wrong. Please try again."
             );
         }
     }
 
     async function onValid(data: SubmitWindowFormData) {
         setServerError(null);
+
         try {
             await onSubmit({
-                openFrom: toUtcIso(data.openFrom),
-                openTo: toUtcIso(data.openTo),
+                openFrom: data.openFrom.toISOString(),
+                openTo: data.openTo.toISOString(),
             });
+
             handleClose();
         } catch (err) {
             mapServerErrors(
-                err as { detail?: string; errors?: Record<string, string[]> },
+                err as {
+                    detail?: string;
+                    errors?: Record<string, string[]>;
+                }
             );
         }
     }
-
-    const inputClass = (hasError: boolean) =>
-        cn(
-            "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
-            "focus:outline-none focus:ring-2 focus:ring-ring/20",
-            "transition-colors",
-            hasError
-                ? "border-red-500 focus:border-red-500"
-                : "border-border focus:border-primary/30",
-        );
 
     return (
         <Modal
             open={open}
             onClose={handleClose}
-            title={isEditing ? "Edit Submit Window" : "New Submit Window"}
+            title={
+                isEditing
+                    ? "Edit Submit Window"
+                    : "New Submit Window"
+            }
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (
@@ -157,19 +175,60 @@ export function SubmitWindowFormModal({
                     </div>
                 )}
 
+                {/* OPEN FROM */}
                 <div>
-                    <label
-                        htmlFor="openFrom"
-                        className="mb-1.5 block text-sm font-medium text-foreground"
-                    >
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Open From
                     </label>
-                    <input
-                        id="openFrom"
-                        type="datetime-local"
-                        {...register("openFrom")}
-                        className={inputClass(!!errors.openFrom)}
+
+                    <Controller
+                        control={control}
+                        name="openFrom"
+                        render={({ field }) => (
+                            <DateTimePicker
+                                value={field.value}
+                                onChange={(date) => {
+                                    if (!date) {
+                                        field.onChange(date);
+                                        return;
+                                    }
+
+                                    // EDIT MODE: no auto logic
+                                    if (isEditing) {
+                                        field.onChange(date);
+                                        return;
+                                    }
+
+                                    let nextDate = date;
+
+                                    // CREATE MODE ONLY: default 09:00 once
+                                    if (!openFromTouched) {
+                                        nextDate = setMinutes(
+                                            setHours(date, 9),
+                                            0
+                                        );
+                                        setOpenFromTouched(true);
+                                    }
+
+                                    field.onChange(nextDate);
+
+                                    // CREATE MODE ONLY: auto openTo
+                                    if (!openToTouched) {
+                                        const auto = setMinutes(
+                                            setHours(
+                                                addDays(nextDate, 7),
+                                                17
+                                            ),
+                                            0
+                                        );
+
+                                        setValue("openTo", auto);
+                                    }
+                                }}
+                            />
+                        )}
                     />
+
                     {errors.openFrom && (
                         <p className="mt-1 text-xs text-red-500">
                             {errors.openFrom.message}
@@ -177,19 +236,26 @@ export function SubmitWindowFormModal({
                     )}
                 </div>
 
+                {/* OPEN TO */}
                 <div>
-                    <label
-                        htmlFor="openTo"
-                        className="mb-1.5 block text-sm font-medium text-foreground"
-                    >
+                    <label className="mb-1.5 block text-sm font-medium text-foreground">
                         Open To
                     </label>
-                    <input
-                        id="openTo"
-                        type="datetime-local"
-                        {...register("openTo")}
-                        className={inputClass(!!errors.openTo)}
+
+                    <Controller
+                        control={control}
+                        name="openTo"
+                        render={({ field }) => (
+                            <DateTimePicker
+                                value={field.value}
+                                onChange={(date) => {
+                                    setOpenToTouched(true);
+                                    field.onChange(date);
+                                }}
+                            />
+                        )}
                     />
+
                     {errors.openTo && (
                         <p className="mt-1 text-xs text-red-500">
                             {errors.openTo.message}
@@ -197,7 +263,7 @@ export function SubmitWindowFormModal({
                     )}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-3 pt-2">
                     <Button
                         type="button"
                         variant="secondary"
@@ -205,10 +271,13 @@ export function SubmitWindowFormModal({
                     >
                         Cancel
                     </Button>
+
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting && "Saving..."}
-                        {!isSubmitting && isEditing && "Save Changes"}
-                        {!isSubmitting && !isEditing && "Create"}
+                        {isSubmitting
+                            ? "Saving..."
+                            : isEditing
+                                ? "Save Changes"
+                                : "Create"}
                     </Button>
                 </div>
             </form>
