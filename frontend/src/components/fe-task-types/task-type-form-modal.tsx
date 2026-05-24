@@ -7,8 +7,8 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
-
 import { cn } from "@/lib/utils";
+import { fieldBase } from "@/components/ui/field/fieldstyles";
 
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import { ApiError } from "@/lib/api/client";
@@ -27,7 +27,7 @@ const taskTypeSchema = z.object({
         .max(20, "Code must be between 1 and 20 characters.")
         .regex(
             /^[A-Z0-9_-]+$/,
-            "Code must contain only uppercase letters, numbers, hyphens, and underscores.",
+            "Code must contain only uppercase letters, numbers, hyphens, and underscores."
         ),
 });
 
@@ -48,8 +48,7 @@ export function TaskTypeFormModal({
 }: Readonly<TaskTypeFormModalProps>) {
     const isEditing = !!initial;
 
-    const [serverError, setServerError] =
-        useState<string | null>(null);
+    const [serverError, setServerError] = useState<string | null>(null);
 
     const {
         register,
@@ -57,14 +56,9 @@ export function TaskTypeFormModal({
         reset,
         setError,
         setValue,
-
-        formState: {
-            errors,
-            isSubmitting,
-        },
+        formState: { errors, isSubmitting },
     } = useForm<TaskTypeFormData>({
         resolver: zodResolver(taskTypeSchema),
-
         defaultValues: {
             name: "",
             code: "",
@@ -72,9 +66,7 @@ export function TaskTypeFormModal({
     });
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
+        if (!open) return;
 
         reset({
             name: initial?.name ?? "",
@@ -86,33 +78,22 @@ export function TaskTypeFormModal({
 
     function handleClose() {
         reset();
-
         setServerError(null);
-
         onClose();
     }
 
     function applyApiValidationErrors(error: ApiError) {
         if (!error.errors) {
-            setServerError(
-                error.detail ??
-                error.message ??
-                "Something went wrong.",
-            );
-
+            setServerError(error.detail ?? error.message ?? "Something went wrong.");
             return;
         }
 
         if (error.errors.Name?.[0]) {
-            setError("name", {
-                message: error.errors.Name[0],
-            });
+            setError("name", { message: error.errors.Name[0] });
         }
 
         if (error.errors.Code?.[0]) {
-            setError("code", {
-                message: error.errors.Code[0],
-            });
+            setError("code", { message: error.errors.Code[0] });
         }
     }
 
@@ -121,7 +102,6 @@ export function TaskTypeFormModal({
 
         try {
             await onSubmit(data);
-
             handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
@@ -133,22 +113,23 @@ export function TaskTypeFormModal({
         }
     }
 
+    const inputClass = (hasError?: boolean) =>
+        cn(
+            fieldBase,
+            hasError
+                ? "border-danger focus-visible:ring-danger/20"
+                : "focus-visible:ring-primary/20"
+        );
+
     return (
         <Modal
             open={open}
             onClose={handleClose}
-            title={
-                isEditing
-                    ? "Edit Task Type"
-                    : "New Task Type"
-            }
+            title={isEditing ? "Edit Task Type" : "New Task Type"}
         >
-            <form
-                onSubmit={handleSubmit(onValid)}
-                className="space-y-5"
-            >
+            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (
-                    <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
                         {serverError}
                     </div>
                 )}
@@ -167,21 +148,12 @@ export function TaskTypeFormModal({
                         type="text"
                         {...register("name")}
                         maxLength={100}
-                        className={cn(
-                            "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
-                            "placeholder:text-muted-foreground",
-                            "focus:outline-none focus:ring-2 focus:ring-ring/20",
-                            "transition-colors",
-
-                            errors.name
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-border focus:border-primary/30",
-                        )}
-                        placeholder="e.g. Standard Delivery"
+                        className={inputClass(!!errors.name)}
+                        placeholder="e.g. Collections"
                     />
 
                     {errors.name && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-danger">
                             {errors.name.message}
                         </p>
                     )}
@@ -200,60 +172,35 @@ export function TaskTypeFormModal({
                         id="code"
                         type="text"
                         {...register("code", {
-                            onChange: (
-                                e: React.ChangeEvent<HTMLInputElement>,
-                            ) =>
-                                setValue(
-                                    "code",
-                                    e.target.value.toUpperCase(),
-                                    {
-                                        shouldValidate: false,
-                                    },
-                                ),
+                            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                                setValue("code", e.target.value.toUpperCase(), {
+                                    shouldValidate: false,
+                                }),
                         })}
                         maxLength={20}
-                        className={cn(
-                            "w-full rounded-lg border bg-surface px-3 py-2 font-mono text-sm text-foreground",
-                            "placeholder:text-muted-foreground",
-                            "focus:outline-none focus:ring-2 focus:ring-ring/20",
-                            "transition-colors",
-
-                            errors.code
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-border focus:border-primary/30",
-                        )}
-                        placeholder="e.g. STD_DELIVERY"
+                        className={inputClass(!!errors.code)}
+                        placeholder="e.g 20000"
                     />
 
                     {errors.code && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-danger">
                             {errors.code.message}
                         </p>
                     )}
 
                     <p className="mt-1 text-xs text-muted-foreground">
-                        Uppercase letters, numbers,
-                        hyphens, and underscores only.
+                        Uppercase letters, numbers, hyphens, and underscores only.
                     </p>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={handleClose}
-                    >
+                    <Button type="button" variant="secondary" onClick={handleClose}>
                         Cancel
                     </Button>
 
-                    <Button
-                        type="submit"
-                        loading={isSubmitting}
-                    >
-                        {isEditing
-                            ? "Save Changes"
-                            : "Create"}
+                    <Button type="submit" loading={isSubmitting}>
+                        {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>
             </form>

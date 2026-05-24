@@ -85,7 +85,7 @@ export function SubmitWindowTable({
                         <th className="px-4 py-3">Open To</th>
                         <th className="px-4 py-3">Status</th>
                         <th className="px-4 py-3">Last Modified</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <th className="px-4 py-3 text-center">Actions</th>
                     </tr>
                 </thead>
 
@@ -134,7 +134,7 @@ export function SubmitWindowTable({
                                 </td>
 
                                 <td className="px-4 py-3 align-middle">
-                                    <div className="flex justify-end gap-2">
+                                    <div className="flex justify-center gap-2">
                                         {canManage && (
                                             <>
                                                 <IconButton onClick={() => onEdit(item)}>

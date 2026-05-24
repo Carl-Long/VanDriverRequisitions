@@ -120,7 +120,7 @@ export default function FeTaskTypesPage() {
                 </Button>
             </PageHeader>
 
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
                 <SearchInput
                     value={search}
                     onChange={setSearch}
@@ -128,7 +128,7 @@ export default function FeTaskTypesPage() {
                     className="w-full lg:w-[32rem]"
                 />
 
-                <Surface className="flex items-center gap-3 px-4 py-2 w-fit">
+                <Surface className="flex w-fit self-end items-center gap-3 px-4 py-2 lg:ml-auto lg:self-auto">
                     <span className="text-sm text-muted-foreground">
                         Include inactive
                     </span>
@@ -144,8 +144,8 @@ export default function FeTaskTypesPage() {
             </div>
 
             {error && (
-                <Surface className="mb-6 border-destructive bg-destructive/10 px-4 py-3">
-                    <p className="text-sm text-destructive">
+                <Surface className="mb-6 border-danger bg-danger/10 px-4 py-3">
+                    <p className="text-sm text-danger">
                         {error}
                     </p>
                 </Surface>

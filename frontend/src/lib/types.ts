@@ -30,7 +30,7 @@ export type MenuItem = {
     label: string;
     icon?: LucideIcon;
     action: () => void;
-    variant?: "default" | "destructive";
+    variant?: "default" | "danger";
 };
 
 export type PagedResult<T> = {

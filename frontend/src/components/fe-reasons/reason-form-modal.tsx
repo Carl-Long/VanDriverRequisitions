@@ -7,12 +7,13 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
+import { fieldBase } from "@/components/ui/field/fieldstyles";
+
 import { cn } from "@/lib/utils";
 
 import type { FeReason } from "@/lib/api/fe-reasons";
 import { ApiError } from "@/lib/api/client";
 
-// Zod schema (same as backend validation rules)
 const reasonSchema = z.object({
     reason: z
         .string()
@@ -73,13 +74,13 @@ export function ReasonFormModal({
         if (!error.errors) {
             setServerError(
                 error.detail ??
-                    error.message ??
-                    "Something went wrong.",
+                error.message ??
+                "Something went wrong."
             );
+
             return;
         }
 
-        // backend likely returns "Reason"
         if (error.errors.Reason?.[0]) {
             setError("reason", {
                 message: error.errors.Reason[0],
@@ -92,6 +93,7 @@ export function ReasonFormModal({
 
         try {
             await onSubmit(data);
+
             handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
@@ -103,15 +105,26 @@ export function ReasonFormModal({
         }
     }
 
+    const inputClass = (hasError?: boolean) =>
+        cn(
+            fieldBase,
+            hasError
+                ? "border-danger focus-visible:ring-danger/20"
+                : "focus-visible:ring-primary/20"
+        );
+
     return (
         <Modal
             open={open}
             onClose={handleClose}
             title={isEditing ? "Edit Reason" : "New Reason"}
         >
-            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
+            <form
+                onSubmit={handleSubmit(onValid)}
+                className="space-y-5"
+            >
                 {serverError && (
-                    <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
                         {serverError}
                     </div>
                 )}
@@ -129,20 +142,12 @@ export function ReasonFormModal({
                         id="reason"
                         {...register("reason")}
                         maxLength={100}
-                        className={cn(
-                            "w-full rounded-lg border bg-surface px-3 py-2 text-sm text-foreground",
-                            "placeholder:text-muted-foreground",
-                            "focus:outline-none focus:ring-2 focus:ring-ring/20",
-                            "transition-colors resize-none",
-                            errors.reason
-                                ? "border-red-500 focus:border-red-500"
-                                : "border-border focus:border-primary/30",
-                        )}
-                        placeholder="e.g. Driver was unavailable due to vehicle breakdown"
+                        className={inputClass(!!errors.reason)}
+                        placeholder="e.g. Toll fee"
                     />
 
                     {errors.reason && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-danger">
                             {errors.reason.message}
                         </p>
                     )}
@@ -158,7 +163,10 @@ export function ReasonFormModal({
                         Cancel
                     </Button>
 
-                    <Button type="submit" loading={isSubmitting}>
+                    <Button
+                        type="submit"
+                        loading={isSubmitting}
+                    >
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

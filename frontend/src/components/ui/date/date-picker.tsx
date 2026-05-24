@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { useState } from "react";
 import { formatDateGB } from "@/lib/format/date";
+import { fieldBase } from "../field/fieldstyles";
 
 type Props = {
   value?: Date;
@@ -20,15 +21,9 @@ export function DatePicker({ value, onChange }: Readonly<Props>) {
         <button
           type="button"
           className={`
-            flex h-10 w-full items-center justify-between
-            rounded-lg border px-3 text-sm
-            transition-colors cursor-pointer
-            text-foreground
-
-            ${open
-              ? "border-primary ring-2 ring-primary/20"
-              : "border-border hover:bg-muted"
-            }
+            ${fieldBase}
+            flex items-center justify-between cursor-pointer
+            ${open ? "border-primary ring-2 ring-primary/20" : "hover:bg-muted"}
           `}
         >
           {value ? formatDateGB(value) : "Select date"}

@@ -32,7 +32,7 @@ export function DateTimePicker({ value, onChange }: Readonly<Props>) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+    <div className="flex flex-col sm:flex-row gap-2 sm:items-stretch">
       <div className="flex-1">
         <DatePicker value={value} onChange={handleDateChange} />
       </div>

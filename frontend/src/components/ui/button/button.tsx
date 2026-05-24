@@ -14,7 +14,7 @@ const variantStyles = {
     secondary:
         "border border-border bg-surface text-foreground hover:bg-muted",
     ghost: "text-foreground hover:bg-muted",
-    danger: "bg-red-600 text-white hover:bg-red-700",
+    danger: "bg-danger text-danger hover:danger/90",
 } as const;
 
 const sizeStyles = {

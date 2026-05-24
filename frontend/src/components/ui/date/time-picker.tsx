@@ -1,3 +1,5 @@
+import { fieldBase } from "../field/fieldstyles";
+
 type Props = {
   value?: string;
   onChange: (value: string) => void;
@@ -17,10 +19,7 @@ export function TimePicker({ value = "09:00", onChange }: Readonly<Props>) {
       <select
         value={hour}
         onChange={(e) => onChange(`${e.target.value}:${minute}`)}
-        className="
-          h-10 rounded-lg border border-border
-          bg-surface-elevated px-3 text-sm text-foreground cursor-pointer
-        "
+        className={`${fieldBase} appearance-none cursor-pointer`}
       >
         {hours.map((h) => (
           <option key={h} value={h}>
@@ -32,10 +31,7 @@ export function TimePicker({ value = "09:00", onChange }: Readonly<Props>) {
       <select
         value={minute}
         onChange={(e) => onChange(`${hour}:${e.target.value}`)}
-        className="
-          h-10 rounded-lg border border-border
-          bg-surface-elevated px-3 text-sm text-foreground cursor-pointer
-        "
+        className={`${fieldBase} appearance-none cursor-pointer`}
       >
         {minutes.map((m) => (
           <option key={m} value={m}>

@@ -10,14 +10,14 @@ export function MenuItem({
   icon: Icon,
   action,
   variant = "default",
-}: MenuItemProps) {
+}: Readonly<MenuItemProps>) {
   return (
     <button
       onClick={action}
       className={clsx(
         "w-full flex items-center gap-3 px-4 py-2 text-sm",
         "hover:bg-muted transition text-left",
-        variant === "destructive" && "text-red-600"
+        variant === "danger" && "text-danger"
       )}
     >
       {Icon && <Icon size={16} />}

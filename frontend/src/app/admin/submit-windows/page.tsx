@@ -141,46 +141,48 @@ export default function SubmitWindowsPage() {
                 loading={statusLoading}
             />
 
-            <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1 mb-2">
-                <button
-                    type="button"
-                    onClick={() => setFilter("active")}
-                    className={cn(
-                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
-                        filter === "active"
-                            ? "bg-success/20 text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                    )}
-                >
-                    Current & Upcoming
-                </button>
+            <div className="mb-2 flex justify-end">
+                <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface-elevated p-1">
+                    <button
+                        type="button"
+                        onClick={() => setFilter("active")}
+                        className={cn(
+                            "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                            filter === "active"
+                                ? "bg-success/20 text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground",
+                        )}
+                    >
+                        Current & Upcoming
+                    </button>
 
-                <button
-                    type="button"
-                    onClick={() => setFilter("past")}
-                    className={cn(
-                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
-                        filter === "past"
-                            ? "bg-accent/20 text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                    )}
-                >
-                    Completed
-                </button>
+                    <button
+                        type="button"
+                        onClick={() => setFilter("past")}
+                        className={cn(
+                            "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                            filter === "past"
+                                ? "bg-accent/20 text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground",
+                        )}
+                    >
+                        Completed
+                    </button>
 
-                <button
-                    type="button"
-                    onClick={() => setFilter("deleted")}
-                    className={cn(
-                        "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
-                        filter === "deleted"
-                            ? "bg-danger/20 text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                    )}
-                >
-                    Deleted
-                </button>
-            </div>`
+                    <button
+                        type="button"
+                        onClick={() => setFilter("deleted")}
+                        className={cn(
+                            "rounded-lg px-4 py-2 text-sm font-medium transition-all cursor-pointer",
+                            filter === "deleted"
+                                ? "bg-danger/20 text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground",
+                        )}
+                    >
+                        Deleted
+                    </button>
+                </div>
+            </div>
 
             {/* Error */}
             {

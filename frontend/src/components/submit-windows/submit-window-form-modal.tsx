@@ -170,7 +170,7 @@ export function SubmitWindowFormModal({
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (
-                    <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
                         {serverError}
                     </div>
                 )}
@@ -230,7 +230,7 @@ export function SubmitWindowFormModal({
                     />
 
                     {errors.openFrom && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-danger">
                             {errors.openFrom.message}
                         </p>
                     )}
@@ -257,7 +257,7 @@ export function SubmitWindowFormModal({
                     />
 
                     {errors.openTo && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-danger">
                             {errors.openTo.message}
                         </p>
                     )}
