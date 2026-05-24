@@ -125,7 +125,7 @@ export function TaskTypeFormModal({
         <Modal
             open={open}
             onClose={handleClose}
-            title={isEditing ? "Edit Task Type" : "New Task Type"}
+            title={isEditing ? "Edit Task Type" : "Create Task Type"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (

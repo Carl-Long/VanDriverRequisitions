@@ -165,7 +165,7 @@ export function SubmitWindowFormModal({
             title={
                 isEditing
                     ? "Edit Submit Window"
-                    : "New Submit Window"
+                    : "Create Submit Window"
             }
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
@@ -272,12 +272,11 @@ export function SubmitWindowFormModal({
                         Cancel
                     </Button>
 
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting
-                            ? "Saving..."
-                            : isEditing
-                                ? "Save Changes"
-                                : "Create"}
+                    <Button
+                        type="submit"
+                        loading={isSubmitting}
+                    >
+                        {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>
             </form>

@@ -117,7 +117,7 @@ export function ReasonFormModal({
         <Modal
             open={open}
             onClose={handleClose}
-            title={isEditing ? "Edit Reason" : "New Reason"}
+            title={isEditing ? "Edit Reason" : "Create Reason"}
         >
             <form
                 onSubmit={handleSubmit(onValid)}
