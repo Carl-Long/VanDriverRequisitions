@@ -10,7 +10,7 @@ const hours = Array.from({ length: 24 }, (_, i) =>
 const minutes = ["00", "15", "30", "45"];
 
 export function TimePicker({ value = "09:00", onChange }: Readonly<Props>) {
-  const [hour, minute] = value.split(":");
+  const [hour = "09", minute = "00"] = value.split(":");
 
   return (
     <div className="flex gap-2">
@@ -23,7 +23,9 @@ export function TimePicker({ value = "09:00", onChange }: Readonly<Props>) {
         "
       >
         {hours.map((h) => (
-          <option key={h}>{h}</option>
+          <option key={h} value={h}>
+            {h}
+          </option>
         ))}
       </select>
 
@@ -36,7 +38,9 @@ export function TimePicker({ value = "09:00", onChange }: Readonly<Props>) {
         "
       >
         {minutes.map((m) => (
-          <option key={m}>{m}</option>
+          <option key={m} value={m}>
+            {m}
+          </option>
         ))}
       </select>
     </div>

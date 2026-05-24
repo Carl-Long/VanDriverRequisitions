@@ -1,18 +1,17 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
-import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { useState } from "react";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
   value?: Date;
   onChange: (date: Date | undefined) => void;
 };
 
-
-export function DatePicker({ value, onChange, }: Readonly<Props>) {
+export function DatePicker({ value, onChange }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,24 +31,16 @@ export function DatePicker({ value, onChange, }: Readonly<Props>) {
             }
           `}
         >
-          {value
-            ? format(value, "dd MMM yyyy")
-            : "Select date"}
+          {value ? formatDateGB(value) : "Select date"}
         </button>
       </Popover.Trigger>
 
       <Popover.Content
         sideOffset={8}
         className="
-                    z-50
-                    rounded-xl
-                    border
-                    border-border
-                    bg-surface-elevated
-                    p-3
-                    shadow-xl
-                    text-foreground
-                "
+          z-50 rounded-xl border border-border
+          bg-surface-elevated p-3 shadow-xl text-foreground
+        "
       >
         <DayPicker
           mode="single"
@@ -64,7 +55,8 @@ export function DatePicker({ value, onChange, }: Readonly<Props>) {
               ),
           }}
           classNames={{
-            selected: "bg-primary text-primary-foreground hover:bg-primary rounded-xl",
+            selected:
+              "bg-primary text-primary-foreground hover:bg-primary rounded-xl",
             today: "text-primary",
           }}
         />
