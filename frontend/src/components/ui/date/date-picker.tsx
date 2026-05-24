@@ -24,14 +24,17 @@ export function DatePicker({ value, onChange }: Readonly<Props>) {
             ${fieldBase}
             flex items-center justify-between cursor-pointer
             ${open ? "border-primary ring-2 ring-primary/20" : "hover:bg-muted"}
-          `}
+        `}
         >
           {value ? formatDateGB(value) : "Select date"}
         </button>
       </Popover.Trigger>
 
       <Popover.Content
-        sideOffset={8}
+        side="right"
+        align="center"
+        avoidCollisions={false}
+        sideOffset={10}
         className="
           z-50 rounded-xl border border-border
           bg-surface-elevated p-3 shadow-xl text-foreground
@@ -41,6 +44,7 @@ export function DatePicker({ value, onChange }: Readonly<Props>) {
           mode="single"
           selected={value}
           onSelect={onChange}
+          fixedWeeks
           components={{
             Chevron: ({ orientation }) =>
               orientation === "left" ? (

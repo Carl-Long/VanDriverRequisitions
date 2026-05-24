@@ -75,3 +75,15 @@ export function timeUntil(iso: string): string {
   if (hours > 0) return `${hours}h`;
   return "soon";
 }
+
+export function setTime(date: Date, hours: number, minutes: number): Date {
+  const d = new Date(date);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+}
+
+export function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}

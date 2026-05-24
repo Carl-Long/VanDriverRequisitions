@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDays, setHours, setMinutes } from "date-fns";
 import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
@@ -11,6 +10,7 @@ import { Button } from "@/components/ui/button/button";
 
 import type { SubmitWindow } from "@/lib/api/submit-windows";
 import { DateTimePicker } from "../ui/date/date-time-picker";
+import { addDays, setTime } from "@/lib/format/date";
 
 const submitWindowSchema = z
     .object({
@@ -203,10 +203,7 @@ export function SubmitWindowFormModal({
 
                                     // CREATE MODE ONLY: default 09:00 once
                                     if (!openFromTouched) {
-                                        nextDate = setMinutes(
-                                            setHours(date, 9),
-                                            0
-                                        );
+                                        nextDate = setTime(date, 9, 0);
                                         setOpenFromTouched(true);
                                     }
 
@@ -214,13 +211,7 @@ export function SubmitWindowFormModal({
 
                                     // CREATE MODE ONLY: auto openTo
                                     if (!openToTouched) {
-                                        const auto = setMinutes(
-                                            setHours(
-                                                addDays(nextDate, 7),
-                                                17
-                                            ),
-                                            0
-                                        );
+                                        const auto = setTime(addDays(nextDate, 7), 17, 0);
 
                                         setValue("openTo", auto);
                                     }
