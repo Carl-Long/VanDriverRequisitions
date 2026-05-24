@@ -23,6 +23,7 @@ import {
 
 import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/providers/toast-provider";
 
 const PAGE_SIZE = 10;
 
@@ -79,6 +80,8 @@ export default function SubmitWindowsPage() {
         setPage(1);
     }, [filter]);
 
+    const toast = useToast();
+
     function openCreate() {
         setEditing(null);
         setModalOpen(true);
@@ -93,25 +96,30 @@ export default function SubmitWindowsPage() {
         openFrom: string;
         openTo: string;
     }) {
-        if (editing) {
-            await submitWindowsApi.update(
-                editing.id,
-                data,
-            );
-        } else {
-            await submitWindowsApi.create(data);
+        try {
+            if (editing) {
+                await submitWindowsApi.update(editing.id, data);
+                toast.success(`Submit window updated`);
+            } else {
+                await submitWindowsApi.create(data);
+                toast.success(`Submit window created`);
+            }
+
+            setModalOpen(false);
+            setEditing(null);
+
+            await load();
+            await refreshStatus();
+        } catch {
+            setError("Failed to save submit window.");
         }
-
-        setModalOpen(false);
-        setEditing(null);
-
-        await load();
-        await refreshStatus();
     }
 
     async function handleDelete(window: SubmitWindow) {
         try {
             await submitWindowsApi.delete(window.id);
+
+            toast.success("Submit window deleted");
 
             await load();
             await refreshStatus();
