@@ -69,45 +69,50 @@ export function SubmitWindowHero({
   if (variant === "compact") {
     if (state.type === "open") {
       return (
-        <div className="flex items-center justify-between rounded-xl border border-success-border bg-success-surface px-4 py-3">
-          <div className="flex items-center gap-2">
+        <div className="rounded-xl border border-success-border bg-success-surface px-4 py-3">
+          <div className="flex items-center justify-center gap-2 text-center">
             <CalendarCheck size={16} className="text-success" />
             <span className="text-sm font-medium text-foreground">
               {copy.open}
             </span>
           </div>
 
-          <span className="text-xs text-muted-foreground">
-            {formatDateTime(state.openFrom)} -{" "}
-            {formatDateTime(state.openTo)}
-          </span>
+          <div className="mt-1 text-center text-xs text-muted-foreground">
+            {formatDateTime(state.openFrom)} - {formatDateTime(state.openTo)}
+          </div>
         </div>
       );
     }
 
     if (state.type === "next") {
       return (
-        <div className="flex items-center justify-between rounded-xl border border-info-border bg-info-surface px-4 py-3">
-          <div className="flex items-center gap-2">
+        <div className="rounded-xl border border-info-border bg-info-surface px-4 py-3">
+          <div className="flex items-center justify-center gap-2 text-center">
             <CalendarClock size={16} className="text-info" />
             <span className="text-sm font-medium text-foreground">
               {copy.next(state.opensIn)}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            {formatDateTime(state.openFrom)} —{" "}
-            {formatDateTime(state.openTo)}
-          </span>
+
+          <div className="mt-1 text-center text-xs text-muted-foreground">
+            {formatDateTime(state.openFrom)} — {formatDateTime(state.openTo)}
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
-        <CalendarPlus size={16} className="text-warning" />
-        <span className="text-sm text-muted-foreground">
-          {copy.none}
-        </span>
+      <div className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
+        <div className="flex items-center justify-center gap-2 text-center">
+          <CalendarPlus size={16} className="text-warning" />
+          <span className="text-sm text-muted-foreground">
+            {copy.none}
+          </span>
+        </div>
+
+        <div className="mt-1 text-center text-xs text-muted-foreground">
+          {copy.noneStrict}
+        </div>
       </div>
     );
   }
