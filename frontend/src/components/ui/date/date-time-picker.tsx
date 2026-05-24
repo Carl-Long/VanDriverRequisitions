@@ -11,12 +11,14 @@ type Props = {
 
 export function DateTimePicker({ value, onChange }: Readonly<Props>) {
   function handleDateChange(date?: Date) {
-    if (!date) return;
+    if (!date) {
+      onChange(undefined);
+      return;
+    }
 
-    // if we already have a time, preserve it
+    // preserve existing time if present
     if (value) {
-      const next = applyTime(date, getTimeString(value));
-      onChange(next);
+      onChange(applyTime(date, getTimeString(value)));
       return;
     }
 
@@ -26,18 +28,21 @@ export function DateTimePicker({ value, onChange }: Readonly<Props>) {
   function handleTimeChange(time: string) {
     if (!value) return;
 
-    const next = applyTime(value, time);
-    onChange(next);
+    onChange(applyTime(value, time));
   }
 
   return (
-    <div className="space-y-2">
-      <DatePicker value={value} onChange={handleDateChange} />
+    <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+      <div className="flex-1">
+        <DatePicker value={value} onChange={handleDateChange} />
+      </div>
 
-      <TimePicker
-        value={value ? getTimeString(value) : "09:00"}
-        onChange={handleTimeChange}
-      />
+      <div className="sm:w-[160px]">
+        <TimePicker
+          value={value ? getTimeString(value) : "09:00"}
+          onChange={handleTimeChange}
+        />
+      </div>
     </div>
   );
 }
