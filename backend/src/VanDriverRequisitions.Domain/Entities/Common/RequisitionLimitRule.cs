@@ -9,7 +9,7 @@ public class RequisitionLimitRule : AuditableEntity
     public RequisitionRowCategory Category { get; set; }
     public Guid? FeTaskTypeId { get; set; }
     public FeTaskType? FeTaskType { get; set; }
-    public Fascia? Fascia { get; set; }
-    public int? MaxQuantity { get; set; }
-    public decimal? MaxRate { get; set; }
+    public Fascia Fascia { get; set; }
+    public int MaxQuantity { get; set; }
+    public decimal MaxRate { get; set; }
 }

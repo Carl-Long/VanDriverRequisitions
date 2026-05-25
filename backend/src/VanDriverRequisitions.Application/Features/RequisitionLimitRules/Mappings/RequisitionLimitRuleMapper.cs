@@ -12,6 +12,7 @@ public static class RequisitionLimitRuleMapper
             Id = entity.Id,
             Category = entity.Category,
             FeTaskTypeId = entity.FeTaskTypeId,
+            FeTaskTypeName = entity.FeTaskType?.Name,
             Fascia = entity.Fascia,
             MaxQuantity = entity.MaxQuantity,
             MaxRate = entity.MaxRate,

@@ -67,7 +67,7 @@ public static class DevDataSeeder
         // 2. LIMIT RULES
         // ─────────────────────────────────────────────
 
-        if (!hasRules)
+       if (!hasRules)
         {
             context.RequisitionLimitRules.AddRange(
 
@@ -77,6 +77,7 @@ public static class DevDataSeeder
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.GeneralTask,
                     FeTaskTypeId = CollectionsTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 30,
                     MaxRate = 15.00m,
                     CreatedAtUtc = now,
@@ -88,6 +89,7 @@ public static class DevDataSeeder
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.GeneralTask,
                     FeTaskTypeId = DeliveriesTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 25,
                     MaxRate = 20.00m,
                     CreatedAtUtc = now,
@@ -99,6 +101,7 @@ public static class DevDataSeeder
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.GeneralTask,
                     FeTaskTypeId = WasteTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 10,
                     MaxRate = 25.00m,
                     CreatedAtUtc = now,
@@ -110,6 +113,7 @@ public static class DevDataSeeder
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.GeneralTask,
                     FeTaskTypeId = LoadingTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 15,
                     MaxRate = 12.50m,
                     CreatedAtUtc = now,
@@ -117,12 +121,13 @@ public static class DevDataSeeder
                     CreatedByNameSnapshot = SystemUserName
                 },
 
-                // ─── Mileage (no task type) ─────────────────
+                // ─── Mileage ────────────────────────────────
                 new RequisitionLimitRule
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.Mileage,
-                    FeTaskTypeId = null,
+                    FeTaskTypeId = CollectionsTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 500,
                     MaxRate = 0.45m,
                     CreatedAtUtc = now,
@@ -130,12 +135,13 @@ public static class DevDataSeeder
                     CreatedByNameSnapshot = SystemUserName
                 },
 
-                // ─── Transfers ───────────────────────────────
+                // ─── Transfers ──────────────────────────────
                 new RequisitionLimitRule
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.Transfer,
-                    FeTaskTypeId = null,
+                    FeTaskTypeId = DeliveriesTaskTypeId,
+                    Fascia = Fascia.Fe,
                     MaxQuantity = 20,
                     MaxRate = 18.00m,
                     CreatedAtUtc = now,
@@ -143,14 +149,15 @@ public static class DevDataSeeder
                     CreatedByNameSnapshot = SystemUserName
                 },
 
-                // ─── Additional Costs ────────────────────────
+                // ─── Additional Costs (now REQUIRED values) ─
                 new RequisitionLimitRule
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.AdditionalCost,
-                    FeTaskTypeId = null,
-                    MaxQuantity = null,
-                    MaxRate = null,
+                    FeTaskTypeId = LoadingTaskTypeId,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 1,
+                    MaxRate = 50.00m,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
