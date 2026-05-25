@@ -8,7 +8,7 @@ import {
     type UseFormSetValue,
 } from "react-hook-form";
 import { AlertCircle, Building2, CalendarDays, User } from "lucide-react";
-import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import type { ShopLookup } from "@/lib/api/shops";
 import type { VanDriverLookup } from "@/lib/api/van-drivers";
 import type { RequisitionFormData } from "@/lib/schemas/requisition";

@@ -8,7 +8,7 @@ import type {
     UseFormSetValue,
 } from "react-hook-form";
 import { Button } from "@/components/ui/button/button";
-import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import type { ShopLookup } from "@/lib/api/shops";
 import type { RequisitionFormData } from "@/lib/schemas/requisition";
 import { RowTotal, WeekFields } from "./week-fields";

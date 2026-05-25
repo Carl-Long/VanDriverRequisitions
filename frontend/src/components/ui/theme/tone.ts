@@ -17,7 +17,7 @@ export const toneMap: Record<
 > = {
     primary: {
         solid: "bg-primary text-primary-foreground hover:opacity-90",
-        outline: "border border-primary text-primary hover:bg-primary-surface-hover",
+        outline: "border border-primary text-primary hover:bg-primary hover:text-primary-foreground",
         ghost: "text-primary hover:bg-primary-surface-hover",
     },
 

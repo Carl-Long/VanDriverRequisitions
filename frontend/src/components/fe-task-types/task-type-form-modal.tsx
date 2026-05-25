@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/field/input";
 import { Field } from "@/components/ui/field/field";
 
 import type { FeTaskType } from "@/lib/api/fe-task-types";
