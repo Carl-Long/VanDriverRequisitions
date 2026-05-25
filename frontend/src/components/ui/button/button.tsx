@@ -1,91 +1,47 @@
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
+import { Tone, Variant, toneMap } from "../theme";
 
-type ButtonStyle = "solid" | "outline" | "ghost";
-type ButtonTone = "default" | "primary" | "secondary" | "danger";
+type ButtonSize = "sm" | "md";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-    style?: ButtonStyle;
-    tone?: ButtonTone;
-    size?: "sm" | "md";
+    tone?: Tone;
+    variant?: Variant;
+    size?: ButtonSize;
     loading?: boolean;
     children: ReactNode;
 };
 
-const sizeStyles = {
+const base =
+    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
+
+const sizeMap: Record<ButtonSize, string> = {
     sm: "px-3 py-1.5 text-xs",
     md: "px-4 py-2 text-sm",
-} as const;
-
-/* ---------------------------
-   SOLID
----------------------------- */
-const solidStyles: Record<ButtonTone, string> = {
-    default: "bg-surface text-foreground hover:bg-surface-hover",
-    primary: "bg-primary text-primary-foreground hover:opacity-90",
-    secondary: "bg-secondary text-secondary-foreground hover:opacity-90",
-    danger: "bg-danger text-danger-foreground hover:opacity-90",
-};
-
-/* ---------------------------
-   OUTLINE
----------------------------- */
-const outlineStyles: Record<ButtonTone, string> = {
-    default:
-        "border border-border bg-transparent text-foreground hover:bg-surface-hover",
-
-    primary:
-        "border border-primary text-primary hover:bg-primary/10",
-
-    secondary:
-        "border border-secondary text-secondary hover:bg-secondary/10",
-
-    danger:
-        "border border-danger text-danger hover:bg-danger/10",
-};
-
-/* ---------------------------
-   GHOST
----------------------------- */
-const ghostStyles: Record<ButtonTone, string> = {
-    default: "text-foreground hover:bg-surface-hover",
-    primary: "text-primary hover:bg-primary/10",
-    secondary: "text-secondary hover:bg-secondary/10",
-    danger: "text-danger hover:bg-danger/10",
 };
 
 export function Button({
-    style = "solid",
     tone = "primary",
+    variant = "solid",
     size = "md",
+    loading,
+    disabled,
     className,
     children,
-    disabled,
-    loading = false,
     ...props
-}: Readonly<ButtonProps>) {
-    const variantClass =
-        style === "solid"
-            ? solidStyles[tone]
-            : style === "outline"
-                ? outlineStyles[tone]
-                : ghostStyles[tone];
-
+}: ButtonProps) {
     return (
         <button
             className={cn(
-                "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition cursor-pointer",
-                "disabled:pointer-events-none disabled:opacity-50",
-                loading && "cursor-not-allowed opacity-70",
-                sizeStyles[size],
-                variantClass,
+                base,
+                sizeMap[size],
+                toneMap[tone][variant],
+                loading && "cursor-wait opacity-70",
                 className
             )}
             disabled={disabled || loading}
             {...props}
         >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {children}
         </button>
     );

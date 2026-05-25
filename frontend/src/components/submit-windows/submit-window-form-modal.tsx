@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button/button";
 import type { SubmitWindow } from "@/lib/api/submit-windows";
 import { DateTimePicker } from "../ui/date/date-time-picker";
 import { addDays, setTime } from "@/lib/format/date";
+import { Field } from "../ui/field/field";
 
 const submitWindowSchema = z
     .object({
@@ -177,87 +178,90 @@ export function SubmitWindowFormModal({
 
                 {/* OPEN FROM */}
                 <div>
-                    <label className="mb-1.5 block text-sm font-medium text-foreground">
-                        Open From
-                    </label>
-
-                    <Controller
-                        control={control}
-                        name="openFrom"
-                        render={({ field }) => (
-                            <DateTimePicker
-                                value={field.value}
-                                onChange={(date) => {
-                                    if (!date) {
-                                        field.onChange(date);
-                                        return;
+                    <Field
+                        label="Open From"
+                        error={errors.openFrom?.message}
+                        required
+                    >
+                        <Controller
+                            control={control}
+                            name="openFrom"
+                            render={({ field }) => (
+                                <DateTimePicker
+                                    value={field.value}
+                                    state={
+                                        errors.openFrom
+                                            ? "error"
+                                            : "default"
                                     }
+                                    onChange={(date) => {
+                                        if (!date) {
+                                            field.onChange(date);
+                                            return;
+                                        }
 
-                                    // EDIT MODE: no auto logic
-                                    if (isEditing) {
-                                        field.onChange(date);
-                                        return;
-                                    }
+                                        if (isEditing) {
+                                            field.onChange(date);
+                                            return;
+                                        }
 
-                                    let nextDate = date;
+                                        let nextDate = date;
 
-                                    // CREATE MODE ONLY: default 09:00 once
-                                    if (!openFromTouched) {
-                                        nextDate = setTime(date, 9, 0);
-                                        setOpenFromTouched(true);
-                                    }
+                                        if (!openFromTouched) {
+                                            nextDate = setTime(date, 9, 0);
+                                            setOpenFromTouched(true);
+                                        }
 
-                                    field.onChange(nextDate);
+                                        field.onChange(nextDate);
 
-                                    // CREATE MODE ONLY: auto openTo
-                                    if (!openToTouched) {
-                                        const auto = setTime(addDays(nextDate, 7), 17, 0);
+                                        if (!openToTouched) {
+                                            const auto = setTime(
+                                                addDays(nextDate, 7),
+                                                17,
+                                                0
+                                            );
 
-                                        setValue("openTo", auto);
-                                    }
-                                }}
-                            />
-                        )}
-                    />
-
-                    {errors.openFrom && (
-                        <p className="mt-1 text-xs text-danger">
-                            {errors.openFrom.message}
-                        </p>
-                    )}
+                                            setValue("openTo", auto);
+                                        }
+                                    }}
+                                />
+                            )}
+                        />
+                    </Field>
                 </div>
 
                 {/* OPEN TO */}
                 <div>
-                    <label className="mb-1.5 block text-sm font-medium text-foreground">
-                        Open To
-                    </label>
-
-                    <Controller
-                        control={control}
-                        name="openTo"
-                        render={({ field }) => (
-                            <DateTimePicker
-                                value={field.value}
-                                onChange={(date) => {
-                                    setOpenToTouched(true);
-                                    field.onChange(date);
-                                }}
-                            />
-                        )}
-                    />
-
-                    {errors.openTo && (
-                        <p className="mt-1 text-xs text-danger">
-                            {errors.openTo.message}
-                        </p>
-                    )}
+                    <Field
+                        label="Open To"
+                        error={errors.openTo?.message}
+                        required
+                    >
+                        <Controller
+                            control={control}
+                            name="openTo"
+                            render={({ field }) => (
+                                <DateTimePicker
+                                    value={field.value}
+                                    state={
+                                        errors.openTo
+                                            ? "error"
+                                            : "default"
+                                    }
+                                    onChange={(date) => {
+                                        setOpenToTouched(true);
+                                        field.onChange(date);
+                                    }}
+                                />
+                            )}
+                        />
+                    </Field>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
                     <Button
                         type="button"
-                        style="outline"
+                        variant="outline"
                         tone="primary"
                         onClick={handleClose}
                     >
@@ -266,7 +270,7 @@ export function SubmitWindowFormModal({
 
                     <Button
                         type="submit"
-                        style="solid"
+                        variant="solid"
                         tone="primary"
                         loading={isSubmitting}
                     >

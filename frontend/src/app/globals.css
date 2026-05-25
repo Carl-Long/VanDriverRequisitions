@@ -19,12 +19,21 @@
 
     --primary: 237 0 45;
     --primary-foreground: 255 255 255;
+    --primary-surface: 254 242 245;
+    --primary-surface-hover: 252 231 236;
+    --primary-border: 251 207 232;
 
     --secondary: 140 0 50;
     --secondary-foreground: 255 255 255;
+    --secondary-surface: 253 244 247;
+    --secondary-surface-hover: 252 231 240;
+    --secondary-border: 249 168 212;
 
     --accent: 71 78 90;
     --accent-foreground: 255 255 255;
+    --accent-surface: 241 245 249;
+    --accent-surface-hover: 226 232 240;
+    --accent-border: 203 213 225;
 
     --success: 34 197 94;
     --success-foreground: 255 255 255;
@@ -72,12 +81,21 @@
 
     --primary: 237 0 45;
     --primary-foreground: 255 255 255;
+    --primary-surface: 30 10 15;
+    --primary-surface-hover: 45 15 25;
+    --primary-border: 237 0 45;
 
     --secondary: 140 0 50;
     --secondary-foreground: 255 255 255;
+    --secondary-surface: 25 8 12;
+    --secondary-surface-hover: 40 12 20;
+    --secondary-border: 140 0 50;
 
     --accent: 71 78 90;
     --accent-foreground: 255 255 255;
+    --accent-surface: 20 24 32;
+    --accent-surface-hover: 32 38 50;
+    --accent-border: 71 78 90;
 
     --success: 34 197 94;
     --success-foreground: 255 255 255;
@@ -116,52 +134,62 @@
 
     --surface: 255 255 255;
     --surface-elevated: 250 250 250;
-    --surface-hover: 244 244 245;
-    --surface-subtle: 250 250 250;
+    --surface-hover: 240 240 242;
+    --surface-subtle: 247 247 248;
 
     --foreground: 24 24 27;
     --foreground-subtle: 82 82 91;
     --muted-foreground: 113 113 122;
 
-    --primary: 39 39 42;
+    --primary: 24 24 27;
     --primary-foreground: 255 255 255;
+    --primary-surface: 235 235 237;
+    --primary-surface-hover: 220 220 224;
+    --primary-border: 200 200 205;
 
     --secondary: 82 82 91;
     --secondary-foreground: 255 255 255;
+    --secondary-surface: 242 242 244;
+    --secondary-surface-hover: 235 235 237;
+    --secondary-border: 210 210 214;
 
     --accent: 113 113 122;
     --accent-foreground: 255 255 255;
+    --accent-surface: 244 244 245;
+    --accent-surface-hover: 236 236 238;
+    --accent-border: 220 220 224;
 
-    --success: 39 39 42;
+    --success: 82 82 82;
     --success-foreground: 255 255 255;
-    --success-surface: 244 244 245;
-    --success-surface-hover: 228 228 231;
-    --success-border: 212 212 216;
+    --success-surface: 242 242 242;
+    --success-surface-hover: 235 235 235;
+    --success-border: 212 212 212;
 
-    --info: 59 130 246;
+    --info: 100 100 110;
     --info-foreground: 255 255 255;
-    --info-surface: 239 246 255;
-    --info-surface-hover: 219 234 254;
-    --info-border: 191 219 254;
+    --info-surface: 242 242 244;
+    --info-surface-hover: 235 235 238;
+    --info-border: 210 210 214;
 
-    --warning: 202 138 4;
+
+    --warning: 120 120 120;
     --warning-foreground: 255 255 255;
-    --warning-surface: 254 252 232;
-    --warning-surface-hover: 254 249 195;
-    --warning-border: 253 224 71;
+    --warning-surface: 245 245 245;
+    --warning-surface-hover: 238 238 238;
+    --warning-border: 224 224 224;
 
-    --danger: 220 38 38;
+    --danger: 90 90 90;
     --danger-foreground: 255 255 255;
-    --danger-surface: 254 242 242;
-    --danger-surface-hover: 254 226 226;
-    --danger-border: 254 202 202;
+    --danger-surface: 243 243 243;
+    --danger-surface-hover: 236 236 236;
+    --danger-border: 214 214 214;
 
     --border: 228 228 231;
     --border-subtle: 244 244 245;
 
     --muted: 244 244 245;
 
-    --ring: 39 39 42;
+    --ring: 24 24 27;
 }
 
 .dark-mono {
@@ -178,36 +206,45 @@
 
     --primary: 245 245 245;
     --primary-foreground: 10 10 11;
+    --primary-surface: 32 32 35;
+    --primary-surface-hover: 45 45 50;
+    --primary-border: 70 70 75;
 
-    --secondary: 82 82 91;
-    --secondary-foreground: 255 255 255;
+    --secondary: 180 180 185;
+    --secondary-foreground: 10 10 11;
+    --secondary-surface: 30 30 33;
+    --secondary-surface-hover: 42 42 46;
+    --secondary-border: 65 65 70;
 
-    --accent: 113 113 122;
-    --accent-foreground: 255 255 255;
-
-    --success: 228 228 231;
+    --accent: 150 150 155;
+    --accent-foreground: 10 10 11;
+    --accent-surface: 28 28 31;
+    --accent-surface-hover: 40 40 44;
+    --accent-border: 60 60 65;
+    
+    --success: 200 200 205;
     --success-foreground: 10 10 11;
-    --success-surface: 39 39 42;
-    --success-surface-hover: 63 63 70;
-    --success-border: 82 82 91;
+    --success-surface: 28 28 30;
+    --success-surface-hover: 40 40 42;
+    --success-border: 60 60 65;
 
-    --info: 96 165 250;
+    --info: 170 170 175;
     --info-foreground: 10 10 11;
-    --info-surface: 23 37 84;
-    --info-surface-hover: 30 41 59;
-    --info-border: 96 165 250;
+    --info-surface: 28 28 31;
+    --info-surface-hover: 40 40 44;
+    --info-border: 60 60 65;
 
-    --warning: 250 204 21;
+    --warning: 190 190 195;
     --warning-foreground: 10 10 11;
-    --warning-surface: 66 32 6;
-    --warning-surface-hover: 113 63 18;
-    --warning-border: 250 204 21;
+    --warning-surface: 30 30 33;
+    --warning-surface-hover: 42 42 46;
+    --warning-border: 65 65 70;
 
-    --danger: 248 113 113;
+    --danger: 200 200 205;
     --danger-foreground: 10 10 11;
-    --danger-surface: 69 10 10;
-    --danger-surface-hover: 127 29 29;
-    --danger-border: 248 113 113;
+    --danger-surface: 30 30 33;
+    --danger-surface-hover: 42 42 46;
+    --danger-border: 65 65 70;
 
     --border: 50 50 54;
     --border-subtle: 63 63 70;
@@ -261,12 +298,22 @@ body {
 
     --color-primary: rgb(var(--primary));
     --color-primary-foreground: rgb(var(--primary-foreground));
+    --color-primary-surface: rgb(var(--primary-surface));
+    --color-primary-surface-hover: rgb(var(--primary-surface-hover));
+    --color-primary-border: rgb(var(--primary-border));
+
 
     --color-secondary: rgb(var(--secondary));
     --color-secondary-foreground: rgb(var(--secondary-foreground));
+    --color-secondary-surface: rgb(var(--secondary-surface));
+    --color-secondary-surface-hover: rgb(var(--secondary-surface-hover));
+    --color-secondary-border: rgb(var(--secondary-border));
 
     --color-accent: rgb(var(--accent));
     --color-accent-foreground: rgb(var(--accent-foreground));
+    --color-accent-surface: rgb(var(--accent-surface));
+    --color-accent-surface-hover: rgb(var(--accent-surface-hover));
+    --color-accent-border: rgb(var(--accent-border));
 
     --color-success: rgb(var(--success));
     --color-success-foreground: rgb(var(--success-foreground));

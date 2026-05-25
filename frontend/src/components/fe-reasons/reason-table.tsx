@@ -6,6 +6,8 @@ import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
 
 import { formatDateGB } from "@/lib/format/date";
+import { TableHeaderRow } from "../ui/table/table-header-row";
+import { TableRow } from "../ui/table/table-row";
 
 type Props = {
     items: FeReason[];
@@ -21,17 +23,16 @@ export function FeReasonsTable({
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-                {/* HEADER */}
+
                 <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
-                    <tr className="text-xs font-semibold uppercase tracking-wide text-foreground bg-accent/10">
+                    <TableHeaderRow>
                         <th className="px-4 py-3">Reason</th>
                         <th className="px-4 py-3">Active</th>
                         <th className="px-4 py-3">Last modified</th>
                         <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
+                    </TableHeaderRow>
                 </thead>
 
-                {/* BODY */}
                 <tbody className="divide-y divide-border-subtle">
                     {items.map((item) => {
                         const lastDate =
@@ -43,19 +44,12 @@ export function FeReasonsTable({
                             "System";
 
                         return (
-                            <tr
-                                key={item.id}
-                                className="group transition-colors duration-150 hover:bg-surface-hover"
-                            >
-                                {/* Reason */}
-                                <td className="px-4 py-3 align-middle">
-                                    <div className="font-medium text-foreground">
-                                        {item.reason}
-                                    </div>
+                            <TableRow key={item.id}>
+                                <td className="px-4 py-3 font-medium text-foreground">
+                                    {item.reason}
                                 </td>
 
-                                {/* Active */}
-                                <td className="px-4 py-3 align-middle">
+                                <td className="px-4 py-3">
                                     <Toggle
                                         checked={item.isActive}
                                         onChange={() => onToggleActive(item)}
@@ -63,10 +57,9 @@ export function FeReasonsTable({
                                     />
                                 </td>
 
-                                {/* Last Modified */}
-                                <td className="px-4 py-3 align-middle">
+                                <td className="px-4 py-3">
                                     <div className="flex flex-col leading-tight">
-                                        <span className="text-sm text-foreground">
+                                        <span className="text-sm">
                                             {formatDateGB(lastDate) ?? "—"}
                                         </span>
                                         <span className="text-xs text-muted-foreground">
@@ -75,11 +68,10 @@ export function FeReasonsTable({
                                     </div>
                                 </td>
 
-                                {/* Actions */}
-                                <td className="px-4 py-3 align-middle text-right">
+                                <td className="px-4 py-3 text-right">
                                     <IconButton
-                                        style="ghost"
-                                        tone="default"
+                                        variant="ghost"
+                                        tone="accent"
                                         size="sm"
                                         onClick={() => onEdit(item)}
                                         aria-label="Edit"
@@ -87,7 +79,7 @@ export function FeReasonsTable({
                                         <Pencil size={14} />
                                     </IconButton>
                                 </td>
-                            </tr>
+                            </TableRow>
                         );
                     })}
                 </tbody>

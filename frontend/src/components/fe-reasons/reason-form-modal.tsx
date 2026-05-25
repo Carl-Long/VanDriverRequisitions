@@ -7,9 +7,8 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
-import { fieldBase } from "@/components/ui/field/fieldstyles";
-
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Field } from "@/components/ui/field/field";
 
 import type { FeReason } from "@/lib/api/fe-reasons";
 import { ApiError } from "@/lib/api/client";
@@ -38,7 +37,6 @@ export function ReasonFormModal({
     initial,
 }: Readonly<ReasonFormModalProps>) {
     const isEditing = !!initial;
-
     const [serverError, setServerError] = useState<string | null>(null);
 
     const {
@@ -72,12 +70,7 @@ export function ReasonFormModal({
 
     function applyApiValidationErrors(error: ApiError) {
         if (!error.errors) {
-            setServerError(
-                error.detail ??
-                error.message ??
-                "Something went wrong."
-            );
-
+            setServerError(error.message ?? "Something went wrong.");
             return;
         }
 
@@ -93,7 +86,6 @@ export function ReasonFormModal({
 
         try {
             await onSubmit(data);
-
             handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
@@ -105,14 +97,6 @@ export function ReasonFormModal({
         }
     }
 
-    const inputClass = (hasError?: boolean) =>
-        cn(
-            fieldBase,
-            hasError
-                ? "border-danger focus-visible:ring-danger/20"
-                : "focus-visible:ring-primary/20"
-        );
-
     return (
         <Modal
             open={open}
@@ -123,6 +107,7 @@ export function ReasonFormModal({
                 onSubmit={handleSubmit(onValid)}
                 className="space-y-5"
             >
+                {/* Server error */}
                 {serverError && (
                     <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
                         {serverError}
@@ -130,34 +115,24 @@ export function ReasonFormModal({
                 )}
 
                 {/* Reason */}
-                <div>
-                    <label
-                        htmlFor="reason"
-                        className="mb-1.5 block text-sm font-medium text-foreground"
-                    >
-                        Reason
-                    </label>
-
-                    <input
-                        id="reason"
+                <Field
+                    label="Reason"
+                    error={errors.reason?.message}
+                    required
+                >
+                    <Input
                         {...register("reason")}
                         maxLength={100}
-                        className={inputClass(!!errors.reason)}
                         placeholder="e.g. Toll fee"
+                        state={errors.reason ? "error" : "default"}
                     />
-
-                    {errors.reason && (
-                        <p className="mt-1 text-xs text-danger">
-                            {errors.reason.message}
-                        </p>
-                    )}
-                </div>
+                </Field>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-2">
+                <div className="flex justify-end gap-3 pt-2">
                     <Button
                         type="button"
-                        style="outline"
+                        variant="outline"
                         tone="primary"
                         onClick={handleClose}
                     >
@@ -166,9 +141,8 @@ export function ReasonFormModal({
 
                     <Button
                         type="submit"
-                        style="solid"
-                        tone="primary"
                         loading={isSubmitting}
+                        tone="primary"
                     >
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>

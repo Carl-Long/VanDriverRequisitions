@@ -7,8 +7,8 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
-import { cn } from "@/lib/utils";
-import { fieldBase } from "@/components/ui/field/fieldstyles";
+import { Input } from "@/components/ui/input";
+import { Field } from "@/components/ui/field/field";
 
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import { ApiError } from "@/lib/api/client";
@@ -23,17 +23,20 @@ const taskTypeSchema = z.object({
     code: z
         .string()
         .trim()
-        .min(1, "Code is required.")
-        .max(20, "Code must be between 1 and 20 characters.")
-        .regex(
-            /^[A-Z0-9_-]+$/,
-            "Code must contain only uppercase letters, numbers, hyphens, and underscores."
+        .transform((v) => v.toUpperCase())
+        .pipe(
+            z
+                .string()
+                .regex(
+                    /^[A-Z0-9_-]+$/,
+                    "Code must contain only uppercase letters, numbers, hyphens, and underscores."
+                )
         ),
 });
 
 type TaskTypeFormData = z.infer<typeof taskTypeSchema>;
 
-type TaskTypeFormModalProps = {
+type Props = {
     open: boolean;
     onClose: () => void;
     onSubmit: (data: TaskTypeFormData) => Promise<void>;
@@ -45,9 +48,8 @@ export function TaskTypeFormModal({
     onClose,
     onSubmit,
     initial,
-}: Readonly<TaskTypeFormModalProps>) {
+}: Readonly<Props>) {
     const isEditing = !!initial;
-
     const [serverError, setServerError] = useState<string | null>(null);
 
     const {
@@ -82,9 +84,9 @@ export function TaskTypeFormModal({
         onClose();
     }
 
-    function applyApiValidationErrors(error: ApiError) {
+    function applyApiErrors(error: ApiError) {
         if (!error.errors) {
-            setServerError(error.detail ?? error.message ?? "Something went wrong.");
+            setServerError(error.message ?? "Something went wrong.");
             return;
         }
 
@@ -105,21 +107,13 @@ export function TaskTypeFormModal({
             handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
-                applyApiValidationErrors(err);
+                applyApiErrors(err);
                 return;
             }
 
             setServerError("Unexpected error occurred.");
         }
     }
-
-    const inputClass = (hasError?: boolean) =>
-        cn(
-            fieldBase,
-            hasError
-                ? "border-danger focus-visible:ring-danger/20"
-                : "focus-visible:ring-primary/20"
-        );
 
     return (
         <Modal
@@ -128,6 +122,8 @@ export function TaskTypeFormModal({
             title={isEditing ? "Edit Task Type" : "Create Task Type"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
+
+                {/* Server error */}
                 {serverError && (
                     <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
                         {serverError}
@@ -135,69 +131,47 @@ export function TaskTypeFormModal({
                 )}
 
                 {/* Name */}
-                <div>
-                    <label
-                        htmlFor="name"
-                        className="mb-1.5 block text-sm font-medium text-foreground"
-                    >
-                        Name
-                    </label>
-
-                    <input
-                        id="name"
-                        type="text"
+                <Field
+                    label="Name"
+                    error={errors.name?.message}
+                    required
+                >
+                    <Input
                         {...register("name")}
-                        maxLength={100}
-                        className={inputClass(!!errors.name)}
+                        state={errors.name ? "error" : "default"}
                         placeholder="e.g. Collections"
                     />
-
-                    {errors.name && (
-                        <p className="mt-1 text-xs text-danger">
-                            {errors.name.message}
-                        </p>
-                    )}
-                </div>
+                </Field>
 
                 {/* Code */}
-                <div>
-                    <label
-                        htmlFor="code"
-                        className="mb-1.5 block text-sm font-medium text-foreground"
-                    >
-                        Code
-                    </label>
-
-                    <input
-                        id="code"
-                        type="text"
-                        {...register("code", {
-                            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                                setValue("code", e.target.value.toUpperCase(), {
-                                    shouldValidate: false,
-                                }),
-                        })}
-                        maxLength={20}
-                        className={inputClass(!!errors.code)}
-                        placeholder="e.g 20000"
+                <Field
+                    label="Code"
+                    error={errors.code?.message}
+                    hint="Uppercase letters, numbers, hyphens, and underscores only."
+                    required
+                >
+                    <Input
+                        {...register("code")}
+                        onChange={(e) => {
+                            setValue(
+                                "code",
+                                e.target.value.toUpperCase(),
+                                {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                }
+                            );
+                        }}
+                        state={errors.code ? "error" : "default"}
+                        placeholder="e.g. COLLECTIONS"
                     />
-
-                    {errors.code && (
-                        <p className="mt-1 text-xs text-danger">
-                            {errors.code.message}
-                        </p>
-                    )}
-
-                    <p className="mt-1 text-xs text-muted-foreground">
-                        Uppercase letters, numbers, hyphens, and underscores only.
-                    </p>
-                </div>
+                </Field>
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
                     <Button
                         type="button"
-                        style="outline"
+                        variant="outline"
                         tone="primary"
                         onClick={handleClose}
                     >
@@ -206,9 +180,8 @@ export function TaskTypeFormModal({
 
                     <Button
                         type="submit"
-                        style="solid"
-                        tone="primary"
                         loading={isSubmitting}
+                        tone="primary"
                     >
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>

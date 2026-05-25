@@ -21,6 +21,8 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
@@ -152,18 +154,16 @@ export default function FeReasonsPage() {
             </div>
 
             {error && (
-                <Surface className="mb-6 border-danger bg-danger/10 px-4 py-3">
-                    <p className="text-sm text-danger">
-                        {error}
-                    </p>
-                </Surface>
+                <Alert tone="danger" className="mb-6">
+                    {error}
+                </Alert>
             )}
 
             {loading && (
                 <div className="space-y-3">
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
+                    <Skeleton className="h-10" />
+                    <Skeleton className="h-10" />
+                    <Skeleton className="h-10" />
                 </div>
             )}
 

@@ -10,6 +10,8 @@ import type {
 
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format/date";
+import { TableHeaderRow } from "../ui/table/table-header-row";
+import { TableRow } from "../ui/table/table-row";
 
 type Props = {
     items: SubmitWindow[];
@@ -87,22 +89,16 @@ export function SubmitWindowTable({
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 z-10 border-b border-border bg-surface-elevated">
-                    <tr className="bg-accent/10 text-xs font-semibold uppercase tracking-wide text-foreground">
+                <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+                    <TableHeaderRow>
                         <th className="px-4 py-3">Open From</th>
-
                         <th className="px-4 py-3">Open To</th>
-
                         <th className="px-4 py-3">Status</th>
-
                         <th className="px-4 py-3">
                             {isDeletedView ? "Deleted" : "Last Modified"}
                         </th>
-
-                        <th className="px-4 py-3 text-center">
-                            Actions
-                        </th>
-                    </tr>
+                        <th className="px-4 py-3 text-center">Actions</th>
+                    </TableHeaderRow>
                 </thead>
 
                 <tbody className="divide-y divide-border-subtle">
@@ -123,12 +119,10 @@ export function SubmitWindowTable({
                             "System";
 
                         return (
-                            <tr
+                            <TableRow
                                 key={item.id}
                                 className={cn(
-                                    "group transition-colors duration-150 hover:bg-surface-hover",
-                                    item.isDeleted &&
-                                    "bg-danger-surface opacity-60",
+                                    item.isDeleted && "bg-danger-surface opacity-60",
                                 )}
                             >
                                 <td className="px-4 py-3 align-middle text-foreground">
@@ -160,8 +154,8 @@ export function SubmitWindowTable({
                                         {canManage && (
                                             <>
                                                 <IconButton
-                                                    style="ghost"
-                                                    tone="default"
+                                                    variant="ghost"
+                                                    tone="accent"
                                                     size="sm"
                                                     onClick={() => onEdit(item)}
                                                     aria-label="Edit"
@@ -170,7 +164,7 @@ export function SubmitWindowTable({
                                                 </IconButton>
 
                                                 <IconButton
-                                                    style="ghost"
+                                                    variant="ghost"
                                                     tone="danger"
                                                     size="sm"
                                                     onClick={() => onDelete(item)}
@@ -182,7 +176,7 @@ export function SubmitWindowTable({
                                         )}
                                     </div>
                                 </td>
-                            </tr>
+                            </TableRow>
                         );
                     })}
                 </tbody>

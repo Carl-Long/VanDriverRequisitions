@@ -5,6 +5,8 @@ import { Surface } from "../ui/surface";
 import { Toggle } from "../ui/toggle";
 
 import { formatDateGB } from "@/lib/format/date";
+import { TableHeaderRow } from "../ui/table/table-header-row";
+import { TableRow } from "../ui/table/table-row";
 
 type Props = {
     items: FeTaskType[];
@@ -23,13 +25,13 @@ export function TaskTypeTable({
 
                 {/* HEADER */}
                 <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
-                    <tr className="text-xs font-semibold uppercase tracking-wide text-foreground bg-accent/10">
+                    <TableHeaderRow>
                         <th className="px-4 py-3">Name</th>
                         <th className="px-4 py-3">Code</th>
                         <th className="px-4 py-3">Active</th>
                         <th className="px-4 py-3">Last modified</th>
                         <th className="px-4 py-3 text-right">Actions</th>
-                    </tr>
+                    </TableHeaderRow>
                 </thead>
 
                 {/* BODY */}
@@ -44,10 +46,7 @@ export function TaskTypeTable({
                             "System";
 
                         return (
-                            <tr
-                                key={item.id}
-                                className="group transition-colors duration-150 hover:bg-surface-hover"
-                            >
+                            <TableRow key={item.id} className="hover:bg-surface-hover">
                                 {/* Name */}
                                 <td className="px-4 py-3 align-middle">
                                     <div className="font-medium text-foreground">
@@ -85,8 +84,8 @@ export function TaskTypeTable({
                                 {/* Actions */}
                                 <td className="px-4 py-3 align-middle text-right">
                                     <IconButton
-                                        style="ghost"
-                                        tone="default"
+                                        variant="ghost"
+                                        tone="accent"
                                         size="sm"
                                         onClick={() => onEdit(item)}
                                         aria-label="Edit"
@@ -94,7 +93,7 @@ export function TaskTypeTable({
                                         <Pencil size={14} />
                                     </IconButton>
                                 </td>
-                            </tr>
+                            </TableRow>
                         );
                     })}
                 </tbody>

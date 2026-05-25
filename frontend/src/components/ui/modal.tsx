@@ -54,7 +54,7 @@ export function Modal({
                     {title}
                 </h2>
                 <IconButton
-                    style="ghost"
+                    variant="ghost"
                     tone="default"
                     size="sm"
                     onClick={onClose}
