@@ -14,24 +14,34 @@ public class RequisitionLimitRuleService(
     IApplicationDbContext context,
     IValidatorService validator) : IRequisitionLimitRuleService
 {
-    public async Task<List<RequisitionLimitRuleSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<List<RequisitionLimitRuleSummaryDto>> GetAllAsync(
+        CancellationToken cancellationToken = default)
     {
-        return await context.RequisitionLimitRules
+        var requisitionLimitRules = await context.RequisitionLimitRules
             .AsNoTracking()
+            .Include(x => x.FeTaskType)
             .OrderBy(x => x.Category)
-            .Select(RequisitionLimitRuleProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
+
+        return requisitionLimitRules
+            .Select(RequisitionLimitRuleMapper.ToSummaryDto)
+            .ToList();
     }
 
-    public async Task<RequisitionLimitRuleSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<RequisitionLimitRuleSummaryDto> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
     {
-        var rule = await context.RequisitionLimitRules
+        var requisitionLimitRule = await context.RequisitionLimitRules
             .AsNoTracking()
-            .Where(x => x.Id == id)
-            .Select(RequisitionLimitRuleProjections.AsSummaryDto)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Include(x => x.FeTaskType)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        return rule ?? throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
+        if (requisitionLimitRule is null)
+            throw new NotFoundException(
+                $"Requisition Limit Rule with ID '{id}' was not found.");
+
+        return RequisitionLimitRuleMapper.ToSummaryDto(requisitionLimitRule);
     }
 
     public async Task<RequisitionLimitRuleSummaryDto> CreateAsync(
@@ -42,7 +52,7 @@ public class RequisitionLimitRuleService(
 
         EnforceBusinessRules(createRequisitionLimitRuleDto.Category, createRequisitionLimitRuleDto.FeTaskTypeId);
 
-        var entity = new RequisitionLimitRule
+        var newRequisitionLimitRule = new RequisitionLimitRule
         {
             Category = createRequisitionLimitRuleDto.Category,
             FeTaskTypeId = createRequisitionLimitRuleDto.FeTaskTypeId,
@@ -51,11 +61,11 @@ public class RequisitionLimitRuleService(
             MaxRate = createRequisitionLimitRuleDto.MaxRate
         };
 
-        context.RequisitionLimitRules.Add(entity);
+        context.RequisitionLimitRules.Add(newRequisitionLimitRule);
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return RequisitionLimitRuleMapper.ToSummaryDto(entity);
+        return RequisitionLimitRuleMapper.ToSummaryDto(newRequisitionLimitRule);
     }
 
     public async Task<RequisitionLimitRuleSummaryDto> UpdateAsync(
@@ -65,26 +75,27 @@ public class RequisitionLimitRuleService(
     {
         await validator.ValidateAsync(updateRequisitionLimitRuleDto, cancellationToken);
 
-        var entity = await context.RequisitionLimitRules
+        var existingRequisitionLimitRule = await context.RequisitionLimitRules
             .IgnoreQueryFilters()
+            .Include(x => x.FeTaskType)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        if (entity is null)
+        if (existingRequisitionLimitRule is null)
             throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
 
         EnforceBusinessRules(updateRequisitionLimitRuleDto.Category, updateRequisitionLimitRuleDto.FeTaskTypeId);
 
-        entity.Category = updateRequisitionLimitRuleDto.Category;
-        entity.FeTaskTypeId = updateRequisitionLimitRuleDto.FeTaskTypeId;
-        entity.Fascia = updateRequisitionLimitRuleDto.Fascia;
-        entity.MaxQuantity = updateRequisitionLimitRuleDto.MaxQuantity;
-        entity.MaxRate = updateRequisitionLimitRuleDto.MaxRate;
+        existingRequisitionLimitRule.Category = updateRequisitionLimitRuleDto.Category;
+        existingRequisitionLimitRule.FeTaskTypeId = updateRequisitionLimitRuleDto.FeTaskTypeId;
+        existingRequisitionLimitRule.Fascia = updateRequisitionLimitRuleDto.Fascia;
+        existingRequisitionLimitRule.MaxQuantity = updateRequisitionLimitRuleDto.MaxQuantity;
+        existingRequisitionLimitRule.MaxRate = updateRequisitionLimitRuleDto.MaxRate;
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return RequisitionLimitRuleMapper.ToSummaryDto(entity);
+        return RequisitionLimitRuleMapper.ToSummaryDto(existingRequisitionLimitRule);
     }
-    
+
     private static void EnforceBusinessRules(
         RequisitionRowCategory category,
         Guid? feTaskTypeId)

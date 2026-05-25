@@ -47,8 +47,8 @@ export const adminNavigation = [
                 icon: Tags,
             },
             {
-                title: "Limit Values",
-                href: "/admin/limit-values",
+                title: "Limit Rules",
+                href: "/admin/requisition-limit-rules",
                 icon: Gauge,
             },
         ],
