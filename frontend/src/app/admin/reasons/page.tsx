@@ -174,15 +174,6 @@ export default function FeReasonsPage() {
                             ? "No reasons match your search."
                             : "No reasons yet. Create one to get started."}
                     </p>
-
-                    {!search && (
-                        <div className="mt-4">
-                            <IconButton onClick={openCreate}>
-                                <Plus size={14} />
-                                Create Reason
-                            </IconButton>
-                        </div>
-                    )}
                 </Surface>
             )}
 
