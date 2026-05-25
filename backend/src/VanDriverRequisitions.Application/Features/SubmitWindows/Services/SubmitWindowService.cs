@@ -18,25 +18,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         SubmitWindowFilter filter,
         CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
-
-        IQueryable<SubmitWindow> query = context.SubmitWindows;
-
-        query = filter switch
-        {
-            SubmitWindowFilter.Active => query.Where(x => x.OpenTo >= now),
-            SubmitWindowFilter.Past => query.Where(x => x.OpenTo < now),
-            SubmitWindowFilter.Deleted => query.IgnoreQueryFilters().Where(x => x.DeletedAtUtc != null),
-            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
-        };
-
-        query = filter switch
-        {
-            SubmitWindowFilter.Active => query.OrderBy(x => x.OpenFrom),
-            SubmitWindowFilter.Past => query.OrderByDescending(x => x.OpenTo),
-            SubmitWindowFilter.Deleted => query.OrderByDescending(x => x.UpdatedAtUtc),
-            _ => query
-        };
+        var query = BuildFilteredQuery(filter, DateTime.UtcNow);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -144,6 +126,38 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .AnyAsync(x => x.Id != id && x.OpenFrom < openTo && x.OpenTo > openFrom, cancellationToken);
 
         if (overlapping)
-            throw new ValidationException("This window overlaps with an existing submit window.");
+            throw new ValidationException("This window overlaps with an upcoming or completed submit window.");
+    }
+
+    private IQueryable<SubmitWindow> BuildFilteredQuery(
+        SubmitWindowFilter filter,
+        DateTime now)
+    {
+        IQueryable<SubmitWindow> query = context.SubmitWindows;
+
+        return filter switch
+        {
+            SubmitWindowFilter.Active => query
+                .Where(x => x.OpenTo >= now)
+                // active first, then upcoming
+                .OrderBy(x => x.OpenFrom > now ? 1 : 0)
+                // active => ending soonest
+                // upcoming => starting soonest
+                .ThenBy(x => x.OpenFrom > now ? x.OpenFrom : x.OpenTo)
+                .ThenBy(x => x.Id),
+
+            SubmitWindowFilter.Past => query
+                .Where(x => x.OpenTo < now)
+                .OrderByDescending(x => x.OpenTo)
+                .ThenByDescending(x => x.Id),
+
+            SubmitWindowFilter.Deleted => query
+                .IgnoreQueryFilters()
+                .Where(x => x.DeletedAtUtc != null)
+                .OrderByDescending(x => x.DeletedAtUtc)
+                .ThenByDescending(x => x.Id),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
+        };
     }
 }

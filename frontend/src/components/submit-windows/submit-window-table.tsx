@@ -3,12 +3,17 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Surface } from "@/components/ui/surface";
 import { IconButton } from "@/components/ui/button/icon-button";
 
-import type { SubmitWindow } from "@/lib/api/submit-windows";
+import type {
+    SubmitWindow,
+    SubmitWindowFilter,
+} from "@/lib/api/submit-windows";
+
 import { cn } from "@/lib/utils";
-import { formatDateGB, formatDateTime } from "@/lib/format/date";
+import { formatDateTime } from "@/lib/format/date";
 
 type Props = {
     items: SubmitWindow[];
+    filter: SubmitWindowFilter;
     onEdit: (item: SubmitWindow) => void;
     onDelete: (item: SubmitWindow) => void;
 };
@@ -73,30 +78,47 @@ function StatusPill({
 
 export function SubmitWindowTable({
     items,
+    filter,
     onEdit,
     onDelete,
 }: Readonly<Props>) {
+    const isDeletedView = filter === "deleted";
+
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
                 <thead className="sticky top-0 z-10 border-b border-border bg-surface-elevated">
                     <tr className="bg-accent/10 text-xs font-semibold uppercase tracking-wide text-foreground">
                         <th className="px-4 py-3">Open From</th>
+
                         <th className="px-4 py-3">Open To</th>
+
                         <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3">Last Modified</th>
-                        <th className="px-4 py-3 text-center">Actions</th>
+
+                        <th className="px-4 py-3">
+                            {isDeletedView ? "Deleted" : "Last Modified"}
+                        </th>
+
+                        <th className="px-4 py-3 text-center">
+                            Actions
+                        </th>
                     </tr>
                 </thead>
 
                 <tbody className="divide-y divide-border-subtle">
                     {items.map((item) => {
                         const status = getWindowStatus(item);
-                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
-                        const canManage = status === "upcoming" || status === "open";
 
-                        const lastUser =
-                            item.updatedByNameSnapshot ??
+                        const canManage =
+                            status === "upcoming" || status === "open";
+
+                        const metaDate = isDeletedView
+                            ? item.deletedAtUtc
+                            : item.updatedAtUtc ?? item.createdAtUtc;
+
+                        const metaUser = isDeletedView
+                            ? item.deletedByNameSnapshot
+                            : item.updatedByNameSnapshot ??
                             item.createdByNameSnapshot ??
                             "System";
 
@@ -124,11 +146,11 @@ export function SubmitWindowTable({
                                 <td className="px-4 py-3 align-middle">
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
-                                            {formatDateGB(lastDate) ?? "—"}
+                                            {formatDateTime(metaDate) ?? "—"}
                                         </span>
 
                                         <span className="text-xs text-muted-foreground">
-                                            {lastUser}
+                                            {metaUser ?? "System"}
                                         </span>
                                     </div>
                                 </td>
@@ -137,7 +159,9 @@ export function SubmitWindowTable({
                                     <div className="flex justify-center gap-2">
                                         {canManage && (
                                             <>
-                                                <IconButton onClick={() => onEdit(item)}>
+                                                <IconButton
+                                                    onClick={() => onEdit(item)}
+                                                >
                                                     <Pencil size={14} />
                                                     Edit
                                                 </IconButton>

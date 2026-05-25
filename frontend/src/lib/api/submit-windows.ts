@@ -12,6 +12,8 @@ export type SubmitWindow = {
     createdByNameSnapshot: string;
     updatedAtUtc: string | null;
     updatedByNameSnapshot: string | null;
+    deletedAtUtc: string;
+    deletedByNameSnapshot: string | null;
 };
 
 export type CreateSubmitWindow = {

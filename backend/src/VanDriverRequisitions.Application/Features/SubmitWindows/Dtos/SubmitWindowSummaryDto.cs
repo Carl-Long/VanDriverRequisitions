@@ -10,4 +10,7 @@ public class SubmitWindowSummaryDto
     public string CreatedByNameSnapshot { get; init; } = string.Empty;
     public DateTime? UpdatedAtUtc { get; init; }
     public string? UpdatedByNameSnapshot { get; init; }
+    public DateTime? DeletedAtUtc {get; init;}
+    public string? DeletedByNameSnapshot {get; init;}
+
 }

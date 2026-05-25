@@ -16,6 +16,8 @@ public static class SubmitWindowProjections
             CreatedAtUtc = x.CreatedAtUtc,
             CreatedByNameSnapshot = x.CreatedByNameSnapshot,
             UpdatedAtUtc = x.UpdatedAtUtc,
-            UpdatedByNameSnapshot = x.UpdatedByNameSnapshot
+            UpdatedByNameSnapshot = x.UpdatedByNameSnapshot,
+            DeletedAtUtc = x.DeletedAtUtc,
+            DeletedByNameSnapshot = x.DeletedByNameSnapshot
         };
 }

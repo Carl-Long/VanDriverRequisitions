@@ -16,7 +16,9 @@ public static class SubmitWindowMapper
             CreatedAtUtc = entity.CreatedAtUtc,
             CreatedByNameSnapshot = entity.CreatedByNameSnapshot,
             UpdatedAtUtc = entity.UpdatedAtUtc,
-            UpdatedByNameSnapshot = entity.UpdatedByNameSnapshot
+            UpdatedByNameSnapshot = entity.UpdatedByNameSnapshot,
+            DeletedAtUtc = entity.DeletedAtUtc,
+            DeletedByNameSnapshot = entity.DeletedByNameSnapshot
         };
     }
 }

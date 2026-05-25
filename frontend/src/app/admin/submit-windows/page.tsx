@@ -235,6 +235,7 @@ export default function SubmitWindowsPage() {
                 data.items.length > 0 && (
                     <SubmitWindowTable
                         items={data.items}
+                        filter={filter}
                         onEdit={openEdit}
                         onDelete={handleDelete}
                     />
