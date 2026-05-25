@@ -96,23 +96,20 @@ export default function SubmitWindowsPage() {
         openFrom: string;
         openTo: string;
     }) {
-        try {
-            if (editing) {
-                await submitWindowsApi.update(editing.id, data);
-                toast.success(`Submit window updated`);
-            } else {
-                await submitWindowsApi.create(data);
-                toast.success(`Submit window created`);
-            }
 
-            setModalOpen(false);
-            setEditing(null);
-
-            await load();
-            await refreshStatus();
-        } catch {
-            setError("Failed to save submit window.");
+        if (editing) {
+            await submitWindowsApi.update(editing.id, data);
+            toast.success(`Submit window updated`);
+        } else {
+            await submitWindowsApi.create(data);
+            toast.success(`Submit window created`);
         }
+
+        setModalOpen(false);
+        setEditing(null);
+
+        await load();
+        await refreshStatus();
     }
 
     async function handleDelete(window: SubmitWindow) {
