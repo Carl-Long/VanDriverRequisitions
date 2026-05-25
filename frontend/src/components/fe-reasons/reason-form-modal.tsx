@@ -157,7 +157,8 @@ export function ReasonFormModal({
                 <div className="flex items-center justify-end gap-3 pt-2">
                     <Button
                         type="button"
-                        variant="secondary"
+                        style="outline"
+                        tone="primary"
                         onClick={handleClose}
                     >
                         Cancel
@@ -165,6 +166,8 @@ export function ReasonFormModal({
 
                     <Button
                         type="submit"
+                        style="solid"
+                        tone="primary"
                         loading={isSubmitting}
                     >
                         {isEditing ? "Save Changes" : "Create"}

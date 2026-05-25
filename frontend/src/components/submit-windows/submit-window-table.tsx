@@ -160,18 +160,23 @@ export function SubmitWindowTable({
                                         {canManage && (
                                             <>
                                                 <IconButton
+                                                    style="ghost"
+                                                    tone="default"
+                                                    size="sm"
                                                     onClick={() => onEdit(item)}
+                                                    aria-label="Edit"
                                                 >
                                                     <Pencil size={14} />
-                                                    Edit
                                                 </IconButton>
 
                                                 <IconButton
-                                                    className="text-danger"
+                                                    style="ghost"
+                                                    tone="danger"
+                                                    size="sm"
                                                     onClick={() => onDelete(item)}
+                                                    aria-label="Delete"
                                                 >
                                                     <Trash2 size={14} />
-                                                    Delete
                                                 </IconButton>
                                             </>
                                         )}

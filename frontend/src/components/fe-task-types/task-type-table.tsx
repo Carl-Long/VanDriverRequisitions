@@ -84,9 +84,14 @@ export function TaskTypeTable({
 
                                 {/* Actions */}
                                 <td className="px-4 py-3 align-middle text-right">
-                                    <IconButton onClick={() => onEdit(item)}>
+                                    <IconButton
+                                        style="ghost"
+                                        tone="default"
+                                        size="sm"
+                                        onClick={() => onEdit(item)}
+                                        aria-label="Edit"
+                                    >
                                         <Pencil size={14} />
-                                        Edit
                                     </IconButton>
                                 </td>
                             </tr>

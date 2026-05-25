@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,13 +53,15 @@ export function Modal({
                 <h2 className="text-lg font-semibold text-foreground">
                     {title}
                 </h2>
-                <button
-                    type="button"
+                <IconButton
+                    style="ghost"
+                    tone="default"
+                    size="sm"
                     onClick={onClose}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    aria-label="Close modal"
                 >
                     <X size={18} />
-                </button>
+                </IconButton>
             </div>
             <div className="px-6 py-5">{children}</div>
         </dialog>

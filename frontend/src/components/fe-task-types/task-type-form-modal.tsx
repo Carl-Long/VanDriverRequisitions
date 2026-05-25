@@ -194,12 +194,22 @@ export function TaskTypeFormModal({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                    <Button type="button" variant="secondary" onClick={handleClose}>
+                <div className="flex justify-end gap-3 pt-2">
+                    <Button
+                        type="button"
+                        style="outline"
+                        tone="primary"
+                        onClick={handleClose}
+                    >
                         Cancel
                     </Button>
 
-                    <Button type="submit" loading={isSubmitting}>
+                    <Button
+                        type="submit"
+                        style="solid"
+                        tone="primary"
+                        loading={isSubmitting}
+                    >
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>
