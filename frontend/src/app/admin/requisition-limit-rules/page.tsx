@@ -6,19 +6,28 @@ import { Plus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 
-import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
+
+import { ApiError } from "@/lib/api/client";
+import {
+    requisitionLimitRulesApi,
+    type RequisitionLimitRuleSummary,
+} from "@/lib/api/requisition-limit-rules";
+
+import { feTaskTypesApi } from "@/lib/api/fe-task-types";
+import type { FeTaskType } from "@/lib/api/fe-task-types";
+
 import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/requisition-limit-rule-table";
-import { RequisitionLimitRuleSummary, requisitionLimitRulesApi } from "@/lib/api/requisition-limit-rules";
+import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
 
     const [search, setSearch] = useState("");
 
@@ -27,6 +36,8 @@ export default function RequisitionLimitRulesPage() {
         useState<RequisitionLimitRuleSummary | null>(null);
 
     const toast = useToast();
+
+    /* ---------------- load ---------------- */
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -50,18 +61,30 @@ export default function RequisitionLimitRulesPage() {
         load();
     }, [load]);
 
+    useEffect(() => {
+        feTaskTypesApi.getAll(false)
+            .then(setTaskTypes)
+            .catch(() => {
+                toast.error("Failed to load task types");
+            });
+    }, [toast]);
+
+    /* ---------------- filter ---------------- */
+
     const filtered = useMemo(() => {
         if (!search.trim()) return rules;
 
-        const query = search.toLowerCase();
+        const q = search.toLowerCase();
 
         return rules.filter(
-            (r) =>
-                r.category.toLowerCase().includes(query) ||
-                r.fascia.toLowerCase().includes(query) ||
-                (r.feTaskTypeName?.toLowerCase().includes(query) ?? false),
+            r =>
+                r.categoryName.toLowerCase().includes(q) ||
+                r.fasciaName.toLowerCase().includes(q) ||
+                (r.feTaskTypeName?.toLowerCase().includes(q) ?? false),
         );
     }, [rules, search]);
+
+    /* ---------------- modal handlers ---------------- */
 
     function openCreate() {
         setEditing(null);
@@ -73,17 +96,27 @@ export default function RequisitionLimitRulesPage() {
         setModalOpen(true);
     }
 
+    /* ---------------- submit ---------------- */
+
     async function handleSubmit(data: {
-        category: string;
-        feTaskTypeId?: string | null;
-        fascia: string;
+        categoryId: number;
+        fasciaId: number;
+        feTaskTypeId: string | null;
         maxQuantity: number;
         maxRate: number;
     }) {
+        const payload = {
+            categoryId: data.categoryId,
+            fasciaId: data.fasciaId,
+            feTaskTypeId: data.feTaskTypeId,
+            maxQuantity: data.maxQuantity,
+            maxRate: data.maxRate,
+        };
+
         if (editing) {
-            await requisitionLimitRulesApi.update(editing.id, data);
+            await requisitionLimitRulesApi.update(editing.id, payload);
         } else {
-            await requisitionLimitRulesApi.create(data);
+            await requisitionLimitRulesApi.create(payload);
         }
 
         toast.success(
@@ -94,6 +127,8 @@ export default function RequisitionLimitRulesPage() {
 
         await load();
     }
+
+    /* ---------------- UI ---------------- */
 
     return (
         <PageContainer>
@@ -118,9 +153,7 @@ export default function RequisitionLimitRulesPage() {
 
             {error && (
                 <Surface className="mb-6 border-danger bg-danger/10 px-4 py-3">
-                    <p className="text-sm text-danger">
-                        {error}
-                    </p>
+                    <p className="text-sm text-danger">{error}</p>
                 </Surface>
             )}
 
@@ -136,8 +169,8 @@ export default function RequisitionLimitRulesPage() {
                 <Surface className="py-16 text-center">
                     <p className="text-sm text-muted-foreground">
                         {search
-                            ? "No requisition limit rules match your search."
-                            : "No requisition limit rules yet. Create one to get started."}
+                            ? "No rules match your search."
+                            : "No requisition limit rules yet."}
                     </p>
                 </Surface>
             )}
@@ -149,6 +182,14 @@ export default function RequisitionLimitRulesPage() {
                 />
             )}
 
+            <RequisitionLimitRuleFormModal
+                open={modalOpen}
+                onClose={() => {
+                    setModalOpen(false);
+                    setEditing(null);
+                }}
+                onSubmit={handleSubmit}
+                initial={editing} taskTypes={taskTypes} />
         </PageContainer>
     );
 }

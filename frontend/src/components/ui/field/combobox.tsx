@@ -157,31 +157,34 @@ export function Combobox<T>({
                         ? "border-red-500/60 focus:border-red-500"
                         : "border-border focus:border-primary/30",
                     disabled && "opacity-50 cursor-not-allowed",
+                    display && !disabled ? "pr-14" : "pr-9",
                 )}
             >
                 <span className={cn("truncate", !display && "text-muted-foreground")}>
                     {display ?? placeholder}
                 </span>
-                <div className="flex items-center gap-1">
-                    {display && !disabled && (
-                        <button
-                            type="button"
-                            onClick={handleClear}
-                            className="rounded p-0.5 text-muted-foreground transition hover:text-foreground"
-                            aria-label="Clear"
-                        >
-                            ×
-                        </button>
-                    )}
-                    <ChevronDown
-                        size={16}
-                        className={cn(
-                            "text-muted-foreground transition-transform",
-                            open && "rotate-180",
-                        )}
-                    />
-                </div>
             </button>
+
+            {/* Clear and chevron — siblings of the trigger, absolutely positioned */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 gap-0.5">
+                {display && !disabled && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="pointer-events-auto rounded p-0.5 text-muted-foreground transition hover:text-foreground"
+                        aria-label="Clear"
+                    >
+                        ×
+                    </button>
+                )}
+                <ChevronDown
+                    size={16}
+                    className={cn(
+                        "text-muted-foreground transition-transform",
+                        open && "rotate-180",
+                    )}
+                />
+            </div>
 
             {open && (
                 <div
