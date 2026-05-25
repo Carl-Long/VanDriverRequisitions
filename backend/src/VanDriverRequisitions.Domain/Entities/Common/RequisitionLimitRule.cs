@@ -4,7 +4,7 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Domain.Entities.Common;
 
-public class RequisitionLimitRule : LookupEntity
+public class RequisitionLimitRule : AuditableEntity
 {
     public RequisitionRowCategory Category { get; set; }
     public Guid? FeTaskTypeId { get; set; }

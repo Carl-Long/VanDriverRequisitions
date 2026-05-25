@@ -79,7 +79,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = CollectionsTaskTypeId,
                     MaxQuantity = 30,
                     MaxRate = 15.00m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -91,7 +90,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = DeliveriesTaskTypeId,
                     MaxQuantity = 25,
                     MaxRate = 20.00m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -103,7 +101,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = WasteTaskTypeId,
                     MaxQuantity = 10,
                     MaxRate = 25.00m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -115,7 +112,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = LoadingTaskTypeId,
                     MaxQuantity = 15,
                     MaxRate = 12.50m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -129,7 +125,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = null,
                     MaxQuantity = 500,
                     MaxRate = 0.45m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -143,7 +138,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = null,
                     MaxQuantity = 20,
                     MaxRate = 18.00m,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
@@ -157,7 +151,6 @@ public static class DevDataSeeder
                     FeTaskTypeId = null,
                     MaxQuantity = null,
                     MaxRate = null,
-                    IsActive = true,
                     CreatedAtUtc = now,
                     CreatedById = SystemUserId,
                     CreatedByNameSnapshot = SystemUserName
