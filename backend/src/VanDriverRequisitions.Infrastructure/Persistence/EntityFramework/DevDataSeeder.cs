@@ -126,7 +126,7 @@ public static class DevDataSeeder
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.Mileage,
-                    FeTaskTypeId = CollectionsTaskTypeId,
+                    FeTaskTypeId = null,
                     Fascia = Fascia.Fe,
                     MaxQuantity = 500,
                     MaxRate = 0.45m,
@@ -140,7 +140,7 @@ public static class DevDataSeeder
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.Transfer,
-                    FeTaskTypeId = DeliveriesTaskTypeId,
+                    FeTaskTypeId = null,
                     Fascia = Fascia.Fe,
                     MaxQuantity = 20,
                     MaxRate = 18.00m,
@@ -154,7 +154,7 @@ public static class DevDataSeeder
                 {
                     Id = Guid.NewGuid(),
                     Category = RequisitionRowCategory.AdditionalCost,
-                    FeTaskTypeId = LoadingTaskTypeId,
+                    FeTaskTypeId = null,
                     Fascia = Fascia.Fe,
                     MaxQuantity = 1,
                     MaxRate = 50.00m,

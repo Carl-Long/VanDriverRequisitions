@@ -18,7 +18,7 @@ public class RequisitionLimitRuleConfiguration
             .HasConversion<int>();
 
         builder.Property(x => x.FeTaskTypeId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(x => x.Fascia)
             .IsRequired()
@@ -34,7 +34,7 @@ public class RequisitionLimitRuleConfiguration
         builder.HasOne(x => x.FeTaskType)
             .WithMany()
             .HasForeignKey(x => x.FeTaskTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
         
         builder.HasIndex(x => new
             {

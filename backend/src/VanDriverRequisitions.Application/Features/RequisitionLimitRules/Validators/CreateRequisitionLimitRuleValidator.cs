@@ -1,5 +1,6 @@
 using FluentValidation;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.RequisitionLimitRules.Validators;
 
@@ -13,8 +14,11 @@ public class CreateRequisitionLimitRuleDtoValidator
             .WithMessage("Category is required and must be valid.");
 
         RuleFor(x => x.FeTaskTypeId)
-            .NotEmpty()
-            .WithMessage("FeTaskTypeId is required.");
+            .Must((dto, id) =>
+                dto.Category == RequisitionRowCategory.GeneralTask
+                    ? id != null
+                    : id == null)
+            .WithMessage("FeTaskTypeId is required only for GeneralTask and must be null for other categories.");
 
         RuleFor(x => x.Fascia)
             .IsInEnum()
