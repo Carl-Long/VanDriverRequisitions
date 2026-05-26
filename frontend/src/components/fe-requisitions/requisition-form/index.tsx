@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { Modal } from "@/components/ui/modal";
-import { useToast } from "@/components/ui/toast/toast";
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +40,7 @@ import {
     toPayload,
     weekTotal,
 } from "./utils";
+import { useToast } from "@/providers/toast-provider";
 
 type RequisitionFormProps = {
     initial: FeRequisitionDetail | null;

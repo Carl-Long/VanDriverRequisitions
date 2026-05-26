@@ -281,7 +281,7 @@ export default function HomeVanDriversPage() {
                         )}
                     />
                 </form>
-                <Button variant="secondary" onClick={openFilterModal}>
+                <Button tone="secondary" onClick={openFilterModal}>
                     <SlidersHorizontal size={16} />
                     <span>Filters</span>
                 </Button>
@@ -511,7 +511,7 @@ export default function HomeVanDriversPage() {
                         </button>
                         <div className="flex items-center gap-3">
                             <Button
-                                variant="secondary"
+                                tone="secondary"
                                 onClick={() => setFilterModalOpen(false)}
                             >
                                 Cancel
