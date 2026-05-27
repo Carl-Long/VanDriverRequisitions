@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
@@ -35,6 +36,7 @@ public static class DevDataSeeder
         var hasRules     = await context.RequisitionLimitRules.AnyAsync();
         var hasShops     = await context.Shops.AnyAsync();
         var hasDrivers   = await context.VanDrivers.AnyAsync();
+        var hasRequisitions = await context.FeRequisitions.AnyAsync();
 
         if (hasTaskTypes && hasRules && hasShops && hasDrivers)
         {
@@ -186,6 +188,11 @@ public static class DevDataSeeder
             await SeedVanDriversAsync(context, logger);
         }
 
+        if (!hasRequisitions)
+        {
+            await SeedRequisitionsAsync(context, logger);
+        }
+
         logger?.LogInformation("Development seeding complete.");
     }
     // ─── Shop seed data ────────────────────────────────────────────────────
@@ -316,6 +323,131 @@ public static class DevDataSeeder
         await context.Database.ExecuteSqlRawAsync(sb.ToString());
         logger?.LogInformation("Seeded {Count} van drivers ({Active} active, {Inactive} inactive).", count, 800, 200);
     }
+    private static readonly (Guid Id, string Name)[] SeedUsers =
+    [
+        (new Guid("10000000-0000-0000-0000-000000000001"), "John Smith"),
+        (new Guid("10000000-0000-0000-0000-000000000002"), "Sarah Jones"),
+        (new Guid("10000000-0000-0000-0000-000000000003"), "Mike Brown"),
+        (new Guid("10000000-0000-0000-0000-000000000004"), "Emma Wilson"),
+        (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
+    ];
 
+    private static async Task SeedRequisitionsAsync(
+        VanDriverDbContext context,
+        ILogger? logger)
+    {
+        const int count = 100;
+
+        var rng = new Random(123);
+
+        var shops = await context.Shops
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var drivers = await context.VanDrivers
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var requisitions = new List<FeRequisition>();
+
+        for (var i = 1; i <= count; i++)
+        {
+            var shop = shops[rng.Next(shops.Count)];
+            var driver = drivers[rng.Next(drivers.Count)];
+            var user = SeedUsers[rng.Next(SeedUsers.Length)];
+
+            var createdDate = DateTime.UtcNow
+                .AddDays(-rng.Next(0, 120));
+
+            var status = GetRandomStatus(rng);
+
+            var requisition = new FeRequisition
+            {
+                Id = Guid.NewGuid(),
+
+                RequisitionNumber = $"F{i:D10}",
+
+                RequisitionDate =
+                    DateOnly.FromDateTime(createdDate),
+
+                VanDriverId = driver.Id,
+                VanDriverName = driver.TradersName,
+                TradersName = driver.TradersName,
+                VanDriverCode = driver.Code,
+
+                ShopId = shop.Id,
+                ShopCode = shop.Code,
+                ShopName = shop.Name,
+
+                Status = status,
+
+                IsVatApplicable = rng.Next(0, 2) == 1,
+
+                Subtotal =
+                    Math.Round((decimal)rng.NextDouble() * 750m, 2),
+
+                CreatedAtUtc = createdDate,
+
+                CreatedById = user.Id,
+                CreatedByNameSnapshot = user.Name
+            };
+
+            if (status != RequisitionStatus.Draft)
+            {
+                requisition.SubmittedById = user.Id;
+                requisition.SubmittedAtUtc =
+                    createdDate.AddHours(2);
+            }
+
+            if (status == RequisitionStatus.Rejected)
+            {
+                requisition.RejectedById = user.Id;
+                requisition.RejectedAtUtc =
+                    createdDate.AddDays(1);
+
+                requisition.RejectionNotes =
+                    "Seeded test rejection";
+            }
+
+            if (status == RequisitionStatus.Processed)
+            {
+                requisition.ProcessedById = user.Id;
+                requisition.ProcessedAtUtc =
+                    createdDate.AddDays(2);
+
+                requisition.PoNumber =
+                    $"PO-{rng.Next(100000, 999999)}";
+            }
+
+            requisitions.Add(requisition);
+        }
+
+        context.FeRequisitions.AddRange(requisitions);
+
+        await context.SaveChangesAsync();
+
+        logger?.LogInformation(
+            "Seeded {Count} requisitions.",
+            count);
+    }
+    
+    private static RequisitionStatus GetRandomStatus(Random rng)
+    {
+        var statuses = new[]
+        {
+            RequisitionStatus.Draft,
+            RequisitionStatus.Submitted,
+            RequisitionStatus.Rejected,
+            RequisitionStatus.Resubmitted,
+            RequisitionStatus.SentToFinance,
+            RequisitionStatus.Processed,
+            RequisitionStatus.ReturnedFromFinance
+        };
+
+        return statuses[rng.Next(statuses.Length)];
+    }
+    
     private static string Esc(string value) => value.Replace("'", "''");
 }

@@ -11,7 +11,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
     : DbContext(options), IApplicationDbContext
 {
-    public DbSet<FeRequisition> Requisitions => Set<FeRequisition>();
+    public DbSet<FeRequisition> FeRequisitions => Set<FeRequisition>();
     public DbSet<FeTaskType> FeTaskTypes => Set<FeTaskType>();
     public DbSet<FeReason> FeReasons => Set<FeReason>();
     public DbSet<RequisitionLimitRule> RequisitionLimitRules => Set<RequisitionLimitRule>();

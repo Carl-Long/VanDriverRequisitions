@@ -4,8 +4,6 @@ using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
-using VanDriverRequisitions.Domain.Entities.FE;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 
@@ -20,7 +18,7 @@ public class FeRequisitionService(
     {
         var userId = currentUser?.User?.Id ?? throw new UnauthorizedAccessException();
 
-        var dbQuery = context.Requisitions.ApplyFilters(query, userId);
+        var dbQuery = context.FeRequisitions.ApplyFilters(query, userId);
 
         var totalCount = await dbQuery.CountAsync(cancellationToken);
 

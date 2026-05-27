@@ -6,7 +6,7 @@ namespace VanDriverRequisitions.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
-    DbSet<FeRequisition> Requisitions { get; }
+    DbSet<FeRequisition> FeRequisitions { get; }
     DbSet<FeTaskType> FeTaskTypes { get; }
     DbSet<FeReason> FeReasons { get; }
     DbSet<RequisitionLimitRule> RequisitionLimitRules { get; }
