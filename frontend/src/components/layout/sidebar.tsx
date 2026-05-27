@@ -2,22 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { PanelLeft, HomeIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { HomeIcon, PanelLeft } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { navigation, adminNavigation } from "@/lib/navigation";
-import { NavItem } from "@/components/layout/nav-item";
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
+
+import { NavItem } from "@/components/layout/nav-item";
+
 import { useAuth } from "@/providers/auth-provider";
 import { isAdmin } from "@/lib/auth/roles";
+import { IconButton } from "../ui/button/icon-button";
 
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+
     const { user } = useAuth();
     const showAdmin = isAdmin(user);
 
-    // Auto-collapse on small screens; restore persisted state on large screens
+    // Auto-collapse on small screens
     useEffect(() => {
         const mq = globalThis.matchMedia("(min-width: 1024px)");
 
@@ -31,14 +35,19 @@ export function Sidebar() {
         };
 
         sync();
+
         mq.addEventListener("change", sync);
+
         return () => mq.removeEventListener("change", sync);
     }, []);
 
-    // Only persist the user's preference when on a large screen
+    // Persist desktop collapse state
     useEffect(() => {
         if (globalThis.matchMedia("(min-width: 1024px)").matches) {
-            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, String(collapsed));
+            localStorage.setItem(
+                SIDEBAR_COLLAPSE_KEY,
+                String(collapsed)
+            );
         }
     }, [collapsed]);
 
@@ -49,46 +58,66 @@ export function Sidebar() {
             className={cn(
                 "flex flex-col h-[calc(100vh-64px)]",
                 "border-r border-border bg-surface",
-                "transition-all duration-300 ease-in-out",
-                "overflow-hidden",
+                "overflow-hidden transition-all duration-300 ease-in-out",
                 collapsed ? "w-16" : "w-72"
             )}
         >
-            {/* NAVIGATION SECTION */}
             <div className="flex flex-col p-2">
-                {/* COLLAPSE BUTTON - integrated into nav */}
-                <div className="flex items-center justify-end px-1 mb-2">
-                    <button
-                        onClick={() => setCollapsed(!collapsed)}
-                        className="
-              flex h-8 w-8 items-center justify-center
-              rounded-lg hover:bg-muted transition
-            "
-                        aria-label="Toggle sidebar"
-                    >
-                        <PanelLeft
-                            size={18}
-                            className={cn(
-                                "transition-transform duration-300 ease-in-out",
-                                collapsed ? "rotate-180" : "rotate-0"
-                            )}
-                        />
-                    </button>
-                </div>
 
-                {/* HOME */}
-                <div>
+                {/* COLLAPSED HEADER */}
+                {collapsed && (
+                    <div className="flex justify-center mb-2">
+                        <IconButton
+                            size="md"
+                            variant="ghost"
+                            onClick={() => setCollapsed(false)}
+                            aria-label="Expand sidebar"
+                        >
+                            <PanelLeft
+                                size={18}
+                                className="rotate-180"
+                            />
+                        </IconButton>
+                    </div>
+                )}
+
+                {/* EXPANDED HEADER */}
+                {!collapsed && (
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="flex-1">
+                            <NavItem
+                                href="/"
+                                label="Home"
+                                icon={HomeIcon}
+                                active={isActive("/")}
+                                collapsed={false}
+                            />
+                        </div>
+
+                        <IconButton
+                            size="md"
+                            variant="ghost"
+                            onClick={() => setCollapsed(true)}
+                            aria-label="Collapse sidebar"
+                        >
+                            <PanelLeft size={18} />
+                        </IconButton>
+                    </div>
+                )}
+
+                {/* HOME ICON (collapsed mode) */}
+                {collapsed && (
                     <NavItem
                         href="/"
                         label="Home"
                         icon={HomeIcon}
                         active={isActive("/")}
-                        collapsed={collapsed}
+                        collapsed
                     />
-                </div>
+                )}
 
                 {/* MAIN NAV */}
-                <div className="mt-4 space-y-1">
+                <div className="mt-2 space-y-1">
                     {navigation.map((item) => (
                         <NavItem
                             key={item.href}
@@ -103,7 +132,8 @@ export function Sidebar() {
 
                 {/* ADMIN */}
                 {showAdmin && (
-                    <div className="mt-6">
+                    <div className="mt-6 pt-4 border-t border-border">
+
                         {!collapsed && (
                             <p className="px-3 mb-2 text-xs font-semibold uppercase text-muted-foreground">
                                 Admin
