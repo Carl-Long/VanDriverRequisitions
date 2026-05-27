@@ -15,6 +15,7 @@ import {
 
 import { StatusFilterField } from "./filter-fields/status-filter-field";
 import { ShopFilterField } from "./filter-fields/shop-filter-field";
+import { CreatedByUserFilterField } from "./filter-fields/created-by-user-filter-field";
 
 type Props = {
     open: boolean;
@@ -112,6 +113,19 @@ export function FeRequisitionFilterDrawer({
                             Show only my requisitions
                         </span>
                     </label>
+
+                    <CreatedByUserFilterField
+                        value={filters.createdByUserId}
+                        label={filters.createdByUserLabel}
+                        onChange={(value, label) =>
+                            onFiltersChange({
+                                ...filters,
+                                createdByUserId: value,
+                                createdByUserLabel: label,
+                                createdByMe: false,
+                            })
+                        }
+                    />
 
                     {/* Status */}
                     <StatusFilterField

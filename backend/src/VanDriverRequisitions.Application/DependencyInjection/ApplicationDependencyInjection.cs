@@ -7,6 +7,7 @@ using VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
 using VanDriverRequisitions.Application.Features.Shops.Services;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
+using VanDriverRequisitions.Application.Features.Users.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Services;
 
 namespace VanDriverRequisitions.Application.DependencyInjection;
@@ -21,6 +22,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ISubmitWindowService, SubmitWindowService>();
         services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();
         services.AddScoped<IShopService, ShopService>();
+        services.AddScoped<IFeRequisitionUserService, FeRequisitionUserService>();
         services.AddScoped<IVanDriverService, VanDriverService>();
         services.AddScoped<IValidatorService, ValidatorService>();
         return services;

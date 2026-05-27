@@ -222,6 +222,22 @@ export default function HomeVanDriversPage() {
             });
         }
 
+        if (
+            filters.createdByUserId &&
+            filters.createdByUserLabel
+        ) {
+            result.push({
+                key: "createdByUser",
+                label: `Created By: ${filters.createdByUserLabel}`,
+                onRemove: () =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        createdByUserId: null,
+                        createdByUserLabel: null,
+                    })),
+            });
+        }
+
         if (filters.shopId && filters.shopLabel) {
             result.push({
                 key: "shop",

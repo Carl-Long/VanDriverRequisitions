@@ -1,5 +1,7 @@
 import type { FeRequisitionQuery } from "@/lib/api/fe-requisitions";
+
 import type { FeRequisitionFilters } from "./types";
+
 import { PAGE_SIZE } from "./constants";
 
 export function buildFeRequisitionQuery(
@@ -9,6 +11,7 @@ export function buildFeRequisitionQuery(
     return {
         page,
         pageSize: PAGE_SIZE,
+
         createdByMe: filters.createdByMe,
 
         ...(filters.requisitionNumber && {
@@ -22,6 +25,11 @@ export function buildFeRequisitionQuery(
 
         ...(filters.shopId && {
             shopId: filters.shopId,
+        }),
+
+        ...(filters.createdByUserId && {
+            createdByUserId:
+                filters.createdByUserId,
         }),
     };
 }
