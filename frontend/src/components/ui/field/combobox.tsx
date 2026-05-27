@@ -26,6 +26,7 @@ type Props = {
     label?: string | null;
     placeholder?: string;
     options?: ComboboxOption[];
+    pinnedOptions?: ComboboxOption[];
     onSearch?: (
         search: string,
     ) => Promise<ComboboxOption[]>;
@@ -40,6 +41,7 @@ export function Combobox({
     label,
     placeholder = "Select...",
     options = [],
+    pinnedOptions = [],
     onSearch,
     onChange,
 }: Readonly<Props>) {
@@ -176,67 +178,112 @@ export function Combobox({
                     </div>
 
                     <div className="max-h-64 overflow-y-auto py-1">
+
+                        {/* Pinned options */}
+                        {pinnedOptions.map((option) => {
+                            const selected =
+                                option.value === value;
+
+                            return (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => {
+                                        onChange(
+                                            option.value,
+                                            option,
+                                        );
+
+                                        setOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
+                                    )}
+                                >
+                                    <Check
+                                        size={14}
+                                        className={cn(
+                                            selected
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                        )}
+                                    />
+
+                                    <span className="truncate">
+                                        {option.label}
+                                    </span>
+                                </button>
+                            );
+                        })}
+
+                        {/* Divider */}
+                        {pinnedOptions.length > 0 &&
+                            finalOptions.length > 0 && (
+                                <div className="my-1 border-t border-border" />
+                            )}
+
+                        {/* Async / normal options */}
                         {loading && (
                             <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-muted-foreground">
                                 <Loader2
                                     size={14}
                                     className="animate-spin"
                                 />
+
                                 Loading...
                             </div>
                         )}
 
                         {!loading &&
-                            finalOptions.map(
-                                (option) => {
-                                    const selected =
-                                        option.value ===
-                                        value;
+                            finalOptions.map((option) => {
+                                const selected =
+                                    option.value === value;
 
-                                    return (
-                                        <button
-                                            key={
-                                                option.value
-                                            }
-                                            type="button"
-                                            onClick={() => {
-                                                onChange(
-                                                    option.value,
-                                                    option,
-                                                );
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => {
+                                            onChange(
+                                                option.value,
+                                                option,
+                                            );
 
-                                                setOpen(
-                                                    false,
-                                                );
-                                            }}
+                                            setOpen(false);
+                                        }}
+                                        className={cn(
+                                            "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
+                                        )}
+                                    >
+                                        <Check
+                                            size={14}
                                             className={cn(
-                                                "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
+                                                selected
+                                                    ? "opacity-100"
+                                                    : "opacity-0",
                                             )}
-                                        >
-                                            <Check
-                                                size={14}
-                                                className={cn(
-                                                    selected
-                                                        ? "opacity-100"
-                                                        : "opacity-0",
-                                                )}
-                                            />
+                                        />
 
-                                            <span className="truncate">
-                                                {
-                                                    option.label
-                                                }
-                                            </span>
-                                        </button>
-                                    );
-                                },
+                                        <span className="truncate">
+                                            {option.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+
+                        {!loading &&
+                            pinnedOptions.length === 0 &&
+                            finalOptions.length === 0 && (
+                                <div className="px-3 py-4 text-sm text-muted-foreground">
+                                    No results
+                                </div>
                             )}
 
                         {!loading &&
-                            finalOptions.length ===
-                            0 && (
-                                <div className="px-3 py-4 text-sm text-muted-foreground">
-                                    No results
+                            pinnedOptions.length > 0 &&
+                            finalOptions.length === 0 && (
+                                <div className="px-3 py-2 text-xs text-muted-foreground">
+                                    No matching users
                                 </div>
                             )}
                     </div>

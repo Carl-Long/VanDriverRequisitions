@@ -9,9 +9,7 @@ import { cn } from "@/lib/utils";
 
 import type { FeRequisitionFilters } from "./types";
 
-import {
-    EMPTY_FILTERS,
-} from "./constants";
+import { INITIAL_FILTERS } from "./constants";
 
 import { StatusFilterField } from "./filter-fields/status-filter-field";
 import { ShopFilterField } from "./filter-fields/shop-filter-field";
@@ -39,7 +37,7 @@ export function FeRequisitionFilterDrawer({
     onApply,
 }: Readonly<Props>) {
     function resetFilters() {
-        onFiltersChange(EMPTY_FILTERS);
+        onFiltersChange(INITIAL_FILTERS);
     }
 
     if (!open) {
@@ -83,46 +81,12 @@ export function FeRequisitionFilterDrawer({
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
                     {/* Mine */}
-                    <label className="flex items-center gap-3">
-                        <input
-                            type="checkbox"
-                            checked={filters.createdByMe}
-                            onChange={(e) =>
-                                onFiltersChange({
-                                    ...filters,
-
-                                    createdByMe:
-                                        e.target.checked,
-
-                                    // clear explicit user if toggled
-                                    createdByUserId:
-                                        e.target.checked
-                                            ? null
-                                            : filters.createdByUserId,
-
-                                    createdByUserLabel:
-                                        e.target.checked
-                                            ? null
-                                            : filters.createdByUserLabel,
-                                })
-                            }
-                            className="h-4 w-4 rounded border-border accent-primary"
-                        />
-
-                        <span className="text-sm font-medium text-foreground">
-                            Show only my requisitions
-                        </span>
-                    </label>
-
                     <CreatedByUserFilterField
-                        value={filters.createdByUserId}
-                        label={filters.createdByUserLabel}
-                        onChange={(value, label) =>
+                        value={filters.createdBy}
+                        onChange={(value) =>
                             onFiltersChange({
                                 ...filters,
-                                createdByUserId: value,
-                                createdByUserLabel: label,
-                                createdByMe: false,
+                                createdBy: value,
                             })
                         }
                     />

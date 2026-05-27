@@ -12,8 +12,6 @@ export function buildFeRequisitionQuery(
         page,
         pageSize: PAGE_SIZE,
 
-        createdByMe: filters.createdByMe,
-
         ...(filters.requisitionNumber && {
             requisitionNumber:
                 filters.requisitionNumber,
@@ -27,9 +25,14 @@ export function buildFeRequisitionQuery(
             shopId: filters.shopId,
         }),
 
-        ...(filters.createdByUserId && {
-            createdByUserId:
-                filters.createdByUserId,
+        ...(filters.createdBy.type === "me" && {
+            createdByMe: true,
         }),
+
+        ...(filters.createdBy.type === "user" && {
+            createdByUserId:
+                filters.createdBy.userId,
+        }),
+
     };
 }

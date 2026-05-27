@@ -210,30 +210,31 @@ export default function HomeVanDriversPage() {
             });
         }
 
-        if (filters.createdByMe) {
+        if (filters.createdBy.type === "me") {
             result.push({
-                key: "mine",
-                label: `My requisitions`,
+                key: "createdByMe",
+                label: "Created By: Me",
                 onRemove: () =>
                     setFilters((prev) => ({
                         ...prev,
-                        createdByMe: false,
+
+                        createdBy: {
+                            type: "any",
+                        },
                     })),
             });
         }
 
-        if (
-            filters.createdByUserId &&
-            filters.createdByUserLabel
-        ) {
+        if (filters.createdBy.type === "user") {
             result.push({
                 key: "createdByUser",
-                label: `Created By: ${filters.createdByUserLabel}`,
+                label: `Created By: ${filters.createdBy.label}`,
                 onRemove: () =>
                     setFilters((prev) => ({
                         ...prev,
-                        createdByUserId: null,
-                        createdByUserLabel: null,
+                        createdBy: {
+                            type: "any",
+                        },
                     })),
             });
         }
@@ -255,7 +256,6 @@ export default function HomeVanDriversPage() {
     }, [filters]);
 
     const hasFilters = chips.length > 0;
-
     const items = data?.items ?? [];
 
     // =========================

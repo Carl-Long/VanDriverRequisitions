@@ -5,8 +5,7 @@ import {
 
 export type FilterFieldName =
     | "shop"
-    | "status"
-    | "createdByMe";
+    | "status";
 
 export const filterConfig: Record<FilterFieldName, any> = {
     shop: {
@@ -26,10 +25,5 @@ export const filterConfig: Record<FilterFieldName, any> = {
                 label: requisitionStatusConfig[s].label,
             })),
         ],
-    },
-
-    createdByMe: {
-        type: "checkbox",
-        label: "Show only my requisitions",
     },
 };

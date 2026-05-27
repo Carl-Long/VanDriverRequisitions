@@ -85,19 +85,20 @@ export const INITIAL_FILTERS: FeRequisitionFilters = {
     status: "",
     shopId: null,
     shopLabel: null,
-    createdByUserId: null,
-    createdByUserLabel: null,
-    createdByMe: true,
+    createdBy: {
+        type: "me",
+    },
 };
 
-export const EMPTY_FILTERS: FeRequisitionFilters = {
+export const EMPTY_FILTERS: FeRequisitionFilters =
+{
     requisitionNumber: "",
     status: "",
     shopId: null,
     shopLabel: null,
-    createdByUserId: null,
-    createdByUserLabel: null,
-    createdByMe: false,
+    createdBy: {
+        type: "any",
+    },
 };
 
 export const PAGE_SIZE = 10;

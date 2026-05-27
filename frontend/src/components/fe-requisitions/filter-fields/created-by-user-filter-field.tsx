@@ -1,29 +1,60 @@
 "use client";
 
 import { Field } from "@/components/ui/field/field";
-import { Combobox } from "@/components/ui/field/combobox";
+
+import {
+    Combobox,
+    type ComboboxOption,
+} from "@/components/ui/field/combobox";
+
 import { requisitionUsersApi } from "@/lib/api/requisition-users";
 
+import type { CreatedByFilter } from "../types";
+
+const STATIC_OPTIONS: ComboboxOption[] = [
+    {
+        value: "__ME__",
+        label: "Me",
+    },
+
+    {
+        value: "__ANY__",
+        label: "Anyone",
+    },
+];
 type Props = {
-    value: string | null;
-    label: string | null;
+    value: CreatedByFilter;
+
     onChange: (
-        value: string | null,
-        label: string | null,
+        value: CreatedByFilter,
     ) => void;
 };
 
 export function CreatedByUserFilterField({
     value,
-    label,
     onChange,
 }: Readonly<Props>) {
+    const selectedValue =
+        value.type === "any"
+            ? "__ANY__"
+            : value.type === "me"
+                ? "__ME__"
+                : value.userId;
+
+    const selectedLabel =
+        value.type === "any"
+            ? "Anyone"
+            : value.type === "me"
+                ? "Me"
+                : value.label;
+
     return (
-        <Field label="Created By">
+        <Field label="Requisition Created By">
             <Combobox
-                value={value}
-                label={label}
-                placeholder="Select user..."
+                value={selectedValue}
+                label={selectedLabel}
+                placeholder="Select creator..."
+                pinnedOptions={STATIC_OPTIONS}
                 onSearch={async (search) => {
                     const res =
                         await requisitionUsersApi.search({
@@ -37,10 +68,23 @@ export function CreatedByUserFilterField({
                     }));
                 }}
                 onChange={(value, option) => {
-                    onChange(
-                        value,
-                        option?.label ?? null,
-                    );
+                    if (value === "__ME__") {
+                        onChange({ type: "me", });
+                        return;
+                    }
+
+                    if (value === "__ANY__") {
+                        onChange({ type: "any", });
+                        return;
+                    }
+
+                    if (option) {
+                        onChange({
+                            type: "user",
+                            userId: value!,
+                            label: option.label,
+                        });
+                    }
                 }}
             />
         </Field>
