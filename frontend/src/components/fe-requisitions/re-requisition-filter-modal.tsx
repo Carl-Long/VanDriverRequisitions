@@ -5,47 +5,19 @@ import { Modal } from "@/components/ui/modal";
 
 import { cn } from "@/lib/utils";
 
-// ─────────────────────────────────────────────────────────────────────────────
+import type { FeRequisitionFilters } from "./types";
 
-const REQUISITION_STATUSES = [
-    "Draft",
-    "Submitted",
-    "Rejected",
-    "Resubmitted",
-    "SentToFinance",
-    "Processed",
-    "ReturnedFromFinance",
-] as const;
-
-const statusConfig: Record<string, { label: string }> = {
-    Draft: { label: "Draft" },
-    Submitted: { label: "Submitted" },
-    Rejected: { label: "Rejected" },
-    Resubmitted: { label: "Resubmitted" },
-    SentToFinance: { label: "Sent to Finance" },
-    Processed: { label: "Processed" },
-    ReturnedFromFinance: { label: "Returned" },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type FeRequisitionFilters = {
-    requisitionNumber: string;
-    status: string;
-    createdByMe: boolean;
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { REQUISITION_STATUSES, requisitionStatusConfig, RESET_FILTERS, } from "./constants";
 
 type Props = {
     open: boolean;
     filters: FeRequisitionFilters;
     onClose: () => void;
-    onFiltersChange: (filters: FeRequisitionFilters) => void;
+    onFiltersChange: (
+        filters: FeRequisitionFilters,
+    ) => void;
     onApply: () => void;
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 export function FeRequisitionFilterModal({
     open,
@@ -54,7 +26,9 @@ export function FeRequisitionFilterModal({
     onFiltersChange,
     onApply,
 }: Readonly<Props>) {
-    function update<K extends keyof FeRequisitionFilters>(
+    function update<
+        K extends keyof FeRequisitionFilters,
+    >(
         key: K,
         value: FeRequisitionFilters[K],
     ) {
@@ -65,11 +39,7 @@ export function FeRequisitionFilterModal({
     }
 
     function resetFilters() {
-        onFiltersChange({
-            requisitionNumber: "",
-            status: "",
-            createdByMe: false,
-        });
+        onFiltersChange(RESET_FILTERS);
     }
 
     return (
@@ -112,7 +82,11 @@ export function FeRequisitionFilterModal({
                         id="filter-status"
                         value={filters.status}
                         onChange={(e) =>
-                            update("status", e.target.value)
+                            update(
+                                "status",
+                                e.target
+                                    .value as FeRequisitionFilters["status"],
+                            )
                         }
                         className={cn(
                             "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground",
@@ -124,15 +98,20 @@ export function FeRequisitionFilterModal({
                             All statuses
                         </option>
 
-                        {REQUISITION_STATUSES.map((status) => (
-                            <option
-                                key={status}
-                                value={status}
-                            >
-                                {statusConfig[status]?.label ??
-                                    status}
-                            </option>
-                        ))}
+                        {REQUISITION_STATUSES.map(
+                            (status) => (
+                                <option
+                                    key={status}
+                                    value={status}
+                                >
+                                    {
+                                        requisitionStatusConfig[
+                                            status
+                                        ].label
+                                    }
+                                </option>
+                            ),
+                        )}
                     </select>
                 </div>
 

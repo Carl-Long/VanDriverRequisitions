@@ -1,76 +1,47 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
+
 import { useRouter } from "next/navigation";
-import { Plus, Search, SlidersHorizontal, X } from "lucide-react";
+
+import {
+    Plus,
+    Search,
+    SlidersHorizontal,
+} from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
+
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
+
+import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import { useAuth } from "@/providers/auth-provider";
 
 import {
     feRequisitionsApi,
     type FeRequisitionSummary,
-    type FeRequisitionQuery,
 } from "@/lib/api/fe-requisitions";
 
 import type { PagedResult } from "@/lib/types";
 
 import { cn } from "@/lib/utils";
+
+import { useDebounce } from "@/hooks/use-debounce";
+import { INITIAL_FILTERS, requisitionStatusConfig } from "@/components/fe-requisitions/constants";
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
-import { FeRequisitionFilters, FeRequisitionFilterModal } from "@/components/fe-requisitions/re-requisition-filter-modal";
+import { FilterChip } from "@/components/fe-requisitions/filter-chip";
+import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
+import { FeRequisitionFilterModal } from "@/components/fe-requisitions/re-requisition-filter-modal";
+import { FeRequisitionFilters } from "@/components/fe-requisitions/types";
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-const PAGE_SIZE = 10;
-
-const DEFAULT_FILTERS: FeRequisitionFilters = {
-    requisitionNumber: "",
-    status: "",
-    createdByMe: true,
-};
-
-const statusConfig: Record<string, { label: string }> = {
-    Draft: { label: "Draft" },
-    Submitted: { label: "Submitted" },
-    Rejected: { label: "Rejected" },
-    Resubmitted: { label: "Resubmitted" },
-    SentToFinance: { label: "Sent to Finance" },
-    Processed: { label: "Processed" },
-    ReturnedFromFinance: { label: "Returned" },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-type FilterChipProps = {
-    label: string;
-    onRemove: () => void;
-};
-
-function FilterChip({
-    label,
-    onRemove,
-}: Readonly<FilterChipProps>) {
-    return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs font-medium text-foreground">
-            {label}
-
-            <button
-                type="button"
-                onClick={onRemove}
-                className="ml-0.5 rounded-full p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                aria-label={`Remove filter: ${label}`}
-            >
-                <X size={12} />
-            </button>
-        </span>
-    );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function HomeVanDriversPage() {
     const { user } = useAuth();
@@ -79,53 +50,52 @@ export default function HomeVanDriversPage() {
 
     // Data
     const [data, setData] =
-        useState<PagedResult<FeRequisitionSummary> | null>(null);
+        useState<
+            PagedResult<FeRequisitionSummary> | null
+        >(null);
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] =
+        useState(true);
 
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] =
+        useState<string | null>(null);
 
     const [page, setPage] = useState(1);
 
     // Filters
     const [filters, setFilters] =
-        useState<FeRequisitionFilters>(DEFAULT_FILTERS);
+        useState<FeRequisitionFilters>(
+            INITIAL_FILTERS,
+        );
 
     const [tempFilters, setTempFilters] =
-        useState<FeRequisitionFilters>(DEFAULT_FILTERS);
+        useState<FeRequisitionFilters>(
+            INITIAL_FILTERS,
+        );
 
-    const [searchInput, setSearchInput] = useState("");
+    const [searchInput, setSearchInput] =
+        useState("");
+
+    const debouncedSearch =
+        useDebounce(searchInput, 400);
 
     const [filterModalOpen, setFilterModalOpen] =
         useState(false);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Load
-    // ─────────────────────────────────────────────────────────────────────────
-
+    // Load data
     const load = useCallback(async () => {
         setLoading(true);
 
         setError(null);
 
         try {
-            const query: FeRequisitionQuery = {
-                page,
-                pageSize: PAGE_SIZE,
-                createdByMe: filters.createdByMe,
-            };
-
-            if (filters.requisitionNumber) {
-                query.requisitionNumber =
-                    filters.requisitionNumber;
-            }
-
-            if (filters.status) {
-                query.status = filters.status;
-            }
-
             const result =
-                await feRequisitionsApi.getAll(query);
+                await feRequisitionsApi.getAll(
+                    buildFeRequisitionQuery(
+                        page,
+                        filters,
+                    ),
+                );
 
             setData(result);
         } catch {
@@ -141,48 +111,49 @@ export default function HomeVanDriversPage() {
         load();
     }, [load]);
 
+    // Reset page when filters change
     useEffect(() => {
         setPage(1);
     }, [filters]);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Search
-    // ─────────────────────────────────────────────────────────────────────────
-
+    // Debounced search
     useEffect(() => {
-        const trimmed = searchInput.trim();
+        const trimmed = debouncedSearch.trim();
 
-        if (trimmed === filters.requisitionNumber) {
+        if (
+            trimmed ===
+            filters.requisitionNumber
+        ) {
             return;
         }
 
-        const timer = setTimeout(() => {
-            setFilters((prev) => ({
-                ...prev,
-                requisitionNumber: trimmed,
-            }));
-        }, 400);
-
-        return () => clearTimeout(timer);
-    }, [searchInput, filters.requisitionNumber]);
+        setFilters((prev) => ({
+            ...prev,
+            requisitionNumber: trimmed,
+        }));
+    }, [
+        debouncedSearch,
+        filters.requisitionNumber,
+    ]);
 
     function handleSearch(
-        e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
+        e: React.SyntheticEvent<
+            HTMLFormElement,
+            SubmitEvent
+        >,
     ) {
         e.preventDefault();
 
         setFilters((prev) => ({
             ...prev,
-            requisitionNumber: searchInput.trim(),
+            requisitionNumber:
+                searchInput.trim(),
         }));
     }
-    // ─────────────────────────────────────────────────────────────────────────
-    // Filter Modal
-    // ─────────────────────────────────────────────────────────────────────────
 
+    // Modal
     function openFilterModal() {
         setTempFilters(filters);
-
         setFilterModalOpen(true);
     }
 
@@ -192,7 +163,6 @@ export default function HomeVanDriversPage() {
 
     function applyFilters() {
         setFilters(tempFilters);
-
         setFilterModalOpen(false);
     }
 
@@ -206,10 +176,7 @@ export default function HomeVanDriversPage() {
         setSearchInput("");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Active Filter Chips
-    // ─────────────────────────────────────────────────────────────────────────
-
+    // Active chips
     const activeChips: {
         key: string;
         label: string;
@@ -219,8 +186,9 @@ export default function HomeVanDriversPage() {
     if (filters.createdByMe) {
         activeChips.push({
             key: "mine",
-            label: `My Requisitions${user ? ` (${user.name})` : ""
-                }`,
+            label: `My Requisitions${
+                user ? ` (${user.name})` : ""
+            }`,
             onRemove: () =>
                 setFilters((prev) => ({
                     ...prev,
@@ -247,9 +215,11 @@ export default function HomeVanDriversPage() {
     if (filters.status) {
         activeChips.push({
             key: "status",
-            label: `Status: ${statusConfig[filters.status]?.label ??
-                filters.status
-                }`,
+            label: `Status: ${
+                requisitionStatusConfig[
+                    filters.status
+                ]?.label ?? filters.status
+            }`,
             onRemove: () =>
                 setFilters((prev) => ({
                     ...prev,
@@ -258,9 +228,8 @@ export default function HomeVanDriversPage() {
         });
     }
 
-    const hasFilters = activeChips.length > 0;
-
-    // ─────────────────────────────────────────────────────────────────────────
+    const hasFilters =
+        activeChips.length > 0;
 
     return (
         <PageContainer>
@@ -270,16 +239,20 @@ export default function HomeVanDriversPage() {
             >
                 <Button
                     onClick={() =>
-                        router.push("/home-van-drivers/new")
+                        router.push(
+                            "/home-van-drivers/new",
+                        )
                     }
                 >
                     <Plus size={16} />
 
-                    <span>New Requisition</span>
+                    <span>
+                        New Requisition
+                    </span>
                 </Button>
             </PageHeader>
 
-            {/* Search & Filters */}
+            {/* Search + Filters */}
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <form
                     onSubmit={handleSearch}
@@ -295,7 +268,9 @@ export default function HomeVanDriversPage() {
                         placeholder="Search by requisition number…"
                         value={searchInput}
                         onChange={(e) =>
-                            setSearchInput(e.target.value)
+                            setSearchInput(
+                                e.target.value,
+                            )
                         }
                         className={cn(
                             "w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground",
@@ -316,7 +291,7 @@ export default function HomeVanDriversPage() {
                 </Button>
             </div>
 
-            {/* Active Filters */}
+            {/* Filter Chips */}
             {hasFilters && (
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                     {activeChips.map((chip) => (
@@ -341,10 +316,11 @@ export default function HomeVanDriversPage() {
             <div className="mb-4">
                 <p className="text-sm text-muted-foreground">
                     {data && !loading
-                        ? `${data.totalCount} requisition${data.totalCount === 1
-                            ? ""
-                            : "s"
-                        }`
+                        ? `${data.totalCount} requisition${
+                              data.totalCount === 1
+                                  ? ""
+                                  : "s"
+                          }`
                         : "\u00A0"}
                 </p>
             </div>
@@ -357,37 +333,32 @@ export default function HomeVanDriversPage() {
             )}
 
             {/* Loading */}
-            {loading && (
-                <div className="overflow-hidden rounded-xl border border-border">
-                    {["a", "b", "c", "d", "e"].map((key) => (
-                        <div
-                            key={`skeleton-${key}`}
-                            className="h-14 animate-pulse border-b border-border bg-surface last:border-b-0"
-                        />
-                    ))}
-                </div>
-            )}
+            {loading && <TableSkeleton />}
 
             {/* Empty */}
             {!loading &&
-                data?.items.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <p className="text-sm text-muted-foreground">
-                            {hasFilters
+                data &&
+                data.items.length === 0 && (
+                    <EmptyState
+                        title={
+                            hasFilters
                                 ? "No requisitions match your current filters."
-                                : "No requisitions yet."}
-                        </p>
-
-                        {hasFilters && (
-                            <button
-                                type="button"
-                                onClick={clearAllFilters}
-                                className="mt-2 text-sm font-medium text-primary transition hover:underline"
-                            >
-                                Clear all filters
-                            </button>
-                        )}
-                    </div>
+                                : "No requisitions yet."
+                        }
+                        action={
+                            hasFilters ? (
+                                <button
+                                    type="button"
+                                    onClick={
+                                        clearAllFilters
+                                    }
+                                    className="text-sm font-medium text-primary transition hover:underline"
+                                >
+                                    Clear all filters
+                                </button>
+                            ) : null
+                        }
+                    />
                 )}
 
             {/* Table */}
@@ -414,7 +385,7 @@ export default function HomeVanDriversPage() {
                 />
             )}
 
-            {/* Filter Modal */}
+            {/* Filters Modal */}
             <FeRequisitionFilterModal
                 open={filterModalOpen}
                 filters={tempFilters}
