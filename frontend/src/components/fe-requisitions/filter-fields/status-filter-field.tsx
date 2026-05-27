@@ -21,32 +21,56 @@ type Props = {
     onChange: (
         value: RequisitionStatus | "",
     ) => void;
+
+    hideLabel?: boolean;
 };
+
+const STATIC_OPTIONS = [
+    {
+        value: "",
+        label: "All statuses",
+    },
+
+    ...REQUISITION_STATUSES.map((s) => ({
+        value: s,
+        label: requisitionStatusConfig[s].label,
+    })),
+];
 
 export function StatusFilterField({
     value,
     onChange,
+    hideLabel = false,
 }: Readonly<Props>) {
+    const select = (
+        <Combobox
+            value={value}
+            label={
+                value
+                    ? `Status: ${requisitionStatusConfig[
+                        value
+                    ].label
+                    }`
+                    : "Status: All statuses"
+            }
+            options={STATIC_OPTIONS}
+            placeholder="Status: All statuses"
+            onChange={(value) =>
+                onChange(
+                    (value as RequisitionStatus) ??
+                    "",
+                )
+            }
+        />
+    );
+
+    if (hideLabel) {
+        return select;
+    }
+
     return (
         <Field label="Status">
-            <Combobox
-                value={value || null}
-                label={
-                    value
-                        ? requisitionStatusConfig[
-                            value
-                        ].label
-                        : null
-                }
-                options={options}
-                placeholder="All statuses"
-                onChange={(value) =>
-                    onChange(
-                        (value as RequisitionStatus) ||
-                        "",
-                    )
-                }
-            />
+            {select}
         </Field>
     );
 }

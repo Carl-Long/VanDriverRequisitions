@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-    Inbox,
-    Plus,
-    Search,
-    SlidersHorizontal,
-} from "lucide-react";
+import { Inbox, Plus } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -28,10 +23,7 @@ import {
 import type { PagedResult } from "@/lib/types";
 
 import {
-    EMPTY_FILTERS,
     INITIAL_FILTERS,
-    RequisitionStatus,
-    requisitionStatusConfig,
 } from "@/components/fe-requisitions/constants";
 
 import type {
@@ -39,11 +31,8 @@ import type {
 } from "@/components/fe-requisitions/types";
 
 import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
-
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
-
-import { FilterChip } from "@/components/fe-requisitions/filter-chip";
-import { FeRequisitionFilterDrawer } from "@/components/fe-requisitions/fe-requisitions-filter-drawer";
+import { FeRequisitionFiltersToolbar } from "@/components/fe-requisitions/fe-requisition-filters-toolbar";
 
 
 export default function HomeVanDriversPage() {
@@ -59,23 +48,12 @@ export default function HomeVanDriversPage() {
             INITIAL_FILTERS,
         );
 
-    const [draftFilters, setDraftFilters] =
-        useState<FeRequisitionFilters>(
-            INITIAL_FILTERS,
-        );
-
     // =========================
     // Pagination
     // =========================
 
     const [page, setPage] = useState(1);
 
-    // =========================
-    // Drawer
-    // =========================
-
-    const [drawerOpen, setDrawerOpen] =
-        useState(false);
 
     // =========================
     // Debounced requisition search
@@ -153,110 +131,19 @@ export default function HomeVanDriversPage() {
         debouncedReqNumber,
     ]);
 
-    // =========================
-    // Drawer handlers
-    // =========================
-
-    function openDrawer() {
-        setDraftFilters(filters);
-        setDrawerOpen(true);
-    }
-
-    function closeDrawer() {
-        setDrawerOpen(false);
-    }
-
-    function applyDrawerFilters() {
-        setFilters(draftFilters);
-        setPage(1);
-        setDrawerOpen(false);
-    }
-
-    // =========================
-    // Active chips
-    // =========================
-
-    const chips = useMemo(() => {
-        const result: {
-            key: string;
-            label: string;
-            onRemove: () => void;
-        }[] = [];
-
-        if (filters.requisitionNumber) {
-            result.push({
-                key: "req",
-                label: `Req #: ${filters.requisitionNumber}`,
-                onRemove: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        requisitionNumber: "",
-                    })),
-            });
-        }
-
-        if (filters.status) {
-            result.push({
-                key: "status",
-                label: `Status: ${requisitionStatusConfig[
-                    filters.status
-                ].label
-                    }`,
-                onRemove: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        status: "",
-                    })),
-            });
-        }
-
-        if (filters.createdBy.type === "me") {
-            result.push({
-                key: "createdByMe",
-                label: "Created By: Me",
-                onRemove: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-
-                        createdBy: {
-                            type: "any",
-                        },
-                    })),
-            });
-        }
-
-        if (filters.createdBy.type === "user") {
-            result.push({
-                key: "createdByUser",
-                label: `Created By: ${filters.createdBy.label}`,
-                onRemove: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        createdBy: {
-                            type: "any",
-                        },
-                    })),
-            });
-        }
-
-        if (filters.shopId && filters.shopLabel) {
-            result.push({
-                key: "shop",
-                label: `Shop: ${filters.shopLabel}`,
-                onRemove: () =>
-                    setFilters((prev) => ({
-                        ...prev,
-                        shopId: null,
-                        shopLabel: null,
-                    })),
-            });
-        }
-
-        return result;
-    }, [filters]);
-
-    const hasFilters = chips.length > 0;
     const items = data?.items ?? [];
+
+    function handleFiltersChange(
+        next: FeRequisitionFilters,
+    ) {
+        setPage(1);
+        setFilters(next);
+    }
+
+    function resetFilters() {
+        setPage(1);
+        setFilters(INITIAL_FILTERS);
+    }
 
     // =========================
     // Render
@@ -282,66 +169,15 @@ export default function HomeVanDriversPage() {
                 </Button>
             </PageHeader>
 
-            {/* Toolbar */}
+            {/* Filters */}
 
-            <div className="mb-4 flex items-center gap-3">
-                <div className="relative w-full max-w-md">
-                    <Search
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    />
-
-                    <input
-                        value={
-                            filters.requisitionNumber
-                        }
-                        onChange={(e) =>
-                            setFilters((prev) => ({
-                                ...prev,
-                                requisitionNumber:
-                                    e.target.value,
-                            }))
-                        }
-                        placeholder="Search requisition number..."
-                        className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm"
-                    />
-                </div>
-
-                <Button
-                    tone="secondary"
-                    onClick={openDrawer}
-                >
-                    <SlidersHorizontal size={16} />
-                    <span>Filters</span>
-                </Button>
-            </div>
-
-            {/* Chips */}
-
-            {hasFilters && (
-                <div className="mb-4 flex flex-wrap gap-2">
-                    {chips.map((chip) => (
-                        <FilterChip
-                            key={chip.key}
-                            label={chip.label}
-                            onRemove={
-                                chip.onRemove
-                            }
-                        />
-                    ))}
-
-                    <button
-                        onClick={() =>
-                            setFilters(
-                                EMPTY_FILTERS,
-                            )
-                        }
-                        className="cursor-pointer text-xs text-muted-foreground hover:text-foreground"
-                    >
-                        Clear all filters
-                    </button>
-                </div>
-            )}
+            <FeRequisitionFiltersToolbar
+                filters={filters}
+                onFiltersChange={
+                    handleFiltersChange
+                }
+                onReset={resetFilters}
+            />
 
             {/* Error */}
 
@@ -381,34 +217,14 @@ export default function HomeVanDriversPage() {
                 )}
 
             {/* Pagination */}
-
-            {data &&
-                data.totalPages > 1 && (
-                    <Pagination
-                        page={data.page}
-                        totalPages={
-                            data.totalPages
-                        }
-                        onPageChange={
-                            setPage
-                        }
-                        className="mt-6"
-                    />
-                )}
-
-            {/* Drawer */}
-
-            <FeRequisitionFilterDrawer
-                open={drawerOpen}
-                filters={draftFilters}
-                onClose={closeDrawer}
-                onFiltersChange={
-                    setDraftFilters
-                }
-                onApply={
-                    applyDrawerFilters
-                }
-            />
+            {data && data.totalPages > 1 && (
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    onPageChange={setPage}
+                    className="mt-6"
+                />
+            )}
         </PageContainer>
     );
 }

@@ -24,6 +24,7 @@ const STATIC_OPTIONS: ComboboxOption[] = [
 ];
 type Props = {
     value: CreatedByFilter;
+    hideLabel?: boolean;
 
     onChange: (
         value: CreatedByFilter,
@@ -33,6 +34,7 @@ type Props = {
 export function CreatedByUserFilterField({
     value,
     onChange,
+    hideLabel = false,
 }: Readonly<Props>) {
     const selectedValue =
         value.type === "any"
@@ -42,51 +44,65 @@ export function CreatedByUserFilterField({
                 : value.userId;
 
     const selectedLabel =
-        value.type === "any"
-            ? "Anyone"
-            : value.type === "me"
-                ? "Me"
-                : value.label;
+        value.type === "me"
+            ? "Created By: Me"
+            : value.type === "any"
+                ? "Created By: Anyone"
+                : `Created By: ${value.label}`;
+
+    const combobox = (
+        <Combobox
+            value={selectedValue}
+            label={selectedLabel}
+            placeholder="Created By: Anyone"
+            pinnedOptions={STATIC_OPTIONS}
+            onSearch={async (search) => {
+                const res =
+                    await requisitionUsersApi.search({
+                        search,
+                        pageSize: 20,
+                    });
+
+                return res.items.map((x) => ({
+                    value: x.id,
+                    label: x.name,
+                }));
+            }}
+            onChange={(value, option) => {
+                if (value === "__ME__") {
+                    onChange({
+                        type: "me",
+                    });
+
+                    return;
+                }
+
+                if (value === "__ANY__") {
+                    onChange({
+                        type: "any",
+                    });
+
+                    return;
+                }
+
+                if (option) {
+                    onChange({
+                        type: "user",
+                        userId: value!,
+                        label: option.label,
+                    });
+                }
+            }}
+        />
+    );
+
+    if (hideLabel) {
+        return combobox;
+    }
 
     return (
-        <Field label="Requisition Created By">
-            <Combobox
-                value={selectedValue}
-                label={selectedLabel}
-                placeholder="Select creator..."
-                pinnedOptions={STATIC_OPTIONS}
-                onSearch={async (search) => {
-                    const res =
-                        await requisitionUsersApi.search({
-                            search,
-                            pageSize: 20,
-                        });
-
-                    return res.items.map((x) => ({
-                        value: x.id,
-                        label: x.name,
-                    }));
-                }}
-                onChange={(value, option) => {
-                    if (value === "__ME__") {
-                        onChange({ type: "me", });
-                        return;
-                    }
-
-                    if (value === "__ANY__") {
-                        onChange({ type: "any", });
-                        return;
-                    }
-
-                    if (option) {
-                        onChange({
-                            type: "user",
-                            userId: value!,
-                            label: option.label,
-                        });
-                    }
-                }}
-            />
+        <Field label="Created By">
+            {combobox}
         </Field>
-    );
+    )
 }

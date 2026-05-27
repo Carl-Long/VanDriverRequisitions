@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { fieldBase } from "./fieldstyles";
 
 export type ComboboxOption = {
     value: string;
@@ -145,7 +146,8 @@ export function Combobox({
                     setOpen((prev) => !prev)
                 }
                 className={cn(
-                    "cursor-pointer flex h-10 w-full items-center justify-between rounded-lg border border-border bg-surface px-3 text-sm",
+                    fieldBase,
+                    "cursor-pointer flex items-center justify-between",
                 )}
             >
                 <span

@@ -7,42 +7,69 @@ import { shopsApi } from "@/lib/api/shops";
 type Props = {
     value: string | null;
     label: string | null;
+    hideLabel?: boolean;
     onChange: (
         value: string | null,
         label: string | null,
     ) => void;
 };
 
+const STATIC_OPTIONS = [
+    {
+        value: "__ALL__",
+        label: "All shops",
+    },
+];
+
 export function ShopFilterField({
     value,
     label,
+    hideLabel = false,
     onChange,
 }: Readonly<Props>) {
+    const combobox = (
+        <Combobox
+            value={value}
+            label={
+                label
+                    ? `Shop: ${label}`
+                    : "Shop: All shops"
+            }
+            
+            pinnedOptions={STATIC_OPTIONS}
+            placeholder="Shop: All shops"
+            onSearch={async (search) => {
+                const res =
+                    await shopsApi.search({
+                        search,
+                        pageSize: 20,
+                    });
+
+                return res.items.map((x) => ({
+                    value: x.id,
+                    label: `${x.code} - ${x.name}`,
+                }));
+            }}
+            onChange={(value, option) => {
+                if (value === "__ALL__") {
+                    onChange(null, null);
+                    return;
+                }
+                onChange(
+                    value,
+                    option?.label ?? null,
+                );
+            }}
+        />
+    );
+
+    if (hideLabel) {
+        return combobox;
+    }
+
     return (
         <Field label="Shop">
-            <Combobox
-                value={value}
-                label={label}
-                placeholder="Select shop..."
-                onSearch={async (search) => {
-                    const res =
-                        await shopsApi.search({
-                            search,
-                            pageSize: 20,
-                        });
-
-                    return res.items.map((x) => ({
-                        value: x.id,
-                        label: `${x.code} - ${x.name}`,
-                    }));
-                }}
-                onChange={(value, option) => {
-                    onChange(
-                        value,
-                        option?.label ?? null,
-                    );
-                }}
-            />
+            {combobox}
         </Field>
     );
 }
