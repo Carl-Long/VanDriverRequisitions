@@ -19,5 +19,9 @@ export function buildFeRequisitionQuery(
         ...(filters.status && {
             status: filters.status,
         }),
+
+        ...(filters.shopId && {
+            shopId: filters.shopId,
+        }),
     };
 }

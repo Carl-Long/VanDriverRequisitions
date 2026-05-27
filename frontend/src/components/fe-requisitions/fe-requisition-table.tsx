@@ -4,10 +4,9 @@ import { TableRow } from "@/components/ui/table/table-row";
 
 import type { FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 import { formatDateGB } from "@/lib/format/date";
-
-import { RequisitionStatus } from "./types";
 import { StatusPill } from "./status-pill";
 import { formatCurrency } from "./requisition-form/utils";
+import { RequisitionStatus } from "./constants";
 
 type Props = {
     items: FeRequisitionSummary[];

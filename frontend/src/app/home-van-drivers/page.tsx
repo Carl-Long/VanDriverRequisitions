@@ -199,8 +199,8 @@ export default function HomeVanDriversPage() {
             result.push({
                 key: "status",
                 label: `Status: ${requisitionStatusConfig[
-                        filters.status as RequisitionStatus
-                    ].label
+                    filters.status
+                ].label
                     }`,
                 onRemove: () =>
                     setFilters((prev) => ({
@@ -218,6 +218,19 @@ export default function HomeVanDriversPage() {
                     setFilters((prev) => ({
                         ...prev,
                         createdByMe: false,
+                    })),
+            });
+        }
+
+        if (filters.shopId && filters.shopLabel) {
+            result.push({
+                key: "shop",
+                label: `Shop: ${filters.shopLabel}`,
+                onRemove: () =>
+                    setFilters((prev) => ({
+                        ...prev,
+                        shopId: null,
+                        shopLabel: null,
                     })),
             });
         }
