@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 import type { FeRequisitionFilters } from "./types";
 
-import { REQUISITION_STATUSES, requisitionStatusConfig, RESET_FILTERS, } from "./constants";
+import { INITIAL_FILTERS, REQUISITION_STATUSES, requisitionStatusConfig, } from "./constants";
 
 type Props = {
     open: boolean;
@@ -39,7 +39,7 @@ export function FeRequisitionFilterModal({
     }
 
     function resetFilters() {
-        onFiltersChange(RESET_FILTERS);
+        onFiltersChange(INITIAL_FILTERS);
     }
 
     return (
@@ -117,17 +117,19 @@ export function FeRequisitionFilterModal({
 
                 {/* Actions */}
                 <div className="flex items-center justify-between pt-2">
-                    <button
-                        type="button"
+                    <Button
+                        tone="accent"
+                        variant="outline"
                         onClick={resetFilters}
-                        className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+                
                     >
                         Reset filters
-                    </button>
+                    </Button>
 
                     <div className="flex items-center gap-3">
                         <Button
-                            tone="secondary"
+                            tone="primary"
+                            variant="outline"
                             onClick={onClose}
                         >
                             Cancel

@@ -186,9 +186,8 @@ export default function HomeVanDriversPage() {
     if (filters.createdByMe) {
         activeChips.push({
             key: "mine",
-            label: `My Requisitions${
-                user ? ` (${user.name})` : ""
-            }`,
+            label: `My Requisitions${user ? ` (${user.name})` : ""
+                }`,
             onRemove: () =>
                 setFilters((prev) => ({
                     ...prev,
@@ -215,11 +214,10 @@ export default function HomeVanDriversPage() {
     if (filters.status) {
         activeChips.push({
             key: "status",
-            label: `Status: ${
-                requisitionStatusConfig[
-                    filters.status
-                ]?.label ?? filters.status
-            }`,
+            label: `Status: ${requisitionStatusConfig[
+                filters.status
+            ]?.label ?? filters.status
+                }`,
             onRemove: () =>
                 setFilters((prev) => ({
                     ...prev,
@@ -296,6 +294,7 @@ export default function HomeVanDriversPage() {
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                     {activeChips.map((chip) => (
                         <FilterChip
+
                             key={chip.key}
                             label={chip.label}
                             onRemove={chip.onRemove}
@@ -305,7 +304,7 @@ export default function HomeVanDriversPage() {
                     <button
                         type="button"
                         onClick={clearAllFilters}
-                        className="text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                        className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer select-none"
                     >
                         Clear all
                     </button>
@@ -316,11 +315,10 @@ export default function HomeVanDriversPage() {
             <div className="mb-4">
                 <p className="text-sm text-muted-foreground">
                     {data && !loading
-                        ? `${data.totalCount} requisition${
-                              data.totalCount === 1
-                                  ? ""
-                                  : "s"
-                          }`
+                        ? `${data.totalCount} requisition${data.totalCount === 1
+                            ? ""
+                            : "s"
+                        }`
                         : "\u00A0"}
                 </p>
             </div>
@@ -337,26 +335,12 @@ export default function HomeVanDriversPage() {
 
             {/* Empty */}
             {!loading &&
-                data &&
-                data.items.length === 0 && (
+                data?.items.length === 0 && (
                     <EmptyState
                         title={
                             hasFilters
                                 ? "No requisitions match your current filters."
                                 : "No requisitions yet."
-                        }
-                        action={
-                            hasFilters ? (
-                                <button
-                                    type="button"
-                                    onClick={
-                                        clearAllFilters
-                                    }
-                                    className="text-sm font-medium text-primary transition hover:underline"
-                                >
-                                    Clear all filters
-                                </button>
-                            ) : null
                         }
                     />
                 )}

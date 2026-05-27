@@ -3,32 +3,27 @@ import { cn } from "@/lib/utils";
 import {
     requisitionStatusConfig,
     statusVariants,
+    type RequisitionStatus,
 } from "./constants";
 
 type Props = {
-    status: string;
+    status: RequisitionStatus;
 };
 
 export function StatusPill({
     status,
 }: Readonly<Props>) {
     const config =
-        requisitionStatusConfig[
-            status as keyof typeof requisitionStatusConfig
-        ];
+        requisitionStatusConfig[status];
 
     return (
         <span
             className={cn(
-                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border",
-                config
-                    ? statusVariants[
-                          config.variant
-                      ]
-                    : "bg-muted text-muted-foreground border-border-subtle",
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                statusVariants[config.variant],
             )}
         >
-            {config?.label ?? status}
+            {config.label}
         </span>
     );
 }

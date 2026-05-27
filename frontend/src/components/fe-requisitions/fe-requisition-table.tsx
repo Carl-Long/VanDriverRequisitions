@@ -5,51 +5,9 @@ import { TableRow } from "@/components/ui/table/table-row";
 import type { FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 import { formatDateGB } from "@/lib/format/date";
 
-import { cn } from "@/lib/utils";
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-    Draft: { label: "Draft", className: "bg-muted text-muted-foreground" },
-    Submitted: { label: "Submitted", className: "bg-blue-500/10 text-blue-600" },
-    Rejected: { label: "Rejected", className: "bg-red-500/10 text-red-600" },
-    Resubmitted: { label: "Resubmitted", className: "bg-amber-500/10 text-amber-600" },
-    SentToFinance: { label: "Sent to Finance", className: "bg-purple-500/10 text-purple-600" },
-    Processed: { label: "Processed", className: "bg-emerald-500/10 text-emerald-600" },
-    ReturnedFromFinance: { label: "Returned", className: "bg-orange-500/10 text-orange-600" },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-
-function formatCurrency(value: number): string {
-    return new Intl.NumberFormat("en-GB", {
-        style: "currency",
-        currency: "GBP",
-    }).format(value);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-function StatusPill({ status }: Readonly<{ status: string }>) {
-    const config = statusConfig[status] ?? {
-        label: status,
-        className: "bg-muted text-muted-foreground",
-    };
-
-    return (
-        <span
-            className={cn(
-                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                config.className,
-            )}
-        >
-            {config.label}
-        </span>
-    );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { RequisitionStatus } from "./types";
+import { StatusPill } from "./status-pill";
+import { formatCurrency } from "./requisition-form/utils";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -138,7 +96,9 @@ export function FeRequisitionTable({
 
                             {/* Status */}
                             <td className="whitespace-nowrap px-4 py-3 align-middle">
-                                <StatusPill status={req.status} />
+                                <StatusPill
+                                    status={req.status as RequisitionStatus}
+                                />
                             </td>
 
                             {/* Driver */}
