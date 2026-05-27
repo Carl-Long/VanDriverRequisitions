@@ -32,8 +32,8 @@ import {
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FilterChip } from "@/components/fe-requisitions/filter-chip";
 import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
-import { FeRequisitionFilterModal } from "@/components/fe-requisitions/re-requisition-filter-modal";
 import { FeRequisitionFilters } from "@/components/fe-requisitions/types";
+import { FeRequisitionFilterDrawer } from "@/components/fe-requisitions/fe-requisitions-filter-drawer";
 
 type QueryState = FeRequisitionFilters;
 
@@ -50,11 +50,11 @@ export default function HomeVanDriversPage() {
     // =========================
     // Data state
     // =========================
-    const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
+    const [data, setData] =
+        useState<PagedResult<FeRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Safe derived value (fixes TS issue)
     const items = data?.items ?? [];
 
     // =========================
@@ -64,10 +64,11 @@ export default function HomeVanDriversPage() {
     const debouncedSearch = useDebounce(searchInput, 400);
 
     // =========================
-    // Filter modal state
+    // Filter drawer state
     // =========================
-    const [filterModalOpen, setFilterModalOpen] = useState(false);
-    const [draftFilters, setDraftFilters] = useState<QueryState>(query);
+    const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+    const [draftFilters, setDraftFilters] =
+        useState<QueryState>(query);
 
     // =========================
     // Sync search → query
@@ -82,7 +83,7 @@ export default function HomeVanDriversPage() {
     }, [debouncedSearch]);
 
     // =========================
-    // Fetch data (fixed async + cleanup)
+    // Fetch data
     // =========================
     useEffect(() => {
         let cancelled = false;
@@ -101,7 +102,9 @@ export default function HomeVanDriversPage() {
                 }
             } catch {
                 if (!cancelled) {
-                    setError("Failed to load requisitions. Is the API running?");
+                    setError(
+                        "Failed to load requisitions. Is the API running?"
+                    );
                 }
             } finally {
                 if (!cancelled) {
@@ -118,21 +121,21 @@ export default function HomeVanDriversPage() {
     }, [query, page]);
 
     // =========================
-    // Modal handlers
+    // Drawer handlers
     // =========================
-    function openFilterModal() {
+    function openFilterDrawer() {
         setDraftFilters(query);
-        setFilterModalOpen(true);
+        setFilterDrawerOpen(true);
     }
 
-    function closeFilterModal() {
-        setFilterModalOpen(false);
+    function closeFilterDrawer() {
+        setFilterDrawerOpen(false);
     }
 
     function applyFilters() {
         setQuery(draftFilters);
         setPage(1);
-        setFilterModalOpen(false);
+        setFilterDrawerOpen(false);
     }
 
     function clearAllFilters() {
@@ -142,7 +145,7 @@ export default function HomeVanDriversPage() {
     }
 
     // =========================
-    // Active chips (derived)
+    // Active chips
     // =========================
     const activeChips = useMemo(() => {
         const chips: {
@@ -156,7 +159,10 @@ export default function HomeVanDriversPage() {
                 key: "mine",
                 label: `My Requisitions${user ? ` (${user.name})` : ""}`,
                 onRemove: () =>
-                    setQuery(prev => ({ ...prev, createdByMe: false })),
+                    setQuery(prev => ({
+                        ...prev,
+                        createdByMe: false,
+                    })),
             });
         }
 
@@ -165,7 +171,10 @@ export default function HomeVanDriversPage() {
                 key: "reqNum",
                 label: `Req #: ${query.requisitionNumber}`,
                 onRemove: () => {
-                    setQuery(prev => ({ ...prev, requisitionNumber: "" }));
+                    setQuery(prev => ({
+                        ...prev,
+                        requisitionNumber: "",
+                    }));
                     setSearchInput("");
                 },
             });
@@ -174,10 +183,14 @@ export default function HomeVanDriversPage() {
         if (query.status) {
             chips.push({
                 key: "status",
-                label: `Status: ${requisitionStatusConfig[query.status]?.label ?? query.status
+                label: `Status: ${requisitionStatusConfig[query.status]?.label ??
+                    query.status
                     }`,
                 onRemove: () =>
-                    setQuery(prev => ({ ...prev, status: "" })),
+                    setQuery(prev => ({
+                        ...prev,
+                        status: "",
+                    })),
             });
         }
 
@@ -213,7 +226,11 @@ export default function HomeVanDriversPage() {
                 title="Home Van Drivers"
                 description="View and manage FE requisitions for home van drivers."
             >
-                <Button onClick={() => router.push("/home-van-drivers/new")}>
+                <Button
+                    onClick={() =>
+                        router.push("/home-van-drivers/new")
+                    }
+                >
                     <Plus size={16} />
                     <span>New Requisition</span>
                 </Button>
@@ -231,12 +248,17 @@ export default function HomeVanDriversPage() {
                         type="text"
                         placeholder="Search by requisition number…"
                         value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
+                        onChange={(e) =>
+                            setSearchInput(e.target.value)
+                        }
                         className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm"
                     />
                 </div>
 
-                <Button tone="secondary" onClick={openFilterModal}>
+                <Button
+                    tone="secondary"
+                    onClick={openFilterDrawer}
+                >
                     <SlidersHorizontal size={16} />
                     <span>Filters</span>
                 </Button>
@@ -280,8 +302,6 @@ export default function HomeVanDriversPage() {
             {/* Loading */}
             {loading && <TableSkeleton />}
 
-
-
             {/* Empty */}
             {!loading && items.length === 0 && (
                 <EmptyState
@@ -295,8 +315,10 @@ export default function HomeVanDriversPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
-                    onRowClick={(req) =>
-                        router.push(`/home-van-drivers/${req.id}`)
+                    onRowClick={req =>
+                        router.push(
+                            `/home-van-drivers/${req.id}`
+                        )
                     }
                 />
             )}
@@ -311,11 +333,11 @@ export default function HomeVanDriversPage() {
                 />
             )}
 
-            {/* Filter Modal */}
-            <FeRequisitionFilterModal
-                open={filterModalOpen}
+            {/* Filter Drawer */}
+            <FeRequisitionFilterDrawer
+                open={filterDrawerOpen}
                 filters={draftFilters}
-                onClose={closeFilterModal}
+                onClose={closeFilterDrawer}
                 onFiltersChange={setDraftFilters}
                 onApply={applyFilters}
             />
