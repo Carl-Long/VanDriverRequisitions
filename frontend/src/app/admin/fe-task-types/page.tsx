@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -21,6 +21,7 @@ import {
 
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -108,6 +109,19 @@ export default function FeTaskTypesPage() {
         }
     }
 
+    const emptyState =
+        search.trim()
+            ? {
+                icon: Search,
+                title: "No task types found",
+                description: "Try adjusting your search terms.",
+            }
+            : {
+                icon: Plus,
+                title: "No task types yet",
+                description: "Create your first task type to get started.",
+            };
+
     return (
         <PageContainer>
             <PageHeader
@@ -160,22 +174,11 @@ export default function FeTaskTypesPage() {
             )}
 
             {!loading && filtered.length === 0 && (
-                <Surface className="py-16 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        {search
-                            ? "No task types match your search."
-                            : "No task types yet. Create one to get started."}
-                    </p>
-
-                    {!search && (
-                        <div className="mt-4">
-                            <IconButton onClick={openCreate}>
-                                <Plus size={14} />
-                                Create Task Type
-                            </IconButton>
-                        </div>
-                    )}
-                </Surface>
+                <EmptyState
+                    icon={emptyState.icon}
+                    title={emptyState.title}
+                    description={emptyState.description}
+                />
             )}
 
             {!loading && filtered.length > 0 && (

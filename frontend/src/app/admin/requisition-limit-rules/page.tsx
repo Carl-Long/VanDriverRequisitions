@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search, SlidersHorizontal } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -22,6 +22,7 @@ import type { FeTaskType } from "@/lib/api/fe-task-types";
 
 import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/requisition-limit-rule-table";
 import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -128,6 +129,20 @@ export default function RequisitionLimitRulesPage() {
         await load();
     }
 
+    const emptyState =
+        search.trim()
+            ? {
+                icon: Search,
+                title: "No rules found",
+                description: "Try adjusting your search terms.",
+            }
+            : {
+                icon: SlidersHorizontal,
+                title: "No requisition limit rules yet",
+                description:
+                    "Create your first rule to define limits for requisitions.",
+            };
+
     /* ---------------- UI ---------------- */
 
     return (
@@ -166,13 +181,11 @@ export default function RequisitionLimitRulesPage() {
             )}
 
             {!loading && filtered.length === 0 && (
-                <Surface className="py-16 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        {search
-                            ? "No rules match your search."
-                            : "No requisition limit rules yet."}
-                    </p>
-                </Surface>
+                <EmptyState
+                    icon={emptyState.icon}
+                    title={emptyState.title}
+                    description={emptyState.description}
+                />
             )}
 
             {!loading && filtered.length > 0 && (

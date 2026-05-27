@@ -86,7 +86,7 @@ export const INITIAL_FILTERS: FeRequisitionFilters = {
     createdByMe: true,
 };
 
-export const RESET_FILTERS: FeRequisitionFilters = {
+export const EMPTY_FILTERS: FeRequisitionFilters = {
     requisitionNumber: "",
     status: "",
     createdByMe: false,

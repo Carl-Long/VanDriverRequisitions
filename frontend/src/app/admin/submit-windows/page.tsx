@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarX, Plus } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -24,6 +24,7 @@ import {
 import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/providers/toast-provider";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const PAGE_SIZE = 10;
 
@@ -48,6 +49,41 @@ export default function SubmitWindowsPage() {
         loading: statusLoading,
         refresh: refreshStatus,
     } = useSubmitWindowStatus();
+
+    const emptyState = (() => {
+        switch (filter) {
+            case "active":
+                return {
+                    icon: CalendarX,
+                    title: "No current or upcoming submit windows",
+                    description:
+                        "Create a new submit window to allow requisitions to be submitted.",
+                };
+
+            case "past":
+                return {
+                    icon: CalendarX,
+                    title: "No past submit windows",
+                    description:
+                        "Once submit windows close, they will appear here.",
+                };
+
+            case "deleted":
+                return {
+                    icon: CalendarX,
+                    title: "No deleted submit windows",
+                    description:
+                        "Deleted submit windows will appear here.",
+                };
+
+            default:
+                return {
+                    icon: CalendarX,
+                    title: "No submit windows",
+                    description: "No submit windows found.",
+                };
+        }
+    })();
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -212,21 +248,14 @@ export default function SubmitWindowsPage() {
             }
 
             {/* Empty state */}
-            {!loading &&
-                data?.items.length === 0 && (
-                    <Surface className="py-16 text-center">
-                        <p className="text-sm text-muted-foreground">
-                            {{
-                                active:
-                                    "No current or upcoming submit windows.",
-                                past:
-                                    "No past submit windows.",
-                                deleted:
-                                    "No deleted submit windows.",
-                            }[filter]}
-                        </p>
-                    </Surface>
-                )}
+
+            {!loading && data?.items.length === 0 && (
+                <EmptyState
+                    icon={emptyState.icon}
+                    title={emptyState.title}
+                    description={emptyState.description}
+                />
+            )}
 
             {/* Table */}
             {

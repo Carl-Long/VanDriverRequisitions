@@ -1,25 +1,14 @@
 "use client";
 
-import {
-    useCallback,
-    useEffect,
-    useState,
-} from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-    Plus,
-    Search,
-    SlidersHorizontal,
-} from "lucide-react";
+import { Inbox, Plus, Search, SlidersHorizontal } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
-
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -32,128 +21,107 @@ import {
 
 import type { PagedResult } from "@/lib/types";
 
-import { cn } from "@/lib/utils";
-
 import { useDebounce } from "@/hooks/use-debounce";
-import { INITIAL_FILTERS, requisitionStatusConfig } from "@/components/fe-requisitions/constants";
+
+import {
+    EMPTY_FILTERS,
+    INITIAL_FILTERS,
+    requisitionStatusConfig,
+} from "@/components/fe-requisitions/constants";
+
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FilterChip } from "@/components/fe-requisitions/filter-chip";
 import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
 import { FeRequisitionFilterModal } from "@/components/fe-requisitions/re-requisition-filter-modal";
 import { FeRequisitionFilters } from "@/components/fe-requisitions/types";
 
+type QueryState = FeRequisitionFilters;
 
 export default function HomeVanDriversPage() {
     const { user } = useAuth();
-
     const router = useRouter();
 
-    // Data
-    const [data, setData] =
-        useState<
-            PagedResult<FeRequisitionSummary> | null
-        >(null);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [error, setError] =
-        useState<string | null>(null);
-
+    // =========================
+    // Core state
+    // =========================
+    const [query, setQuery] = useState<QueryState>(INITIAL_FILTERS);
     const [page, setPage] = useState(1);
 
-    // Filters
-    const [filters, setFilters] =
-        useState<FeRequisitionFilters>(
-            INITIAL_FILTERS,
-        );
+    // =========================
+    // Data state
+    // =========================
+    const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const [tempFilters, setTempFilters] =
-        useState<FeRequisitionFilters>(
-            INITIAL_FILTERS,
-        );
+    // Safe derived value (fixes TS issue)
+    const items = data?.items ?? [];
 
-    const [searchInput, setSearchInput] =
-        useState("");
+    // =========================
+    // Search state (UI only)
+    // =========================
+    const [searchInput, setSearchInput] = useState("");
+    const debouncedSearch = useDebounce(searchInput, 400);
 
-    const debouncedSearch =
-        useDebounce(searchInput, 400);
+    // =========================
+    // Filter modal state
+    // =========================
+    const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const [draftFilters, setDraftFilters] = useState<QueryState>(query);
 
-    const [filterModalOpen, setFilterModalOpen] =
-        useState(false);
+    // =========================
+    // Sync search → query
+    // =========================
+    useEffect(() => {
+        setQuery(prev => ({
+            ...prev,
+            requisitionNumber: debouncedSearch.trim(),
+        }));
 
-    // Load data
-    const load = useCallback(async () => {
-        setLoading(true);
+        setPage(1);
+    }, [debouncedSearch]);
 
-        setError(null);
+    // =========================
+    // Fetch data (fixed async + cleanup)
+    // =========================
+    useEffect(() => {
+        let cancelled = false;
 
-        try {
-            const result =
-                await feRequisitionsApi.getAll(
-                    buildFeRequisitionQuery(
-                        page,
-                        filters,
-                    ),
+        const run = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const result = await feRequisitionsApi.getAll(
+                    buildFeRequisitionQuery(page, query)
                 );
 
-            setData(result);
-        } catch {
-            setError(
-                "Failed to load requisitions. Is the API running?",
-            );
-        } finally {
-            setLoading(false);
-        }
-    }, [page, filters]);
+                if (!cancelled) {
+                    setData(result);
+                }
+            } catch {
+                if (!cancelled) {
+                    setError("Failed to load requisitions. Is the API running?");
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
 
-    useEffect(() => {
-        load();
-    }, [load]);
+        run();
 
-    // Reset page when filters change
-    useEffect(() => {
-        setPage(1);
-    }, [filters]);
+        return () => {
+            cancelled = true;
+        };
+    }, [query, page]);
 
-    // Debounced search
-    useEffect(() => {
-        const trimmed = debouncedSearch.trim();
-
-        if (
-            trimmed ===
-            filters.requisitionNumber
-        ) {
-            return;
-        }
-
-        setFilters((prev) => ({
-            ...prev,
-            requisitionNumber: trimmed,
-        }));
-    }, [
-        debouncedSearch,
-        filters.requisitionNumber,
-    ]);
-
-    function handleSearch(
-        e: React.SyntheticEvent<
-            HTMLFormElement,
-            SubmitEvent
-        >,
-    ) {
-        e.preventDefault();
-
-        setFilters((prev) => ({
-            ...prev,
-            requisitionNumber:
-                searchInput.trim(),
-        }));
-    }
-
-    // Modal
+    // =========================
+    // Modal handlers
+    // =========================
     function openFilterModal() {
-        setTempFilters(filters);
+        setDraftFilters(query);
         setFilterModalOpen(true);
     }
 
@@ -162,100 +130,98 @@ export default function HomeVanDriversPage() {
     }
 
     function applyFilters() {
-        setFilters(tempFilters);
+        setQuery(draftFilters);
+        setPage(1);
         setFilterModalOpen(false);
     }
 
     function clearAllFilters() {
-        setFilters({
-            requisitionNumber: "",
-            status: "",
-            createdByMe: false,
-        });
-
+        setQuery(EMPTY_FILTERS);
         setSearchInput("");
+        setPage(1);
     }
 
-    // Active chips
-    const activeChips: {
-        key: string;
-        label: string;
-        onRemove: () => void;
-    }[] = [];
+    // =========================
+    // Active chips (derived)
+    // =========================
+    const activeChips = useMemo(() => {
+        const chips: {
+            key: string;
+            label: string;
+            onRemove: () => void;
+        }[] = [];
 
-    if (filters.createdByMe) {
-        activeChips.push({
-            key: "mine",
-            label: `My Requisitions${user ? ` (${user.name})` : ""
-                }`,
-            onRemove: () =>
-                setFilters((prev) => ({
-                    ...prev,
-                    createdByMe: false,
-                })),
-        });
-    }
+        if (query.createdByMe) {
+            chips.push({
+                key: "mine",
+                label: `My Requisitions${user ? ` (${user.name})` : ""}`,
+                onRemove: () =>
+                    setQuery(prev => ({ ...prev, createdByMe: false })),
+            });
+        }
 
-    if (filters.requisitionNumber) {
-        activeChips.push({
-            key: "reqNum",
-            label: `Req #: ${filters.requisitionNumber}`,
-            onRemove: () => {
-                setFilters((prev) => ({
-                    ...prev,
-                    requisitionNumber: "",
-                }));
+        if (query.requisitionNumber) {
+            chips.push({
+                key: "reqNum",
+                label: `Req #: ${query.requisitionNumber}`,
+                onRemove: () => {
+                    setQuery(prev => ({ ...prev, requisitionNumber: "" }));
+                    setSearchInput("");
+                },
+            });
+        }
 
-                setSearchInput("");
-            },
-        });
-    }
+        if (query.status) {
+            chips.push({
+                key: "status",
+                label: `Status: ${requisitionStatusConfig[query.status]?.label ?? query.status
+                    }`,
+                onRemove: () =>
+                    setQuery(prev => ({ ...prev, status: "" })),
+            });
+        }
 
-    if (filters.status) {
-        activeChips.push({
-            key: "status",
-            label: `Status: ${requisitionStatusConfig[
-                filters.status
-            ]?.label ?? filters.status
-                }`,
-            onRemove: () =>
-                setFilters((prev) => ({
-                    ...prev,
-                    status: "",
-                })),
-        });
-    }
+        return chips;
+    }, [query, user]);
 
-    const hasFilters =
-        activeChips.length > 0;
+    const hasFilters = activeChips.length > 0;
 
+    const emptyState = useMemo(() => {
+        if (!hasFilters) {
+            return {
+                icon: Inbox,
+                title: "No requisitions yet",
+                description:
+                    "Requisitions will appear here once they are created.",
+            };
+        }
+
+        return {
+            icon: Search,
+            title: "No requisitions found",
+            description:
+                "Try adjusting or clearing your filters to see results.",
+        };
+    }, [hasFilters]);
+
+    // =========================
+    // Render
+    // =========================
     return (
         <PageContainer>
             <PageHeader
                 title="Home Van Drivers"
                 description="View and manage FE requisitions for home van drivers."
             >
-                <Button
-                    onClick={() =>
-                        router.push(
-                            "/home-van-drivers/new",
-                        )
-                    }
-                >
+                <Button onClick={() => router.push("/home-van-drivers/new")}>
                     <Plus size={16} />
-
-                    <span>
-                        New Requisition
-                    </span>
+                    <span>New Requisition</span>
                 </Button>
             </PageHeader>
 
             {/* Search + Filters */}
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <form
-                    onSubmit={handleSearch}
-                    className="relative flex-1"
-                >
+                <div className="relative w-full max-w-md">
                     <Search
                         size={16}
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -265,36 +231,22 @@ export default function HomeVanDriversPage() {
                         type="text"
                         placeholder="Search by requisition number…"
                         value={searchInput}
-                        onChange={(e) =>
-                            setSearchInput(
-                                e.target.value,
-                            )
-                        }
-                        className={cn(
-                            "w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground",
-                            "placeholder:text-muted-foreground",
-                            "focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-ring/20",
-                            "transition-colors",
-                        )}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm"
                     />
-                </form>
+                </div>
 
-                <Button
-                    tone="secondary"
-                    onClick={openFilterModal}
-                >
+                <Button tone="secondary" onClick={openFilterModal}>
                     <SlidersHorizontal size={16} />
-
                     <span>Filters</span>
                 </Button>
             </div>
 
-            {/* Filter Chips */}
+            {/* Chips */}
             {hasFilters && (
                 <div className="mb-4 flex flex-wrap items-center gap-2">
-                    {activeChips.map((chip) => (
+                    {activeChips.map(chip => (
                         <FilterChip
-
                             key={chip.key}
                             label={chip.label}
                             onRemove={chip.onRemove}
@@ -302,30 +254,25 @@ export default function HomeVanDriversPage() {
                     ))}
 
                     <button
-                        type="button"
                         onClick={clearAllFilters}
                         className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer select-none"
                     >
-                        Clear all
+                        Clear all filters
                     </button>
                 </div>
             )}
 
             {/* Count */}
-            <div className="mb-4">
-                <p className="text-sm text-muted-foreground">
-                    {data && !loading
-                        ? `${data.totalCount} requisition${data.totalCount === 1
-                            ? ""
-                            : "s"
-                        }`
-                        : "\u00A0"}
-                </p>
+            <div className="mb-4 text-sm text-muted-foreground">
+                {data && !loading
+                    ? `${data.totalCount} requisition${data.totalCount === 1 ? "" : "s"
+                    }`
+                    : "\u00A0"}
             </div>
 
             {/* Error */}
             {error && (
-                <div className="mb-6 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-600">
+                <div className="mb-6 rounded bg-red-500/10 p-3 text-sm text-red-600">
                     {error}
                 </div>
             )}
@@ -333,31 +280,26 @@ export default function HomeVanDriversPage() {
             {/* Loading */}
             {loading && <TableSkeleton />}
 
+
+
             {/* Empty */}
-            {!loading &&
-                data?.items.length === 0 && (
-                    <EmptyState
-                        title={
-                            hasFilters
-                                ? "No requisitions match your current filters."
-                                : "No requisitions yet."
-                        }
-                    />
-                )}
+            {!loading && items.length === 0 && (
+                <EmptyState
+                    icon={emptyState.icon}
+                    title={emptyState.title}
+                    description={emptyState.description}
+                />
+            )}
 
             {/* Table */}
-            {!loading &&
-                data &&
-                data.items.length > 0 && (
-                    <FeRequisitionTable
-                        items={data.items}
-                        onRowClick={(req) =>
-                            router.push(
-                                `/home-van-drivers/${req.id}`,
-                            )
-                        }
-                    />
-                )}
+            {!loading && items.length > 0 && (
+                <FeRequisitionTable
+                    items={items}
+                    onRowClick={(req) =>
+                        router.push(`/home-van-drivers/${req.id}`)
+                    }
+                />
+            )}
 
             {/* Pagination */}
             {data && data.totalPages > 1 && (
@@ -369,12 +311,12 @@ export default function HomeVanDriversPage() {
                 />
             )}
 
-            {/* Filters Modal */}
+            {/* Filter Modal */}
             <FeRequisitionFilterModal
                 open={filterModalOpen}
-                filters={tempFilters}
+                filters={draftFilters}
                 onClose={closeFilterModal}
-                onFiltersChange={setTempFilters}
+                onFiltersChange={setDraftFilters}
                 onApply={applyFilters}
             />
         </PageContainer>

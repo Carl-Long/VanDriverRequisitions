@@ -1,12 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { MessageSquare, Plus, Search } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
@@ -23,6 +22,7 @@ import { useToast } from "@/providers/toast-provider";
 import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
@@ -118,6 +118,18 @@ export default function FeReasonsPage() {
         }
     }
 
+    const emptyState = search.trim()
+        ? {
+            icon: Search,
+            title: "No reasons found",
+            description: "Try adjusting your search terms.",
+        }
+        : {
+            icon: MessageSquare,
+            title: "No reasons yet",
+            description: "Create your first reason to get started.",
+        };
+
     return (
         <PageContainer>
             <PageHeader
@@ -168,15 +180,12 @@ export default function FeReasonsPage() {
             )}
 
             {!loading && filtered.length === 0 && (
-                <Surface className="py-16 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        {search
-                            ? "No reasons match your search."
-                            : "No reasons yet. Create one to get started."}
-                    </p>
-                </Surface>
+                <EmptyState
+                    icon={emptyState.icon}
+                    title={emptyState.title}
+                    description={emptyState.description}
+                />
             )}
-
             {!loading && filtered.length > 0 && (
                 <FeReasonsTable
                     items={filtered}

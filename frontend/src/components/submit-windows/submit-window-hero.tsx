@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CalendarCheck,
   CalendarPlus,
+  CalendarX,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -179,7 +180,7 @@ export function SubmitWindowHero({
       )}
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/10">
-        <CalendarPlus size={24} className="text-warning" />
+        <CalendarX size={24} className="text-warning" />
       </div>
 
       <div className="flex-1">
