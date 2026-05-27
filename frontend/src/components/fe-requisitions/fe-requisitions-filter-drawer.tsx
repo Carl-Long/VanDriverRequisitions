@@ -1,22 +1,32 @@
 "use client";
 
+import { X } from "lucide-react";
+
 import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
+
 import { cn } from "@/lib/utils";
 
 import type { FeRequisitionFilters } from "./types";
+
 import {
-    INITIAL_FILTERS,
-    REQUISITION_STATUSES,
-    requisitionStatusConfig,
+    EMPTY_FILTERS,
 } from "./constants";
-import { IconButton } from "../ui/button/icon-button";
-import { X } from "lucide-react";
+
+import { StatusFilterField } from "./filter-fields/status-filter-field";
+import { ShopFilterField } from "./filter-fields/shop-filter-field";
 
 type Props = {
     open: boolean;
+
     filters: FeRequisitionFilters;
+
     onClose: () => void;
-    onFiltersChange: (filters: FeRequisitionFilters) => void;
+
+    onFiltersChange: (
+        filters: FeRequisitionFilters,
+    ) => void;
+
     onApply: () => void;
 };
 
@@ -27,21 +37,13 @@ export function FeRequisitionFilterDrawer({
     onFiltersChange,
     onApply,
 }: Readonly<Props>) {
-    function update<K extends keyof FeRequisitionFilters>(
-        key: K,
-        value: FeRequisitionFilters[K],
-    ) {
-        onFiltersChange({
-            ...filters,
-            [key]: value,
-        });
-    }
-
     function resetFilters() {
-        onFiltersChange(INITIAL_FILTERS);
+        onFiltersChange(EMPTY_FILTERS);
     }
 
-    if (!open) return null;
+    if (!open) {
+        return null;
+    }
 
     return (
         <div className="fixed inset-0 z-50">
@@ -63,7 +65,7 @@ export function FeRequisitionFilterDrawer({
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-border px-5 py-4">
                     <h2 className="text-base font-semibold text-foreground">
-                        Filter Requisitions
+                        Filters
                     </h2>
 
                     <IconButton
@@ -78,14 +80,30 @@ export function FeRequisitionFilterDrawer({
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-                    {/* Created By Me */}
+                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+                    {/* Mine */}
                     <label className="flex items-center gap-3">
                         <input
                             type="checkbox"
                             checked={filters.createdByMe}
                             onChange={(e) =>
-                                update("createdByMe", e.target.checked)
+                                onFiltersChange({
+                                    ...filters,
+
+                                    createdByMe:
+                                        e.target.checked,
+
+                                    // clear explicit user if toggled
+                                    createdByUserId:
+                                        e.target.checked
+                                            ? null
+                                            : filters.createdByUserId,
+
+                                    createdByUserLabel:
+                                        e.target.checked
+                                            ? null
+                                            : filters.createdByUserLabel,
+                                })
                             }
                             className="h-4 w-4 rounded border-border accent-primary"
                         />
@@ -96,41 +114,32 @@ export function FeRequisitionFilterDrawer({
                     </label>
 
                     {/* Status */}
-                    <div>
-                        <label
-                            htmlFor="filter-status"
-                            className="mb-1.5 block text-sm font-medium text-foreground"
-                        >
-                            Status
-                        </label>
+                    <StatusFilterField
+                        value={filters.status}
+                        onChange={(value) =>
+                            onFiltersChange({
+                                ...filters,
+                                status: value,
+                            })
+                        }
+                    />
 
-                        <select
-                            id="filter-status"
-                            value={filters.status}
-                            onChange={(e) =>
-                                update(
-                                    "status",
-                                    e.target.value as FeRequisitionFilters["status"],
-                                )
-                            }
-                            className={cn(
-                                "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm",
-                                "focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-ring/20",
-                            )}
-                        >
-                            <option value="">All statuses</option>
-
-                            {REQUISITION_STATUSES.map((status) => (
-                                <option key={status} value={status}>
-                                    {requisitionStatusConfig[status].label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Shop */}
+                    <ShopFilterField
+                        value={filters.shopId}
+                        label={filters.shopLabel}
+                        onChange={(value, label) =>
+                            onFiltersChange({
+                                ...filters,
+                                shopId: value,
+                                shopLabel: label,
+                            })
+                        }
+                    />
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-border px-5 py-4 flex items-center justify-between">
+                <div className="flex items-center justify-between border-t border-border px-5 py-4">
                     <Button
                         tone="accent"
                         variant="outline"

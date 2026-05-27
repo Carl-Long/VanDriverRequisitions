@@ -83,12 +83,20 @@ export const requisitionStatusConfig: Record<
 export const INITIAL_FILTERS: FeRequisitionFilters = {
     requisitionNumber: "",
     status: "",
+    shopId: null,
+    shopLabel: null,
+    createdByUserId: null,
+    createdByUserLabel: null,
     createdByMe: true,
 };
 
 export const EMPTY_FILTERS: FeRequisitionFilters = {
     requisitionNumber: "",
     status: "",
+    shopId: null,
+    shopLabel: null,
+    createdByUserId: null,
+    createdByUserLabel: null,
     createdByMe: false,
 };
 
