@@ -28,6 +28,7 @@ export function Sidebar() {
         const sync = () => {
             if (mq.matches) {
                 const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
+
                 setCollapsed(saved === "true");
             } else {
                 setCollapsed(true);
@@ -59,14 +60,14 @@ export function Sidebar() {
                 "flex flex-col h-[calc(100vh-64px)]",
                 "border-r border-border bg-surface",
                 "overflow-hidden transition-all duration-300 ease-in-out",
-                collapsed ? "w-16" : "w-72"
+                collapsed ? "w-16" : "w-60"
             )}
         >
-            <div className="flex flex-col p-2">
+            <div className="flex flex-col px-2 py-1.5">
 
                 {/* COLLAPSED HEADER */}
                 {collapsed && (
-                    <div className="flex justify-center mb-2">
+                    <div className="mb-2 flex justify-center">
                         <IconButton
                             size="md"
                             variant="ghost"
@@ -83,7 +84,7 @@ export function Sidebar() {
 
                 {/* EXPANDED HEADER */}
                 {!collapsed && (
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="mb-3 flex items-center gap-2">
                         <div className="flex-1">
                             <NavItem
                                 href="/"
@@ -132,10 +133,10 @@ export function Sidebar() {
 
                 {/* ADMIN */}
                 {showAdmin && (
-                    <div className="mt-6 pt-4 border-t border-border">
+                    <div className="mt-4 border-t border-border pt-3">
 
                         {!collapsed && (
-                            <p className="px-3 mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                                 Admin
                             </p>
                         )}

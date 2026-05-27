@@ -17,6 +17,8 @@ export type FeRequisitionSummary = {
     createdAtUtc: string;
     createdById: string;
     createdByNameSnapshot: string;
+    updatedAtUtc: string | null;
+    updatedByNameSnapshot: string | null
 };
 
 export type FeRequisitionQuery = {

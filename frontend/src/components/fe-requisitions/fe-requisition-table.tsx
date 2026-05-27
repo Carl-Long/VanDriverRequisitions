@@ -3,7 +3,12 @@ import { TableHeaderRow } from "@/components/ui/table/table-header-row";
 import { TableRow } from "@/components/ui/table/table-row";
 
 import type { FeRequisitionSummary } from "@/lib/api/fe-requisitions";
-import { formatDateGB } from "@/lib/format/date";
+
+import {
+    formatDateGB,
+    formatDateTime,
+} from "@/lib/format/date";
+
 import { StatusPill } from "./status-pill";
 import { formatCurrency } from "./requisition-form/utils";
 import { RequisitionStatus } from "./constants";
@@ -24,101 +29,117 @@ export function FeRequisitionTable({
                 {/* HEADER */}
                 <thead className="sticky top-0 z-10 border-b border-border bg-surface-elevated">
                     <TableHeaderRow>
-                        <th className="whitespace-nowrap px-4 py-3">
-                            Req #
-                        </th>
-
-                        <th className="whitespace-nowrap px-4 py-3">
-                            81 Code
+                        <th className="px-4 py-3">
+                            Requisition
                         </th>
 
                         <th className="px-4 py-3">
-                            Trader Name
+                            Company
                         </th>
 
-                        <th className="whitespace-nowrap px-4 py-3">
-                            Date
+                        <th className="whitespace-nowrap px-4 py-3 text-center">
+                            Status
                         </th>
 
                         <th className="whitespace-nowrap px-4 py-3 text-right">
                             Amount
                         </th>
 
-                        <th className="whitespace-nowrap px-4 py-3">
-                            Status
-                        </th>
-
-                        <th className="px-4 py-3">
-                            Driver
-                        </th>
-
                         <th className="px-4 py-3">
                             Shop
+                        </th>
+
+                        <th className="px-4 py-3">
+                            Last Modified
                         </th>
                     </TableHeaderRow>
                 </thead>
 
                 {/* BODY */}
                 <tbody className="divide-y divide-border-subtle">
-                    {items.map((req) => (
-                        <TableRow
-                            key={req.id}
-                            onClick={() => onRowClick(req)}
-                            className="cursor-pointer hover:bg-surface-hover"
-                        >
-                            {/* Req Number */}
-                            <td className="whitespace-nowrap px-4 py-3 align-middle">
-                                <span className="font-medium text-foreground">
-                                    {req.requisitionNumber}
-                                </span>
-                            </td>
+                    {items.map((req) => {
+                        const lastDate =
+                            req.updatedAtUtc ?? req.createdAtUtc;
 
-                            {/* 81 Code */}
-                            <td className="whitespace-nowrap px-4 py-3 align-middle text-foreground-subtle">
-                                {req.vanDriverCode}
-                            </td>
+                        const lastUser =
+                            req.updatedByNameSnapshot ??
+                            req.createdByNameSnapshot ??
+                            "System";
 
-                            {/* Trader */}
-                            <td className="px-4 py-3 align-middle text-foreground">
-                                {req.tradersName}
-                            </td>
+                        return (
+                            <TableRow
+                                key={req.id}
+                                onClick={() => onRowClick(req)}
+                                className="cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all"
+                            >
+                                {/* Requisition */}
+                                <td className="px-4 py-3 align-middle">
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="font-semibold text-foreground">
+                                            {req.requisitionNumber}
+                                        </span>
 
-                            {/* Date */}
-                            <td className="whitespace-nowrap px-4 py-3 align-middle text-muted-foreground">
-                                {formatDateGB(req.requisitionDate)}
-                            </td>
+                                        <span className="text-xs text-muted-foreground">
+                                            {formatDateGB(req.requisitionDate)}
+                                        </span>
+                                    </div>
+                                </td>
 
-                            {/* Amount */}
-                            <td className="whitespace-nowrap px-4 py-3 align-middle text-right font-medium tabular-nums text-foreground">
-                                {formatCurrency(req.subtotal)}
-                            </td>
+                                {/* Company */}
+                                <td className="px-4 py-3 align-middle">
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="font-medium text-foreground">
+                                            {req.vanDriverCode}
+                                        </span>
 
-                            {/* Status */}
-                            <td className="whitespace-nowrap px-4 py-3 align-middle">
-                                <StatusPill
-                                    status={req.status as RequisitionStatus}
-                                />
-                            </td>
+                                        <span className="text-xs text-muted-foreground truncate max-w-[220px]">
+                                            {req.tradersName}
+                                        </span>
+                                    </div>
+                                </td>
 
-                            {/* Driver */}
-                            <td className="px-4 py-3 align-middle text-foreground">
-                                {req.vanDriverName}
-                            </td>
+                                {/* Status */}
+                                <td className="whitespace-nowrap px-4 py-3 align-middle text-center">
+                                    <div className="flex justify-center">
+                                        <StatusPill
+                                            status={req.status as RequisitionStatus}
+                                        />
+                                    </div>
+                                </td>
 
-                            {/* Shop */}
-                            <td className="px-4 py-3 align-middle">
-                                <div className="flex flex-col leading-tight">
-                                    <span className="font-medium text-foreground">
-                                        {req.shopCode}
-                                    </span>
+                                {/* Amount */}
+                                <td className="whitespace-nowrap px-4 py-3 align-middle text-right font-semibold tabular-nums text-foreground">
+                                    {formatCurrency(req.subtotal)}
+                                </td>
 
-                                    <span className="text-xs text-muted-foreground">
-                                        {req.shopName}
-                                    </span>
-                                </div>
-                            </td>
-                        </TableRow>
-                    ))}
+                                {/* Shop */}
+                                <td className="px-4 py-3 align-middle">
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="font-medium text-foreground">
+                                            {req.shopCode}
+                                        </span>
+
+                                        <span className="text-xs text-muted-foreground truncate max-w-[220px]">
+                                            {req.shopName}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                {/* Last Modified */}
+                                <td className="px-4 py-3 align-middle">
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="text-sm text-foreground">
+                                            {formatDateTime(lastDate) ?? "—"}
+                                        </span>
+
+                                        <span className="text-xs text-muted-foreground truncate max-w-[160px]">
+                                            {lastUser ?? "System"}
+                                        </span>
+                                    </div>
+                                </td>
+                            </TableRow>
+                        );
+                    })}
                 </tbody>
             </table>
         </Surface>
