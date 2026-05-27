@@ -320,9 +320,9 @@ export default function HomeVanDriversPage() {
                                 EMPTY_FILTERS,
                             )
                         }
-                        className="text-xs text-muted-foreground hover:text-foreground"
+                        className="cursor-pointer text-xs text-muted-foreground hover:text-foreground"
                     >
-                        Clear all
+                        Clear all filters
                     </button>
                 </div>
             )}

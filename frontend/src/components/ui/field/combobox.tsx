@@ -143,7 +143,7 @@ export function Combobox({
                     setOpen((prev) => !prev)
                 }
                 className={cn(
-                    "flex h-10 w-full items-center justify-between rounded-lg border border-border bg-surface px-3 text-sm",
+                    "cursor-pointer flex h-10 w-full items-center justify-between rounded-lg border border-border bg-surface px-3 text-sm",
                 )}
             >
                 <span
@@ -161,7 +161,7 @@ export function Combobox({
 
             {open && (
                 <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-background shadow-lg">
-                    <div className="relative border-b border-border">
+                    <div className="relative rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset overflow-hidden">
                         <Search
                             size={14}
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -169,11 +169,7 @@ export function Combobox({
 
                         <input
                             value={search}
-                            onChange={(e) =>
-                                setSearch(
-                                    e.target.value,
-                                )
-                            }
+                            onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search..."
                             className="h-10 w-full bg-transparent pl-9 pr-3 text-sm outline-none"
                         />
