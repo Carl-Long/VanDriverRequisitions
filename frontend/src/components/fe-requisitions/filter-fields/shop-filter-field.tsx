@@ -35,7 +35,7 @@ export function ShopFilterField({
                     ? `Shop: ${label}`
                     : "Shop: All shops"
             }
-            
+            noMatchesText="No matching shops found"
             pinnedOptions={STATIC_OPTIONS}
             placeholder="Shop: All shops"
             onSearch={async (search) => {

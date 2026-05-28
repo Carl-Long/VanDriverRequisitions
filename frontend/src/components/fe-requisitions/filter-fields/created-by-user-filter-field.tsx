@@ -55,6 +55,7 @@ export function CreatedByUserFilterField({
             value={selectedValue}
             label={selectedLabel}
             placeholder="Created By: Anyone"
+            noMatchesText="No matching users found"
             pinnedOptions={STATIC_OPTIONS}
             onSearch={async (search) => {
                 const res =

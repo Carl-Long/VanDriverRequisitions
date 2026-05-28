@@ -30,6 +30,8 @@ const STATIC_OPTIONS = [
         value: "",
         label: "All statuses",
     },
+]
+const statusOptions = [
 
     ...REQUISITION_STATUSES.map((s) => ({
         value: s,
@@ -53,8 +55,10 @@ export function StatusFilterField({
                     }`
                     : "Status: All statuses"
             }
-            options={STATIC_OPTIONS}
+            pinnedOptions={STATIC_OPTIONS}
+            options={statusOptions}
             placeholder="Status: All statuses"
+            noMatchesText="No matching status found"
             onChange={(value) =>
                 onChange(
                     (value as RequisitionStatus) ??

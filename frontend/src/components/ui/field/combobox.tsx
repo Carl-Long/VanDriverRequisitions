@@ -28,6 +28,8 @@ type Props = {
     placeholder?: string;
     options?: ComboboxOption[];
     pinnedOptions?: ComboboxOption[];
+    noMatchesText?: string;
+    emptyStateText?: string; 
     onSearch?: (
         search: string,
     ) => Promise<ComboboxOption[]>;
@@ -43,6 +45,8 @@ export function Combobox({
     placeholder = "Select...",
     options = [],
     pinnedOptions = [],
+    emptyStateText = "No options available",
+    noMatchesText = "No matching results",
     onSearch,
     onChange,
 }: Readonly<Props>) {
@@ -277,7 +281,7 @@ export function Combobox({
                             pinnedOptions.length === 0 &&
                             finalOptions.length === 0 && (
                                 <div className="px-3 py-4 text-sm text-muted-foreground">
-                                    No results
+                                    {emptyStateText}
                                 </div>
                             )}
 
@@ -285,7 +289,7 @@ export function Combobox({
                             pinnedOptions.length > 0 &&
                             finalOptions.length === 0 && (
                                 <div className="px-3 py-2 text-xs text-muted-foreground">
-                                    No matching users
+                                    {noMatchesText}
                                 </div>
                             )}
                     </div>
