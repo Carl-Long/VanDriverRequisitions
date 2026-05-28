@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { FeRequisitionDraft, } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculations";
-
+import { createEmptyFeGeneralTask, } from "../lib/create-empty-fe-general-task";
 
 
 export function useFeRequisitionDraft() {
@@ -82,6 +82,33 @@ export function useFeRequisitionDraft() {
         }));
     }
 
+    function addGeneralTask() {
+        setDraft((prev) => ({
+            ...prev,
+
+            generalTasks: [
+                ...prev.generalTasks,
+
+                createEmptyFeGeneralTask(),
+            ],
+        }));
+    }
+
+    function removeGeneralTask(
+        clientId: string,
+    ) {
+        setDraft((prev) => ({
+            ...prev,
+
+            generalTasks:
+                prev.generalTasks.filter(
+                    (x) =>
+                        x.clientId !==
+                        clientId,
+                ),
+        }));
+    }
+
     return {
         draft,
         subtotal,
@@ -89,5 +116,7 @@ export function useFeRequisitionDraft() {
         setVanDriver,
         setVanDriverName,
         setShop,
+        addGeneralTask,
+        removeGeneralTask
     };
 }

@@ -1,4 +1,5 @@
 import { VanDriverLookup } from "@/lib/api/van-drivers";
+import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 
 export type FeWeeklyQuantities = {
     sunday?: number;
@@ -9,20 +10,6 @@ export type FeWeeklyQuantities = {
     friday?: number;
     saturday?: number;
 };
-
-export type FeGeneralTaskDraft = {
-    id: string;
-    taskTypeId: string;
-    taskTypeName: string;
-    taskTypeCode: string;
-    weekEndingDate: Date;
-    week: FeWeeklyQuantities;
-    totalNumber: number;
-    ratePerJob?: number;
-    totalValue?: number;
-};
-
-
 
 export type FeRequisitionDraft = {
     requisitionDate?: Date;
