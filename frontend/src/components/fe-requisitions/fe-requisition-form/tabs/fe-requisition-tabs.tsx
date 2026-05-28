@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 
 type Tab =
     | "details"
@@ -10,6 +11,7 @@ type Tab =
     | "additionalCosts";
 
 type Props = {
+    mode: FeRequisitionPageMode
     details: React.ReactNode;
 
     generalTasks: React.ReactNode;

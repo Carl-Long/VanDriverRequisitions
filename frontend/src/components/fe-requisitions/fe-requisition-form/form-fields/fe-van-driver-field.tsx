@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/van-drivers";
 
 type Props = {
+    disabled?: boolean;
     value: string | null;
     label: string | null;
     onChange: (
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function FeVanDriverField({
+    disabled,
     value,
     label,
     onChange,
@@ -37,6 +39,7 @@ export function FeVanDriverField({
             required
         >
             <Combobox
+                disabled={disabled}
                 value={value}
                 label={label}
                 placeholder="Search van drivers..."

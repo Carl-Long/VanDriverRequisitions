@@ -4,8 +4,10 @@ import { FeRequisitionActions } from "./fe-requisition-actions";
 import { FeRequisitionSummaryMetrics } from "./fe-requisition-summary-metrics";
 import { StatusPill } from "../../status-pill";
 import { RequisitionStatus } from "../../constants";
+import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 
 type Props = {
+    mode: FeRequisitionPageMode;
     requisitionNumber?: string;
     status: RequisitionStatus;
     subtotal: number;
@@ -13,10 +15,9 @@ type Props = {
 };
 
 export function FeRequisitionHeader({
+    mode,
     requisitionNumber,
-
     subtotal,
-
     generalTaskCount,
 }: Readonly<Props>) {
     return (
@@ -36,22 +37,23 @@ export function FeRequisitionHeader({
                                 "New Requisition"}
                         </h1>
 
-                        <StatusPill status="Draft"/>
+                        <StatusPill status="Draft" />
                     </div>
 
                     <div className="mt-1 text-sm text-muted-foreground">
                         FE requisition
                     </div>
                 </div>
-
                 <FeRequisitionSummaryMetrics
                     subtotal={subtotal}
                     generalTaskCount={
                         generalTaskCount
                     }
                 />
-
-                <FeRequisitionActions />
+                
+                {mode !== "readonly" && (
+                    <FeRequisitionActions />
+                )}
             </div>
         </div>
     );

@@ -5,6 +5,7 @@ import { Combobox } from "@/components/ui/field/combobox";
 import { shopsApi } from "@/lib/api/shops";
 
 type Props = {
+    disabled?: boolean;
     value: string | null;
     label: string | null;
     hideLabel?: boolean;
@@ -22,6 +23,7 @@ const STATIC_OPTIONS = [
 ];
 
 export function ShopFilterField({
+    disabled = false,
     value,
     label,
     hideLabel = false,
@@ -29,6 +31,7 @@ export function ShopFilterField({
 }: Readonly<Props>) {
     const combobox = (
         <Combobox
+            disabled={disabled}
             value={value}
             label={
                 label

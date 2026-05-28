@@ -12,12 +12,14 @@ import { FieldState, fieldStateMap } from "../theme/state";
 
 
 type Props = {
+    disabled?: boolean;
     value?: Date;
     onChange: (date: Date | undefined) => void;
     state?: FieldState;
 };
 
 export function DatePicker({
+    disabled = false,
     value,
     onChange,
     state = "default",
@@ -27,18 +29,27 @@ export function DatePicker({
     return (
         <Popover.Root
             open={open}
-            onOpenChange={setOpen}
+            onOpenChange={(next) => {
+                if (disabled) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
         >
             <Popover.Trigger asChild>
                 <button
+                    disabled={disabled}
                     type="button"
                     className={cn(
                         fieldBase,
                         fieldStateMap[state],
                         "flex cursor-pointer items-center justify-between",
                         open &&
-                            "border-primary ring-2 ring-primary/20",
-                        !open && "hover:bg-muted"
+                        "border-primary ring-2 ring-primary/20",
+                        !open && "hover:bg-muted",
+                        disabled &&
+                        "cursor-not-allowed opacity-60",
                     )}
                 >
                     {value

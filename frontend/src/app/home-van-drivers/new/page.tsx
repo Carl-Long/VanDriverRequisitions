@@ -11,7 +11,7 @@ export default function NewRequisitionPage() {
                 title="New Requisition"
                 description="Create a new FE requisition."
             />
-            <FeRequisitionShell />
+            <FeRequisitionShell mode="create"/>
         </PageContainer>
     );
 }

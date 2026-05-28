@@ -23,13 +23,14 @@ export type ComboboxOption = {
 };
 
 type Props = {
+    disabled?: boolean;
     value: string | null;
     label?: string | null;
     placeholder?: string;
     options?: ComboboxOption[];
     pinnedOptions?: ComboboxOption[];
     noMatchesText?: string;
-    emptyStateText?: string; 
+    emptyStateText?: string;
     onSearch?: (
         search: string,
     ) => Promise<ComboboxOption[]>;
@@ -40,6 +41,7 @@ type Props = {
 };
 
 export function Combobox({
+    disabled = false,
     value,
     label,
     placeholder = "Select...",
@@ -146,12 +148,18 @@ export function Combobox({
         >
             <button
                 type="button"
-                onClick={() =>
-                    setOpen((prev) => !prev)
-                }
+                onClick={() => {
+                    if (disabled) {
+                        return;
+                    }
+
+                    setOpen((prev) => !prev);
+                }}
                 className={cn(
                     fieldBase,
                     "cursor-pointer flex items-center justify-between",
+                    disabled &&
+                    "cursor-not-allowed opacity-60",
                 )}
             >
                 <span

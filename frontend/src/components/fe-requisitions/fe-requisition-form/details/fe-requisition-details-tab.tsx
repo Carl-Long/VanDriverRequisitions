@@ -10,8 +10,8 @@ import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 
 type Props = {
+    readonly: boolean;
     draft: FeRequisitionDraft;
-
     subtotal: number;
 
     onRequisitionDateChange: (
@@ -39,6 +39,7 @@ type Props = {
 };
 
 export function FeRequisitionDetailsTab({
+    readonly,
     draft,
     subtotal,
     onRequisitionDateChange,
@@ -54,6 +55,7 @@ export function FeRequisitionDetailsTab({
                     required
                 >
                     <DatePicker
+                        disabled={readonly}
                         value={
                             draft.requisitionDate
                         }
@@ -64,6 +66,7 @@ export function FeRequisitionDetailsTab({
                 </Field>
 
                 <FeVanDriverField
+                    disabled={readonly}
                     value={draft.vanDriverId}
                     label={draft.vanDriverLabel}
                     onChange={onVanDriverChange}
@@ -74,6 +77,7 @@ export function FeRequisitionDetailsTab({
                     required
                 >
                     <Input
+                        disabled={readonly}
                         value={
                             draft.vanDriverName
                         }
@@ -86,6 +90,7 @@ export function FeRequisitionDetailsTab({
                 </Field>
 
                 <ShopFilterField
+                    disabled={readonly}
                     value={draft.shopId}
                     label={draft.shopLabel}
                     onChange={(
