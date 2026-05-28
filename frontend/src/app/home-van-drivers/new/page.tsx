@@ -2,7 +2,7 @@
 
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { RequisitionForm } from "@/components/fe-requisitions/requisition-form";
+import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
 
 export default function NewRequisitionPage() {
     return (
@@ -11,7 +11,7 @@ export default function NewRequisitionPage() {
                 title="New Requisition"
                 description="Create a new FE requisition."
             />
-            <RequisitionForm initial={null} />
+            <FeRequisitionShell />
         </PageContainer>
     );
 }

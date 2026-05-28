@@ -10,8 +10,8 @@ import {
 } from "@/lib/format/date";
 
 import { StatusPill } from "./status-pill";
-import { formatCurrency } from "./requisition-form/utils";
 import { RequisitionStatus } from "./constants";
+import { formatCurrency } from "@/lib/format/currency";
 
 type Props = {
     items: FeRequisitionSummary[];
