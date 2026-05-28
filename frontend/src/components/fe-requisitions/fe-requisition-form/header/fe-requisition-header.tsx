@@ -1,9 +1,13 @@
+
 import { FeRequisitionActions } from "./fe-requisition-actions";
 
 import { FeRequisitionSummaryMetrics } from "./fe-requisition-summary-metrics";
+import { StatusPill } from "../../status-pill";
+import { RequisitionStatus } from "../../constants";
 
 type Props = {
     requisitionNumber?: string;
+    status: RequisitionStatus;
     subtotal: number;
     generalTaskCount: number;
 };
@@ -32,7 +36,7 @@ export function FeRequisitionHeader({
                                 "New Requisition"}
                         </h1>
 
-                        <StatusBadge />
+                        <StatusPill status="Draft"/>
                     </div>
 
                     <div className="mt-1 text-sm text-muted-foreground">
@@ -49,23 +53,6 @@ export function FeRequisitionHeader({
 
                 <FeRequisitionActions />
             </div>
-        </div>
-    );
-}
-
-function StatusBadge() {
-    return (
-        <div
-            className="
-                rounded-full
-                border border-amber-200
-                bg-amber-50
-                px-3 py-1
-                text-xs font-medium
-                text-amber-700
-            "
-        >
-            Draft
         </div>
     );
 }

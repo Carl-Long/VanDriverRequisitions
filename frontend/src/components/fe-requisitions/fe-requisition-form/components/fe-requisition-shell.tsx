@@ -23,6 +23,7 @@ export function FeRequisitionShell() {
     return (
         <div className="space-y-6">
             <FeRequisitionHeader
+                status="Draft"
                 subtotal={subtotal}
                 generalTaskCount={
                     draft.generalTasks
