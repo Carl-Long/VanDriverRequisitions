@@ -156,7 +156,6 @@ export type SaveFeRequisition = {
     vanDriverId: string;
     vanDriverName: string;
     shopId: string;
-    isVatApplicable: boolean;
     poNumber: string | null;
     feGeneralTasks: SaveFeGeneralTask[];
     feMileages: SaveFeMileage[];

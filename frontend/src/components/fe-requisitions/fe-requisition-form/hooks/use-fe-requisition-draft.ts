@@ -4,26 +4,16 @@ import { useMemo, useState } from "react";
 import { FeRequisitionDraft, } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculations";
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+
 import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisition-draft";
 
 export function useFeRequisitionDraft() {
     const [draft, setDraft] =
-        useState<FeRequisitionDraft>({
-            requisitionDate: new Date(),
-
-            vanDriverId: null,
-            vanDriverLabel: null,
-
-            vanDriverSummary: null,
-
-            vanDriverName: "",
-
-            shopId: null,
-            shopLabel: null,
-
-            generalTasks: [],
-        });
+        useState<FeRequisitionDraft>(
+            createEmptyFeRequisitionDraft(),
+        );
 
     const subtotal = useMemo(() => {
         return calculateGeneralTasksSubtotal(
@@ -32,7 +22,7 @@ export function useFeRequisitionDraft() {
     }, [draft.generalTasks]);
 
     function setRequisitionDate(
-        requisitionDate: Date | undefined,
+        requisitionDate: Date | null,
     ) {
         setDraft((x) => ({
             ...x,
