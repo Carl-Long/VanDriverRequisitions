@@ -66,17 +66,14 @@ export function FeGeneralTaskDrawer({
         );
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
+        if (!open) return;
 
-        setForm(
-            createEmptyFeGeneralTaskForm(),
-        );
+        const reset = createEmptyFeGeneralTaskForm();
 
+        setForm(reset);
         setErrors({});
     }, [open]);
-
+    
     const totals = useMemo(
         () =>
             calculateFeGeneralTaskFormTotals(
@@ -121,6 +118,7 @@ export function FeGeneralTaskDrawer({
                     result.error,
                 ),
             );
+            console.log(result.error.issues);
 
             return;
         }
@@ -351,7 +349,7 @@ export function FeGeneralTaskDrawer({
                             }
                         />
                     </div>
-                        {errors.form && (
+                    {errors.form && (
                         <div
                             className="
                                 rounded-lg border border-danger/30
@@ -364,26 +362,21 @@ export function FeGeneralTaskDrawer({
                     )}
 
                     <Field
-                        label="Rate Per Job"
+                        label="Rate Per Job (£)"
                         error={
                             errors["ratePerJob"]
                         }
                     >
                         <Input
                             type="number"
-                            value={
-                                form.ratePerJob ?? ""
-                            }
+                            value={form.ratePerJob ?? ""}
+                            state={errors["ratePerJob"] ? "error" : "default"}
                             onChange={(e) =>
                                 setForm((prev) => ({
                                     ...prev,
-
-                                    ratePerJob:
-                                        e.target.value
-                                            ? Number(
-                                                e.target.value,
-                                            )
-                                            : null,
+                                    ratePerJob: e.target.value
+                                        ? Number(e.target.value)
+                                        : null,
                                 }))
                             }
                         />
@@ -419,7 +412,7 @@ export function FeGeneralTaskDrawer({
                         </div>
                     </div>
 
-                
+
 
                     {limitRule && (
                         <div
@@ -518,6 +511,7 @@ function DayInput({
                 type="number"
                 min={0}
                 value={value ?? ""}
+                state={error ? "error" : "default"}
                 onChange={(e) =>
                     onChange(
                         e.target.value

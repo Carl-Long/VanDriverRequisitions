@@ -81,6 +81,7 @@ export function FeGeneralTaskWorkspace({
                 />
             )}
             <FeGeneralTaskDrawer
+                key={open ? "open" : "closed"}
                 open={open}
                 title={`Add ${title}`}
                 limitRule={limitRule}

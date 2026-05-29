@@ -76,6 +76,28 @@ export function createFeGeneralTaskFormSchema(
                         0,
                     );
 
+                const dayLimits = {
+                    sunday: form.quantities.sunday,
+                    monday: form.quantities.monday,
+                    tuesday: form.quantities.tuesday,
+                    wednesday: form.quantities.wednesday,
+                    thursday: form.quantities.thursday,
+                    friday: form.quantities.friday,
+                    saturday: form.quantities.saturday,
+                };
+
+                for (const [day, value] of Object.entries(dayLimits)) {
+                    if (!value) continue;
+
+                    if (value > limitRule.maxQuantity) {
+                        ctx.addIssue({
+                            code: "custom",
+                            path: ["quantities", day],
+                            message: `exceeds max quantity (${limitRule.maxQuantity})`,
+                        });
+                    }
+                }
+
                 //
                 // REQUIRE AT LEAST ONE JOB
                 //
@@ -133,9 +155,9 @@ export function createFeGeneralTaskFormSchema(
 
                 if (
                     form.ratePerJob !==
-                        null &&
+                    null &&
                     form.ratePerJob >
-                        limitRule.maxRate
+                    limitRule.maxRate
                 ) {
                     ctx.addIssue({
                         code: "custom",
