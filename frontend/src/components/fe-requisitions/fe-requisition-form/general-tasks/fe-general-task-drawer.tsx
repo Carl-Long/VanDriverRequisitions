@@ -5,21 +5,38 @@ import {
     useMemo,
     useState,
 } from "react";
-import { Field } from "@/components/ui/field/field";
-import { Input } from "@/components/ui/field/input";
+
+import { Check, Plus, X } from "lucide-react";
+
 import { DatePicker } from "@/components/ui/date/date-picker";
-import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
-import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-import { FeGeneralTaskForm, feGeneralTaskFormSchema } from "../schemas/fe-general-task-form-schema";
-import { mapZodErrors } from "../lib/map-zod-errors";
 import { Button } from "@/components/ui/button/button";
 import { IconButton } from "@/components/ui/button/icon-button";
-import { Check, Plus, X } from "lucide-react";
+import { Field } from "@/components/ui/field/field";
+import { Input } from "@/components/ui/field/input";
+
+import type {
+    RequisitionLimitRuleSummary,
+} from "@/lib/api/requisition-limit-rules";
+
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+
+import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
+
+import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
+
+import { mapZodErrors } from "../lib/map-zod-errors";
+
+import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 
 type Props = {
     open: boolean;
+
     title: string;
+
+    limitRule?: RequisitionLimitRuleSummary;
+
     onClose: () => void;
+
     onSave: (
         form: FeGeneralTaskForm,
     ) => void;
@@ -28,9 +45,11 @@ type Props = {
 export function FeGeneralTaskDrawer({
     open,
     title,
+    limitRule,
     onClose,
     onSave,
 }: Readonly<Props>) {
+
     const [form, setForm] =
         useState<FeGeneralTaskForm>(
             createEmptyFeGeneralTaskForm(),
@@ -38,12 +57,13 @@ export function FeGeneralTaskDrawer({
 
     const [errors, setErrors] =
         useState<
-            Record<
-                string,
-                string
-            >
+            Record<string, string>
         >({});
 
+    const schema =
+        createFeGeneralTaskFormSchema(
+            limitRule,
+        );
 
     useEffect(() => {
         if (!open) {
@@ -68,31 +88,7 @@ export function FeGeneralTaskDrawer({
 
     function handleSave() {
         const result =
-            feGeneralTaskFormSchema.safeParse(
-                form,
-            );
-
-        if (
-            !result.success
-        ) {
-            setErrors(
-                mapZodErrors(
-                    result.error,
-                ),
-            );
-
-            return;
-        }
-
-        setErrors({});
-
-        onSave(result.data);
-        onClose();
-    }
-
-    function handleSaveAndAddAnother() {
-        const result =
-            feGeneralTaskFormSchema.safeParse(
+            schema.safeParse(
                 form,
             );
 
@@ -110,11 +106,34 @@ export function FeGeneralTaskDrawer({
 
         onSave(result.data);
 
-        setForm({
-            weekEndingDate:
-                result.data
-                    .weekEndingDate,
-        });
+        onClose();
+    }
+
+    function handleSaveAndAddAnother() {
+        const result =
+            schema.safeParse(
+                form,
+            );
+
+        if (!result.success) {
+            setErrors(
+                mapZodErrors(
+                    result.error,
+                ),
+            );
+
+            return;
+        }
+
+        setErrors({});
+
+        onSave(result.data);
+
+        setForm(
+            createEmptyFeGeneralTaskForm(
+                result.data.weekEndingDate,
+            ),
+        );
     }
 
     if (!open) {
@@ -123,18 +142,24 @@ export function FeGeneralTaskDrawer({
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
+
             <div
                 className="
                     flex h-full w-full max-w-2xl
                     flex-col bg-background shadow-2xl
                 "
             >
-                <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                    <div>
-                        <h2 className="text-lg font-semibold">
-                            {title}
-                        </h2>
-                    </div>
+
+                <div
+                    className="
+                        flex items-center justify-between
+                        border-b border-border
+                        px-6 py-4
+                    "
+                >
+                    <h2 className="text-lg font-semibold">
+                        {title}
+                    </h2>
 
                     <IconButton
                         variant="ghost"
@@ -147,250 +172,236 @@ export function FeGeneralTaskDrawer({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
                     <Field
                         label="Week Ending"
                         error={
-                            errors[
-                            "weekEndingDate"
-                            ]
+                            errors["weekEndingDate"]
                         }
                     >
                         <DatePicker
                             value={
-                                form.weekEndingDate
+                                form.weekEndingDate ??
+                                undefined
                             }
-                            onChange={(
-                                date,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(date) =>
+                                setForm((prev) => ({
+                                    ...prev,
 
-                                        weekEndingDate:
-                                            date,
-                                    }),
-                                )
+                                    weekEndingDate:
+                                        date ?? null,
+                                }))
                             }
                         />
                     </Field>
 
                     <div className="grid grid-cols-7 gap-3">
+
                         <DayInput
                             label="Sun"
                             error={
-                                errors["sunday"]
+                                errors["quantities.sunday"]
                             }
                             value={
-                                form.sunday
+                                form.quantities.sunday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         sunday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Mon"
                             error={
-                                errors["monday"]
+                                errors["quantities.monday"]
                             }
                             value={
-                                form.monday
+                                form.quantities.monday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         monday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Tue"
                             error={
-                                errors["tuesday"]
+                                errors["quantities.tuesday"]
                             }
                             value={
-                                form.tuesday
+                                form.quantities.tuesday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         tuesday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Wed"
                             error={
-                                errors["wednesday"]
+                                errors["quantities.wednesday"]
                             }
                             value={
-                                form.wednesday
+                                form.quantities.wednesday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         wednesday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Thu"
                             error={
-                                errors["thursday"]
+                                errors["quantities.thursday"]
                             }
                             value={
-                                form.thursday
+                                form.quantities.thursday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         thursday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Fri"
                             error={
-                                errors["friday"]
+                                errors["quantities.friday"]
                             }
                             value={
-                                form.friday
+                                form.quantities.friday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         friday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
 
                         <DayInput
                             label="Sat"
                             error={
-                                errors["saturday"]
+                                errors["quantities.saturday"]
                             }
                             value={
-                                form.saturday
+                                form.quantities.saturday
                             }
-                            onChange={(
-                                value,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(value) =>
+                                setForm((prev) => ({
+                                    ...prev,
+
+                                    quantities: {
+                                        ...prev.quantities,
 
                                         saturday:
-                                            value,
-                                    }),
-                                )
+                                            value ?? null,
+                                    },
+                                }))
                             }
                         />
                     </div>
+                        {errors.form && (
+                        <div
+                            className="
+                                rounded-lg border border-danger/30
+                                bg-danger/5 px-3 py-2
+                                text-sm text-danger
+                            "
+                        >
+                            {errors.form}
+                        </div>
+                    )}
 
                     <Field
                         label="Rate Per Job"
                         error={
-                            errors[
-                            "ratePerJob"
-                            ]
+                            errors["ratePerJob"]
                         }
                     >
                         <Input
                             type="number"
                             value={
-                                form.ratePerJob ??
-                                ""
+                                form.ratePerJob ?? ""
                             }
-                            onChange={(
-                                e,
-                            ) =>
-                                setForm(
-                                    (
-                                        prev,
-                                    ) => ({
-                                        ...prev,
+                            onChange={(e) =>
+                                setForm((prev) => ({
+                                    ...prev,
 
-                                        ratePerJob:
-                                            Number(
-                                                e
-                                                    .target
-                                                    .value,
-                                            ),
-                                    }),
-                                )
+                                    ratePerJob:
+                                        e.target.value
+                                            ? Number(
+                                                e.target.value,
+                                            )
+                                            : null,
+                                }))
                             }
                         />
                     </Field>
 
-                    <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div
+                        className="
+                            rounded-2xl border border-border
+                            bg-surface p-4
+                        "
+                    >
                         <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">
                                 Total Jobs
                             </span>
 
                             <span className="font-medium">
-                                {
-                                    totals.totalJobs
-                                }
+                                {totals.totalJobs}
                             </span>
                         </div>
 
@@ -407,13 +418,39 @@ export function FeGeneralTaskDrawer({
                             </span>
                         </div>
                     </div>
-                    {errors.form && (
-                        <div className="rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
-                            {errors.form}
+
+                
+
+                    {limitRule && (
+                        <div
+                            className="
+                                rounded-xl border border-border
+                                bg-muted/30 p-3 text-sm
+                            "
+                        >
+                            <div>
+                                Maximum quantity per day:
+                                {" "}
+                                <strong>
+                                    {limitRule.maxQuantity}
+                                </strong>
+                            </div>
+
+                            <div>
+                                Maximum rate per Job:
+                                {" "}
+                                <strong>
+                                    £
+                                    {limitRule.maxRate.toFixed(
+                                        2,
+                                    )}
+                                </strong>
+                            </div>
                         </div>
                     )}
 
                     <div className="flex items-center justify-between pt-2">
+
                         <Button
                             tone="accent"
                             variant="outline"
@@ -423,6 +460,7 @@ export function FeGeneralTaskDrawer({
                         </Button>
 
                         <div className="flex items-center gap-4">
+
                             <Button
                                 className="min-w-[160px]"
                                 variant="outline"
@@ -432,7 +470,7 @@ export function FeGeneralTaskDrawer({
                             >
                                 <Plus className="h-4 w-4" />
 
-                                Save & Add another
+                                Save & Add Another
                             </Button>
 
                             <Button
@@ -454,7 +492,9 @@ export function FeGeneralTaskDrawer({
 
 type DayInputProps = {
     label: string;
-    value?: number;
+
+    value: number | null;
+
     error?: string;
 
     onChange: (
@@ -464,13 +504,16 @@ type DayInputProps = {
 
 function DayInput({
     label,
-    error,
     value,
-
+    error,
     onChange,
 }: Readonly<DayInputProps>) {
+
     return (
-        <Field label={label} error={error}>
+        <Field
+            label={label}
+            error={error}
+        >
             <Input
                 type="number"
                 min={0}
@@ -479,8 +522,7 @@ function DayInput({
                     onChange(
                         e.target.value
                             ? Number(
-                                e.target
-                                    .value,
+                                e.target.value,
                             )
                             : undefined,
                     )

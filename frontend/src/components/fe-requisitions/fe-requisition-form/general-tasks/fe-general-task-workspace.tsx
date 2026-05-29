@@ -5,11 +5,15 @@ import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-t
 import { useState } from "react";
 import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import type {
+    RequisitionLimitRuleSummary,
+} from "@/lib/api/requisition-limit-rules";
 
 type Props = {
     readonly: boolean;
     title: string;
     code?: string | null;
+    limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
     onAdd: (
         form: FeGeneralTaskForm,
@@ -25,6 +29,7 @@ export function FeGeneralTaskWorkspace({
     readonly,
     title,
     code,
+    limitRule,
     tasks,
     onAdd,
     onDelete,
@@ -78,6 +83,7 @@ export function FeGeneralTaskWorkspace({
             <FeGeneralTaskDrawer
                 open={open}
                 title={`Add ${title}`}
+                limitRule={limitRule}
                 onClose={() =>
                     setOpen(false)
                 }

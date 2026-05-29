@@ -1,8 +1,23 @@
-import { z } from "zod";
+export type WeeklyQuantitiesForm = {
+    sunday: number | null;
 
-import { feGeneralTaskFormSchema } from "../schemas/fe-general-task-form-schema";
+    monday: number | null;
 
-export type FeGeneralTaskForm =
-    z.infer<
-        typeof feGeneralTaskFormSchema
-    >;
+    tuesday: number | null;
+
+    wednesday: number | null;
+
+    thursday: number | null;
+
+    friday: number | null;
+
+    saturday: number | null;
+};
+
+export type FeGeneralTaskForm = {
+    weekEndingDate: Date | null;
+
+    quantities: WeeklyQuantitiesForm;
+
+    ratePerJob: number | null;
+};

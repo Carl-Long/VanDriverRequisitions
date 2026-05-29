@@ -1,16 +1,20 @@
 "use client";
 
+import { REQUISITION_ROW_CATEGORIES } from "@/lib/constants/requisition-row-categories";
 import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft, } from "../hooks/use-fe-requisition-draft";
 import { useFeTaskTypes } from "../hooks/use-fe-task-types";
+import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
+import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 
-type Props = { mode: FeRequisitionPageMode; };
 
-export function FeRequisitionShell({ mode, }: Readonly<Props>) {
+type Props = { mode: FeRequisitionPageMode; limitRules: RequisitionLimitRuleSummary[] };
+
+export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
     const {
         draft,
         subtotal,
@@ -83,6 +87,15 @@ export function FeRequisitionShell({ mode, }: Readonly<Props>) {
 
                     return (
                         <FeGeneralTaskWorkspace
+                            limitRule={
+                                resolveFeRequisitionLimitRule({
+                                    rules: limitRules,
+                                    categoryId:
+                                        REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+                                    taskTypeId:
+                                        taskType.id,
+                                })
+                            }
                             readonly={
                                 isReadonly
                             }

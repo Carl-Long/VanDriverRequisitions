@@ -5,7 +5,7 @@ namespace VanDriverRequisitions.Domain.Enums;
 public enum Fascia
 {
     [Display(Name ="FE")]
-    Fe,
+    Fe = 0,
     [Display(Name = "STD")]
-    Std
+    Std = 1
 }

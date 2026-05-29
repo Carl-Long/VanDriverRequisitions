@@ -1,16 +1,17 @@
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 
+
 export function calculateFeGeneralTaskFormTotals(
     form: FeGeneralTaskForm,
 ) {
     const totalJobs =
-        (form.sunday ?? 0)
-        + (form.monday ?? 0)
-        + (form.tuesday ?? 0)
-        + (form.wednesday ?? 0)
-        + (form.thursday ?? 0)
-        + (form.friday ?? 0)
-        + (form.saturday ?? 0);
+        (form.quantities.sunday ?? 0)
+        + (form.quantities.monday ?? 0)
+        + (form.quantities.tuesday ?? 0)
+        + (form.quantities.wednesday ?? 0)
+        + (form.quantities.thursday ?? 0)
+        + (form.quantities.friday ?? 0)
+        + (form.quantities.saturday ?? 0);
 
     const totalValue =
         totalJobs *

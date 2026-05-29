@@ -1,5 +1,7 @@
-import { FeGeneralTaskForm } from "../schemas/fe-general-task-form-schema";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
+
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+
 import { calculateFeGeneralTaskFormTotals } from "./calculate-fe-general-task-form";
 
 type Params = {
@@ -12,9 +14,7 @@ type Params = {
 
 export function createFeGeneralTaskDraftFromForm({
     taskTypeId,
-
     taskTypeLabel,
-
     form,
 }: Params): FeGeneralTaskDraft {
     const totals =
@@ -30,33 +30,33 @@ export function createFeGeneralTaskDraftFromForm({
         taskTypeLabel,
 
         weekEndingDate:
-            form.weekEndingDate ?? null,
+            form.weekEndingDate,
 
         quantities: {
             sunday:
-                form.sunday ?? null,
+                form.quantities.sunday,
 
             monday:
-                form.monday ?? null,
+                form.quantities.monday,
 
             tuesday:
-                form.tuesday ?? null,
+                form.quantities.tuesday,
 
             wednesday:
-                form.wednesday ?? null,
+                form.quantities.wednesday,
 
             thursday:
-                form.thursday ?? null,
+                form.quantities.thursday,
 
             friday:
-                form.friday ?? null,
+                form.quantities.friday,
 
             saturday:
-                form.saturday ?? null,
+                form.quantities.saturday,
         },
 
         ratePerJob:
-            form.ratePerJob ?? null,
+            form.ratePerJob,
 
         totalNumber:
             totals.totalJobs,
