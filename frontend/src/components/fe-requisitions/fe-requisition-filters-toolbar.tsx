@@ -149,6 +149,8 @@ export function FeRequisitionFiltersToolbar({
                             label={
                                 filters.shopLabel
                             }
+                            includeAllOption={true}
+                            prefixLabel={true}
                             onChange={(
                                 value,
                                 label,

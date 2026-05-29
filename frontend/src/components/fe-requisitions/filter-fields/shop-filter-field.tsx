@@ -10,6 +10,8 @@ type Props = {
     label: string | null;
     error?: string;
     hideLabel?: boolean;
+    includeAllOption?: boolean;
+    prefixLabel?: boolean;
     onChange: (
         value: string | null,
         label: string | null,
@@ -29,6 +31,8 @@ export function ShopFilterField({
     label,
     error,
     hideLabel = false,
+    includeAllOption = false,
+    prefixLabel = false,
     onChange,
 }: Readonly<Props>) {
     const combobox = (
@@ -38,11 +42,19 @@ export function ShopFilterField({
             value={value}
             label={
                 label
-                    ? `Shop: ${label}`
-                    : "Shop: All shops"
+                    ? prefixLabel
+                        ? `Shop: ${label}`
+                        : label
+                    : prefixLabel
+                        ? "Shop: All shops"
+                        : null
             }
             noMatchesText="No matching shops found"
-            pinnedOptions={STATIC_OPTIONS}
+            pinnedOptions={
+                includeAllOption
+                    ? STATIC_OPTIONS
+                    : []
+            }
             placeholder="Shop: All shops"
             onSearch={async (search) => {
                 const res =
