@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
+import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-totals";
 
 type Props = {
     readonly: boolean;
@@ -12,6 +13,8 @@ type Props = {
     ) => void;
 };
 
+
+
 export function FeGeneralTaskWorkspace({
     readonly,
     title,
@@ -20,6 +23,7 @@ export function FeGeneralTaskWorkspace({
     onAdd,
     onDelete,
 }: Readonly<Props>) {
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -80,11 +84,13 @@ type TableProps = {
 
 function TasksTable({
     readonly,
-
     tasks,
-
     onDelete,
 }: Readonly<TableProps>) {
+    const totals =
+    calculateFeGeneralTaskTotals(
+        tasks,
+    );
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <table className="min-w-full divide-y divide-border">
@@ -92,6 +98,34 @@ function TasksTable({
                     <tr>
                         <HeaderCell>
                             Week Ending
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Sun
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Mon
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Tue
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Wed
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Thu
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Fri
+                        </HeaderCell>
+
+                        <HeaderCell>
+                            Sat
                         </HeaderCell>
 
                         <HeaderCell>
@@ -121,6 +155,7 @@ function TasksTable({
                                 task.clientId
                             }
                         >
+
                             <BodyCell>
                                 {task.weekEndingDate
                                     ? task.weekEndingDate.toLocaleDateString()
@@ -128,17 +163,49 @@ function TasksTable({
                             </BodyCell>
 
                             <BodyCell>
-                                {
-                                    task.totalNumber
-                                }
+                                {task.quantities
+                                    .sunday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .monday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .tuesday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .wednesday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .thursday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .friday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.quantities
+                                    .saturday ?? "-"}
+                            </BodyCell>
+
+                            <BodyCell>
+                                {task.totalNumber}
                             </BodyCell>
 
                             <BodyCell>
                                 £
                                 {task.ratePerJob?.toFixed(
                                     2,
-                                ) ??
-                                    "0.00"}
+                                ) ?? "0.00"}
                             </BodyCell>
 
                             <BodyCell>
@@ -158,17 +225,74 @@ function TasksTable({
                                             )
                                         }
                                         className="
-                                            text-sm text-danger
-                                            hover:underline
-                                        "
+                    text-sm text-danger
+                    hover:underline
+                "
                                     >
                                         Delete
                                     </button>
                                 </BodyCell>
                             )}
+
                         </tr>
                     ))}
                 </tbody>
+                <tfoot className="border-t border-border bg-muted/20">
+                    <tr>
+                        <FooterCell>
+                            Totals
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.sunday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.monday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.tuesday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.wednesday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.thursday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.friday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.saturday}
+                        </FooterCell>
+
+                        <FooterCell>
+                            {totals.totalJobs}
+                        </FooterCell>
+
+                        <FooterCell>
+                            -
+                        </FooterCell>
+
+                        <FooterCell>
+                            £
+                            {totals.subtotal.toFixed(
+                                2,
+                            )}
+                        </FooterCell>
+
+                        {!readonly && (
+                            <FooterCell>
+                                -
+                            </FooterCell>
+                        )}
+                    </tr>
+                </tfoot>
             </table>
         </div>
     );
@@ -199,6 +323,20 @@ function BodyCell({
 }: Readonly<CellProps>) {
     return (
         <td className="px-4 py-3 text-sm">
+            {children}
+        </td>
+    );
+}
+
+function FooterCell({
+    children,
+}: Readonly<CellProps>) {
+    return (
+        <td
+            className="
+                px-4 py-3 text-sm font-semibold
+            "
+        >
             {children}
         </td>
     );
