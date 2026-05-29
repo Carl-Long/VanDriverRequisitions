@@ -1,24 +1,16 @@
-import { FeGeneralTaskFormDraft } from "../types/fe-general-task-form-draft";
+import { FeGeneralTaskForm } from "../schemas/fe-general-task-form-schema";
+import { getUpcomingSaturday } from "./get-upcoming-saturday";
 
-export function createEmptyFeGeneralTaskForm(): FeGeneralTaskFormDraft {
+export function createEmptyFeGeneralTaskForm(): FeGeneralTaskForm {
     return {
-        weekEndingDate:
-            undefined,
-
+        weekEndingDate: getUpcomingSaturday(),
         sunday: undefined,
-
         monday: undefined,
-
         tuesday: undefined,
-
         wednesday: undefined,
-
         thursday: undefined,
-
         friday: undefined,
-
         saturday: undefined,
-
         ratePerJob: undefined,
     };
 }

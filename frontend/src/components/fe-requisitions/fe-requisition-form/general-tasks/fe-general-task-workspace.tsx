@@ -1,9 +1,10 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-totals";
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+
 import { useState } from "react";
 import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 
 type Props = {
     readonly: boolean;
@@ -80,11 +81,7 @@ export function FeGeneralTaskWorkspace({
                 onClose={() =>
                     setOpen(false)
                 }
-                onSave={(form) => {
-                    onAdd(form);
-
-                    setOpen(false);
-                }}
+                onSave={onAdd}
             />
         </div>
     );

@@ -10,34 +10,29 @@ import { Input } from "@/components/ui/field/input";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-import { FeGeneralTaskFormDraft } from "../types/fe-general-task-form-draft";
-import { feGeneralTaskFormSchema } from "../schemas/fe-general-task-form-schema";
+import { FeGeneralTaskForm, feGeneralTaskFormSchema } from "../schemas/fe-general-task-form-schema";
 import { mapZodErrors } from "../lib/map-zod-errors";
-
+import { Button } from "@/components/ui/button/button";
+import { IconButton } from "@/components/ui/button/icon-button";
+import { Check, Plus, X } from "lucide-react";
 
 type Props = {
     open: boolean;
-
     title: string;
-
     onClose: () => void;
-
     onSave: (
-        form: FeGeneralTaskFormDraft,
+        form: FeGeneralTaskForm,
     ) => void;
 };
 
 export function FeGeneralTaskDrawer({
     open,
-
     title,
-
     onClose,
-
     onSave,
 }: Readonly<Props>) {
     const [form, setForm] =
-        useState<FeGeneralTaskFormDraft>(
+        useState<FeGeneralTaskForm>(
             createEmptyFeGeneralTaskForm(),
         );
 
@@ -92,6 +87,34 @@ export function FeGeneralTaskDrawer({
         setErrors({});
 
         onSave(result.data);
+        onClose();
+    }
+
+    function handleSaveAndAddAnother() {
+        const result =
+            feGeneralTaskFormSchema.safeParse(
+                form,
+            );
+
+        if (!result.success) {
+            setErrors(
+                mapZodErrors(
+                    result.error,
+                ),
+            );
+
+            return;
+        }
+
+        setErrors({});
+
+        onSave(result.data);
+
+        setForm({
+            weekEndingDate:
+                result.data
+                    .weekEndingDate,
+        });
     }
 
     if (!open) {
@@ -113,13 +136,14 @@ export function FeGeneralTaskDrawer({
                         </h2>
                     </div>
 
-                    <button
-                        type="button"
+                    <IconButton
+                        variant="ghost"
+                        tone="accent"
+                        size="sm"
                         onClick={onClose}
-                        className="text-sm text-muted-foreground hover:text-foreground"
                     >
-                        Close
-                    </button>
+                        <X size={18} />
+                    </IconButton>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -179,7 +203,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Mon"
-                             error={
+                            error={
                                 errors["monday"]
                             }
                             value={
@@ -203,7 +227,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Tue"
-                             error={
+                            error={
                                 errors["tuesday"]
                             }
                             value={
@@ -227,7 +251,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Wed"
-                             error={
+                            error={
                                 errors["wednesday"]
                             }
                             value={
@@ -251,7 +275,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Thu"
-                             error={
+                            error={
                                 errors["thursday"]
                             }
                             value={
@@ -275,7 +299,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Fri"
-                             error={
+                            error={
                                 errors["friday"]
                             }
                             value={
@@ -299,7 +323,7 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Sat"
-                             error={
+                            error={
                                 errors["saturday"]
                             }
                             value={
@@ -383,31 +407,45 @@ export function FeGeneralTaskDrawer({
                             </span>
                         </div>
                     </div>
-                </div>
+                    {errors.form && (
+                        <div className="rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+                            {errors.form}
+                        </div>
+                    )}
 
-                <div className="flex justify-end gap-3 border-t border-border px-6 py-4">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="
-                            rounded-xl border border-border
-                            px-4 py-2 text-sm
-                        "
-                    >
-                        Cancel
-                    </button>
+                    <div className="flex items-center justify-between pt-2">
+                        <Button
+                            tone="accent"
+                            variant="outline"
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </Button>
 
-                    <button
-                        type="button"
-                        onClick={handleSave}
-                        className="
-                            rounded-xl bg-primary
-                            px-4 py-2 text-sm
-                            text-primary-foreground
-                        "
-                    >
-                        Save
-                    </button>
+                        <div className="flex items-center gap-4">
+                            <Button
+                                className="min-w-[160px]"
+                                variant="outline"
+                                onClick={
+                                    handleSaveAndAddAnother
+                                }
+                            >
+                                <Plus className="h-4 w-4" />
+
+                                Save & Add another
+                            </Button>
+
+                            <Button
+                                className="min-w-[160px]"
+                                type="button"
+                                onClick={handleSave}
+                            >
+                                <Check className="h-4 w-4" />
+
+                                Save & Close
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

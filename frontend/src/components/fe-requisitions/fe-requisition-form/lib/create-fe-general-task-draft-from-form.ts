@@ -1,8 +1,6 @@
-import { calculateFeGeneralTaskFormTotals } from "./calculate-fe-general-task-form";
-
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
-
+import { FeGeneralTaskForm } from "../schemas/fe-general-task-form-schema";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
+import { calculateFeGeneralTaskFormTotals } from "./calculate-fe-general-task-form";
 
 type Params = {
     taskTypeId: string;
