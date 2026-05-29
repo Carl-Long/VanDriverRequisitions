@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
 import { FeTaskType } from "@/lib/api/fe-task-types";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
+import { useMemo } from "react";
 
 type Props = {
     mode: FeRequisitionPageMode;
     taskTypes: FeTaskType[];
+    activeKey: string;
+    onActiveKeyChange: (
+        key: string,
+    ) => void;
+
     details: React.ReactNode;
     renderTaskTypeTab: (
         taskTypeId: string,
@@ -16,6 +21,8 @@ type Props = {
 
 export function FeRequisitionTabs({
     taskTypes,
+    activeKey,
+    onActiveKeyChange,
     details,
     renderTaskTypeTab,
 }: Readonly<Props>) {
@@ -27,9 +34,6 @@ export function FeRequisitionTabs({
 
         [taskTypes],
     );
-
-    const [activeKey, setActiveKey] =
-        useState("details");
 
     const activeTab = tabs.find(
         (x) => x.key === activeKey,
@@ -46,7 +50,7 @@ export function FeRequisitionTabs({
                             activeKey
                         }
                         onClick={() =>
-                            setActiveKey(
+                            onActiveKeyChange(
                                 tab.key,
                             )
                         }

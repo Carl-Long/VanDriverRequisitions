@@ -49,6 +49,8 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
         });
     }
 
+    const [activeTab, setActiveTab] = useState("details");
+
     const result = feRequisitionSchema.safeParse(draft);
 
     const [isSaving, setIsSaving] = useState(false);
@@ -71,7 +73,8 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
                     result.error,
                 ),
             );
-
+            setActiveTab("details");
+            
             return;
         }
 
@@ -152,6 +155,8 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
 
             <FeRequisitionTabs
                 mode={mode}
+                activeKey={activeTab}
+                onActiveKeyChange={setActiveTab}
                 taskTypes={taskTypes}
                 details={
                     <FeRequisitionDetailsTab
