@@ -1,4 +1,4 @@
-export type FeGeneralTaskForm = {
+export type FeGeneralTaskFormDraft = {
     weekEndingDate?: Date;
     sunday?: number;
     monday?: number;

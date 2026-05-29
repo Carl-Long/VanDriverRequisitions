@@ -1,6 +1,6 @@
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { FeGeneralTaskFormDraft } from "../types/fe-general-task-form-draft";
 
-export function createEmptyFeGeneralTaskForm(): FeGeneralTaskForm {
+export function createEmptyFeGeneralTaskForm(): FeGeneralTaskFormDraft {
     return {
         weekEndingDate:
             undefined,

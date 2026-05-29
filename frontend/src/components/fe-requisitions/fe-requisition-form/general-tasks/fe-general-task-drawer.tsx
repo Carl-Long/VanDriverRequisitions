@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
-
+import { FeGeneralTaskFormDraft } from "../types/fe-general-task-form-draft";
+import { feGeneralTaskFormSchema } from "../schemas/fe-general-task-form-schema";
+import { mapZodErrors } from "../lib/map-zod-errors";
 
 
 type Props = {
@@ -18,7 +23,7 @@ type Props = {
     onClose: () => void;
 
     onSave: (
-        form: FeGeneralTaskForm,
+        form: FeGeneralTaskFormDraft,
     ) => void;
 };
 
@@ -32,9 +37,30 @@ export function FeGeneralTaskDrawer({
     onSave,
 }: Readonly<Props>) {
     const [form, setForm] =
-        useState(
+        useState<FeGeneralTaskFormDraft>(
             createEmptyFeGeneralTaskForm(),
         );
+
+    const [errors, setErrors] =
+        useState<
+            Record<
+                string,
+                string
+            >
+        >({});
+
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        setForm(
+            createEmptyFeGeneralTaskForm(),
+        );
+
+        setErrors({});
+    }, [open]);
 
     const totals = useMemo(
         () =>
@@ -44,6 +70,29 @@ export function FeGeneralTaskDrawer({
 
         [form],
     );
+
+    function handleSave() {
+        const result =
+            feGeneralTaskFormSchema.safeParse(
+                form,
+            );
+
+        if (
+            !result.success
+        ) {
+            setErrors(
+                mapZodErrors(
+                    result.error,
+                ),
+            );
+
+            return;
+        }
+
+        setErrors({});
+
+        onSave(result.data);
+    }
 
     if (!open) {
         return null;
@@ -74,7 +123,14 @@ export function FeGeneralTaskDrawer({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    <Field label="Week Ending">
+                    <Field
+                        label="Week Ending"
+                        error={
+                            errors[
+                            "weekEndingDate"
+                            ]
+                        }
+                    >
                         <DatePicker
                             value={
                                 form.weekEndingDate
@@ -99,6 +155,9 @@ export function FeGeneralTaskDrawer({
                     <div className="grid grid-cols-7 gap-3">
                         <DayInput
                             label="Sun"
+                            error={
+                                errors["sunday"]
+                            }
                             value={
                                 form.sunday
                             }
@@ -120,6 +179,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Mon"
+                             error={
+                                errors["monday"]
+                            }
                             value={
                                 form.monday
                             }
@@ -141,6 +203,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Tue"
+                             error={
+                                errors["tuesday"]
+                            }
                             value={
                                 form.tuesday
                             }
@@ -162,6 +227,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Wed"
+                             error={
+                                errors["wednesday"]
+                            }
                             value={
                                 form.wednesday
                             }
@@ -183,6 +251,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Thu"
+                             error={
+                                errors["thursday"]
+                            }
                             value={
                                 form.thursday
                             }
@@ -204,6 +275,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Fri"
+                             error={
+                                errors["friday"]
+                            }
                             value={
                                 form.friday
                             }
@@ -225,6 +299,9 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Sat"
+                             error={
+                                errors["saturday"]
+                            }
                             value={
                                 form.saturday
                             }
@@ -245,7 +322,14 @@ export function FeGeneralTaskDrawer({
                         />
                     </div>
 
-                    <Field label="Rate Per Job">
+                    <Field
+                        label="Rate Per Job"
+                        error={
+                            errors[
+                            "ratePerJob"
+                            ]
+                        }
+                    >
                         <Input
                             type="number"
                             value={
@@ -315,9 +399,7 @@ export function FeGeneralTaskDrawer({
 
                     <button
                         type="button"
-                        onClick={() =>
-                            onSave(form)
-                        }
+                        onClick={handleSave}
                         className="
                             rounded-xl bg-primary
                             px-4 py-2 text-sm
@@ -334,8 +416,8 @@ export function FeGeneralTaskDrawer({
 
 type DayInputProps = {
     label: string;
-
     value?: number;
+    error?: string;
 
     onChange: (
         value?: number,
@@ -344,13 +426,13 @@ type DayInputProps = {
 
 function DayInput({
     label,
-
+    error,
     value,
 
     onChange,
 }: Readonly<DayInputProps>) {
     return (
-        <Field label={label}>
+        <Field label={label} error={error}>
             <Input
                 type="number"
                 min={0}
@@ -359,9 +441,9 @@ function DayInput({
                     onChange(
                         e.target.value
                             ? Number(
-                                  e.target
-                                      .value,
-                              )
+                                e.target
+                                    .value,
+                            )
                             : undefined,
                     )
                 }
