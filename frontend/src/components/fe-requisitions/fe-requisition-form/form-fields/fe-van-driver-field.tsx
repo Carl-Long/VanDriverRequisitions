@@ -16,6 +16,7 @@ type Props = {
     disabled?: boolean;
     value: string | null;
     label: string | null;
+    error?: string;
     onChange: (
         params: {
             id: string | null;
@@ -31,15 +32,18 @@ export function FeVanDriverField({
     disabled,
     value,
     label,
+    error,
     onChange,
 }: Readonly<Props>) {
     return (
         <Field
             label="Van Driver"
+            error={error}
             required
         >
             <Combobox
                 disabled={disabled}
+                state={error ? "error" : "default"}
                 value={value}
                 label={label}
                 placeholder="Search van drivers..."

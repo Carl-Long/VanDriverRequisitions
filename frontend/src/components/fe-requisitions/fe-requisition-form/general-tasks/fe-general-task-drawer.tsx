@@ -73,7 +73,7 @@ export function FeGeneralTaskDrawer({
         setForm(reset);
         setErrors({});
     }, [open]);
-    
+
     const totals = useMemo(
         () =>
             calculateFeGeneralTaskFormTotals(
@@ -105,6 +105,15 @@ export function FeGeneralTaskDrawer({
 
         onClose();
     }
+
+    function clearError(field: string) {
+        setErrors((prev) => {
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    }
+
 
     function handleSaveAndAddAnother() {
         const result =
@@ -203,7 +212,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.sunday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -213,32 +222,31 @@ export function FeGeneralTaskDrawer({
                                         sunday:
                                             value ?? null,
                                     },
-                                }))
-                            }
-                        />
+                                }));
+                                clearError("quantities.sunday");
+                                clearError("form");
 
+                            }}
+                        />
                         <DayInput
                             label="Mon"
-                            error={
-                                errors["quantities.monday"]
-                            }
-                            value={
-                                form.quantities.monday
-                            }
-                            onChange={(value) =>
+                            error={errors["quantities.monday"]}
+                            value={form.quantities.monday}
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
                                     quantities: {
                                         ...prev.quantities,
 
-                                        monday:
-                                            value ?? null,
+                                        monday: value ?? null,
                                     },
-                                }))
-                            }
-                        />
+                                }));
 
+                                clearError("quantities.monday");
+                                clearError("form");
+                            }}
+                        />
                         <DayInput
                             label="Tue"
                             error={
@@ -247,7 +255,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.tuesday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -257,8 +265,10 @@ export function FeGeneralTaskDrawer({
                                         tuesday:
                                             value ?? null,
                                     },
-                                }))
-                            }
+                                }));
+                                clearError("quantities.tuesday");
+                                clearError("form");
+                            }}
                         />
 
                         <DayInput
@@ -269,7 +279,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.wednesday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -279,8 +289,10 @@ export function FeGeneralTaskDrawer({
                                         wednesday:
                                             value ?? null,
                                     },
-                                }))
-                            }
+                                }));
+                                clearError("quantities.wednesday");
+                                clearError("form");
+                            }}
                         />
 
                         <DayInput
@@ -291,7 +303,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.thursday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -301,8 +313,10 @@ export function FeGeneralTaskDrawer({
                                         thursday:
                                             value ?? null,
                                     },
-                                }))
-                            }
+                                }));
+                                clearError("quantities.thursday");
+                                clearError("form");
+                            }}
                         />
 
                         <DayInput
@@ -313,7 +327,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.friday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -323,8 +337,10 @@ export function FeGeneralTaskDrawer({
                                         friday:
                                             value ?? null,
                                     },
-                                }))
-                            }
+                                }));
+                                clearError("quantities.friday");
+                                clearError("form");
+                            }}
                         />
 
                         <DayInput
@@ -335,7 +351,7 @@ export function FeGeneralTaskDrawer({
                             value={
                                 form.quantities.saturday
                             }
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
 
@@ -345,8 +361,10 @@ export function FeGeneralTaskDrawer({
                                         saturday:
                                             value ?? null,
                                     },
-                                }))
-                            }
+                                }));
+                                clearError("quantities.monday");
+                                clearError("form");
+                            }}
                         />
                     </div>
                     {errors.form && (
@@ -371,14 +389,15 @@ export function FeGeneralTaskDrawer({
                             type="number"
                             value={form.ratePerJob ?? ""}
                             state={errors["ratePerJob"] ? "error" : "default"}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setForm((prev) => ({
                                     ...prev,
                                     ratePerJob: e.target.value
                                         ? Number(e.target.value)
                                         : null,
-                                }))
-                            }
+                                }));
+                                clearError("ratePerJob");
+                            }}
                         />
                     </Field>
 

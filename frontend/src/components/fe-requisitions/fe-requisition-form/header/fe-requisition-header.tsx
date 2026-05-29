@@ -9,9 +9,13 @@ import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 type Props = {
     mode: FeRequisitionPageMode;
     requisitionNumber?: string;
+    isSaving: boolean;
     status: RequisitionStatus;
     subtotal: number;
     generalTaskCount: number;
+    onSaveDraft: () => void;
+    onSaveAndContinue: () => void;
+    onSubmit: () => void;
 };
 
 export function FeRequisitionHeader({
@@ -19,6 +23,10 @@ export function FeRequisitionHeader({
     requisitionNumber,
     subtotal,
     generalTaskCount,
+    isSaving,
+    onSaveDraft,
+    onSaveAndContinue,
+    onSubmit
 }: Readonly<Props>) {
     return (
         <div
@@ -50,9 +58,16 @@ export function FeRequisitionHeader({
                         generalTaskCount
                     }
                 />
-                
+
                 {mode !== "readonly" && (
-                    <FeRequisitionActions />
+                    <FeRequisitionActions
+                        isSaving={isSaving}
+                        onSaveDraft={onSaveDraft}
+                        onSaveAndContinue={
+                            onSaveAndContinue
+                        }
+                        onSubmit={onSubmit}
+                    />
                 )}
             </div>
         </div>

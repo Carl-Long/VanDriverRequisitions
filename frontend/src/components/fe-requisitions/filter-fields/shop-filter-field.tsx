@@ -8,6 +8,7 @@ type Props = {
     disabled?: boolean;
     value: string | null;
     label: string | null;
+    error?: string;
     hideLabel?: boolean;
     onChange: (
         value: string | null,
@@ -26,12 +27,14 @@ export function ShopFilterField({
     disabled = false,
     value,
     label,
+    error,
     hideLabel = false,
     onChange,
 }: Readonly<Props>) {
     const combobox = (
         <Combobox
             disabled={disabled}
+            state={error ? "error" : "default"}
             value={value}
             label={
                 label
@@ -56,8 +59,10 @@ export function ShopFilterField({
             onChange={(value, option) => {
                 if (value === "__ALL__") {
                     onChange(null, null);
+
                     return;
                 }
+
                 onChange(
                     value,
                     option?.label ?? null,
@@ -71,7 +76,10 @@ export function ShopFilterField({
     }
 
     return (
-        <Field label="Shop">
+        <Field
+            label="Shop"
+            error={error}
+        >
             {combobox}
         </Field>
     );

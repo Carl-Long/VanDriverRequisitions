@@ -12,9 +12,10 @@ import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 type Props = {
     readonly: boolean;
     draft: FeRequisitionDraft;
-
+    errors: Record<string, string>;
+    clearError: (field: string) => void;
     onRequisitionDateChange: (
-        date: Date | undefined,
+        date: Date | null,
     ) => void;
 
     onVanDriverChange: (
@@ -40,6 +41,8 @@ type Props = {
 export function FeRequisitionDetailsTab({
     readonly,
     draft,
+    errors,
+    clearError,
     onRequisitionDateChange,
     onVanDriverChange,
     onVanDriverNameChange,
@@ -50,45 +53,68 @@ export function FeRequisitionDetailsTab({
             <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                 <Field
                     label="Requisition Date"
+                    error={errors.requisitionDate}
                     required
                 >
                     <DatePicker
                         disabled={readonly}
                         value={
-                            draft.requisitionDate
+                            draft.requisitionDate ??
+                            undefined
                         }
-                        onChange={
-                            onRequisitionDateChange
+                        onChange={(date) =>
+                            onRequisitionDateChange(
+                                date ?? null,
+                            )
                         }
                     />
                 </Field>
 
                 <FeVanDriverField
                     disabled={readonly}
+                    error={errors.vanDriverId}
                     value={draft.vanDriverId}
                     label={draft.vanDriverLabel}
-                    onChange={onVanDriverChange}
+                    onChange={(params) => {
+                        onVanDriverChange(params);
+
+                        clearError("vanDriverId");
+                        clearError("vanDriverName");
+                    }}
                 />
 
                 <Field
                     label="Driver Name"
+                    error={errors.vanDriverName}
                     required
                 >
                     <Input
                         disabled={readonly}
-                        value={
-                            draft.vanDriverName
+                        value={draft.vanDriverName}
+                        state={
+                            errors.vanDriverName
+                                ? "error"
+                                : "default"
                         }
-                        onChange={(e) =>
+                        onChange={(e) => {
                             onVanDriverNameChange(
                                 e.target.value,
-                            )
-                        }
+                            );
+
+                            if (
+                                e.target.value.trim()
+                            ) {
+                                clearError(
+                                    "vanDriverName",
+                                );
+                            }
+                        }}
                     />
                 </Field>
 
                 <ShopFilterField
                     disabled={readonly}
+                    error={errors.shopId}
                     value={draft.shopId}
                     label={draft.shopLabel}
                     onChange={(
@@ -99,6 +125,7 @@ export function FeRequisitionDetailsTab({
                             id: value,
                             label,
                         });
+                        clearError("shopId");
                     }}
                 />
             </div>

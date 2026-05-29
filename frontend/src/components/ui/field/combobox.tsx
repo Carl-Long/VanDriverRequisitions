@@ -24,6 +24,7 @@ export type ComboboxOption = {
 
 type Props = {
     disabled?: boolean;
+    state?: "default" | "error";
     value: string | null;
     label?: string | null;
     placeholder?: string;
@@ -42,6 +43,7 @@ type Props = {
 
 export function Combobox({
     disabled = false,
+    state = "default",
     value,
     label,
     placeholder = "Select...",
@@ -158,6 +160,10 @@ export function Combobox({
                 className={cn(
                     fieldBase,
                     "cursor-pointer flex items-center justify-between",
+
+                    state === "error" &&
+                    "border-danger ring-1 ring-danger/30",
+
                     disabled &&
                     "cursor-not-allowed opacity-60",
                 )}
