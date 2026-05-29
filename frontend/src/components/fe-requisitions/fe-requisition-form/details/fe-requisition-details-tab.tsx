@@ -12,7 +12,6 @@ import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 type Props = {
     readonly: boolean;
     draft: FeRequisitionDraft;
-    subtotal: number;
 
     onRequisitionDateChange: (
         date: Date | undefined,
@@ -41,7 +40,6 @@ type Props = {
 export function FeRequisitionDetailsTab({
     readonly,
     draft,
-    subtotal,
     onRequisitionDateChange,
     onVanDriverChange,
     onVanDriverNameChange,

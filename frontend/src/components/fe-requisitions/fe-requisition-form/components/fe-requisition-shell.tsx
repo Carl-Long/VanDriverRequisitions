@@ -1,9 +1,10 @@
 "use client";
 
 import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
-import { FeGeneralTasksSection } from "../general-tasks/fe-general-tasks-section";
+import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft, } from "../hooks/use-fe-requisition-draft";
+import { useFeTaskTypes } from "../hooks/use-fe-task-types";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 
@@ -21,6 +22,8 @@ export function FeRequisitionShell({ mode, }: Readonly<Props>) {
         removeGeneralTask,
     } = useFeRequisitionDraft();
 
+    const { taskTypes } = useFeTaskTypes();
+
     const isReadonly = mode === "readonly";
     return (
         <div className="space-y-6">
@@ -36,13 +39,13 @@ export function FeRequisitionShell({ mode, }: Readonly<Props>) {
 
             <FeRequisitionTabs
                 mode={mode}
+                taskTypes={taskTypes}
                 details={
                     <FeRequisitionDetailsTab
-                        readonly={isReadonly}
-                        draft={draft}
-                        subtotal={
-                            subtotal
+                        readonly={
+                            isReadonly
                         }
+                        draft={draft}
                         onRequisitionDateChange={
                             setRequisitionDate
                         }
@@ -57,22 +60,51 @@ export function FeRequisitionShell({ mode, }: Readonly<Props>) {
                         }
                     />
                 }
-                generalTasks={
-                    <FeGeneralTasksSection
-                        readonly={
-                            isReadonly
-                        }
-                        tasks={
-                            draft.generalTasks
-                        }
-                        onAdd={
-                            addGeneralTask
-                        }
-                        onDelete={
-                            removeGeneralTask
-                        }
-                    />
-                }
+                renderTaskTypeTab={(
+                    taskTypeId,
+                ) => {
+                    const taskType =
+                        taskTypes.find(
+                            (x) =>
+                                x.id ===
+                                taskTypeId,
+                        );
+
+                    if (!taskType) {
+                        return null;
+                    }
+
+                    const tasks =
+                        draft.generalTasks.filter(
+                            (x) =>
+                                x.taskTypeId ===
+                                taskTypeId,
+                        );
+
+                    return (
+                        <FeGeneralTaskWorkspace
+                            readonly={
+                                isReadonly
+                            }
+                            title={
+                                taskType.name
+                            }
+                            code={
+                                taskType.code
+                            }
+                            tasks={tasks}
+                            onAdd={() =>
+                                addGeneralTask(
+                                    taskType.id,
+                                    taskType.name,
+                                )
+                            }
+                            onDelete={
+                                removeGeneralTask
+                            }
+                        />
+                    );
+                }}
             />
         </div>
     );

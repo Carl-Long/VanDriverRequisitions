@@ -3,6 +3,8 @@ import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 
 type Props = {
     readonly: boolean;
+    title: string;
+    code?: string | null;
     tasks: FeGeneralTaskDraft[];
     onAdd: () => void;
     onDelete: (
@@ -10,13 +12,12 @@ type Props = {
     ) => void;
 };
 
-export function FeGeneralTasksSection({
+export function FeGeneralTaskWorkspace({
     readonly,
-
+    title,
+    code,
     tasks,
-
     onAdd,
-
     onDelete,
 }: Readonly<Props>) {
     return (
@@ -24,14 +25,11 @@ export function FeGeneralTasksSection({
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold">
-                        General Tasks
+                        {title} ({code})
                     </h2>
 
                     <p className="text-sm text-muted-foreground">
-                        Manage
-                        requisition
-                        general task
-                        entries
+                        Manage {title.toLowerCase()} entries
                     </p>
                 </div>
 
@@ -46,13 +44,15 @@ export function FeGeneralTasksSection({
                             hover:opacity-90
                         "
                     >
-                        Add Task
+                        Add {title}
                     </button>
                 )}
             </div>
 
             {tasks.length === 0 ? (
-                <EmptyState title="No general tasks added yet" />
+                <EmptyState
+                    title={title}
+                />
             ) : (
                 <TasksTable
                     readonly={
@@ -91,10 +91,6 @@ function TasksTable({
                 <thead className="bg-muted/40">
                     <tr>
                         <HeaderCell>
-                            Task Type
-                        </HeaderCell>
-
-                        <HeaderCell>
                             Week Ending
                         </HeaderCell>
 
@@ -125,11 +121,6 @@ function TasksTable({
                                 task.clientId
                             }
                         >
-                            <BodyCell>
-                                {task.taskTypeLabel ??
-                                    "Not set"}
-                            </BodyCell>
-
                             <BodyCell>
                                 {task.weekEndingDate
                                     ? task.weekEndingDate.toLocaleDateString()

@@ -82,14 +82,23 @@ export function useFeRequisitionDraft() {
         }));
     }
 
-    function addGeneralTask() {
+    function addGeneralTask(
+        taskTypeId: string,
+        taskTypeLabel: string,
+    ) {
+        const task = createEmptyFeGeneralTask();
+
+        task.taskTypeId = taskTypeId;
+
+        task.taskTypeLabel = taskTypeLabel;
+
         setDraft((prev) => ({
             ...prev,
 
             generalTasks: [
                 ...prev.generalTasks,
 
-                createEmptyFeGeneralTask(),
+                task,
             ],
         }));
     }

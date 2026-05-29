@@ -1,108 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
+import { FeTaskType } from "@/lib/api/fe-task-types";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 
-type Tab =
-    | "details"
-    | "generalTasks"
-    | "mileage"
-    | "transfers"
-    | "additionalCosts";
-
 type Props = {
-    mode: FeRequisitionPageMode
+    mode: FeRequisitionPageMode;
+    taskTypes: FeTaskType[];
     details: React.ReactNode;
-
-    generalTasks: React.ReactNode;
+    renderTaskTypeTab: (
+        taskTypeId: string,
+    ) => React.ReactNode;
 };
 
 export function FeRequisitionTabs({
+    taskTypes,
     details,
-
-    generalTasks,
+    renderTaskTypeTab,
 }: Readonly<Props>) {
-    const [active, setActive] =
-        useState<Tab>("details");
+    const tabs = useMemo(
+        () =>
+            buildFeRequisitionTabs(
+                taskTypes,
+            ),
+
+        [taskTypes],
+    );
+
+    const [activeKey, setActiveKey] =
+        useState("details");
+
+    const activeTab = tabs.find(
+        (x) => x.key === activeKey,
+    );
 
     return (
         <div className="space-y-6">
-            <div className="flex gap-2 border-b border-border">
-                <TabButton
-                    active={
-                        active === "details"
-                    }
-                    onClick={() =>
-                        setActive("details")
-                    }
-                >
-                    Details
-                </TabButton>
-
-                <TabButton
-                    active={
-                        active ===
-                        "generalTasks"
-                    }
-                    onClick={() =>
-                        setActive(
-                            "generalTasks",
-                        )
-                    }
-                >
-                    General Tasks
-                </TabButton>
-
-                <TabButton
-                    active={
-                        active === "mileage"
-                    }
-                    onClick={() =>
-                        setActive("mileage")
-                    }
-                >
-                    Mileage
-                </TabButton>
-
-                <TabButton
-                    active={
-                        active ===
-                        "transfers"
-                    }
-                    onClick={() =>
-                        setActive(
-                            "transfers",
-                        )
-                    }
-                >
-                    Transfers
-                </TabButton>
-
-                <TabButton
-                    active={
-                        active ===
-                        "additionalCosts"
-                    }
-                    onClick={() =>
-                        setActive(
-                            "additionalCosts",
-                        )
-                    }
-                >
-                    Additional Costs
-                </TabButton>
+            <div className="flex gap-2 overflow-x-auto border-b border-border">
+                {tabs.map((tab) => (
+                    <TabButton
+                        key={tab.key}
+                        active={
+                            tab.key ===
+                            activeKey
+                        }
+                        onClick={() =>
+                            setActiveKey(
+                                tab.key,
+                            )
+                        }
+                    >
+                        {tab.label}
+                    </TabButton>
+                ))}
             </div>
 
-            {active === "details" &&
-                details}
+            {activeTab?.type ===
+                "details" && details}
 
-            {active ===
-                "generalTasks" &&
-                generalTasks}
+            {activeTab?.type ===
+                "general-task" &&
+                renderTaskTypeTab(
+                    activeTab.taskTypeId,
+                )}
 
-            {active !== "details" &&
-                active !==
-                "generalTasks" && (
+            {activeTab?.type !==
+                "details" &&
+                activeTab?.type !==
+                "general-task" && (
                     <div className="rounded-2xl border border-dashed border-border p-12 text-center">
                         <div className="text-sm text-muted-foreground">
                             This section
@@ -118,9 +84,7 @@ export function FeRequisitionTabs({
 
 type TabButtonProps = {
     active: boolean;
-
     onClick: () => void;
-
     children: React.ReactNode;
 };
 
@@ -134,7 +98,7 @@ function TabButton({
             type="button"
             onClick={onClick}
             className={[
-                "border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                "whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
                 active
                     ? "border-primary text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground",
