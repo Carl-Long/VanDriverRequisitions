@@ -1,13 +1,18 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-totals";
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { useState } from "react";
+import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 
 type Props = {
     readonly: boolean;
     title: string;
     code?: string | null;
     tasks: FeGeneralTaskDraft[];
-    onAdd: () => void;
+    onAdd: (
+        form: FeGeneralTaskForm,
+    ) => void;
     onDelete: (
         clientId: string,
     ) => void;
@@ -24,6 +29,7 @@ export function FeGeneralTaskWorkspace({
     onDelete,
 }: Readonly<Props>) {
 
+    const [open, setOpen] = useState(false);
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -40,7 +46,7 @@ export function FeGeneralTaskWorkspace({
                 {!readonly && (
                     <button
                         type="button"
-                        onClick={onAdd}
+                        onClick={() => setOpen(true)}
                         className="
                             rounded-xl bg-primary
                             px-4 py-2 text-sm font-medium
@@ -68,6 +74,18 @@ export function FeGeneralTaskWorkspace({
                     }
                 />
             )}
+            <FeGeneralTaskDrawer
+                open={open}
+                title={`Add ${title}`}
+                onClose={() =>
+                    setOpen(false)
+                }
+                onSave={(form) => {
+                    onAdd(form);
+
+                    setOpen(false);
+                }}
+            />
         </div>
     );
 }
@@ -88,9 +106,9 @@ function TasksTable({
     onDelete,
 }: Readonly<TableProps>) {
     const totals =
-    calculateFeGeneralTaskTotals(
-        tasks,
-    );
+        calculateFeGeneralTaskTotals(
+            tasks,
+        );
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <table className="min-w-full divide-y divide-border">

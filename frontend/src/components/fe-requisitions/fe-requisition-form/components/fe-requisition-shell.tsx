@@ -93,10 +93,13 @@ export function FeRequisitionShell({ mode, }: Readonly<Props>) {
                                 taskType.code
                             }
                             tasks={tasks}
-                            onAdd={() =>
+                            onAdd={(form) =>
                                 addGeneralTask(
                                     taskType.id,
+
                                     taskType.name,
+
+                                    form,
                                 )
                             }
                             onDelete={

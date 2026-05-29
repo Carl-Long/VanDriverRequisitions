@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { FeRequisitionDraft, } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculations";
-import { createEmptyFeGeneralTask, } from "../lib/create-empty-fe-general-task";
-
+import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
 
 export function useFeRequisitionDraft() {
     const [draft, setDraft] =
@@ -84,13 +84,21 @@ export function useFeRequisitionDraft() {
 
     function addGeneralTask(
         taskTypeId: string,
+
         taskTypeLabel: string,
+
+        form: FeGeneralTaskForm,
     ) {
-        const task = createEmptyFeGeneralTask();
+        const task =
+            createFeGeneralTaskDraftFromForm(
+                {
+                    taskTypeId,
 
-        task.taskTypeId = taskTypeId;
+                    taskTypeLabel,
 
-        task.taskTypeLabel = taskTypeLabel;
+                    form,
+                },
+            );
 
         setDraft((prev) => ({
             ...prev,

@@ -59,10 +59,10 @@ export function DatePicker({
             </Popover.Trigger>
 
             <Popover.Content
-                side="right"
-                align="center"
-                avoidCollisions={false}
-                sideOffset={10}
+                side="bottom"
+                align="start"
+                sideOffset={8}
+                collisionPadding={16}
                 className="
                     z-50 rounded-xl border border-border
                     bg-surface-elevated p-3 shadow-xl
