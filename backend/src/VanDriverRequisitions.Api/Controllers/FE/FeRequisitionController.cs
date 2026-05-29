@@ -19,4 +19,22 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         var result = await feRequisitionService.GetAllAsync(query, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+       // var result = await feRequisitionService.GetByIdAsync(id, cancellationToken);
+      //  return Ok(result);
+      throw new NotImplementedException();
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status201Created)]
+    public async Task<IActionResult> Create([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.CreateAsync(saveFeRequisitionDto, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id, version = "1.0", }, result);
+    }
 }

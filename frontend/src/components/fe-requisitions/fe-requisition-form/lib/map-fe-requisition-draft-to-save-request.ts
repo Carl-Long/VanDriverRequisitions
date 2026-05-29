@@ -9,7 +9,9 @@ export function mapFeRequisitionDraftToSaveRequest(
 ): SaveFeRequisition {
     return {
         requisitionDate:
-            draft.requisitionDate?.toISOString() ?? "",
+            draft.requisitionDate
+                ?.toISOString()
+                .split("T")[0] ?? "",
 
         vanDriverId:
             draft.vanDriverId ?? "",
@@ -20,16 +22,16 @@ export function mapFeRequisitionDraftToSaveRequest(
         shopId:
             draft.shopId ?? "",
 
-        poNumber: null,
-
         feGeneralTasks:
-            draft.generalTasks.map((task) => ({
+            draft.feGeneralTasks.map((task) => ({
                 feTaskTypeId:
                     task.taskTypeId ?? "",
 
                 weekEndingDate:
-                    task.weekEndingDate?.toISOString() ?? "",
-
+                    task.weekEndingDate
+                        ?.toISOString()
+                        .split("T")[0] ?? "",
+                        
                 week: {
                     sunday:
                         task.quantities.sunday,

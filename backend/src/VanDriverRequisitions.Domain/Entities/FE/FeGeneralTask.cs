@@ -5,48 +5,45 @@ using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeGeneralTask : AuditableEntity, IFeRequisitionChild
+public sealed class FeGeneralTask
+    : AuditableEntity, IFeRequisitionChild
 {
-    private FeGeneralTask() { } // For EF core
-    
-    public FeGeneralTask(WeeklyQuantities week)
+    private FeGeneralTask() { } // EF
+
+    public FeGeneralTask(
+        Guid feTaskTypeId,
+        string taskTypeName,
+        string taskTypeCode,
+        DateOnly weekEndingDate,
+        WeeklyQuantities week,
+        decimal? ratePerJob)
     {
+        FeTaskTypeId = feTaskTypeId;
+        TaskTypeName = taskTypeName;
+        TaskTypeCode = taskTypeCode;
+        WeekEndingDate = weekEndingDate;
         Week = week;
+        RatePerJob = ratePerJob;
+        
+        RecalculateTotals();
     }
-    
-    public Guid FeRequisitionId { get; init; }
-    public Guid FeTaskTypeId { get; init; }
-    public string TaskTypeName { get; init; } = string.Empty;
-    public string TaskTypeCode { get; init; }  = string.Empty;
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
-    public WeeklyQuantities Week { get; set; } = null!;
+
+    public Guid FeRequisitionId { get; set; }
+    public Guid FeTaskTypeId { get; private set; }
+    public string TaskTypeName { get; private set; } = string.Empty;
+    public string TaskTypeCode { get; private set; } = string.Empty;
+    public DateOnly WeekEndingDate { get; private set; }
+    public WeeklyQuantities Week { get; private set; } = null!;
     public int TotalNumber { get; private set; }
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
-
-    public void SetWeekValues(WeeklyQuantities week)
-    {
-        Week = week;
-        RecalculateTotals();
-    }
-
-    public void SetRate(decimal? ratePerJob)
-    {
-        RatePerJob = ratePerJob;
-        RecalculateTotals();
-    }
-
-    private (int totalNumber, decimal? totalValue) CalculateTotals()
-    {
-        var totalNumber = Week.Total;
-        var totalValue = WeeklyCalculator.Calculate(totalNumber, RatePerJob);
-        return (totalNumber, totalValue);
-    }
-
+    
     private void RecalculateTotals()
     {
-        var (totalNumber, totalValue) = CalculateTotals();
-        TotalNumber = totalNumber;
-        TotalValue = totalValue;
+        TotalNumber = Week.Total;
+
+        TotalValue = WeeklyCalculator.Calculate(
+            TotalNumber,
+            RatePerJob);
     }
 }

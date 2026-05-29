@@ -1,7 +1,5 @@
 import { FASCIAS } from "@/lib/constants/fascias";
 
-import { REQUISITION_ROW_CATEGORIES } from "@/lib/constants/requisition-row-categories";
-
 import type {
     RequisitionLimitRuleSummary,
 } from "@/lib/api/requisition-limit-rules";

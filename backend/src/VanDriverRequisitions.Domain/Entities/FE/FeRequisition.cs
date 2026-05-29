@@ -28,11 +28,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     // Calculated and persisted for reporting/performance
     public decimal Subtotal { get; set; }
 
-    public ICollection<FeGeneralTask> FeGeneralTasks { get; init; } = [];
-    public ICollection<FeMileage> FeMileages { get; init; } = [];
-    public ICollection<FeTransfer> FeTransfers { get; init; } = [];
-    public ICollection<FeAdditionalCost> FeAdditionalCosts { get; init; } = [];
-
+    public ICollection<FeGeneralTask> FeGeneralTasks { get; set; } =  [];
+    public ICollection<FeMileage> FeMileages { get; private set; } = [];
+    public ICollection<FeTransfer> FeTransfers { get; private set; } = [];
+    public ICollection<FeAdditionalCost> FeAdditionalCosts { get; private set; } = [];
+    
+    public void RecalculateSubtotal()
+    {
+        Subtotal = CalculateSubtotal();
+    }
+    
     public decimal CalculateSubtotal()
     {
         var generalTasksTotal = FeGeneralTasks.Sum(x => x.TotalValue ?? 0);

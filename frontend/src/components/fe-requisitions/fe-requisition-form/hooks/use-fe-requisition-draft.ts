@@ -17,9 +17,9 @@ export function useFeRequisitionDraft() {
 
     const subtotal = useMemo(() => {
         return calculateGeneralTasksSubtotal(
-            draft.generalTasks,
+            draft.feGeneralTasks,
         );
-    }, [draft.generalTasks]);
+    }, [draft.feGeneralTasks]);
 
     function setRequisitionDate(
         requisitionDate: Date | null,
@@ -93,8 +93,8 @@ export function useFeRequisitionDraft() {
         setDraft((prev) => ({
             ...prev,
 
-            generalTasks: [
-                ...prev.generalTasks,
+            feGeneralTasks: [
+                ...prev.feGeneralTasks,
 
                 task,
             ],
@@ -107,8 +107,8 @@ export function useFeRequisitionDraft() {
         setDraft((prev) => ({
             ...prev,
 
-            generalTasks:
-                prev.generalTasks.filter(
+            feGeneralTasks:
+                prev.feGeneralTasks.filter(
                     (x) =>
                         x.clientId !==
                         clientId,

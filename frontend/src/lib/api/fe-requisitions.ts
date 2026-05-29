@@ -156,7 +156,6 @@ export type SaveFeRequisition = {
     vanDriverId: string;
     vanDriverName: string;
     shopId: string;
-    poNumber: string | null;
     feGeneralTasks: SaveFeGeneralTask[];
     feMileages: SaveFeMileage[];
     feTransfers: SaveFeTransfer[];
@@ -178,12 +177,12 @@ export const feRequisitionsApi = {
     create: (data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(BASE, {
             method: "POST",
-            body: JSON.stringify(data),
+            body: data,
         }),
     update: (id: string, data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}`, {
             method: "PUT",
-            body: JSON.stringify(data),
+            body: data,
         }),
     submit: (id: string) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}/submit`, { method: "POST" }),

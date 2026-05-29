@@ -35,13 +35,13 @@ export const feRequisitionSchema =
                     "Shop is required",
                 ),
 
-            generalTasks:
+            feGeneralTasks:
                 z.array(z.any()),
         })
         .superRefine(
             (data, ctx) => {
                 const hasAnyRows =
-                    data.generalTasks.length >
+                    data.feGeneralTasks.length >
                     0;
 
                 if (!hasAnyRows) {

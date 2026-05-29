@@ -12,7 +12,7 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         vanDriverName: "",
         shopId: null,
         shopLabel: null,
-        generalTasks: [],
+        feGeneralTasks: [],
         mileageRows: [],
         transferRows: [],
         additionalCostRows: [],

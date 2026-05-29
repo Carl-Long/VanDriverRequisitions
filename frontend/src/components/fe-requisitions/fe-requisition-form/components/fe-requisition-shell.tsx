@@ -74,7 +74,7 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
                 ),
             );
             setActiveTab("details");
-            
+
             return;
         }
 
@@ -98,6 +98,7 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
             // refresh
 
         } catch {
+            console.log(errors);
             setErrors({
                 form:
                     "Failed to save requisition",
@@ -129,7 +130,7 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
                 status="Draft"
                 subtotal={subtotal}
                 generalTaskCount={
-                    draft.generalTasks
+                    draft.feGeneralTasks
                         .length
                 }
                 isSaving={isSaving}
@@ -195,7 +196,7 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
                     }
 
                     const tasks =
-                        draft.generalTasks.filter(
+                        draft.feGeneralTasks.filter(
                             (x) =>
                                 x.taskTypeId ===
                                 taskTypeId,

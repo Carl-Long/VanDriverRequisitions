@@ -173,7 +173,10 @@ export async function apiFetch<T>(
 
     // Handle failed responses
     if (!response.ok) {
-        throw await buildApiError(response);
+        const error = await buildApiError(response);
+        console.log(error);
+        throw error;
+        //throw await buildApiError(response);
     }
 
     return (await parseResponseBody(response)) as T;
