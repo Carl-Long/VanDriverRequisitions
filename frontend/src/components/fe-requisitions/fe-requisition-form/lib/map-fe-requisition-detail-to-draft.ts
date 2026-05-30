@@ -6,6 +6,7 @@ export function mapFeRequisitionDetailToDraft(
 ): FeRequisitionDraft {
     return {
         requisitionId: detail.id,
+        rowVersion: detail.rowVersion,
         requisitionNumber: detail.requisitionNumber,
         status: detail.status,
         requisitionDate: new Date(detail.requisitionDate),
@@ -29,10 +30,10 @@ export function mapFeRequisitionDetailToDraft(
         feGeneralTasks:
             detail.feGeneralTasks.map(
                 (task) => ({
-                    clientId:
-                        task.id ??
-                        crypto.randomUUID(),
+                    id: task.id,
 
+                    clientId:
+                        crypto.randomUUID(),
                     taskTypeId:
                         task.feTaskTypeId,
 

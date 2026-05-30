@@ -8,4 +8,5 @@ public interface IFeRequisitionService
     Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default);
      Task<FeRequisitionDetailDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<FeRequisitionDetailDto> CreateAsync(SaveFeRequisitionDto dto, CancellationToken cancellationToken = default);
+    Task<FeRequisitionDetailDto> UpdateAsync(Guid id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default);
 }

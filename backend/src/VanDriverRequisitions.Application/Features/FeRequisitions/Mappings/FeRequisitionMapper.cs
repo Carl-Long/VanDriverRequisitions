@@ -77,8 +77,7 @@ public static class FeRequisitionMapper
         SaveFeGeneralTaskDto saveFeGeneralTaskDto,
         IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
     {
-        var taskType =
-            taskTypes[saveFeGeneralTaskDto.FeTaskTypeId];
+        var taskType = taskTypes[saveFeGeneralTaskDto.FeTaskTypeId];
 
         return new FeGeneralTask(
             saveFeGeneralTaskDto.FeTaskTypeId,
@@ -145,4 +144,36 @@ public static class FeRequisitionMapper
             Sunday = week.Sunday
         };
     }
+    
+    public static void UpdateRequisition(
+        FeRequisition requisition,
+        SaveFeRequisitionDto dto,
+        VanDriverLookupDto driver,
+        Shop shop,
+        IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
+    {
+        requisition.RequisitionDate = dto.RequisitionDate;
+        
+        requisition.VanDriverId = driver.Id;
+        requisition.VanDriverCode = driver.Code;
+        requisition.VanDriverName = dto.VanDriverName.Trim();
+        requisition.TradersName = driver.TradersName;
+
+        requisition.ShopId = shop.Id;
+        requisition.ShopCode = shop.Code;
+        requisition.ShopName = shop.Name;
+
+        requisition.IsVatApplicable = driver.HasVat;
+        
+        requisition.FeGeneralTasks.Clear();
+
+        foreach (var task in dto.FeGeneralTasks)
+        {
+            requisition.FeGeneralTasks.Add(
+                MapGeneralTask(task, taskTypes));
+        }
+        requisition.RecalculateSubtotal();
+    }
+    
+    
 }

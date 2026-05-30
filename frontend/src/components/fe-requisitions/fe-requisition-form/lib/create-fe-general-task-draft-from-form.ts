@@ -23,6 +23,8 @@ export function createFeGeneralTaskDraftFromForm({
         );
 
     return {
+        id: null,
+        
         clientId: crypto.randomUUID(),
 
         taskTypeId,

@@ -76,6 +76,6 @@ public class FeGeneralTaskConfiguration : IEntityTypeConfiguration<FeGeneralTask
             );
         });
 
-        builder.ApplyAuditableConfiguration();
+       // builder.ApplyAuditableConfiguration();
     }
 }

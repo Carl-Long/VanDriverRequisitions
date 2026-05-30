@@ -94,6 +94,7 @@ export type FeAdditionalCost = {
 
 export type FeRequisitionDetail = {
     id: string;
+    rowVersion: string| null;
     requisitionNumber: string;
     requisitionDate: string;
     vanDriverSummary: VanDriverLookup;
@@ -154,6 +155,7 @@ export type SaveFeAdditionalCost = {
 };
 
 export type SaveFeRequisition = {
+    rowVersion: string | null;
     requisitionDate: string;
     vanDriverId: string;
     vanDriverName: string;

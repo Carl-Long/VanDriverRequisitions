@@ -100,8 +100,23 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
-            const saved = await feRequisitionsApi.create(request);
+            let saved;
+
+            if (draft.requisitionId) {
+                saved =
+                    await feRequisitionsApi.update(
+                        draft.requisitionId,
+                        request,
+                    );
+            } else {
+                saved =
+                    await feRequisitionsApi.create(
+                        request,
+                    );
+            }
+
             toast.success(`Requisition #${saved.requisitionNumber} saved`)
+            
             if (continueEditing) {
                 router.push(`/home-van-drivers/${saved.id}`);
             } else {

@@ -98,6 +98,46 @@ public class FeRequisitionService(
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
     }
 
+    public async Task<FeRequisitionDetailDto> UpdateAsync(
+        Guid id,
+        SaveFeRequisitionDto saveFeRequisitionDto,
+        CancellationToken cancellationToken = default)
+    {
+        await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
+
+        var existingRequisition = await LoadFullAsync(id, cancellationToken) 
+                                  ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        var driverSummary = await context.VanDrivers
+            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        var shop = await context.Shops.SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
+
+        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
+                .Select(x => x.FeTaskTypeId)
+                .Distinct()
+                .ToList();
+
+        var taskTypes = await context.FeTaskTypes
+                .Where(x => taskTypeIds.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+
+        var taskTypeMap = taskTypes.ToDictionary(x => x.Id);
+        
+        FeRequisitionMapper.UpdateRequisition(
+            existingRequisition,
+            saveFeRequisitionDto,
+            driverSummary,
+            shop,
+            taskTypeMap);
+        
+        await context.SaveChangesAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
+    }
+
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
     {
         return await context.FeRequisitions

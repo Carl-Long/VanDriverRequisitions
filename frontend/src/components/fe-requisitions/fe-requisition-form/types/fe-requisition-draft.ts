@@ -4,6 +4,7 @@ import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;
+    rowVersion: string | null;
     requisitionNumber: string | null;
     status: string;
     requisitionDate: Date | null;

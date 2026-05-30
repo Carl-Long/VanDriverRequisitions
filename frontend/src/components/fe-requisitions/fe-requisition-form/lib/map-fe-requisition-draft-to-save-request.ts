@@ -8,6 +8,8 @@ export function mapFeRequisitionDraftToSaveRequest(
     draft: FeRequisitionDraft,
 ): SaveFeRequisition {
     return {
+        rowVersion: draft.rowVersion,
+        
         requisitionDate:
             draft.requisitionDate
                 ?.toISOString()
@@ -24,6 +26,8 @@ export function mapFeRequisitionDraftToSaveRequest(
 
         feGeneralTasks:
             draft.feGeneralTasks.map((task) => ({
+                id: task.id,
+
                 feTaskTypeId:
                     task.taskTypeId ?? "",
 

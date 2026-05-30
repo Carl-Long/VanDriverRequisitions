@@ -9,6 +9,7 @@ export type WeeklyQuantitiesDraft = {
 };
 
 export type FeGeneralTaskDraft = {
+    id: string | null;
     clientId: string;
     taskTypeId: string | null;
     taskTypeLabel: string | null;
