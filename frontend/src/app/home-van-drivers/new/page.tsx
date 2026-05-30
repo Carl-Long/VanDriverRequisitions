@@ -3,29 +3,11 @@
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
-import {
-    requisitionLimitRulesApi,
-    RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
-import { useEffect, useState } from "react";
+import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
 
 export default function NewRequisitionPage() {
 
-    const [limitRules, setLimitRules] =
-        useState<
-            RequisitionLimitRuleSummary[]
-        >([]);
-
-    useEffect(() => {
-        async function load() {
-            const rules =
-                await requisitionLimitRulesApi.getAll();
-
-            setLimitRules(rules);
-        }
-
-        load();
-    }, []);
+    const { limitRules } = useRequisitionLimitRules();
 
     return (
         <PageContainer>

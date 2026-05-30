@@ -19,15 +19,13 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         var result = await feRequisitionService.GetAllAsync(query, cancellationToken);
         return Ok(result);
     }
-    
-    [HttpGet("{id:guid}")]
+   [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-       // var result = await feRequisitionService.GetByIdAsync(id, cancellationToken);
-      //  return Ok(result);
-      throw new NotImplementedException();
+        var result = await feRequisitionService.GetByIdAsync(id, cancellationToken);
+        return Ok(result);
     }
 
     [HttpPost]

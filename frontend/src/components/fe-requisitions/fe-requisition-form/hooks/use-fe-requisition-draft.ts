@@ -9,9 +9,11 @@ import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisition-draft";
 
-export function useFeRequisitionDraft() {
+export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
+    
     const [draft, setDraft] =
         useState<FeRequisitionDraft>(
+            initialDraft ??
             createEmptyFeRequisitionDraft(),
         );
 

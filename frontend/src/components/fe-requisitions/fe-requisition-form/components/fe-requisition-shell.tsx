@@ -12,14 +12,25 @@ import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 import { useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
-import { feRequisitionsApi } from "@/lib/api/fe-requisitions";
+import { feRequisitionsApi, FeRequisitionDetail } from "@/lib/api/fe-requisitions";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
 import { mapZodErrors } from "../lib/map-zod-errors";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/providers/toast-provider";
+import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 
+type Props = {
+    mode: FeRequisitionPageMode;
+    limitRules: RequisitionLimitRuleSummary[];
+    feRequisition?: FeRequisitionDetail;
+};
 
-type Props = { mode: FeRequisitionPageMode; limitRules: RequisitionLimitRuleSummary[] };
+export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly<Props>) {
 
-export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
+    const initialDraft = feRequisition
+        ? mapFeRequisitionDetailToDraft(feRequisition)
+        : undefined;
+
     const {
         draft,
         subtotal,
@@ -29,7 +40,8 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
         setShop,
         addGeneralTask,
         removeGeneralTask,
-    } = useFeRequisitionDraft();
+    } = useFeRequisitionDraft(initialDraft);
+
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -59,7 +71,10 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
 
     const isReadonly = mode === "readonly";
 
-    async function saveRequisition() {
+    const router = useRouter();
+    const toast = useToast();
+
+    async function saveRequisition(continueEditing: boolean = false) {
         const result =
             feRequisitionSchema.safeParse(
                 draft,
@@ -83,19 +98,15 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
 
             setIsSaving(true);
 
-            const request =
-                mapFeRequisitionDraftToSaveRequest(
-                    draft,
-                );
+            const request = mapFeRequisitionDraftToSaveRequest(draft);
 
-            await feRequisitionsApi.create(
-                request,
-            );
-
-            // next:
-            // toast
-            // redirect
-            // refresh
+            const saved = await feRequisitionsApi.create(request);
+            toast.success(`Requisition #${saved.requisitionNumber} saved`)
+            if (continueEditing) {
+                router.push(`/home-van-drivers/${saved.id}`);
+            } else {
+                router.push("/home-van-drivers");
+            }
 
         } catch {
             console.log(errors);
@@ -114,7 +125,7 @@ export function FeRequisitionShell({ mode, limitRules }: Readonly<Props>) {
     }
 
     async function handleSaveAndContinue() {
-        await saveRequisition();
+        await saveRequisition(true);
     }
 
     async function handleSubmit() {

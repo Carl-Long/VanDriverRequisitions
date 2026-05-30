@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Enums;
@@ -11,7 +12,7 @@ public static class FeRequisitionMapper
     public static FeRequisition MapSaveRequisitionDtoToRequisition(
         SaveFeRequisitionDto saveFeRequisitionDto,
         string requisitionNumber,
-        VanDriver driver,
+        VanDriverLookupDto driver,
         Shop shop,
         IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
     {
@@ -42,28 +43,29 @@ public static class FeRequisitionMapper
     // DETAIL DTO
     // =========================
 
-    public static FeRequisitionDetailDto MapRequisitionToDetailDto(FeRequisition requisition)
+    public static FeRequisitionDetailDto MapRequisitionToDetailDto(FeRequisition requisition, VanDriverLookupDto vanDriverSummary)
     {
+
         return new FeRequisitionDetailDto
         {
             Id = requisition.Id,
             RowVersion = requisition.RowVersion,
             RequisitionNumber = requisition.RequisitionNumber,
             RequisitionDate = requisition.RequisitionDate,
+            VanDriverSummary = vanDriverSummary,
             VanDriverId = requisition.VanDriverId,
-            VanDriverCode = requisition.VanDriverCode,
-            VanDriverName = requisition.VanDriverName,
-            TradersName = requisition.TradersName,
             ShopId = requisition.ShopId,
             ShopCode = requisition.ShopCode,
             ShopName = requisition.ShopName,
             Status = requisition.Status,
             PoNumber = requisition.PoNumber,
             Subtotal = requisition.Subtotal,
+            IsEditable = requisition.Status == RequisitionStatus.Draft || requisition.Status == RequisitionStatus.Rejected,
 
             FeGeneralTasks = requisition.FeGeneralTasks
                     .Select(MapGeneralTaskDetail)
                     .ToList()
+
         };
     }
 

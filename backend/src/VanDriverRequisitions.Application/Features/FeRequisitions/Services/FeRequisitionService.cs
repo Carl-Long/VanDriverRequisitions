@@ -5,6 +5,7 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
+using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -16,9 +17,7 @@ public class FeRequisitionService(
     ICurrentUserService currentUser,
     IValidatorService validator) : IFeRequisitionService
 {
-    public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(
-        FeRequisitionQueryDto query,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
         var userId = currentUser?.User?.Id ?? throw new UnauthorizedAccessException();
 
@@ -43,13 +42,30 @@ public class FeRequisitionService(
         };
     }
 
+    public async Task<FeRequisitionDetailDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var existingRequisition = await LoadFullAsync(id, cancellationToken)
+            ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        var shop = await context.Shops.SingleAsync(x => x.Id == existingRequisition.ShopId, cancellationToken);
+
+        var driverSummary = await context.VanDrivers
+            .Where(x => x.Id == existingRequisition.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
+    }
+
     public async Task<FeRequisitionDetailDto> CreateAsync(SaveFeRequisitionDto saveFeRequisitionDto,
         CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        var driver = await context.VanDrivers
-            .SingleAsync(x => x.Id == saveFeRequisitionDto.VanDriverId, cancellationToken);
+        var driverSummary = await context.VanDrivers
+                   .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
+                   .Select(VanDriverProjections.AsLookupDto)
+                   .SingleAsync(cancellationToken);
 
         var shop = await context.Shops.SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
 
@@ -61,7 +77,7 @@ public class FeRequisitionService(
         var taskTypes = await context.FeTaskTypes
             .Where(x => taskTypeIds.Contains(x.Id))
             .ToListAsync(cancellationToken);
-        
+
         var taskTypeMap =
             taskTypes.ToDictionary(x => x.Id);
 
@@ -70,15 +86,25 @@ public class FeRequisitionService(
         var requisition = FeRequisitionMapper.MapSaveRequisitionDtoToRequisition(
                 saveFeRequisitionDto,
                 requisitionNumber,
-                driver,
+                driverSummary,
                 shop,
                 taskTypeMap);
-        
+
         requisition.RecalculateSubtotal();
-        
+
         context.FeRequisitions.Add(requisition);
         await context.SaveChangesAsync(cancellationToken);
 
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition);
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
+
+    private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.FeRequisitions
+            .Include(x => x.FeGeneralTasks)
+            .Include(x => x.FeMileages)
+            .Include(x => x.FeTransfers)
+            .Include(x => x.FeAdditionalCosts)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 }

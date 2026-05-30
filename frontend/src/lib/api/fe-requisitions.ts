@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
+import { VanDriverLookup } from "./van-drivers";
 
 const BASE = "/api/v1/fe-requisitions";
 
@@ -95,6 +96,7 @@ export type FeRequisitionDetail = {
     id: string;
     requisitionNumber: string;
     requisitionDate: string;
+    vanDriverSummary: VanDriverLookup;
     vanDriverId: string;
     vanDriverCode: string;
     vanDriverName: string;
