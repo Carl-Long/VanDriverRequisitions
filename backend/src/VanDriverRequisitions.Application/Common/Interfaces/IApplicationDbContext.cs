@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 
@@ -14,7 +15,9 @@ public interface IApplicationDbContext
     DbSet<SubmitWindow> SubmitWindows { get; }
     DbSet<Shop> Shops { get; }
     DbSet<VanDriver> VanDrivers { get; }
-
+    
+    EntityEntry Entry(object entity);
+    
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken);
 

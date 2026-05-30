@@ -117,13 +117,13 @@ public static class FeRequisitionMapper
         WeeklyQuantitiesDto weeklyQuantitiesDto)
     {
         return new WeeklyQuantities(
+            weeklyQuantitiesDto.Sunday,
             weeklyQuantitiesDto.Monday,
             weeklyQuantitiesDto.Tuesday,
             weeklyQuantitiesDto.Wednesday,
             weeklyQuantitiesDto.Thursday,
             weeklyQuantitiesDto.Friday,
-            weeklyQuantitiesDto.Saturday,
-            weeklyQuantitiesDto.Sunday);
+            weeklyQuantitiesDto.Saturday);
     }
 
     // =========================
@@ -135,45 +135,13 @@ public static class FeRequisitionMapper
     {
         return new WeeklyQuantitiesDto
         {
+            Sunday = week.Sunday,
             Monday = week.Monday,
             Tuesday = week.Tuesday,
             Wednesday = week.Wednesday,
             Thursday = week.Thursday,
             Friday = week.Friday,
-            Saturday = week.Saturday,
-            Sunday = week.Sunday
+            Saturday = week.Saturday
         };
     }
-    
-    public static void UpdateRequisition(
-        FeRequisition requisition,
-        SaveFeRequisitionDto dto,
-        VanDriverLookupDto driver,
-        Shop shop,
-        IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
-    {
-        requisition.RequisitionDate = dto.RequisitionDate;
-        
-        requisition.VanDriverId = driver.Id;
-        requisition.VanDriverCode = driver.Code;
-        requisition.VanDriverName = dto.VanDriverName.Trim();
-        requisition.TradersName = driver.TradersName;
-
-        requisition.ShopId = shop.Id;
-        requisition.ShopCode = shop.Code;
-        requisition.ShopName = shop.Name;
-
-        requisition.IsVatApplicable = driver.HasVat;
-        
-        requisition.FeGeneralTasks.Clear();
-
-        foreach (var task in dto.FeGeneralTasks)
-        {
-            requisition.FeGeneralTasks.Add(
-                MapGeneralTask(task, taskTypes));
-        }
-        requisition.RecalculateSubtotal();
-    }
-    
-    
 }

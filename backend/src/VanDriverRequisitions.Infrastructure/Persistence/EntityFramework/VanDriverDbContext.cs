@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
@@ -40,6 +41,11 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
                     .HasMaxLength(200);
             }
         }
+    }
+    
+    public new EntityEntry Entry(object entity)
+    {
+        return base.Entry(entity);
     }
 
     public async Task<string> NextFeRequisitionNumberAsync(CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -105,8 +106,12 @@ public class FeRequisitionService(
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        var existingRequisition = await LoadFullAsync(id, cancellationToken) 
+        var existingRequisition = await LoadFullAsync(id, cancellationToken)
                                   ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(existingRequisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = saveFeRequisitionDto.RowVersion;
 
         var driverSummary = await context.VanDrivers
             .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
@@ -125,15 +130,110 @@ public class FeRequisitionService(
                 .ToListAsync(cancellationToken);
 
         var taskTypeMap = taskTypes.ToDictionary(x => x.Id);
-        
-        FeRequisitionMapper.UpdateRequisition(
-            existingRequisition,
-            saveFeRequisitionDto,
-            driverSummary,
-            shop,
-            taskTypeMap);
-        
-        await context.SaveChangesAsync(cancellationToken);
+
+        existingRequisition.UpdateDetails(
+            saveFeRequisitionDto.RequisitionDate,
+            driverSummary.Id,
+            saveFeRequisitionDto.VanDriverName.Trim(),
+            driverSummary.Code,
+            driverSummary.TradersName,
+            shop.Id,
+            shop.Code,
+            shop.Name,
+            driverSummary.HasVat);
+
+        var existingTasks = existingRequisition.FeGeneralTasks
+            .ToDictionary(x => x.Id);
+
+        var incomingIds = saveFeRequisitionDto.FeGeneralTasks
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        var tasksToDelete = existingRequisition.FeGeneralTasks
+            .Where(x => !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var task in tasksToDelete)
+        {
+            existingRequisition.FeGeneralTasks.Remove(task);
+        }
+
+        foreach (var dtoTask in saveFeRequisitionDto.FeGeneralTasks.Where(x => x.Id.HasValue))
+        {
+            if (!existingTasks.TryGetValue(dtoTask.Id!.Value, out var task))
+            {
+                throw new ValidationException(
+                    $"Task '{dtoTask.Id}' was not found on requisition '{id}'.");
+            }
+
+            task.Update(
+                dtoTask.WeekEndingDate,
+                new WeeklyQuantities(
+                    dtoTask.Week.Sunday,
+                    dtoTask.Week.Monday,
+                    dtoTask.Week.Tuesday,
+                    dtoTask.Week.Wednesday,
+                    dtoTask.Week.Thursday,
+                    dtoTask.Week.Friday,
+                    dtoTask.Week.Saturday),
+                dtoTask.RatePerJob);
+        }
+
+        foreach (var dtoTask in saveFeRequisitionDto.FeGeneralTasks.Where(x => !x.Id.HasValue))
+        {
+            var taskType = taskTypeMap[dtoTask.FeTaskTypeId];
+
+            var task = new FeGeneralTask(
+                taskType.Id,
+                taskType.Name,
+                taskType.Code,
+                dtoTask.WeekEndingDate,
+                new WeeklyQuantities(
+                    dtoTask.Week.Sunday,
+                    dtoTask.Week.Monday,
+                    dtoTask.Week.Tuesday,
+                    dtoTask.Week.Wednesday,
+                    dtoTask.Week.Thursday,
+                    dtoTask.Week.Friday,
+                    dtoTask.Week.Saturday),
+                dtoTask.RatePerJob);
+
+            existingRequisition.FeGeneralTasks.Add(task);
+            context.FeGeneralTasks.Add(task);
+            Console.WriteLine(context.Entry(task).State);
+        }
+
+        existingRequisition.RecalculateSubtotal();
+
+        foreach (var task in existingRequisition.FeGeneralTasks)
+        {
+            Console.WriteLine(
+                $"Task {task.Id}");
+        }
+
+        foreach (var task in existingRequisition.FeGeneralTasks)
+        {
+            var state = context.Entry(task).State;
+
+            Console.WriteLine(
+                $"Task: {task.Id} State: {state}");
+        }
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                Console.WriteLine(
+                    $"Concurrency entity: {entry.Entity.GetType().Name}");
+            }
+
+            throw;
+        }
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
     }

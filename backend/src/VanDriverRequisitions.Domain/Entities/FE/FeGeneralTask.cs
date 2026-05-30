@@ -38,6 +38,18 @@ public sealed class FeGeneralTask
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
     
+    public void Update(
+        DateOnly weekEndingDate,
+        WeeklyQuantities week,
+        decimal? ratePerJob)
+    {
+        WeekEndingDate = weekEndingDate;
+        Week = week;
+        RatePerJob = ratePerJob;
+
+        RecalculateTotals();
+    }
+    
     private void RecalculateTotals()
     {
         TotalNumber = Week.Total;

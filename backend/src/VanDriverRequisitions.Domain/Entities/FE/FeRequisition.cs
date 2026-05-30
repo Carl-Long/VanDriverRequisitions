@@ -33,6 +33,31 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public ICollection<FeTransfer> FeTransfers { get; private set; } = [];
     public ICollection<FeAdditionalCost> FeAdditionalCosts { get; private set; } = [];
     
+    public void UpdateDetails(
+        DateOnly requisitionDate,
+        Guid vanDriverId,
+        string vanDriverName,
+        string vanDriverCode,
+        string tradersName,
+        Guid shopId,
+        string shopCode,
+        string shopName,
+        bool isVatApplicable)
+    {
+        RequisitionDate = requisitionDate;
+
+        VanDriverId = vanDriverId;
+        VanDriverName = vanDriverName;
+        VanDriverCode = vanDriverCode;
+        TradersName = tradersName;
+
+        ShopId = shopId;
+        ShopCode = shopCode;
+        ShopName = shopName;
+
+        IsVatApplicable = isVatApplicable;
+    }
+    
     public void RecalculateSubtotal()
     {
         Subtotal = CalculateSubtotal();
