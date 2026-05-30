@@ -38,6 +38,23 @@ public sealed class FeGeneralTask
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
     
+    public static FeGeneralTask Create(
+        Guid feTaskTypeId,
+        string taskTypeName,
+        string taskTypeCode,
+        DateOnly weekEndingDate,
+        WeeklyQuantities week,
+        decimal? ratePerJob)
+    {
+        return new(
+            feTaskTypeId,
+            taskTypeName,
+            taskTypeCode,
+            weekEndingDate,
+            week,
+            ratePerJob);
+    }
+    
     public void Update(
         DateOnly weekEndingDate,
         WeeklyQuantities week,

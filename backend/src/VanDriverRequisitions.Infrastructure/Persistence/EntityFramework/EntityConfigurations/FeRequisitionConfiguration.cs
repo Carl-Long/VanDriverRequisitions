@@ -78,20 +78,32 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
             .HasForeignKey(x => x.FeRequisitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Navigation(x => x.FeGeneralTasks)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.HasMany(x => x.FeMileages)
             .WithOne()
             .HasForeignKey(x => x.FeRequisitionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(x => x.FeMileages)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(x => x.FeTransfers)
             .WithOne()
             .HasForeignKey(x => x.FeRequisitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Navigation(x => x.FeTransfers)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.HasMany(x => x.FeAdditionalCosts)
             .WithOne()
             .HasForeignKey(x => x.FeRequisitionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(x => x.FeAdditionalCosts)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
         
         // Indexes
         builder.HasIndex(x => x.RequisitionNumber).IsUnique();

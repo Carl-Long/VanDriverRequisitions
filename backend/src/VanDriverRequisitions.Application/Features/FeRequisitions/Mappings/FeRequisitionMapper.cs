@@ -9,36 +9,6 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 
 public static class FeRequisitionMapper
 {
-    public static FeRequisition MapSaveRequisitionDtoToRequisition(
-        SaveFeRequisitionDto saveFeRequisitionDto,
-        string requisitionNumber,
-        VanDriverLookupDto driver,
-        Shop shop,
-        IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
-    {
-        return new FeRequisition
-        {
-            RequisitionNumber = requisitionNumber,
-            RequisitionDate = saveFeRequisitionDto.RequisitionDate,
-            VanDriverId = driver.Id,
-            VanDriverCode = driver.Code,
-            VanDriverName = saveFeRequisitionDto.VanDriverName.Trim(),
-            TradersName = driver.TradersName,
-            ShopId = shop.Id,
-            ShopCode = shop.Code,
-            ShopName = shop.Name,
-            IsVatApplicable = driver.HasVat,
-            Status = RequisitionStatus.Draft,
-
-            FeGeneralTasks = saveFeRequisitionDto.FeGeneralTasks
-                    .Select(x =>
-                        MapGeneralTask(
-                            x,
-                            taskTypes))
-                    .ToList()
-        };
-    }
-
     // =========================
     // DETAIL DTO
     // =========================
@@ -68,26 +38,7 @@ public static class FeRequisitionMapper
 
         };
     }
-
-    // =========================
-    // GENERAL TASK CREATE
-    // =========================
-
-    private static FeGeneralTask MapGeneralTask(
-        SaveFeGeneralTaskDto saveFeGeneralTaskDto,
-        IReadOnlyDictionary<Guid, FeTaskType> taskTypes)
-    {
-        var taskType = taskTypes[saveFeGeneralTaskDto.FeTaskTypeId];
-
-        return new FeGeneralTask(
-            saveFeGeneralTaskDto.FeTaskTypeId,
-            taskType.Name,
-            taskType.Code,
-            saveFeGeneralTaskDto.WeekEndingDate,
-            MapWeekDtoToWeek(saveFeGeneralTaskDto.Week),
-            saveFeGeneralTaskDto.RatePerJob);
-    }
-
+    
     // =========================
     // GENERAL TASK DETAIL
     // =========================
@@ -108,24 +59,7 @@ public static class FeRequisitionMapper
             TotalValue = task.TotalValue
         };
     }
-
-    // =========================
-    // WEEK -> VALUE OBJECT
-    // =========================
-
-    private static WeeklyQuantities MapWeekDtoToWeek(
-        WeeklyQuantitiesDto weeklyQuantitiesDto)
-    {
-        return new WeeklyQuantities(
-            weeklyQuantitiesDto.Sunday,
-            weeklyQuantitiesDto.Monday,
-            weeklyQuantitiesDto.Tuesday,
-            weeklyQuantitiesDto.Wednesday,
-            weeklyQuantitiesDto.Thursday,
-            weeklyQuantitiesDto.Friday,
-            weeklyQuantitiesDto.Saturday);
-    }
-
+    
     // =========================
     // VALUE OBJECT -> DTO
     // =========================
