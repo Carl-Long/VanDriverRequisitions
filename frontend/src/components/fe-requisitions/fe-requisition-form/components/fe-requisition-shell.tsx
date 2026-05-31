@@ -39,6 +39,7 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
         setVanDriverName,
         setShop,
         addGeneralTask,
+        updateGeneralTask,
         removeGeneralTask,
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
@@ -258,6 +259,18 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
                                     taskType.name,
                                     form,
                                 );
+                                clearError("generalTasks");
+                                clearError("form");
+                            }}
+                            onUpdate={(
+                                clientId,
+                                form,
+                            ) => {
+                                updateGeneralTask(
+                                    clientId,
+                                    form,
+                                );
+
                                 clearError("generalTasks");
                                 clearError("form");
                             }}

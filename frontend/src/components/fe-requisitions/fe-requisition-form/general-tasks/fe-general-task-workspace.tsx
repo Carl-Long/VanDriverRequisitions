@@ -9,6 +9,10 @@ import type {
     RequisitionLimitRuleSummary,
 } from "@/lib/api/requisition-limit-rules";
 import { formatCurrencyGB } from "@/lib/format/currency";
+import { IconButton } from "@/components/ui/button/icon-button";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button/button";
+import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 
 type Props = {
     readonly: boolean;
@@ -17,6 +21,10 @@ type Props = {
     limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
     onAdd: (
+        form: FeGeneralTaskForm,
+    ) => void;
+    onUpdate: (
+        clientId: string,
         form: FeGeneralTaskForm,
     ) => void;
     onDelete: (
@@ -33,10 +41,13 @@ export function FeGeneralTaskWorkspace({
     limitRule,
     tasks,
     onAdd,
+    onUpdate,
     onDelete,
 }: Readonly<Props>) {
 
     const [open, setOpen] = useState(false);
+    const [editingTask, setEditingTask] = useState<FeGeneralTaskDraft | null>(null);
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -51,18 +62,15 @@ export function FeGeneralTaskWorkspace({
                 </div>
 
                 {!readonly && (
-                    <button
+                    <Button
                         type="button"
-                        onClick={() => setOpen(true)}
-                        className="
-                            rounded-xl bg-primary
-                            px-4 py-2 text-sm font-medium
-                            text-primary-foreground
-                            hover:opacity-90
-                        "
+                        onClick={() => {
+                            setEditingTask(null);
+                            setOpen(true);
+                        }}
                     >
                         Add {title}
-                    </button>
+                    </Button>
                 )}
             </div>
 
@@ -72,24 +80,49 @@ export function FeGeneralTaskWorkspace({
                 />
             ) : (
                 <TasksTable
-                    readonly={
-                        readonly
-                    }
+                    readonly={readonly}
                     tasks={tasks}
-                    onDelete={
-                        onDelete
-                    }
+                    onEdit={(task) => {
+                        setEditingTask(task);
+                        setOpen(true);
+                    }}
+                    onDelete={onDelete}
                 />
             )}
             <FeGeneralTaskDrawer
-                key={open ? "open" : "closed"}
-                open={open}
-                title={`Add ${title}`}
-                limitRule={limitRule}
-                onClose={() =>
-                    setOpen(false)
+                key={
+                    editingTask
+                        ? editingTask.clientId
+                        : "new"
                 }
-                onSave={onAdd}
+                open={open}
+                title={
+                    editingTask
+                        ? `Edit ${title}`
+                        : `Add ${title}`
+                }
+                limitRule={limitRule}
+                initialValues={
+                    editingTask
+                        ? mapFeGeneralTaskDraftToForm(
+                            editingTask,
+                        )
+                        : undefined
+                }
+                onClose={() => {
+                    setOpen(false);
+                    setEditingTask(null);
+                }}
+                onSave={(form) => {
+                    if (editingTask) {
+                        onUpdate(
+                            editingTask.clientId,
+                            form,
+                        );
+                    } else {
+                        onAdd(form);
+                    }
+                }}
             />
         </div>
     );
@@ -100,6 +133,10 @@ type TableProps = {
 
     tasks: FeGeneralTaskDraft[];
 
+    onEdit: (
+        task: FeGeneralTaskDraft,
+    ) => void;
+
     onDelete: (
         clientId: string,
     ) => void;
@@ -108,6 +145,7 @@ type TableProps = {
 function TasksTable({
     readonly,
     tasks,
+    onEdit,
     onDelete,
 }: Readonly<TableProps>) {
     const totals =
@@ -234,20 +272,30 @@ function TasksTable({
 
                             {!readonly && (
                                 <BodyCell>
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            onDelete(
-                                                task.clientId,
-                                            )
-                                        }
-                                        className="
-                    text-sm text-danger
-                    hover:underline
-                "
-                                    >
-                                        Delete
-                                    </button>
+                                    <div className="flex gap-2">
+
+                                        <IconButton
+                                            variant="ghost"
+                                            onClick={() =>
+                                                onEdit(task)
+                                            }
+                                        >
+                                            <Pencil size={14} />
+                                        </IconButton>
+
+                                        <IconButton
+                                            tone="danger"
+                                            variant="ghost"
+                                            onClick={() =>
+                                                onDelete(
+                                                    task.clientId,
+                                                )
+                                            }
+                                        >
+                                            <Trash2 size={14} />
+                                        </IconButton>
+
+                                    </div>
                                 </BodyCell>
                             )}
 

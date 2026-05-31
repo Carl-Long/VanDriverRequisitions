@@ -8,6 +8,7 @@ import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculati
 import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisition-draft";
+import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
@@ -85,9 +86,7 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
     function addGeneralTask(
         taskTypeId: string,
-
         taskTypeLabel: string,
-
         form: FeGeneralTaskForm,
     ) {
         const task =
@@ -109,6 +108,52 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
                 task,
             ],
+        }));
+    }
+
+    function updateGeneralTask(
+        clientId: string,
+        form: FeGeneralTaskForm,
+    ) {
+        const totals =
+            calculateFeGeneralTaskFormTotals(
+                form,
+            );
+
+        setDraft((prev) => ({
+            ...prev,
+
+            feGeneralTasks:
+                prev.feGeneralTasks.map(
+                    (task) => {
+                        if (
+                            task.clientId !==
+                            clientId
+                        ) {
+                            return task;
+                        }
+
+                        return {
+                            ...task,
+
+                            weekEndingDate:
+                                form.weekEndingDate,
+
+                            quantities: {
+                                ...form.quantities,
+                            },
+
+                            ratePerJob:
+                                form.ratePerJob,
+
+                            totalNumber:
+                                totals.totalJobs,
+
+                            totalValue:
+                                totals.totalValue,
+                        };
+                    },
+                ),
         }));
     }
 
@@ -135,6 +180,7 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         setVanDriverName,
         setShop,
         addGeneralTask,
+        updateGeneralTask,
         removeGeneralTask,
         setRowVersion
     };

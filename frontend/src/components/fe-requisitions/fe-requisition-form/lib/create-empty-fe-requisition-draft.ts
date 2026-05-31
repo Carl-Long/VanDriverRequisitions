@@ -3,6 +3,7 @@ import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
     return {
         requisitionId: null,
+        rowVersion: null,
         requisitionNumber: null,
         status: "Draft",
         requisitionDate: new Date(),

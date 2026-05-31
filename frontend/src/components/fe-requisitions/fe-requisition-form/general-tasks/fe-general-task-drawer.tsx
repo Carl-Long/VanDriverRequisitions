@@ -31,13 +31,10 @@ import { formatCurrencyGB } from "@/lib/format/currency";
 
 type Props = {
     open: boolean;
-
     title: string;
-
     limitRule?: RequisitionLimitRuleSummary;
-
+    initialValues?: FeGeneralTaskForm;
     onClose: () => void;
-
     onSave: (
         form: FeGeneralTaskForm,
     ) => void;
@@ -47,6 +44,7 @@ export function FeGeneralTaskDrawer({
     open,
     title,
     limitRule,
+    initialValues,
     onClose,
     onSave,
 }: Readonly<Props>) {
@@ -66,14 +64,19 @@ export function FeGeneralTaskDrawer({
             limitRule,
         );
 
+    const isEditMode =
+        initialValues !== undefined;
+
     useEffect(() => {
         if (!open) return;
 
-        const reset = createEmptyFeGeneralTaskForm();
+        setForm(
+            initialValues ??
+            createEmptyFeGeneralTaskForm(),
+        );
 
-        setForm(reset);
         setErrors({});
-    }, [open]);
+    }, [open, initialValues]);
 
     const totals = useMemo(
         () =>
@@ -486,17 +489,22 @@ export function FeGeneralTaskDrawer({
                                 variant="outline"
                                 onClick={handleSave}
                             >
-                                Add & Close
+                                {isEditMode
+                                    ? "Update & Close"
+                                    : "Add & Close"}
                             </Button>
 
-                            <Button
-                                className="min-w-[160px]"
-                                onClick={handleSaveAndAddAnother}
-                            >
-                                <Plus className="h-4 w-4" />
-
-                                Add & Create Another
-                            </Button>
+                            {!isEditMode && (
+                                <Button
+                                    className="min-w-[160px]"
+                                    onClick={
+                                        handleSaveAndAddAnother
+                                    }
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add & Create Another
+                                </Button>
+                            )}
 
                         </div>
                     </div>
