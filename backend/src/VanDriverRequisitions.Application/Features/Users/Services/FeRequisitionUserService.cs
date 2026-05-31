@@ -7,11 +7,12 @@ using VanDriverRequisitions.Application.Features.Users.Mappings;
 
 namespace VanDriverRequisitions.Application.Features.Users.Services;
 
-public class FeRequisitionUserService(IApplicationDbContext context ) : IFeRequisitionUserService
+public class FeRequisitionUserService(IApplicationDbContext context, ICurrentUserService currentUserService ) : IFeRequisitionUserService
 {
     public async Task<PagedResult<RequisitionUserLookupDto>> SearchAsync(RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default)
     {
         var usersQuery = context.FeRequisitions
+            .Where(x => currentUserService.User != null && x.CreatedById != currentUserService.User.Id)
             .Select(RequisitionUserProjections.AsLookupDto)
             .Distinct();
 
