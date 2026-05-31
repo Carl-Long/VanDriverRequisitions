@@ -12,21 +12,13 @@ export function mapFeRequisitionDetailToDraft(
         status: detail.status as RequisitionStatus,
         requisitionDate: new Date(detail.requisitionDate),
         vanDriverId: detail.vanDriverId,
-
-        vanDriverLabel:
-            `${detail.vanDriverSummary.code} - ${detail.vanDriverSummary.tradersName}`,
-
-        vanDriverSummary:
-            detail.vanDriverSummary,
-
-        vanDriverName:
-            detail.vanDriverName,
-
-        shopId:
-            detail.shopId,
-
-        shopLabel:
-            `${detail.shopCode} - ${detail.shopName}`,
+        vanDriverLabel: `${detail.vanDriverSummary.code} - ${detail.vanDriverSummary.tradersName}`,
+        vanDriverSummary:detail.vanDriverSummary,
+        vanDriverName:detail.vanDriverName,
+        shopId:detail.shopId,
+        shopLabel:`${detail.shopCode} - ${detail.shopName}`,
+        poNumber: detail.poNumber,
+        rejectionNotes: detail.rejectionNotes,
 
         feGeneralTasks:
             detail.feGeneralTasks.map(

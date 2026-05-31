@@ -16,6 +16,9 @@ export type FeRequisitionDraft = {
     shopId: string | null;
     shopLabel: string | null;
 
+    poNumber: string | null;
+    rejectionNotes: string | null;
+
     feGeneralTasks: FeGeneralTaskDraft[];
     mileageRows: [];
     transferRows: [];

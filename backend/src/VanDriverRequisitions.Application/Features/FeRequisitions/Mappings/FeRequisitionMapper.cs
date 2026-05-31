@@ -31,6 +31,7 @@ public static class FeRequisitionMapper
             ShopName = requisition.ShopName,
             Status = EnumExtensions.GetDisplayName(requisition.Status),
             PoNumber = requisition.PoNumber,
+            RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
             IsEditable = requisition.Status == RequisitionStatus.Draft || requisition.Status == RequisitionStatus.Rejected,
 

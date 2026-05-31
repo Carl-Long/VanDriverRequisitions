@@ -16,6 +16,7 @@ public sealed class FeRequisitionDetailDto
     public required string ShopName { get; init; }
     public string Status { get; init; } = string.Empty;
     public string? PoNumber { get; init; }
+    public string? RejectionNotes { get; init; }
     public decimal Subtotal { get; init; }
     public required List<FeGeneralTaskDetailDto> FeGeneralTasks { get; init; }
 

@@ -153,9 +153,33 @@ export function FeRequisitionDetailsTab({
                                 }}
                             />
                         </Field>
-
-
                     </div>
+                    {(draft.poNumber || draft.rejectionNotes) && (
+                        <div className="mt-8 border-t pt-6">
+                            <h3 className="text-sm font-medium">
+                                Processing Information
+                            </h3>
+
+                            <div className="mt-4 space-y-4">
+                                {draft.poNumber && (
+                                    <Field label="PO Number">
+                                        <Input
+                                            disabled
+                                            value={draft.poNumber}
+                                        />
+                                    </Field>
+                                )}
+
+                                {draft.rejectionNotes && (
+                                    <Field label="Rejection Reason">
+                                        <div className="rounded-md border bg-muted/30 p-3 text-sm">
+                                            {draft.rejectionNotes}
+                                        </div>
+                                    </Field>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <VanDriverSummaryCard
