@@ -40,6 +40,7 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
         setShop,
         addGeneralTask,
         removeGeneralTask,
+        setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
 
@@ -108,6 +109,8 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
                         draft.requisitionId,
                         request,
                     );
+
+                setRowVersion(saved.rowVersion);
             } else {
                 saved =
                     await feRequisitionsApi.create(
@@ -116,7 +119,7 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
             }
 
             toast.success(`Requisition #${saved.requisitionNumber} saved`)
-            
+
             if (continueEditing) {
                 router.push(`/home-van-drivers/${saved.id}`);
             } else {

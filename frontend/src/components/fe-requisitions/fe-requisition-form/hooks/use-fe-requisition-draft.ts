@@ -10,12 +10,21 @@ import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisition-draft";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
-    
+
     const [draft, setDraft] =
         useState<FeRequisitionDraft>(
             initialDraft ??
             createEmptyFeRequisitionDraft(),
         );
+
+    function setRowVersion(
+        rowVersion: string | null,
+    ) {
+        setDraft(x => ({
+            ...x,
+            rowVersion,
+        }));
+    }
 
     const subtotal = useMemo(() => {
         return calculateGeneralTasksSubtotal(
@@ -126,6 +135,7 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         setVanDriverName,
         setShop,
         addGeneralTask,
-        removeGeneralTask
+        removeGeneralTask,
+        setRowVersion
     };
 }
