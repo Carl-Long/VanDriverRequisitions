@@ -11,8 +11,11 @@ public class FeRequisitionUserService(IApplicationDbContext context, ICurrentUse
 {
     public async Task<PagedResult<RequisitionUserLookupDto>> SearchAsync(RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default)
     {
+        var userId = currentUserService.User?.Id 
+                     ?? throw new UnauthorizedAccessException();
+        
         var usersQuery = context.FeRequisitions
-            .Where(x => currentUserService.User != null && x.CreatedById != currentUserService.User.Id)
+            .Where(x => x.CreatedById != userId)
             .Select(RequisitionUserProjections.AsLookupDto)
             .Distinct();
 
