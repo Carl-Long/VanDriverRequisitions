@@ -32,6 +32,7 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
         // - IActivatable => IsActive == true
         // - ISoftDeletable => DeletedAtUtc == null
         modelBuilder.ApplyGlobalQueryFilters();
+        modelBuilder.ApplySequentialGuidKeys();
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
