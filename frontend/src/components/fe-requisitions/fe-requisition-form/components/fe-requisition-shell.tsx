@@ -18,7 +18,6 @@ import { mapZodErrors } from "../lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
-import { RequisitionStatus } from "../../constants";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -65,8 +64,6 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
     }
 
     const [activeTab, setActiveTab] = useState("details");
-
-    const result = feRequisitionSchema.safeParse(draft);
 
     const [isSaving, setIsSaving] = useState(false);
 

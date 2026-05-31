@@ -10,23 +10,12 @@ export const REQUISITION_STATUSES = [
     "ReturnedFromFinance",
 ] as const;
 
-export const REQUISITION_STATUS_MAP = {
-    0: "Draft",
-    1: "Submitted",
-    2: "Rejected",
-    3: "Resubmitted",
-    4: "SentToFinance",
-    5: "Processed",
-    6: "ReturnedFromFinance",
-} as const;
-
 export type RequisitionStatus =
     (typeof REQUISITION_STATUSES)[number];
 
 export const statusVariants = {
     neutral:
-        "bg-muted text-muted-foreground border border-border-subtle",
-
+        "bg-surface-subtle text-foreground-subtle border border-border",
     info:
         "bg-info-surface text-info border border-info-border",
 
@@ -41,6 +30,7 @@ export const statusVariants = {
 
     accent:
         "bg-accent-surface text-accent border border-accent-border",
+
 } as const;
 
 type StatusVariant = keyof typeof statusVariants;

@@ -76,14 +76,14 @@ export function FeRequisitionHeader({
                         ) : (
                             <span
                                 className="
-                            inline-flex items-center
-                            rounded-full
-                            border border-border
-                            bg-muted/50
-                            px-2 py-0.5
-                            text-xs font-medium
-                            text-muted-foreground
-                        "
+                                    inline-flex items-center
+                                    rounded-full
+                                    border border-warning-border
+                                    bg-warning-surface
+                                    px-2 py-0.5
+                                    text-xs font-medium
+                                    text-warning
+                                "
                             >
                                 Unsaved
                             </span>
