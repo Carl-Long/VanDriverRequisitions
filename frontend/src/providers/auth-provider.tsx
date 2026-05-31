@@ -17,6 +17,7 @@ const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:50815";
 
 export type AuthUser = {
+    id: string;
     name: string;
     email: string;
     role: string;
@@ -46,6 +47,7 @@ function userFromToken(token: string): AuthUser {
     const claims = parseJwt(token);
     const name = claims.name ?? "Unknown";
     return {
+        id: claims.oid,
         name,
         email: claims.preferred_username ?? "",
         role:

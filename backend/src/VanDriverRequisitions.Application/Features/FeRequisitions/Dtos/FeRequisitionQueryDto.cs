@@ -9,5 +9,5 @@ public class FeRequisitionQueryDto
     public string? RequisitionNumber { get; init; }
     public RequisitionStatus? Status { get; init; }
     public Guid? ShopId { get; init; }
-    public bool CreatedByMe { get; init; }
+    public Guid? CreatedByUserId { get; init; }
 }

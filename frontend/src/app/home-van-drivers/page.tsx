@@ -98,9 +98,9 @@ export default function HomeVanDriversPage() {
                             page,
                             {
                                 ...filters,
-                                requisitionNumber:
-                                    debouncedReqNumber,
+                                requisitionNumber: debouncedReqNumber,
                             },
+                            user!.id
                         ),
                     );
 

@@ -28,7 +28,7 @@ export type FeRequisitionQuery = {
     requisitionNumber?: string;
     status?: string;
     shopId?: string;
-    createdByMe?: boolean;
+    createdByUserId?: string;
 };
 
 export type WeeklyQuantities = {
@@ -94,7 +94,7 @@ export type FeAdditionalCost = {
 
 export type FeRequisitionDetail = {
     id: string;
-    rowVersion: string| null;
+    rowVersion: string | null;
     requisitionNumber: string;
     requisitionDate: string;
     vanDriverSummary: VanDriverLookup;
@@ -174,7 +174,7 @@ export const feRequisitionsApi = {
         if (query.requisitionNumber) params.set("requisitionNumber", query.requisitionNumber);
         if (query.status) params.set("status", query.status);
         if (query.shopId) params.set("shopId", query.shopId);
-        if (query.createdByMe) params.set("createdByMe", "true");
+        if (query.createdByUserId) {params.set("createdByUserId", query.createdByUserId);}
         return apiFetch<PagedResult<FeRequisitionSummary>>(`${BASE}?${params}`);
     },
     getById: (id: string) => apiFetch<FeRequisitionDetail>(`${BASE}/${id}`),

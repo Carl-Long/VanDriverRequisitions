@@ -7,12 +7,11 @@ public static class FeRequisitionQueryExtensions
 {
     public static IQueryable<FeRequisition> ApplyFilters(
         this IQueryable<FeRequisition> query,
-        FeRequisitionQueryDto filters,
-        Guid currentUserId)
+        FeRequisitionQueryDto filters)
     {
-        if (filters.CreatedByMe)
+        if (filters.CreatedByUserId.HasValue)
         {
-            query = query.Where(x => x.CreatedById == currentUserId);
+            query = query.Where(x => x.CreatedById == filters.CreatedByUserId);
         }
 
         if (!string.IsNullOrWhiteSpace(filters.RequisitionNumber))

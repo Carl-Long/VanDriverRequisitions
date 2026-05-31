@@ -24,7 +24,7 @@ public class FeRequisitionService(
     {
         var userId = currentUser?.User?.Id ?? throw new UnauthorizedAccessException();
 
-        var dbQuery = context.FeRequisitions.ApplyFilters(query, userId);
+        var dbQuery = context.FeRequisitions.ApplyFilters(query);
 
         var totalCount = await dbQuery.CountAsync(cancellationToken);
 
@@ -211,32 +211,7 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
     existingRequisition.SyncGeneralTasks(taskModels);
     
     await limitValidator.ValidateAsync(existingRequisition, cancellationToken);
-    Console.WriteLine(
-        $"DTO RowVersion: {Convert.ToBase64String(saveFeRequisitionDto.RowVersion)}");
-
-    Console.WriteLine(
-        $"Entity RowVersion: {Convert.ToBase64String(existingRequisition.RowVersion)}");
-
-    var dbVersion = await context.FeRequisitions
-        .AsNoTracking()
-        .Where(x => x.Id == existingRequisition.Id)
-        .Select(x => x.RowVersion)
-        .SingleAsync(cancellationToken);
-
-    Console.WriteLine(
-        $"DB RowVersion: {Convert.ToBase64String(dbVersion)}");
-    foreach (var task in existingRequisition.FeGeneralTasks)
-    {
-        Console.WriteLine(
-            $"Task {task.Id}");
-    }
-    var dbContext = (DbContext)context;
-
-    foreach (var entry in dbContext.ChangeTracker.Entries<FeGeneralTask>())
-    {
-        Console.WriteLine(
-            $"Task: {entry.Entity.Id} State: {entry.State}");
-    }
+    
     try
     {
         await context.SaveChangesAsync(cancellationToken);
