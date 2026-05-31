@@ -17,6 +17,16 @@ export function formatDateGB(date?: Date | string | null): string | null {
   }).format(d);
 }
 
+export function toDateOnlyString(date?: Date | null): string | null {
+  if (!date) return null;
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}`;
+}
+
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",

@@ -3,17 +3,18 @@ import {
 } from "@/lib/api/fe-requisitions";
 
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
+import { toDateOnlyString } from "@/lib/format/date";
 
 export function mapFeRequisitionDraftToSaveRequest(
     draft: FeRequisitionDraft,
 ): SaveFeRequisition {
     return {
         rowVersion: draft.rowVersion,
-        
+
         requisitionDate:
-            draft.requisitionDate
-                ?.toISOString()
-                .split("T")[0] ?? "",
+            toDateOnlyString(
+                draft.requisitionDate,
+            ) ?? "",
 
         vanDriverId:
             draft.vanDriverId ?? "",
@@ -32,10 +33,10 @@ export function mapFeRequisitionDraftToSaveRequest(
                     task.taskTypeId ?? "",
 
                 weekEndingDate:
-                    task.weekEndingDate
-                        ?.toISOString()
-                        .split("T")[0] ?? "",
-                        
+                    toDateOnlyString(
+                        task.weekEndingDate,
+                    ) ?? "",
+
                 week: {
                     sunday:
                         task.quantities.sunday,
