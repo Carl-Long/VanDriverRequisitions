@@ -4,5 +4,5 @@ namespace VanDriverRequisitions.Domain.Entities.Base;
 
 public abstract class BaseEntity
 {
-    [Key] public Guid Id { get; init; } = Guid.CreateVersion7();
+    [Key] public Guid Id { get; set; }
 }

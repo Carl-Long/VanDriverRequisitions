@@ -18,8 +18,20 @@ public sealed class SaveFeRequisitionDtoValidator
             .NotEmpty()
             .MaximumLength(100);
 
-        RuleFor(x => x.FeGeneralTasks)
-            .NotEmpty()
-            .WithMessage("At least one requisition row is required");
+        RuleFor(x => x)
+            .Must(HaveAtLeastOneRow)
+            .WithMessage("At least one requisition row is required.");
+
+        RuleForEach(x => x.FeGeneralTasks)
+            .SetValidator(new SaveFeGeneralTaskDtoValidator());
+    }
+
+    private static bool HaveAtLeastOneRow(
+        SaveFeRequisitionDto saveFeRequisitionDto)
+    {
+        return saveFeRequisitionDto.FeGeneralTasks.Any();
+        //       || dto.FeMileages.Any()
+        //     || dto.FeTransfers.Any()
+        //   || dto.FeAdditionalCosts.Any();
     }
 }

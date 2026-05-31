@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -7,11 +5,11 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
-using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
@@ -19,7 +17,8 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 public class FeRequisitionService(
     IApplicationDbContext context,
     ICurrentUserService currentUser,
-    IValidatorService validator) : IFeRequisitionService
+    IValidatorService validator,
+    IFeRequisitionLimitValidator limitValidator) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -130,6 +129,8 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
         requisitionNumber,
         details,
         taskModels);
+    
+    await limitValidator.ValidateAsync(requisition, cancellationToken);
 
     context.FeRequisitions.Add(requisition);
 
@@ -144,15 +145,12 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
     SaveFeRequisitionDto saveFeRequisitionDto,
     CancellationToken cancellationToken = default)
 {
-    await validator.ValidateAsync(
-        saveFeRequisitionDto,
-        cancellationToken);
+    await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-    var requisition = await LoadFullAsync(id, cancellationToken)
-        ?? throw new NotFoundException(
-            $"Requisition with ID '{id}' was not found.");
+    var existingRequisition = await LoadFullAsync(id, cancellationToken)
+        ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-    context.Entry(requisition)
+    context.Entry(existingRequisition)
         .Property(nameof(FeRequisition.RowVersion))
         .OriginalValue = saveFeRequisitionDto.RowVersion;
 
@@ -162,9 +160,7 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
         .SingleAsync(cancellationToken);
 
     var shop = await context.Shops
-        .SingleAsync(
-            x => x.Id == saveFeRequisitionDto.ShopId,
-            cancellationToken);
+        .SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
 
     var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
         .Select(x => x.FeTaskTypeId)
@@ -188,7 +184,7 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
             shop.Code,
             shop.Name));
 
-    requisition.UpdateDetails(details);
+    existingRequisition.UpdateDetails(details);
 
     var taskModels = saveFeRequisitionDto.FeGeneralTasks
         .Select(dto =>
@@ -212,19 +208,49 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
                 dto.RatePerJob);
         });
 
-    requisition.SyncGeneralTasks(taskModels);
+    existingRequisition.SyncGeneralTasks(taskModels);
+    
+    await limitValidator.ValidateAsync(existingRequisition, cancellationToken);
+    Console.WriteLine(
+        $"DTO RowVersion: {Convert.ToBase64String(saveFeRequisitionDto.RowVersion)}");
 
+    Console.WriteLine(
+        $"Entity RowVersion: {Convert.ToBase64String(existingRequisition.RowVersion)}");
+
+    var dbVersion = await context.FeRequisitions
+        .AsNoTracking()
+        .Where(x => x.Id == existingRequisition.Id)
+        .Select(x => x.RowVersion)
+        .SingleAsync(cancellationToken);
+
+    Console.WriteLine(
+        $"DB RowVersion: {Convert.ToBase64String(dbVersion)}");
+    foreach (var task in existingRequisition.FeGeneralTasks)
+    {
+        Console.WriteLine(
+            $"Task {task.Id}");
+    }
+    var dbContext = (DbContext)context;
+
+    foreach (var entry in dbContext.ChangeTracker.Entries<FeGeneralTask>())
+    {
+        Console.WriteLine(
+            $"Task: {entry.Entity.Id} State: {entry.State}");
+    }
     try
     {
         await context.SaveChangesAsync(cancellationToken);
     }
-    catch (DbUpdateConcurrencyException)
+    catch (DbUpdateConcurrencyException ex)
     {
-        throw new ConflictException(
-            "This requisition has been modified by another user.");
+        foreach (var entry in ex.Entries )
+        {
+            Console.WriteLine($"Concurrency entity: {entry.Entity.GetType().Name}");
+        }
+        throw new ConflictException("This requisition has been modified by another user since you opened it so cannot be updated.");
     }
 
-    return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
 }
 
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
