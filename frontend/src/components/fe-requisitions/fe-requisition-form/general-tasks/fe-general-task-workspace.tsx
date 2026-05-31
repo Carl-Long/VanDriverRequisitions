@@ -78,7 +78,6 @@ export function FeGeneralTaskWorkspace({
             {tasks.length === 0 ? (
                 <EmptyState
                     title={`No ${title}`}
-                    description={`Click 'Add ${title}' to add one`}
                 />
             ) : (
                 <TasksTable

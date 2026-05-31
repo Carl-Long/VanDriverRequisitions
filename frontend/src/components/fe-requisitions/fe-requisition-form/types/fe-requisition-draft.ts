@@ -12,7 +12,7 @@ export type FeRequisitionDraft = {
     vanDriverId: string | null;
     vanDriverLabel: string | null;
     vanDriverSummary: VanDriverLookup | null;
-    vanDriverName: string;
+    vanDriverName: string | null;
     shopId: string | null;
     shopLabel: string | null;
 

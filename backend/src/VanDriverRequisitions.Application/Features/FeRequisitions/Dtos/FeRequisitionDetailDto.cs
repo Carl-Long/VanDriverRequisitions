@@ -1,5 +1,4 @@
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
@@ -9,8 +8,9 @@ public sealed class FeRequisitionDetailDto
     public byte[] RowVersion { get; init; } = [];
     public required string RequisitionNumber { get; init; }
     public DateOnly RequisitionDate { get; init; }
-    public required VanDriverLookupDto VanDriverSummary {get; init;}
+    public required VanDriverLookupDto VanDriverSummary { get; init; }
     public Guid VanDriverId { get; init; }
+    public string VanDriverName { get; init; } = string.Empty;
     public Guid ShopId { get; init; }
     public required string ShopCode { get; init; }
     public required string ShopName { get; init; }
@@ -19,5 +19,5 @@ public sealed class FeRequisitionDetailDto
     public decimal Subtotal { get; init; }
     public required List<FeGeneralTaskDetailDto> FeGeneralTasks { get; init; }
 
-    public bool IsEditable {get; init;}
+    public bool IsEditable { get; init; }
 }

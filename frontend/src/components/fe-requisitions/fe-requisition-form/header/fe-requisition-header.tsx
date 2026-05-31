@@ -40,7 +40,7 @@ export function FeRequisitionHeader({
         !!submitStatus?.currentWindow;
 
     return (
-        <div className="pb-4">
+        <div className="pb-2">
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">

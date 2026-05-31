@@ -25,6 +25,7 @@ public static class FeRequisitionMapper
             RequisitionDate = requisition.RequisitionDate,
             VanDriverSummary = vanDriverSummary,
             VanDriverId = requisition.VanDriverId,
+            VanDriverName = requisition.VanDriverName,
             ShopId = requisition.ShopId,
             ShopCode = requisition.ShopCode,
             ShopName = requisition.ShopName,

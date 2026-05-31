@@ -20,7 +20,7 @@ export function mapFeRequisitionDetailToDraft(
             detail.vanDriverSummary,
 
         vanDriverName:
-            detail.vanDriverSummary.tradersName,
+            detail.vanDriverName,
 
         shopId:
             detail.shopId,

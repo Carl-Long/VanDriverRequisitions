@@ -1,49 +1,81 @@
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 
 type Props = {
-    vanDriver: VanDriverLookup;
+    vanDriver: VanDriverLookup | null;
 };
 
 export function VanDriverSummaryCard({
     vanDriver,
 }: Readonly<Props>) {
+    if (!vanDriver) {
+        return (
+            <div className="rounded-2xl border border-border bg-surface-elevated p-6 card-shadow">
+                <div>
+                    <h3 className="font-semibold">
+                        Driver Information
+                    </h3>
+
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Select a van driver to view
+                        trader details, VAT status
+                        and address information.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="rounded-2xl border border-border bg-surface p-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Info
+        <div className="rounded-2xl border border-border bg-surface-elevated p-6 card-shadow">
+            <div>
+                <h3 className="font-semibold">
+                    {vanDriver.tradersName}
+                </h3>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {vanDriver.code}
+                </p>
+            </div>
+
+            <div className="mt-6 space-y-4">
+                <InfoRow
                     label="Driver Code"
                     value={vanDriver.code}
                 />
 
-                <Info
-                    label="Trader Name"
-                    value={vanDriver.tradersName}
-                />
-
-                <Info
+                <InfoRow
                     label="Phone"
                     value={
                         vanDriver.phone ?? "-"
                     }
                 />
 
-                <Info
-                    label="VAT"
-                    value={
-                        vanDriver.hasVat
-                            ? vanDriver.vatNumber ??
-                            "Registered"
-                            : "Not VAT Registered"
-                    }
-                />
+                <div className="grid grid-cols-[110px_1fr] gap-3">
+                    <span className="text-sm text-muted-foreground">
+                        VAT
+                    </span>
+
+                    <div>
+                        {vanDriver.hasVat ? (
+                            <span className="inline-flex rounded-full border border-success-border bg-success-surface px-2 py-0.5 text-xs font-medium text-success">
+                                {vanDriver.vatNumber ??
+                                    "Registered"}
+                            </span>
+                        ) : (
+                            <span className="inline-flex rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                                Not Registered
+                            </span>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div className="mt-4 border-t border-border pt-4">
-                <div className="text-sm font-medium">
+            <div className="mt-6 border-t border-border pt-6">
+                <div className="mb-3 text-sm font-medium">
                     Address
                 </div>
 
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="space-y-1 text-sm text-muted-foreground">
                     <div>
                         {vanDriver.address1}
                     </div>
@@ -54,14 +86,20 @@ export function VanDriverSummaryCard({
                         </div>
                     )}
 
+                    {vanDriver.town && (
+                        <div>
+                            {vanDriver.town}
+                        </div>
+                    )}
+
+                    {vanDriver.county && (
+                        <div>
+                            {vanDriver.county}
+                        </div>
+                    )}
+
                     <div>
-                        {[
-                            vanDriver.town,
-                            vanDriver.county,
-                            vanDriver.postcode,
-                        ]
-                            .filter(Boolean)
-                            .join(", ")}
+                        {vanDriver.postcode}
                     </div>
                 </div>
             </div>
@@ -69,24 +107,24 @@ export function VanDriverSummaryCard({
     );
 }
 
-type InfoProps = {
+type InfoRowProps = {
     label: string;
     value: string;
 };
 
-function Info({
+function InfoRow({
     label,
     value,
-}: Readonly<InfoProps>) {
+}: Readonly<InfoRowProps>) {
     return (
-        <div>
-            <div className="text-xs text-muted-foreground">
+        <div className="grid grid-cols-[110px_1fr] gap-3">
+            <span className="text-sm text-muted-foreground">
                 {label}
-            </div>
+            </span>
 
-            <div className="text-sm font-medium">
+            <span className="text-sm font-medium">
                 {value}
-            </div>
+            </span>
         </div>
     );
 }

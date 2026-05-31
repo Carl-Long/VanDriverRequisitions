@@ -20,7 +20,7 @@ export function mapFeRequisitionDraftToSaveRequest(
             draft.vanDriverId ?? "",
 
         vanDriverName:
-            draft.vanDriverName,
+            draft.vanDriverName ?? "",
 
         shopId:
             draft.shopId ?? "",
