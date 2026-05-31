@@ -3,6 +3,7 @@ import { z } from "zod";
 import type {
     RequisitionLimitRuleSummary,
 } from "@/lib/api/requisition-limit-rules";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 export function createFeGeneralTaskFormSchema(
     limitRule?: RequisitionLimitRuleSummary,
@@ -86,18 +87,6 @@ export function createFeGeneralTaskFormSchema(
                     saturday: form.quantities.saturday,
                 };
 
-                for (const [day, value] of Object.entries(dayLimits)) {
-                    if (!value) continue;
-
-                    if (value > limitRule.maxQuantity) {
-                        ctx.addIssue({
-                            code: "custom",
-                            path: ["quantities", day],
-                            message: `exceeds max quantity (${limitRule.maxQuantity})`,
-                        });
-                    }
-                }
-
                 //
                 // REQUIRE AT LEAST ONE JOB
                 //
@@ -139,18 +128,16 @@ export function createFeGeneralTaskFormSchema(
                     return;
                 }
 
-                if (
-                    totalQuantity >
-                    limitRule.maxQuantity
-                ) {
-                    ctx.addIssue({
-                        code: "custom",
+                for (const [day, value] of Object.entries(dayLimits)) {
+                    if (!value) continue;
 
-                        path: ["form"],
-
-                        message:
-                            `Maximum quantity of ${limitRule.maxQuantity} exceeded`,
-                    });
+                    if (value > limitRule.maxQuantity) {
+                        ctx.addIssue({
+                            code: "custom",
+                            path: ["quantities", day],
+                            message: `exceeds max quantity (${limitRule.maxQuantity})`,
+                        });
+                    }
                 }
 
                 if (
@@ -167,7 +154,7 @@ export function createFeGeneralTaskFormSchema(
                         ],
 
                         message:
-                            `Maximum rate of £${limitRule.maxRate.toFixed(2)} exceeded`,
+                            `Maximum rate of ${formatCurrencyGB(limitRule.maxRate)} exceeded`,
                     });
                 }
             },

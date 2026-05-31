@@ -6,7 +6,7 @@ import {
     useState,
 } from "react";
 
-import { Check, Plus, X } from "lucide-react";
+import { Check, Info, Plus, X } from "lucide-react";
 
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Button } from "@/components/ui/button/button";
@@ -27,6 +27,7 @@ import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-tas
 import { mapZodErrors } from "../lib/map-zod-errors";
 
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 type Props = {
     open: boolean;
@@ -182,6 +183,7 @@ export function FeGeneralTaskDrawer({
 
                     <Field
                         label="Week Ending"
+                        required
                         error={
                             errors["weekEndingDate"]
                         }
@@ -201,6 +203,37 @@ export function FeGeneralTaskDrawer({
                             }
                         />
                     </Field>
+                    {limitRule && (
+                        <div
+                            className="flex gap-3 rounded-xl border border-border bg-muted/30 p-4"
+                        >
+                            <Info
+                                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            />
+
+                            <div className="text-sm">
+                                <div className="font-medium">
+                                    Requisition Limits
+                                </div>
+
+                                <div className="mt-1 text-muted-foreground">
+                                    Maximum quantity per day:
+                                    {" "}
+                                    <strong className="text-foreground">
+                                        {limitRule.maxQuantity}
+                                    </strong>
+                                </div>
+
+                                <div className="text-muted-foreground">
+                                    Maximum rate per job:
+                                    {" "}
+                                    <strong className="text-foreground">
+                                        {formatCurrencyGB(limitRule.maxRate)}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-7 gap-3">
 
@@ -362,7 +395,7 @@ export function FeGeneralTaskDrawer({
                                             value ?? null,
                                     },
                                 }));
-                                clearError("quantities.monday");
+                                clearError("quantities.saturday");
                                 clearError("form");
                             }}
                         />
@@ -381,24 +414,32 @@ export function FeGeneralTaskDrawer({
 
                     <Field
                         label="Rate Per Job (£)"
+                        required
                         error={
                             errors["ratePerJob"]
                         }
                     >
-                        <Input
-                            type="number"
-                            value={form.ratePerJob ?? ""}
-                            state={errors["ratePerJob"] ? "error" : "default"}
-                            onChange={(e) => {
-                                setForm((prev) => ({
-                                    ...prev,
-                                    ratePerJob: e.target.value
-                                        ? Number(e.target.value)
-                                        : null,
-                                }));
-                                clearError("ratePerJob");
-                            }}
-                        />
+                        <div className="max-w-[200px]">
+                            <Input
+                                type="number"
+                                value={form.ratePerJob ?? ""}
+                                state={
+                                    errors["ratePerJob"]
+                                        ? "error"
+                                        : "default"
+                                }
+                                onChange={(e) => {
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        ratePerJob: e.target.value
+                                            ? Number(e.target.value)
+                                            : null,
+                                    }));
+
+                                    clearError("ratePerJob");
+                                }}
+                            />
+                        </div>
                     </Field>
 
                     <div
@@ -423,43 +464,10 @@ export function FeGeneralTaskDrawer({
                             </span>
 
                             <span className="font-medium">
-                                £
-                                {totals.totalValue.toFixed(
-                                    2,
-                                )}
+                                {formatCurrencyGB(totals.totalValue)}
                             </span>
                         </div>
                     </div>
-
-
-
-                    {limitRule && (
-                        <div
-                            className="
-                                rounded-xl border border-border
-                                bg-muted/30 p-3 text-sm
-                            "
-                        >
-                            <div>
-                                Maximum quantity per day:
-                                {" "}
-                                <strong>
-                                    {limitRule.maxQuantity}
-                                </strong>
-                            </div>
-
-                            <div>
-                                Maximum rate per Job:
-                                {" "}
-                                <strong>
-                                    £
-                                    {limitRule.maxRate.toFixed(
-                                        2,
-                                    )}
-                                </strong>
-                            </div>
-                        </div>
-                    )}
 
                     <div className="flex items-center justify-between pt-2">
 
@@ -476,24 +484,20 @@ export function FeGeneralTaskDrawer({
                             <Button
                                 className="min-w-[160px]"
                                 variant="outline"
-                                onClick={
-                                    handleSaveAndAddAnother
-                                }
+                                onClick={handleSave}
                             >
-                                <Plus className="h-4 w-4" />
-
-                                Save & Add Another
+                                Add & Close
                             </Button>
 
                             <Button
                                 className="min-w-[160px]"
-                                type="button"
-                                onClick={handleSave}
+                                onClick={handleSaveAndAddAnother}
                             >
-                                <Check className="h-4 w-4" />
+                                <Plus className="h-4 w-4" />
 
-                                Save & Close
+                                Add & Create Another
                             </Button>
+
                         </div>
                     </div>
                 </div>

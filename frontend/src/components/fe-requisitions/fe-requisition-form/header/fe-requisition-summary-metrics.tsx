@@ -1,3 +1,5 @@
+import { formatCurrencyGB } from "@/lib/format/currency";
+
 type Props = {
     subtotal: number;
     generalTaskCount: number;
@@ -11,7 +13,7 @@ export function FeRequisitionSummaryMetrics({
         <div className="flex items-center gap-3">
             <MetricCard
                 label="Subtotal"
-                value={`£${subtotal.toFixed(2)}`}
+                value={formatCurrencyGB(subtotal)}
             />
 
             <MetricCard

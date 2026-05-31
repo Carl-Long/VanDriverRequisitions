@@ -8,6 +8,7 @@ import { TableRow } from "@/components/ui/table/table-row";
 
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 
 type Props = {
@@ -76,7 +77,7 @@ export function RequisitionLimitRuleTable({
 
                                 {/* Max Rate */}
                                 <td className="px-4 py-3 align-middle text-foreground">
-                                    £{item.maxRate.toFixed(2)}
+                                    {formatCurrencyGB(item.maxRate)}
                                 </td>
 
                                 {/* Last Modified */}

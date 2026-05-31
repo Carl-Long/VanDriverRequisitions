@@ -11,7 +11,7 @@ import {
 
 import { StatusPill } from "./status-pill";
 import { RequisitionStatus } from "./constants";
-import { formatCurrency } from "@/lib/format/currency";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -109,7 +109,7 @@ export function FeRequisitionTable({
 
                                 {/* Amount */}
                                 <td className="whitespace-nowrap px-4 py-3 align-middle text-right font-semibold tabular-nums text-foreground">
-                                    {formatCurrency(req.subtotal)}
+                                    {formatCurrencyGB(req.subtotal)}
                                 </td>
 
                                 {/* Shop */}

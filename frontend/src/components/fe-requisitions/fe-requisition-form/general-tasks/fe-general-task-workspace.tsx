@@ -8,6 +8,7 @@ import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import type {
     RequisitionLimitRuleSummary,
 } from "@/lib/api/requisition-limit-rules";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 type Props = {
     readonly: boolean;
@@ -224,17 +225,11 @@ function TasksTable({
                             </BodyCell>
 
                             <BodyCell>
-                                £
-                                {task.ratePerJob?.toFixed(
-                                    2,
-                                ) ?? "0.00"}
+                                {formatCurrencyGB(task.ratePerJob ?? 0)}
                             </BodyCell>
 
                             <BodyCell>
-                                £
-                                {task.totalValue.toFixed(
-                                    2,
-                                )}
+                                {formatCurrencyGB(task.totalValue)}
                             </BodyCell>
 
                             {!readonly && (
@@ -302,12 +297,8 @@ function TasksTable({
                         </FooterCell>
 
                         <FooterCell>
-                            £
-                            {totals.subtotal.toFixed(
-                                2,
-                            )}
+                            {formatCurrencyGB(totals.subtotal)}
                         </FooterCell>
-
                         {!readonly && (
                             <FooterCell>
                                 -
