@@ -1,18 +1,21 @@
+"use client";
 
-import { FeRequisitionActions } from "./fe-requisition-actions";
+import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
-import { FeRequisitionSummaryMetrics } from "./fe-requisition-summary-metrics";
 import { StatusPill } from "../../status-pill";
 import { RequisitionStatus } from "../../constants";
+
+import { FeRequisitionActions } from "./fe-requisition-actions";
+import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 
 type Props = {
     mode: FeRequisitionPageMode;
-    requisitionNumber?: string;
+    requisitionNumber: string | null;
+    status: RequisitionStatus | null;
     isSaving: boolean;
-    status: RequisitionStatus;
     subtotal: number;
-    generalTaskCount: number;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -21,54 +24,94 @@ type Props = {
 export function FeRequisitionHeader({
     mode,
     requisitionNumber,
+    status,
     subtotal,
-    generalTaskCount,
     isSaving,
     onSaveDraft,
     onSaveAndContinue,
-    onSubmit
+    onSubmit,
 }: Readonly<Props>) {
+    const {
+        status: submitStatus,
+        loading: submitStatusLoading,
+    } = useSubmitWindowStatus();
+
+    const canSubmit =
+        !!submitStatus?.currentWindow;
+
     return (
-        <div
-            className="
-                sticky top-0 z-30
-                rounded-2xl border border-border
-                bg-surface/95 backdrop-blur
-                p-4 shadow-sm
-            "
-        >
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div>
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-bold">
-                            {requisitionNumber ??
-                                "New Requisition"}
+        <div className="pb-4">
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                        <h1 className="flex flex-wrap items-center gap-3 text-xl font-semibold leading-none tracking-tight">
+                            <span>
+                                {mode === "create"
+                                    ? "Create New Requisition"
+                                    : mode === "readonly"
+                                        ? "Viewing Requisition"
+                                        : "Editing Requisition"}
+                            </span>
+
+                            {mode !== "create" && requisitionNumber && (
+                                <span className="font-mono text-xl font-semibold">
+                                    {requisitionNumber}
+                                </span>
+                            )}
                         </h1>
-
-                        <StatusPill status="Draft" />
                     </div>
 
-                    <div className="mt-1 text-sm text-muted-foreground">
-                        FE requisition
-                    </div>
+                    {mode !== "readonly" && (
+                        <FeRequisitionSubmitStatus
+                            status={submitStatus}
+                            loading={submitStatusLoading}
+                        />
+                    )}
                 </div>
-                <FeRequisitionSummaryMetrics
-                    subtotal={subtotal}
-                    generalTaskCount={
-                        generalTaskCount
-                    }
-                />
 
-                {mode !== "readonly" && (
-                    <FeRequisitionActions
-                        isSaving={isSaving}
-                        onSaveDraft={onSaveDraft}
-                        onSaveAndContinue={
-                            onSaveAndContinue
-                        }
-                        onSubmit={onSubmit}
-                    />
-                )}
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-wrap items-center gap-3">
+                        {status ? (
+                            <StatusPill status={status} />
+                        ) : (
+                            <span
+                                className="
+                            inline-flex items-center
+                            rounded-full
+                            border border-border
+                            bg-muted/50
+                            px-2 py-0.5
+                            text-xs font-medium
+                            text-muted-foreground
+                        "
+                            >
+                                Unsaved
+                            </span>
+                        )}
+
+                        <div className="h-4 w-px bg-border" />
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">
+                                Subtotal
+                            </span>
+
+                            <span className="font-medium tabular-nums">
+                                {formatCurrencyGB(subtotal)}
+                            </span>
+                        </div>
+                    </div>
+
+                    {mode !== "readonly" && (
+                        <FeRequisitionActions
+                            isSaving={isSaving}
+                            canSubmit={canSubmit}
+                            onSaveDraft={onSaveDraft}
+                            onSaveAndContinue={onSaveAndContinue}
+                            onSubmit={onSubmit}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

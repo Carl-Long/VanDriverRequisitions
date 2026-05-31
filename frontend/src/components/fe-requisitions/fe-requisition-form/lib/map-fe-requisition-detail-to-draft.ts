@@ -1,5 +1,6 @@
 import { FeRequisitionDetail } from "@/lib/api/fe-requisitions";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
+import { RequisitionStatus } from "../../constants";
 
 export function mapFeRequisitionDetailToDraft(
     detail: FeRequisitionDetail,
@@ -8,7 +9,7 @@ export function mapFeRequisitionDetailToDraft(
         requisitionId: detail.id,
         rowVersion: detail.rowVersion,
         requisitionNumber: detail.requisitionNumber,
-        status: detail.status,
+        status: detail.status as RequisitionStatus,
         requisitionDate: new Date(detail.requisitionDate),
         vanDriverId: detail.vanDriverId,
 

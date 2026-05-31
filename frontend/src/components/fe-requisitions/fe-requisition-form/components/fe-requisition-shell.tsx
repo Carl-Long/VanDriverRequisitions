@@ -18,6 +18,7 @@ import { mapZodErrors } from "../lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
+import { RequisitionStatus } from "../../constants";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -154,15 +155,14 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
 
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <FeRequisitionHeader
                 mode={mode}
-                status="Draft"
-                subtotal={subtotal}
-                generalTaskCount={
-                    draft.feGeneralTasks
-                        .length
+                requisitionNumber={
+                    draft.requisitionNumber
                 }
+                status={draft.status}
+                subtotal={subtotal}
                 isSaving={isSaving}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={

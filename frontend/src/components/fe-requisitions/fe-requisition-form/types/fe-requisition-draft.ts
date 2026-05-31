@@ -1,12 +1,13 @@
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 
 import { FeGeneralTaskDraft } from "./fe-general-task-draft";
+import { RequisitionStatus } from "../../constants";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;
     rowVersion: string | null;
     requisitionNumber: string | null;
-    status: string;
+    status: RequisitionStatus | null;
     requisitionDate: Date | null;
     vanDriverId: string | null;
     vanDriverLabel: string | null;

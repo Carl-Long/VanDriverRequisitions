@@ -62,14 +62,6 @@ export default function Page() {
 
     return (
         <PageContainer>
-            <PageHeader
-                title={
-                    requisition
-                        ? requisition.requisitionNumber
-                        : "Loading..."
-                }
-            />
-
             {loading || !requisition ? (
                 <div>
                     Loading requisition...

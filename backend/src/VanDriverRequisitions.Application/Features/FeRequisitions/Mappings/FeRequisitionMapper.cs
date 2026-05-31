@@ -1,3 +1,4 @@
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.Common;
@@ -27,7 +28,7 @@ public static class FeRequisitionMapper
             ShopId = requisition.ShopId,
             ShopCode = requisition.ShopCode,
             ShopName = requisition.ShopName,
-            Status = requisition.Status,
+            Status = EnumExtensions.GetDisplayName(requisition.Status),
             PoNumber = requisition.PoNumber,
             Subtotal = requisition.Subtotal,
             IsEditable = requisition.Status == RequisitionStatus.Draft || requisition.Status == RequisitionStatus.Rejected,

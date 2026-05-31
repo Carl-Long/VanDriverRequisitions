@@ -5,7 +5,7 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         requisitionId: null,
         rowVersion: null,
         requisitionNumber: null,
-        status: "Draft",
+        status: null,
         requisitionDate: new Date(),
         vanDriverId: null,
         vanDriverLabel: null,

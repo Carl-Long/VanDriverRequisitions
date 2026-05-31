@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button/button";
+import { ArrowRight, ArrowRightCircle, Save, Send } from "lucide-react";
 
 type Props = {
     isSaving: boolean;
+    canSubmit: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -9,6 +11,7 @@ type Props = {
 
 export function FeRequisitionActions({
     isSaving,
+    canSubmit,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
@@ -16,34 +19,46 @@ export function FeRequisitionActions({
 
 
     return (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
 
             <Button
-                type="button"
+                size="sm"
+                disabled={isSaving}
+                onClick={onSaveAndContinue}
+                
+            >
+                <Save size={14} />
+                <ArrowRightCircle size={14} />
+
+                Save & Continue
+            </Button>
+
+
+            <Button
+                size="sm"
+                variant="outline"
                 disabled={isSaving}
                 onClick={onSaveDraft}
-
             >
+                <Save size={14} />
+
                 {isSaving
                     ? "Saving..."
                     : "Save Draft"}
             </Button>
 
-            <Button
-                type="button"
-                disabled={isSaving}
-                onClick={onSaveAndContinue}
-            >
-                Save & Continue
-            </Button>
+            {canSubmit && (
+                <Button
+                    size="sm"
+                    tone="danger"
+                    disabled={isSaving}
+                    onClick={onSubmit}
+                >
+                    <Send size={14} />
 
-            <Button
-                type="button"
-                disabled={isSaving}
-                onClick={onSubmit}
-            >
-                Submit
-            </Button>
+                    Submit
+                </Button>
+            )}
         </div>
     );
 }

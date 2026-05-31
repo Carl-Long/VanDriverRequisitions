@@ -10,6 +10,16 @@ export const REQUISITION_STATUSES = [
     "ReturnedFromFinance",
 ] as const;
 
+export const REQUISITION_STATUS_MAP = {
+    0: "Draft",
+    1: "Submitted",
+    2: "Rejected",
+    3: "Resubmitted",
+    4: "SentToFinance",
+    5: "Processed",
+    6: "ReturnedFromFinance",
+} as const;
+
 export type RequisitionStatus =
     (typeof REQUISITION_STATUSES)[number];
 
