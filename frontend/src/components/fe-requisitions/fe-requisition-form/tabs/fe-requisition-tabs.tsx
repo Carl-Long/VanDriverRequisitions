@@ -31,7 +31,6 @@ export function FeRequisitionTabs({
             buildFeRequisitionTabs(
                 taskTypes,
             ),
-
         [taskTypes],
     );
 
@@ -41,47 +40,51 @@ export function FeRequisitionTabs({
 
     return (
         <div className="space-y-6">
-            <div className="flex gap-2 overflow-x-auto border-b border-border">
-                {tabs.map((tab) => (
-                    <TabButton
-                        key={tab.key}
-                        active={
-                            tab.key ===
-                            activeKey
-                        }
-                        onClick={() =>
-                            onActiveKeyChange(
-                                tab.key,
-                            )
-                        }
-                    >
-                        {tab.label}
-                    </TabButton>
-                ))}
+            <div className="overflow-x-auto">
+                <div className="inline-flex min-w-max gap-1 rounded-2xl bg-muted p-1">
+                    {tabs.map((tab) => (
+                        <TabButton
+                            key={tab.key}
+                            active={
+                                tab.key ===
+                                activeKey
+                            }
+                            onClick={() =>
+                                onActiveKeyChange(
+                                    tab.key,
+                                )
+                            }
+                        >
+                            {tab.label}
+                        </TabButton>
+                    ))}
+                </div>
             </div>
 
-            {activeTab?.type ===
-                "details" && details}
+            <div>
+                {activeTab?.type ===
+                    "details" && details}
 
-            {activeTab?.type ===
-                "general-task" &&
-                renderTaskTypeTab(
-                    activeTab.taskTypeId,
-                )}
+                {activeTab?.type ===
+                    "general-task" &&
+                    renderTaskTypeTab(
+                        activeTab.taskTypeId,
+                    )}
 
-            {activeTab?.type !==
-                "details" &&
-                activeTab?.type !==
-                "general-task" && (
-                    <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-                        <div className="text-sm text-muted-foreground">
-                            This section
-                            will be
-                            implemented
-                            later
+                {activeTab?.type !==
+                    "details" &&
+                    activeTab?.type !==
+                    "general-task" && (
+                        <div className="rounded-2xl border border-dashed border-border p-12 text-center">
+                            <div className="text-sm text-muted-foreground">
+                                This section
+                                will be
+                                implemented
+                                later
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+            </div>
         </div>
     );
 }
@@ -102,10 +105,18 @@ function TabButton({
             type="button"
             onClick={onClick}
             className={[
-                "whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                "cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200",
                 active
-                    ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
+                    ? [
+                        "bg-background",
+                        "text-foreground",
+                        "shadow-sm",
+                    ].join(" ")
+                    : [
+                        "text-muted-foreground",
+                        "hover:text-foreground",
+                        "hover:bg-background/50",
+                    ].join(" "),
             ].join(" ")}
         >
             {children}

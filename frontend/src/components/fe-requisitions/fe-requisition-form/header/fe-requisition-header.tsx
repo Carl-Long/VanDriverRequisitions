@@ -44,17 +44,18 @@ export function FeRequisitionHeader({
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                        <h1 className="flex flex-wrap items-center gap-3 text-xl font-semibold leading-none tracking-tight">
+                        <h1 className="flex flex-wrap items-center gap-3 font-semibold text-lg leading-none tracking-tight">
                             <span>
                                 {mode === "create"
                                     ? "Create New Requisition"
                                     : mode === "readonly"
                                         ? "Viewing Requisition"
                                         : "Editing Requisition"}
+                                        
                             </span>
 
                             {mode !== "create" && requisitionNumber && (
-                                <span className="font-mono text-xl font-semibold">
+                                <span className="font-mono">
                                     {requisitionNumber}
                                 </span>
                             )}

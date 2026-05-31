@@ -49,96 +49,94 @@ export function FeRequisitionDetailsTab({
     onShopChange,
 }: Readonly<Props>) {
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6">
-            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                <Field
-                    label="Requisition Date"
-                    error={errors.requisitionDate}
-                    required
-                >
-                    <DatePicker
-                        disabled={readonly}
-                        value={
-                            draft.requisitionDate ??
-                            undefined
-                        }
-                        onChange={(date) =>
-                            onRequisitionDateChange(
-                                date ?? null,
-                            )
-                        }
-                    />
-                </Field>
+        <div className="space-y-6">
 
-                <FeVanDriverField
-                    disabled={readonly}
-                    error={errors.vanDriverId}
-                    value={draft.vanDriverId}
-                    label={draft.vanDriverLabel}
-                    onChange={(params) => {
-                        onVanDriverChange(params);
+            <div className="flex items-start justify-between ">
+                <div>
+                    <h2 className="text-md font-semibold">
+                        Requisition Details
+                    </h2>
 
-                        clearError("vanDriverId");
-                        clearError("vanDriverName");
-                    }}
-                />
-
-                <Field
-                    label="Driver Name"
-                    error={errors.vanDriverName}
-                    required
-                >
-                    <Input
-                        disabled={readonly}
-                        value={draft.vanDriverName}
-                        state={
-                            errors.vanDriverName
-                                ? "error"
-                                : "default"
-                        }
-                        onChange={(e) => {
-                            onVanDriverNameChange(
-                                e.target.value,
-                            );
-
-                            if (
-                                e.target.value.trim()
-                            ) {
-                                clearError(
-                                    "vanDriverName",
-                                );
-                            }
-                        }}
-                    />
-                </Field>
-
-                <ShopFilterField
-                    disabled={readonly}
-                    error={errors.shopId}
-                    value={draft.shopId}
-                    label={draft.shopLabel}
-                    onChange={(
-                        value,
-                        label,
-                    ) => {
-                        onShopChange({
-                            id: value,
-                            label,
-                        });
-                        clearError("shopId");
-                    }}
-                />
+                    <p className="text-sm text-muted-foreground">
+                        Manage requisition information
+                    </p>
+                </div>
             </div>
 
-            {draft.vanDriverSummary && (
-                <div className="mt-6">
-                    <VanDriverSummaryCard
-                        vanDriver={
-                            draft.vanDriverSummary
-                        }
+            <div className="rounded-2xl border border-border bg-surface p-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+                    <Field
+                        label="Requisition Date"
+                        error={errors.requisitionDate}
+                        required
+                    >
+                        <DatePicker
+                            disabled={readonly}
+                            value={draft.requisitionDate ?? undefined}
+                            onChange={(date) =>
+                                onRequisitionDateChange(date ?? null)
+                            }
+                        />
+                    </Field>
+
+                    <FeVanDriverField
+                        disabled={readonly}
+                        error={errors.vanDriverId}
+                        value={draft.vanDriverId}
+                        label={draft.vanDriverLabel}
+                        onChange={(params) => {
+                            onVanDriverChange(params);
+                            clearError("vanDriverId");
+                            clearError("vanDriverName");
+                        }}
                     />
+
+                    <Field
+                        label="Driver Name"
+                        error={errors.vanDriverName}
+                        required
+                    >
+                        <Input
+                            disabled={readonly}
+                            value={draft.vanDriverName}
+                            state={
+                                errors.vanDriverName
+                                    ? "error"
+                                    : "default"
+                            }
+                            onChange={(e) => {
+                                onVanDriverNameChange(e.target.value);
+
+                                if (e.target.value.trim()) {
+                                    clearError("vanDriverName");
+                                }
+                            }}
+                        />
+                    </Field>
+
+                    <ShopFilterField
+                        required
+                        disabled={readonly}
+                        error={errors.shopId}
+                        value={draft.shopId}
+                        label={draft.shopLabel}
+                        onChange={(value, label) => {
+                            onShopChange({ id: value, label });
+                            clearError("shopId");
+                        }}
+                    />
+
                 </div>
-            )}
+
+                {draft.vanDriverSummary && (
+                    <div className="mt-6">
+                        <VanDriverSummaryCard
+                            vanDriver={draft.vanDriverSummary}
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

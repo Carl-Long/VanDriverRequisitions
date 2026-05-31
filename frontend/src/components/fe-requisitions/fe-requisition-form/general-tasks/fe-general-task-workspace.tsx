@@ -10,7 +10,7 @@ import type {
 } from "@/lib/api/requisition-limit-rules";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { IconButton } from "@/components/ui/button/icon-button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 
@@ -52,7 +52,7 @@ export function FeGeneralTaskWorkspace({
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-lg font-semibold">
+                    <h2 className="text-md font-semibold">
                         {title} ({code})
                     </h2>
 
@@ -69,6 +69,7 @@ export function FeGeneralTaskWorkspace({
                             setOpen(true);
                         }}
                     >
+                        <Plus size={14} />
                         Add {title}
                     </Button>
                 )}
@@ -76,7 +77,8 @@ export function FeGeneralTaskWorkspace({
 
             {tasks.length === 0 ? (
                 <EmptyState
-                    title={title}
+                    title={`No ${title}`}
+                    description={`Click 'Add ${title}' to add one`}
                 />
             ) : (
                 <TasksTable

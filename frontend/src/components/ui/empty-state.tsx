@@ -13,7 +13,7 @@ export function EmptyState({
     icon,
 }: Readonly<Props>) {
     return (
-        <div className="flex items-center justify-center py-20">
+        <div className="flex items-center justify-center py-4">
             <div className="w-full max-w-sm rounded-lg border border-border-subtle bg-surface-subtle px-6 py-8 text-center">
 
                 <div className="mb-4 flex justify-center">
