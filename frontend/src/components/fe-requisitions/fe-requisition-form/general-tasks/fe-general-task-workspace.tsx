@@ -13,6 +13,7 @@ import { IconButton } from "@/components/ui/button/icon-button";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
+import { TableHeaderRow } from "@/components/ui/table/table-header-row";
 
 type Props = {
     readonly: boolean;
@@ -155,207 +156,209 @@ function TasksTable({
         );
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <table className="min-w-full divide-y divide-border">
-                <thead className="bg-muted/40">
-                    <tr>
-                        <HeaderCell>
-                            Week Ending
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Sun
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Mon
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Tue
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Wed
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Thu
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Fri
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Sat
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Total Qty
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Rate
-                        </HeaderCell>
-
-                        <HeaderCell>
-                            Total
-                        </HeaderCell>
-
-                        {!readonly && (
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-border">
+                    <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+                        <TableHeaderRow>
                             <HeaderCell>
-                                Actions
+                                Week Ending
                             </HeaderCell>
-                        )}
-                    </tr>
-                </thead>
 
-                <tbody className="divide-y divide-border">
-                    {tasks.map((task) => (
-                        <tr
-                            key={
-                                task.clientId
-                            }
-                        >
+                            <HeaderCell>
+                                Sun
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.weekEndingDate
-                                    ? task.weekEndingDate.toLocaleDateString()
-                                    : "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Mon
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .sunday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Tue
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .monday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Wed
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .tuesday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Thu
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .wednesday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Fri
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .thursday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Sat
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .friday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Total Qty
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.quantities
-                                    .saturday ?? "-"}
-                            </BodyCell>
+                            <HeaderCell>
+                                Rate
+                            </HeaderCell>
 
-                            <BodyCell>
-                                {task.totalNumber}
-                            </BodyCell>
-
-                            <BodyCell>
-                                {formatCurrencyGB(task.ratePerJob ?? 0)}
-                            </BodyCell>
-
-                            <BodyCell>
-                                {formatCurrencyGB(task.totalValue)}
-                            </BodyCell>
+                            <HeaderCell>
+                                Total
+                            </HeaderCell>
 
                             {!readonly && (
-                                <BodyCell>
-                                    <div className="flex gap-2">
-
-                                        <IconButton
-                                            variant="ghost"
-                                            onClick={() =>
-                                                onEdit(task)
-                                            }
-                                        >
-                                            <Pencil size={14} />
-                                        </IconButton>
-
-                                        <IconButton
-                                            tone="danger"
-                                            variant="ghost"
-                                            onClick={() =>
-                                                onDelete(
-                                                    task.clientId,
-                                                )
-                                            }
-                                        >
-                                            <Trash2 size={14} />
-                                        </IconButton>
-
-                                    </div>
-                                </BodyCell>
+                                <HeaderCell>
+                                    Actions
+                                </HeaderCell>
                             )}
+                        </TableHeaderRow>
+                    </thead>
 
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot className="border-t border-border bg-muted/20">
-                    <tr>
-                        <FooterCell>
-                            Totals
-                        </FooterCell>
+                    <tbody className="divide-y divide-border">
+                        {tasks.map((task) => (
+                            <tr
+                                key={
+                                    task.clientId
+                                }
+                            >
 
-                        <FooterCell>
-                            {totals.sunday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.weekEndingDate
+                                        ? task.weekEndingDate.toLocaleDateString()
+                                        : "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.monday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .sunday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.tuesday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .monday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.wednesday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .tuesday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.thursday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .wednesday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.friday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .thursday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.saturday}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .friday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {totals.totalJobs}
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.quantities
+                                        .saturday ?? "-"}
+                                </BodyCell>
 
-                        <FooterCell>
-                            -
-                        </FooterCell>
+                                <BodyCell>
+                                    {task.totalNumber}
+                                </BodyCell>
 
-                        <FooterCell>
-                            {formatCurrencyGB(totals.subtotal)}
-                        </FooterCell>
-                        {!readonly && (
+                                <BodyCell>
+                                    {formatCurrencyGB(task.ratePerJob ?? 0)}
+                                </BodyCell>
+
+                                <BodyCell>
+                                    {formatCurrencyGB(task.totalValue)}
+                                </BodyCell>
+
+                                {!readonly && (
+                                    <BodyCell>
+                                        <div className="flex gap-2">
+
+                                            <IconButton
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    onEdit(task)
+                                                }
+                                            >
+                                                <Pencil size={14} />
+                                            </IconButton>
+
+                                            <IconButton
+                                                tone="danger"
+                                                variant="ghost"
+                                                onClick={() =>
+                                                    onDelete(
+                                                        task.clientId,
+                                                    )
+                                                }
+                                            >
+                                                <Trash2 size={14} />
+                                            </IconButton>
+
+                                        </div>
+                                    </BodyCell>
+                                )}
+
+                            </tr>
+                        ))}
+                    </tbody>
+                    <tfoot className="border-t border-border bg-muted/20">
+                        <tr>
+                            <FooterCell>
+                                Totals
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.sunday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.monday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.tuesday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.wednesday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.thursday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.friday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.saturday}
+                            </FooterCell>
+
+                            <FooterCell>
+                                {totals.totalJobs}
+                            </FooterCell>
+
                             <FooterCell>
                                 -
                             </FooterCell>
-                        )}
-                    </tr>
-                </tfoot>
-            </table>
+
+                            <FooterCell>
+                                {formatCurrencyGB(totals.subtotal)}
+                            </FooterCell>
+                            {!readonly && (
+                                <FooterCell>
+                                    -
+                                </FooterCell>
+                            )}
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     );
 }
@@ -372,7 +375,7 @@ function HeaderCell({
             className="
                 px-4 py-3 text-left text-xs
                 font-medium uppercase tracking-wide
-                text-muted-foreground
+                text-foreground font-semibold
             "
         >
             {children}

@@ -157,7 +157,7 @@ export function FeGeneralTaskDrawer({
             <div
                 className="
                     flex h-full w-full max-w-2xl
-                    flex-col bg-background shadow-2xl
+                    flex-col bg-surface shadow-2xl
                 "
             >
 
@@ -208,7 +208,7 @@ export function FeGeneralTaskDrawer({
                     </Field>
                     {limitRule && (
                         <div
-                            className="flex gap-3 rounded-xl border border-border bg-muted/30 p-4"
+                            className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4"
                         >
                             <Info
                                 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
@@ -448,7 +448,7 @@ export function FeGeneralTaskDrawer({
                     <div
                         className="
                             rounded-2xl border border-border
-                            bg-surface p-4
+                            bg-surface-subtle p-4
                         "
                     >
                         <div className="flex items-center justify-between text-sm">
@@ -476,7 +476,6 @@ export function FeGeneralTaskDrawer({
 
                         <Button
                             tone="accent"
-                            variant="outline"
                             onClick={onClose}
                         >
                             Cancel
