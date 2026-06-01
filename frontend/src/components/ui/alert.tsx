@@ -1,5 +1,11 @@
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import {
+    AlertCircle,
+    AlertTriangle,
+    CheckCircle2,
+    Info,
+} from "lucide-react";
 import { Tone } from "./theme";
 
 type AlertProps = {
@@ -19,16 +25,36 @@ const toneMap: Record<Tone, string> = {
     danger: "bg-danger/10 text-danger border-danger/20",
 };
 
-export function Alert({ tone = "danger", children, className, }: Readonly<AlertProps>) {
+const iconMap = {
+    success: CheckCircle2,
+    info: Info,
+    warning: AlertTriangle,
+    danger: AlertCircle,
+} as const;
+
+export function Alert({
+    tone = "danger",
+    children,
+    className,
+}: Readonly<AlertProps>) {
+    const Icon =
+        tone in iconMap
+            ? iconMap[tone as keyof typeof iconMap]
+            : null;
+
     return (
         <div
             className={cn(
-                "rounded-lg border px-4 py-3 text-sm",
+                "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm",
                 toneMap[tone],
-                className
+                className,
             )}
         >
-            {children}
+            {Icon && (
+                <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+            )}
+
+            <div>{children}</div>
         </div>
     );
 }

@@ -60,173 +60,173 @@ public class FeRequisitionService(
         return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
     }
 
-public async Task<FeRequisitionDetailDto> CreateAsync(
-    SaveFeRequisitionDto saveFeRequisitionDto,
-    CancellationToken cancellationToken = default)
-{
-    await validator.ValidateAsync(
-        saveFeRequisitionDto,
-        cancellationToken);
-
-    var driverSummary = await context.VanDrivers
-        .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
-        .Select(VanDriverProjections.AsLookupDto)
-        .SingleAsync(cancellationToken);
-
-    var shop = await context.Shops
-        .SingleAsync(
-            x => x.Id == saveFeRequisitionDto.ShopId,
+    public async Task<FeRequisitionDetailDto> CreateAsync(
+        SaveFeRequisitionDto saveFeRequisitionDto,
+        CancellationToken cancellationToken = default)
+    {
+        await validator.ValidateAsync(
+            saveFeRequisitionDto,
             cancellationToken);
 
-    var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
-        .Select(x => x.FeTaskTypeId)
-        .Distinct()
-        .ToList();
+        var driverSummary = await context.VanDrivers
+            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
 
-    var taskTypeMap = await context.FeTaskTypes
-        .Where(x => taskTypeIds.Contains(x.Id))
-        .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var shop = await context.Shops
+            .SingleAsync(
+                x => x.Id == saveFeRequisitionDto.ShopId,
+                cancellationToken);
 
-    var requisitionNumber =
-        await context.NextFeRequisitionNumberAsync(cancellationToken);
+        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
+            .Select(x => x.FeTaskTypeId)
+            .Distinct()
+            .ToList();
 
-    var details = new RequisitionDetails(
-        saveFeRequisitionDto.RequisitionDate,
-        new VanDriverSnapshot(
-            driverSummary.Id,
-            driverSummary.Code,
-            saveFeRequisitionDto.VanDriverName.Trim(),
-            driverSummary.TradersName,
-            driverSummary.HasVat),
-        new ShopSnapshot(
-            shop.Id,
-            shop.Code,
-            shop.Name));
+        var taskTypeMap = await context.FeTaskTypes
+            .Where(x => taskTypeIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
 
-    var taskModels = saveFeRequisitionDto.FeGeneralTasks
-        .Select(dto =>
-        {
-            var taskType = taskTypeMap[dto.FeTaskTypeId];
+        var requisitionNumber =
+            await context.NextFeRequisitionNumberAsync(cancellationToken);
 
-            return new FeGeneralTaskUpdateModel(
-                null,
-                dto.FeTaskTypeId,
-                taskType.Name,
-                taskType.Code,
-                dto.WeekEndingDate,
-                new WeeklyQuantities(
-                    dto.Week.Sunday,
-                    dto.Week.Monday,
-                    dto.Week.Tuesday,
-                    dto.Week.Wednesday,
-                    dto.Week.Thursday,
-                    dto.Week.Friday,
-                    dto.Week.Saturday),
-                dto.RatePerJob);
-        });
+        var details = new RequisitionDetails(
+            saveFeRequisitionDto.RequisitionDate,
+            new VanDriverSnapshot(
+                driverSummary.Id,
+                driverSummary.Code,
+                saveFeRequisitionDto.VanDriverName.Trim(),
+                driverSummary.TradersName,
+                driverSummary.HasVat),
+            new ShopSnapshot(
+                shop.Id,
+                shop.Code,
+                shop.Name));
 
-    var requisition = FeRequisition.Create(
-        requisitionNumber,
-        details,
-        taskModels);
-    
-    await limitValidator.ValidateAsync(requisition, cancellationToken);
+        var taskModels = saveFeRequisitionDto.FeGeneralTasks
+            .Select(dto =>
+            {
+                var taskType = taskTypeMap[dto.FeTaskTypeId];
 
-    context.FeRequisitions.Add(requisition);
+                return new FeGeneralTaskUpdateModel(
+                    null,
+                    dto.FeTaskTypeId,
+                    taskType.Name,
+                    taskType.Code,
+                    dto.WeekEndingDate,
+                    new WeeklyQuantities(
+                        dto.Week.Sunday,
+                        dto.Week.Monday,
+                        dto.Week.Tuesday,
+                        dto.Week.Wednesday,
+                        dto.Week.Thursday,
+                        dto.Week.Friday,
+                        dto.Week.Saturday),
+                    dto.RatePerJob);
+            });
 
-    await context.SaveChangesAsync(cancellationToken);
+        var requisition = FeRequisition.Create(
+            requisitionNumber,
+            details,
+            taskModels);
 
-    return FeRequisitionMapper.MapRequisitionToDetailDto(
-        requisition,
-        driverSummary);
-}
-   public async Task<FeRequisitionDetailDto> UpdateAsync(
-    Guid id,
-    SaveFeRequisitionDto saveFeRequisitionDto,
-    CancellationToken cancellationToken = default)
-{
-    await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
+        await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-    var existingRequisition = await LoadFullAsync(id, cancellationToken)
-        ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+        context.FeRequisitions.Add(requisition);
 
-    context.Entry(existingRequisition)
-        .Property(nameof(FeRequisition.RowVersion))
-        .OriginalValue = saveFeRequisitionDto.RowVersion;
-
-    var driverSummary = await context.VanDrivers
-        .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
-        .Select(VanDriverProjections.AsLookupDto)
-        .SingleAsync(cancellationToken);
-
-    var shop = await context.Shops
-        .SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
-
-    var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
-        .Select(x => x.FeTaskTypeId)
-        .Distinct()
-        .ToList();
-
-    var taskTypeMap = await context.FeTaskTypes
-        .Where(x => taskTypeIds.Contains(x.Id))
-        .ToDictionaryAsync(x => x.Id, cancellationToken);
-
-    var details = new RequisitionDetails(
-        saveFeRequisitionDto.RequisitionDate,
-        new VanDriverSnapshot(
-            driverSummary.Id,
-            driverSummary.Code,
-            saveFeRequisitionDto.VanDriverName.Trim(),
-            driverSummary.TradersName,
-            driverSummary.HasVat),
-        new ShopSnapshot(
-            shop.Id,
-            shop.Code,
-            shop.Name));
-
-    existingRequisition.UpdateDetails(details);
-
-    var taskModels = saveFeRequisitionDto.FeGeneralTasks
-        .Select(dto =>
-        {
-            var taskType = taskTypeMap[dto.FeTaskTypeId];
-
-            return new FeGeneralTaskUpdateModel(
-                dto.Id,
-                dto.FeTaskTypeId,
-                taskType.Name,
-                taskType.Code,
-                dto.WeekEndingDate,
-                new WeeklyQuantities(
-                    dto.Week.Sunday,
-                    dto.Week.Monday,
-                    dto.Week.Tuesday,
-                    dto.Week.Wednesday,
-                    dto.Week.Thursday,
-                    dto.Week.Friday,
-                    dto.Week.Saturday),
-                dto.RatePerJob);
-        });
-
-    existingRequisition.SyncGeneralTasks(taskModels);
-    
-    await limitValidator.ValidateAsync(existingRequisition, cancellationToken);
-    
-    try
-    {
         await context.SaveChangesAsync(cancellationToken);
-    }
-    catch (DbUpdateConcurrencyException ex)
-    {
-        foreach (var entry in ex.Entries )
-        {
-            Console.WriteLine($"Concurrency entity: {entry.Entity.GetType().Name}");
-        }
-        throw new ConflictException("This requisition has been modified by another user since you opened it so cannot be updated.");
-    }
 
-    return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
-}
+        return FeRequisitionMapper.MapRequisitionToDetailDto(
+            requisition,
+            driverSummary);
+    }
+    public async Task<FeRequisitionDetailDto> UpdateAsync(
+     Guid id,
+     SaveFeRequisitionDto saveFeRequisitionDto,
+     CancellationToken cancellationToken = default)
+    {
+        await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
+
+        var existingRequisition = await LoadFullAsync(id, cancellationToken)
+            ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(existingRequisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = saveFeRequisitionDto.RowVersion;
+
+        var driverSummary = await context.VanDrivers
+            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        var shop = await context.Shops
+            .SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
+
+        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
+            .Select(x => x.FeTaskTypeId)
+            .Distinct()
+            .ToList();
+
+        var taskTypeMap = await context.FeTaskTypes
+            .Where(x => taskTypeIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+        var details = new RequisitionDetails(
+            saveFeRequisitionDto.RequisitionDate,
+            new VanDriverSnapshot(
+                driverSummary.Id,
+                driverSummary.Code,
+                saveFeRequisitionDto.VanDriverName.Trim(),
+                driverSummary.TradersName,
+                driverSummary.HasVat),
+            new ShopSnapshot(
+                shop.Id,
+                shop.Code,
+                shop.Name));
+
+        existingRequisition.UpdateDetails(details);
+
+        var taskModels = saveFeRequisitionDto.FeGeneralTasks
+            .Select(dto =>
+            {
+                var taskType = taskTypeMap[dto.FeTaskTypeId];
+
+                return new FeGeneralTaskUpdateModel(
+                    dto.Id,
+                    dto.FeTaskTypeId,
+                    taskType.Name,
+                    taskType.Code,
+                    dto.WeekEndingDate,
+                    new WeeklyQuantities(
+                        dto.Week.Sunday,
+                        dto.Week.Monday,
+                        dto.Week.Tuesday,
+                        dto.Week.Wednesday,
+                        dto.Week.Thursday,
+                        dto.Week.Friday,
+                        dto.Week.Saturday),
+                    dto.RatePerJob);
+            });
+
+        existingRequisition.SyncGeneralTasks(taskModels);
+
+        await limitValidator.ValidateAsync(existingRequisition, cancellationToken);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException(
+                "This requisition has been updated by another user since you opened it. " +
+                "Refresh the page to load the latest version. " +
+                "Any changes you have made since opening the requisition will need to be re-entered."
+            );
+        }
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, driverSummary);
+    }
 
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -237,7 +237,7 @@ public async Task<FeRequisitionDetailDto> CreateAsync(
             .Include(x => x.FeAdditionalCosts)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
-    
+
     private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(
         IEnumerable<SaveFeGeneralTaskDto> tasks,
         IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)

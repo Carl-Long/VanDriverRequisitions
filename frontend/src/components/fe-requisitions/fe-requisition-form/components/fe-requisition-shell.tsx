@@ -18,6 +18,8 @@ import { mapZodErrors } from "../lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
+import { ApiError } from "@/lib/api/client";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -80,14 +82,13 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
                 draft,
             );
 
-        console.log(result);
-
         if (!result.success) {
             setErrors(
                 mapZodErrors(
                     result.error,
                 ),
             );
+
             setActiveTab("details");
 
             return;
@@ -95,7 +96,6 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
 
         try {
             setErrors({});
-
             setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
@@ -103,30 +103,31 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
             let saved;
 
             if (draft.requisitionId) {
-                saved =
-                    await feRequisitionsApi.update(
-                        draft.requisitionId,
-                        request,
-                    );
-
+                saved = await feRequisitionsApi.update(draft.requisitionId, request);
                 setRowVersion(saved.rowVersion);
             } else {
                 saved =
-                    await feRequisitionsApi.create(
-                        request,
-                    );
+                    await feRequisitionsApi.create(request);
             }
 
-            toast.success(`Requisition #${saved.requisitionNumber} saved`)
+            toast.success(`Requisition #${saved.requisitionNumber} saved`);
 
             if (continueEditing) {
                 router.push(`/home-van-drivers/${saved.id}`);
             } else {
                 router.push("/home-van-drivers");
             }
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form:
+                        err.detail ??
+                        err.message,
+                });
 
-        } catch {
-            console.log(errors);
+                return;
+            }
+
             setErrors({
                 form:
                     "Failed to save requisition",
@@ -169,15 +170,9 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
             />
 
             {errors.form && (
-                <div
-                    className="
-            rounded-lg border border-danger/30
-            bg-danger/5 px-3 py-2
-            text-sm text-danger
-        "
-                >
+                <Alert tone="warning">
                     {errors.form}
-                </div>
+                </Alert>
             )}
 
 
