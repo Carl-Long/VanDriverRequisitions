@@ -48,6 +48,7 @@ export function FeGeneralTaskWorkspace({
 
     const [open, setOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<FeGeneralTaskDraft | null>(null);
+    const totals = calculateFeGeneralTaskTotals(tasks);
 
     return (
         <div className="space-y-6">
@@ -56,9 +57,13 @@ export function FeGeneralTaskWorkspace({
                     <h2 className="text-md font-semibold">
                         {title} ({code})
                     </h2>
-
                     <p className="text-sm text-muted-foreground">
                         Manage {title.toLowerCase()} entries
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} •{" "}
+                        {totals.totalJobs} quantity •{" "}
+                        {formatCurrencyGB(totals.subtotal)}
                     </p>
                 </div>
 
@@ -156,7 +161,7 @@ function TasksTable({
         );
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="max-h-[70vh] overflow-auto">
+            <div className="max-h-[55vh] overflow-auto">
                 <table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
@@ -282,7 +287,7 @@ function TasksTable({
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.friday}</TableCell>
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.saturday}</TableCell>
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">{totals.totalJobs}</TableCell>
-                            <TableCell  className="sticky bottom-0 z-20 bg-surface-elevated"/>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" />
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated tabular-nums" align="right">
                                 {formatCurrencyGB(totals.subtotal)}
                             </TableCell>
