@@ -15,4 +15,6 @@ public class FeRequisitionSummaryDto
     public DateTime CreatedAtUtc { get; init; }
     public Guid CreatedById { get; init; }
     public string CreatedByNameSnapshot { get; init; } = string.Empty;
+    public DateTime? UpdatedAtUtc {get; init;}
+    public string? UpdatedByNameSnapshot {get; init;}
 }

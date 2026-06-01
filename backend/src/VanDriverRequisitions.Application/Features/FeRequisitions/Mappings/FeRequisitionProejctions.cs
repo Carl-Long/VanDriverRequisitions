@@ -22,5 +22,7 @@ public static class FeRequisitionProjections
             CreatedAtUtc = x.CreatedAtUtc,
             CreatedById = x.CreatedById,
             CreatedByNameSnapshot = x.CreatedByNameSnapshot,
+            UpdatedAtUtc = x.UpdatedAtUtc,
+            UpdatedByNameSnapshot = x.UpdatedByNameSnapshot
         };
 }
