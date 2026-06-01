@@ -54,7 +54,7 @@ export function FeRequisitionFiltersToolbar({
                     </div>
 
                     <p className="mt-1 text-sm text-muted-foreground">
-                     Showing your requisitions by default. Refine by creator, status, or shop.
+                        Showing your requisitions by default. Refine by creator, status, or shop.
                     </p>
                 </div>
 
@@ -62,7 +62,7 @@ export function FeRequisitionFiltersToolbar({
 
                 <div className="flex flex-wrap items-center gap-3">
 
-                    <div className="relative min-w-[320px] flex-1">
+                    <div className="relative w-full max-w-md">
                         <Search
                             size={16}
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -91,6 +91,7 @@ export function FeRequisitionFiltersToolbar({
                     <Button
                         tone="accent"
                         variant="solid"
+                        size="sm"
                         onClick={onReset}
                     >
                         <RotateCcw size={16} />

@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { SettingsPopover } from "./settings-popover";
 import { UserMenu } from "./user-menu";
 
 export function Topbar() {
@@ -27,8 +26,6 @@ export function Topbar() {
                 </div>
             </div>
             <div className="flex items-center gap-3">
-                <SettingsPopover isTopbar={true} />
-                <div className="w-px h-6 bg-border" />
                 <UserMenu />
             </div>
         </header>

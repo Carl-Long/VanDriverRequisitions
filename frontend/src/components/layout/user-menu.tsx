@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { LogOut, User } from "lucide-react";
+import { Check, ChevronLeft, LogOut, Palette, User } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
+import { useTheme } from "next-themes";
+import { THEMES } from "@/lib/constants";
 
 export function UserMenu() {
     const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
+    const [submenu, setSubmenu] = useState<string | null>(null);
+    const { theme, setTheme } = useTheme();
 
     if (!user) return null;
 
@@ -31,7 +35,10 @@ export function UserMenu() {
             {open && (
                 <div
                     className="fixed inset-0"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                        setOpen(false);
+                        setSubmenu(null);
+                    }}
                     onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
                     aria-hidden="true"
                 />
@@ -52,29 +59,87 @@ export function UserMenu() {
                     </div>
 
                     {/* Menu Items */}
-                    <div className="py-1">
-                        <button className={cn(
-                            "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                            "hover:bg-muted transition text-left"
-                        )}>
-                            <User size={16} />
-                            Profile
-                        </button>
+                    {submenu === null && (
+                        <div className="py-1">
 
-                        <button
-                            onClick={() => {
-                                setOpen(false);
-                                logout();
-                            }}
-                            className={cn(
-                                "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                                "hover:bg-muted transition text-left text-danger"
-                            )}
-                        >
-                            <LogOut size={16} />
-                            Sign out
-                        </button>
-                    </div>
+                            <button
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left"
+                                )}
+                            >
+                                <User size={16} />
+                                Profile
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    setSubmenu("theme")
+                                }
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left"
+                                )}
+                            >
+                                <Palette size={16} />
+                                Appearance
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setOpen(false);
+                                    logout();
+                                }}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left text-danger"
+                                )}
+                            >
+                                <LogOut size={16} />
+                                Sign out
+                            </button>
+
+                        </div>
+                    )}
+
+                    {submenu === "theme" && (
+                        <div className="py-1">
+
+                            <button
+                                onClick={() =>
+                                    setSubmenu(null)
+                                }
+                                className={cn(
+                                    "w-full flex items-center gap-2 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left"
+                                )}
+                            >
+                                <ChevronLeft size={16} />
+                                Back
+                            </button>
+
+                            <div className="my-1 border-t border-border/50" />
+
+                            {THEMES.map((t) => (
+                                <button
+                                    key={t.value}
+                                    onClick={() => {
+                                        setTheme(t.value);
+                                        setOpen(false);
+                                        setSubmenu(null);
+                                    }}
+                                    className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm hover:bg-muted"
+                                >
+                                    <span>{t.label}</span>
+
+                                    {theme === t.value && (
+                                        <Check size={16} />
+                                    )}
+                                </button>
+                            ))}
+
+                        </div>
+                    )}
                 </div>
             )}
         </div>
