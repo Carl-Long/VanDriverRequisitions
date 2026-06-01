@@ -29,7 +29,7 @@ public class FeRequisitionService(
         var totalCount = await dbQuery.CountAsync(cancellationToken);
 
         var items = await dbQuery
-            .OrderByDescending(x => x.RequisitionDate)
+            .OrderByDescending(x => x.UpdatedAtUtc)
             .ThenByDescending(x => x.CreatedAtUtc)
             .Select(FeRequisitionProjections.AsSummaryDto)
             .Skip((query.Page - 1) * query.PageSize)

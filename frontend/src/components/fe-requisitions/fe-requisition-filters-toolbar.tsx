@@ -17,6 +17,7 @@ import { CreatedByUserFilterField } from "./filter-fields/created-by-user-filter
 import { StatusFilterField } from "./filter-fields/status-filter-field";
 import { ShopFilterField } from "./filter-fields/shop-filter-field";
 import { fieldBase } from "../ui/field/fieldstyles";
+import { Input } from "../ui/field/input";
 
 type Props = {
     filters: FeRequisitionFilters;
@@ -67,7 +68,7 @@ export function FeRequisitionFiltersToolbar({
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         />
 
-                        <input
+                        <Input
                             value={
                                 filters.requisitionNumber
                             }
@@ -88,8 +89,8 @@ export function FeRequisitionFiltersToolbar({
                     </div>
 
                     <Button
-                        tone="secondary"
-                        variant="ghost"
+                        tone="accent"
+                        variant="solid"
                         onClick={onReset}
                     >
                         <RotateCcw size={16} />
