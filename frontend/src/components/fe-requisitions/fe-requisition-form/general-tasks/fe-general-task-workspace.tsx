@@ -160,29 +160,29 @@ function TasksTable({
                 <table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated">Week Ending</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Sun</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Mon</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Tue</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Wed</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Thu</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Fri</TableHeaderCell>
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Sat</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">Week Ending</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Sun</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Mon</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Tue</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Wed</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Thu</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Fri</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Sat</TableHeaderCell>
 
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
                                 Total Qty
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
                                 Rate
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
                                 Total
                             </TableHeaderCell>
 
                             {!readonly && (
-                                <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right" nowrap>
+                                <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right" nowrap>
                                     Actions
                                 </TableHeaderCell>
                             )}
