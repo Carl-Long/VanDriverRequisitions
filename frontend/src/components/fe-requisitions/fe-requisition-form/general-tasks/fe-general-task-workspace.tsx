@@ -13,9 +13,7 @@ import { IconButton } from "@/components/ui/button/icon-button";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
-import { TableHeaderRow } from "@/components/ui/table/table-header-row";
-import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter } from "@/components/ui/table/table";
-import { TableRow } from "@/components/ui/table/table-row";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow } from "@/components/ui/table/table";
 
 type Props = {
     readonly: boolean;

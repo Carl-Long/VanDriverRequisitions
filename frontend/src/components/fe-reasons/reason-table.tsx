@@ -4,10 +4,8 @@ import { FeReason } from "@/lib/api/fe-reasons";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
-
 import { formatDateGB } from "@/lib/format/date";
-import { TableHeaderRow } from "../ui/table/table-header-row";
-import { TableRow } from "../ui/table/table-row";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "../ui/table/table";
 
 type Props = {
     items: FeReason[];
@@ -22,18 +20,22 @@ export function FeReasonsTable({
 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-
-                <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+            <table className="w-full text-sm">
+                <TableHeader>
                     <TableHeaderRow>
-                        <th className="px-4 py-3">Reason</th>
-                        <th className="px-4 py-3">Active</th>
-                        <th className="px-4 py-3">Last modified</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <TableHeaderCell>Reason</TableHeaderCell>
+                        <TableHeaderCell align="center">Active</TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
+                        <TableHeaderCell
+                            align="right"
+                            nowrap
+                        >
+                            Actions
+                        </TableHeaderCell>
                     </TableHeaderRow>
-                </thead>
+                </TableHeader>
 
-                <tbody className="divide-y divide-border-subtle">
+                <TableBody>
                     {items.map((item) => {
                         const lastDate =
                             item.updatedAtUtc ?? item.createdAtUtc;
@@ -45,44 +47,56 @@ export function FeReasonsTable({
 
                         return (
                             <TableRow key={item.id}>
-                                <td className="px-4 py-3 font-medium text-foreground">
+                                {/* Reason */}
+                                <TableCell className="font-medium text-foreground">
                                     {item.reason}
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3">
-                                    <Toggle
-                                        checked={item.isActive}
-                                        onChange={() => onToggleActive(item)}
-                                        ariaLabel={`Toggle active for ${item.reason}`}
-                                    />
-                                </td>
+                                {/* Active */}
+                                <TableCell align="center">
+                                    <div className="flex justify-center">
+                                        <Toggle
+                                            checked={item.isActive}
+                                            onChange={() => onToggleActive(item)}
+                                            ariaLabel={`Toggle active for ${item.reason}`}
+                                        />
+                                    </div>
+                                </TableCell>
 
-                                <td className="px-4 py-3">
+                                {/* Last Modified */}
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
-                                        <span className="text-sm">
+                                        <span className="text-sm text-foreground">
                                             {formatDateGB(lastDate) ?? "—"}
                                         </span>
+
                                         <span className="text-xs text-muted-foreground">
                                             {lastUser}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3 text-right">
-                                    <IconButton
-                                        variant="ghost"
-                                        tone="accent"
-                                        size="sm"
-                                        onClick={() => onEdit(item)}
-                                        aria-label="Edit"
-                                    >
-                                        <Pencil size={14} />
-                                    </IconButton>
-                                </td>
+                                {/* Actions */}
+                                <TableCell
+                                    align="right"
+                                    nowrap
+                                >
+                                    <div className="flex justify-end">
+                                        <IconButton
+                                            variant="ghost"
+                                            tone="accent"
+                                            size="sm"
+                                            onClick={() => onEdit(item)}
+                                            aria-label="Edit"
+                                        >
+                                            <Pencil size={14} />
+                                        </IconButton>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         );
                     })}
-                </tbody>
+                </TableBody>
             </table>
         </Surface>
     );

@@ -3,12 +3,10 @@ import { Pencil } from "lucide-react";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
 
-import { TableHeaderRow } from "@/components/ui/table/table-header-row";
-import { TableRow } from "@/components/ui/table/table-row";
-
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 import { formatCurrencyGB } from "@/lib/format/currency";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "../ui/table/table";
 
 
 type Props = {
@@ -22,23 +20,25 @@ export function RequisitionLimitRuleTable({
 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-
-                {/* HEADER */}
-                <thead className="sticky top-0 z-10 border-b border-border bg-surface-elevated">
+            <table className="w-full text-sm">
+                <TableHeader>
                     <TableHeaderRow>
-                        <th className="px-4 py-3">Category</th>
-                        <th className="px-4 py-3">Task Type</th>
-                        <th className="px-4 py-3">Fascia</th>
-                        <th className="px-4 py-3">Max Quantity</th>
-                        <th className="px-4 py-3">Max Rate</th>
-                        <th className="px-4 py-3">Last Modified</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <TableHeaderCell>Category</TableHeaderCell>
+                        <TableHeaderCell>Task Type</TableHeaderCell>
+                        <TableHeaderCell>Fascia</TableHeaderCell>
+                        <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
+                        <TableHeaderCell align="right">Max Rate</TableHeaderCell>
+                        <TableHeaderCell align="center">Last Activity</TableHeaderCell>
+                        <TableHeaderCell
+                            align="right"
+                            nowrap
+                        >
+                            Actions
+                        </TableHeaderCell>
                     </TableHeaderRow>
-                </thead>
+                </TableHeader>
 
-                {/* BODY */}
-                <tbody className="divide-y divide-border-subtle">
+                <TableBody>
                     {items.map((item) => {
                         const lastDate =
                             item.updatedAtUtc ?? item.createdAtUtc;
@@ -54,34 +54,40 @@ export function RequisitionLimitRuleTable({
                                 className="hover:bg-surface-hover"
                             >
                                 {/* Category */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="font-medium text-foreground">
                                         {item.categoryName}
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Task Type */}
-                                <td className="px-4 py-3 align-middle text-foreground-subtle">
+                                <TableCell className="text-foreground-subtle">
                                     {item.feTaskTypeName ?? ""}
-                                </td>
+                                </TableCell>
 
                                 {/* Fascia */}
-                                <td className="px-4 py-3 align-middle text-foreground-subtle">
+                                <TableCell className="text-foreground-subtle">
                                     {item.fasciaName}
-                                </td>
+                                </TableCell>
 
                                 {/* Max Quantity */}
-                                <td className="px-4 py-3 align-middle text-foreground">
+                                <TableCell
+                                    align="right"
+                                    className="tabular-nums text-foreground"
+                                >
                                     {item.maxQuantity}
-                                </td>
+                                </TableCell>
 
                                 {/* Max Rate */}
-                                <td className="px-4 py-3 align-middle text-foreground">
+                                <TableCell
+                                    align="right"
+                                    className="tabular-nums text-foreground"
+                                >
                                     {formatCurrencyGB(item.maxRate)}
-                                </td>
+                                </TableCell>
 
                                 {/* Last Modified */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell align="center">
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateGB(lastDate) ?? "—"}
@@ -91,24 +97,29 @@ export function RequisitionLimitRuleTable({
                                             {lastUser}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Actions */}
-                                <td className="px-4 py-3 align-middle text-right">
-                                    <IconButton
-                                        variant="ghost"
-                                        tone="accent"
-                                        size="sm"
-                                        onClick={() => onEdit(item)}
-                                        aria-label="Edit"
-                                    >
-                                        <Pencil size={14} />
-                                    </IconButton>
-                                </td>
+                                <TableCell
+                                    align="right"
+                                    nowrap
+                                >
+                                    <div className="flex justify-end">
+                                        <IconButton
+                                            variant="ghost"
+                                            tone="accent"
+                                            size="sm"
+                                            onClick={() => onEdit(item)}
+                                            aria-label="Edit"
+                                        >
+                                            <Pencil size={14} />
+                                        </IconButton>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         );
                     })}
-                </tbody>
+                </TableBody>
             </table>
         </Surface>
     );

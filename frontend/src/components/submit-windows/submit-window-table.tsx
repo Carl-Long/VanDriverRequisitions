@@ -10,8 +10,7 @@ import type {
 
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format/date";
-import { TableHeaderRow } from "../ui/table/table-header-row";
-import { TableRow } from "../ui/table/table-row";
+import { TableBody, TableCell, TableHeader, TableHeaderCell, TableHeaderRow, TableRow } from "../ui/table/table";
 
 type Props = {
     items: SubmitWindow[];
@@ -88,29 +87,33 @@ export function SubmitWindowTable({
 
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+            <table className="w-full text-sm">
+                <TableHeader>
                     <TableHeaderRow>
-                        <th className="px-4 py-3">Open From</th>
-                        <th className="px-4 py-3">Open To</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3">
-                            {isDeletedView ? "Deleted" : "Last Modified"}
-                        </th>
-                        <th className="px-4 py-3 text-center">Actions</th>
+                        <TableHeaderCell>Open From</TableHeaderCell>
+                        <TableHeaderCell>Open To</TableHeaderCell>
+                        <TableHeaderCell>Status</TableHeaderCell>
+                        <TableHeaderCell>
+                            {isDeletedView
+                                ? "Deleted"
+                                : "Last Activity"}
+                        </TableHeaderCell>
+                        <TableHeaderCell align="center" nowrap>Actions</TableHeaderCell>
                     </TableHeaderRow>
-                </thead>
+                </TableHeader>
 
-                <tbody className="divide-y divide-border-subtle">
+                <TableBody>
                     {items.map((item) => {
                         const status = getWindowStatus(item);
 
                         const canManage =
-                            status === "upcoming" || status === "open";
+                            status === "upcoming" ||
+                            status === "open";
 
                         const metaDate = isDeletedView
                             ? item.deletedAtUtc
-                            : item.updatedAtUtc ?? item.createdAtUtc;
+                            : item.updatedAtUtc ??
+                            item.createdAtUtc;
 
                         const metaUser = isDeletedView
                             ? item.deletedByNameSnapshot
@@ -122,34 +125,38 @@ export function SubmitWindowTable({
                             <TableRow
                                 key={item.id}
                                 className={cn(
-                                    item.isDeleted && "bg-danger-surface opacity-60",
+                                    item.isDeleted &&
+                                    "bg-danger-surface opacity-60",
                                 )}
                             >
-                                <td className="px-4 py-3 align-middle text-foreground">
+                                <TableCell className="text-foreground">
                                     {formatDateTime(item.openFrom)}
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3 align-middle text-foreground">
+                                <TableCell className="text-foreground">
                                     {formatDateTime(item.openTo)}
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <StatusPill status={status} />
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateTime(metaDate) ?? "—"}
                                         </span>
 
                                         <span className="text-xs text-muted-foreground">
-                                            {metaUser ?? "System"}
+                                            {metaUser}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell
+                                    align="center"
+                                    nowrap
+                                >
                                     <div className="flex justify-center gap-2">
                                         {canManage && (
                                             <>
@@ -175,11 +182,11 @@ export function SubmitWindowTable({
                                             </>
                                         )}
                                     </div>
-                                </td>
+                                </TableCell>
                             </TableRow>
                         );
                     })}
-                </tbody>
+                </TableBody>
             </table>
         </Surface>
     );

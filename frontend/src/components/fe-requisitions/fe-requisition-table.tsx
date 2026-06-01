@@ -1,6 +1,5 @@
 import { Surface } from "@/components/ui/surface";
-import { TableHeaderRow } from "@/components/ui/table/table-header-row";
-import { TableRow } from "@/components/ui/table/table-row";
+
 
 import type { FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 
@@ -12,7 +11,7 @@ import {
 import { StatusPill } from "./status-pill";
 import { RequisitionStatus } from "./constants";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { TableCell, TableHeader, TableHeaderCell } from "../ui/table/table";
+import { TableCell, TableHeader, TableHeaderCell, TableHeaderRow, TableRow } from "../ui/table/table";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -28,35 +27,12 @@ export function FeRequisitionTable({
             <table className="w-full text-left text-sm">
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>
-                            Requisition
-                        </TableHeaderCell>
-
-                        <TableHeaderCell>
-                            Company
-                        </TableHeaderCell>
-
-                        <TableHeaderCell
-                            align="center"
-                            nowrap
-                        >
-                            Status
-                        </TableHeaderCell>
-
-                        <TableHeaderCell
-                            align="right"
-                            nowrap
-                        >
-                            Amount
-                        </TableHeaderCell>
-
-                        <TableHeaderCell>
-                            Shop
-                        </TableHeaderCell>
-
-                        <TableHeaderCell>
-                            Last Modified
-                        </TableHeaderCell>
+                        <TableHeaderCell>Requisition</TableHeaderCell>
+                        <TableHeaderCell>Company</TableHeaderCell>
+                        <TableHeaderCell align="center"nowrap>Status</TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>Amount</TableHeaderCell>
+                        <TableHeaderCell>Shop</TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
                     </TableHeaderRow>
                 </TableHeader>
 

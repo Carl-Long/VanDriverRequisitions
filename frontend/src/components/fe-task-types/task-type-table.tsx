@@ -5,8 +5,7 @@ import { Surface } from "../ui/surface";
 import { Toggle } from "../ui/toggle";
 
 import { formatDateGB } from "@/lib/format/date";
-import { TableHeaderRow } from "../ui/table/table-header-row";
-import { TableRow } from "../ui/table/table-row";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableHeaderRow, TableRow } from "../ui/table/table";
 
 type Props = {
     items: FeTaskType[];
@@ -21,21 +20,18 @@ export function TaskTypeTable({
 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-
-                {/* HEADER */}
-                <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+            <table className="w-full text-sm">
+                <TableHeader>
                     <TableHeaderRow>
-                        <th className="px-4 py-3">Name</th>
-                        <th className="px-4 py-3">Code</th>
-                        <th className="px-4 py-3">Active</th>
-                        <th className="px-4 py-3">Last modified</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <TableHeaderCell>Name</TableHeaderCell>
+                        <TableHeaderCell>Code</TableHeaderCell>
+                        <TableHeaderCell>Active</TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>Actions</TableHeaderCell>
                     </TableHeaderRow>
-                </thead>
+                </TableHeader>
 
-                {/* BODY */}
-                <tbody className="divide-y divide-border-subtle">
+                <TableBody>
                     {items.map((item) => {
                         const lastDate =
                             item.updatedAtUtc ?? item.createdAtUtc;
@@ -46,30 +42,33 @@ export function TaskTypeTable({
                             "System";
 
                         return (
-                            <TableRow key={item.id} className="hover:bg-surface-hover">
+                            <TableRow
+                                key={item.id}
+                                className="hover:bg-surface-hover"
+                            >
                                 {/* Name */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="font-medium text-foreground">
                                         {item.name}
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Code */}
-                                <td className="px-4 py-3 align-middle text-foreground-subtle">
+                                <TableCell className="text-foreground-subtle">
                                     {item.code}
-                                </td>
+                                </TableCell>
 
                                 {/* Active */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <Toggle
                                         checked={item.isActive}
                                         onChange={() => onToggleActive(item)}
                                         ariaLabel={`Toggle active for ${item.name}`}
                                     />
-                                </td>
+                                </TableCell>
 
                                 {/* Last Modified */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateGB(lastDate) ?? "—"}
@@ -79,24 +78,29 @@ export function TaskTypeTable({
                                             {lastUser}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Actions */}
-                                <td className="px-4 py-3 align-middle text-right">
-                                    <IconButton
-                                        variant="ghost"
-                                        tone="accent"
-                                        size="sm"
-                                        onClick={() => onEdit(item)}
-                                        aria-label="Edit"
-                                    >
-                                        <Pencil size={14} />
-                                    </IconButton>
-                                </td>
+                                <TableCell
+                                    align="right"
+                                    nowrap
+                                >
+                                    <div className="flex justify-end">
+                                        <IconButton
+                                            variant="ghost"
+                                            tone="accent"
+                                            size="sm"
+                                            onClick={() => onEdit(item)}
+                                            aria-label="Edit"
+                                        >
+                                            <Pencil size={14} />
+                                        </IconButton>
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         );
                     })}
-                </tbody>
+                </TableBody>
             </table>
         </Surface>
     );
