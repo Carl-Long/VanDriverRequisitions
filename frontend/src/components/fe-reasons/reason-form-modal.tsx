@@ -12,6 +12,7 @@ import { Field } from "@/components/ui/field/field";
 
 import type { FeReason } from "@/lib/api/fe-reasons";
 import { ApiError } from "@/lib/api/client";
+import { Alert } from "../ui/alert";
 
 const reasonSchema = z.object({
     reason: z
@@ -109,9 +110,9 @@ export function ReasonFormModal({
             >
                 {/* Server error */}
                 {serverError && (
-                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
+                    <Alert tone="danger">
                         {serverError}
-                    </div>
+                    </Alert>
                 )}
 
                 {/* Reason */}

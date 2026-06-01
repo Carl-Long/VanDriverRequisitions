@@ -12,6 +12,7 @@ import type { SubmitWindow } from "@/lib/api/submit-windows";
 import { DateTimePicker } from "../ui/date/date-time-picker";
 import { addDays, setTime } from "@/lib/format/date";
 import { Field } from "../ui/field/field";
+import { Alert } from "../ui/alert";
 
 const submitWindowSchema = z
     .object({
@@ -171,9 +172,9 @@ export function SubmitWindowFormModal({
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {serverError && (
-                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
+                    <Alert tone="danger">
                         {serverError}
-                    </div>
+                    </Alert>
                 )}
 
                 {/* OPEN FROM */}

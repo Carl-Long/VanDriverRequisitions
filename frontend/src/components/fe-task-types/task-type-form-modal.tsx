@@ -12,6 +12,7 @@ import { Field } from "@/components/ui/field/field";
 
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import { ApiError } from "@/lib/api/client";
+import { Alert } from "../ui/alert";
 
 const taskTypeSchema = z.object({
     name: z
@@ -125,9 +126,9 @@ export function TaskTypeFormModal({
 
                 {/* Server error */}
                 {serverError && (
-                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
+                    <Alert tone="danger">
                         {serverError}
-                    </div>
+                    </Alert>
                 )}
 
                 {/* Name */}

@@ -19,6 +19,7 @@ import {
     categoryOptions,
     fasciaOptions,
 } from "./requisition-limit-rule-options";
+import { Alert } from "../ui/alert";
 
 /* ---------------- FORM TYPES (STRING-FIRST) ---------------- */
 
@@ -149,9 +150,9 @@ export function RequisitionLimitRuleFormModal({
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
 
                 {serverError && (
-                    <div className="rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">
+                    <Alert tone="danger">
                         {serverError}
-                    </div>
+                    </Alert>
                 )}
 
                 {/* CATEGORY */}
