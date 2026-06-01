@@ -156,36 +156,33 @@ function TasksTable({
         );
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="overflow-x-auto">
+            <div className="max-h-[70vh] overflow-auto">
                 <table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
-                            <TableHeaderCell>
-                                Week Ending
-                            </TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated">Week Ending</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Sun</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Mon</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Tue</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Wed</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Thu</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Fri</TableHeaderCell>
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">Sat</TableHeaderCell>
 
-                            <TableHeaderCell align="center">Sun</TableHeaderCell>
-                            <TableHeaderCell align="center">Mon</TableHeaderCell>
-                            <TableHeaderCell align="center">Tue</TableHeaderCell>
-                            <TableHeaderCell align="center">Wed</TableHeaderCell>
-                            <TableHeaderCell align="center">Thu</TableHeaderCell>
-                            <TableHeaderCell align="center">Fri</TableHeaderCell>
-                            <TableHeaderCell align="center">Sat</TableHeaderCell>
-
-                            <TableHeaderCell align="right">
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
                                 Total Qty
                             </TableHeaderCell>
 
-                            <TableHeaderCell align="right">
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
                                 Rate
                             </TableHeaderCell>
 
-                            <TableHeaderCell align="right">
+                            <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">
                                 Total
                             </TableHeaderCell>
 
                             {!readonly && (
-                                <TableHeaderCell align="right" nowrap>
+                                <TableHeaderCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right" nowrap>
                                     Actions
                                 </TableHeaderCell>
                             )}
@@ -275,22 +272,22 @@ function TasksTable({
                     </TableBody>
 
                     <TableFooter>
-                        <TableRow className="hover:bg-transparent">
-                            <TableCell>Totals</TableCell>
-                            <TableCell align="center">{totals.sunday}</TableCell>
-                            <TableCell align="center">{totals.monday}</TableCell>
-                            <TableCell align="center">{totals.tuesday}</TableCell>
-                            <TableCell align="center">{totals.wednesday}</TableCell>
-                            <TableCell align="center">{totals.thursday}</TableCell>
-                            <TableCell align="center">{totals.friday}</TableCell>
-                            <TableCell align="center">{totals.saturday}</TableCell>
-                            <TableCell align="right">{totals.totalJobs}</TableCell>
-                            <td></td>
-                            <TableCell align="right" className="tabular-nums">
+                        <TableRow>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated">Totals</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.sunday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.monday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.tuesday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.wednesday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.thursday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.friday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.saturday}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">{totals.totalJobs}</TableCell>
+                            <TableCell  className="sticky bottom-0 z-20 bg-surface-elevated"/>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated tabular-nums" align="right">
                                 {formatCurrencyGB(totals.subtotal)}
                             </TableCell>
                             {!readonly && (
-                                <td></td>
+                                <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" />
                             )}
                         </TableRow>
                     </TableFooter>

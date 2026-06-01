@@ -35,8 +35,8 @@ export function TableHeader({
     return (
         <thead
             className={cn(
-                "sticky top-0 z-10 border-b border-border bg-surface-elevated",
-                className
+                "border-b border-border bg-surface-elevated",
+                className,
             )}
             {...props}
         />
@@ -140,7 +140,7 @@ export function TableFooter({
     return (
         <tfoot
             className={cn(
-                "border-t border-border bg-muted/20 font-semibold",
+                "border-t border-border bg-surface-elevated font-semibold",
                 className,
             )}
             {...props}
