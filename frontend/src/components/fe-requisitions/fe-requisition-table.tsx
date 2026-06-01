@@ -12,6 +12,7 @@ import {
 import { StatusPill } from "./status-pill";
 import { RequisitionStatus } from "./constants";
 import { formatCurrencyGB } from "@/lib/format/currency";
+import { TableCell, TableHeader, TableHeaderCell } from "../ui/table/table";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -25,37 +26,40 @@ export function FeRequisitionTable({
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-
-                {/* HEADER */}
-                <thead className="sticky top-0 z-10 border-b border-border bg-surface-elevated">
+                <TableHeader>
                     <TableHeaderRow>
-                        <th className="px-4 py-3">
+                        <TableHeaderCell>
                             Requisition
-                        </th>
+                        </TableHeaderCell>
 
-                        <th className="px-4 py-3">
+                        <TableHeaderCell>
                             Company
-                        </th>
+                        </TableHeaderCell>
 
-                        <th className="whitespace-nowrap px-4 py-3 text-center">
+                        <TableHeaderCell
+                            align="center"
+                            nowrap
+                        >
                             Status
-                        </th>
+                        </TableHeaderCell>
 
-                        <th className="whitespace-nowrap px-4 py-3 text-right">
+                        <TableHeaderCell
+                            align="right"
+                            nowrap
+                        >
                             Amount
-                        </th>
+                        </TableHeaderCell>
 
-                        <th className="px-4 py-3">
+                        <TableHeaderCell>
                             Shop
-                        </th>
+                        </TableHeaderCell>
 
-                        <th className="px-4 py-3">
+                        <TableHeaderCell>
                             Last Modified
-                        </th>
+                        </TableHeaderCell>
                     </TableHeaderRow>
-                </thead>
+                </TableHeader>
 
-                {/* BODY */}
                 <tbody className="divide-y divide-border-subtle">
                     {items.map((req) => {
                         const lastDate =
@@ -70,10 +74,15 @@ export function FeRequisitionTable({
                             <TableRow
                                 key={req.id}
                                 onClick={() => onRowClick(req)}
-                                className="cursor-pointer hover:bg-surface-hover hover:shadow-sm transition-all"
+                                className="
+                        cursor-pointer
+                        hover:bg-surface-hover
+                        hover:shadow-sm
+                        transition-all
+                    "
                             >
                                 {/* Requisition */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="font-semibold text-foreground">
                                             {req.requisitionNumber}
@@ -83,60 +92,71 @@ export function FeRequisitionTable({
                                             {formatDateGB(req.requisitionDate)}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Company */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="font-medium text-foreground">
                                             {req.vanDriverCode}
                                         </span>
 
-                                        <span className="text-xs text-muted-foreground truncate max-w-[220px]">
+                                        <span className="max-w-[220px] truncate text-xs text-muted-foreground">
                                             {req.tradersName}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Status */}
-                                <td className="whitespace-nowrap px-4 py-3 align-middle text-center">
+                                <TableCell
+                                    align="center"
+                                    nowrap
+                                >
                                     <div className="flex justify-center">
                                         <StatusPill
                                             status={req.status as RequisitionStatus}
                                         />
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Amount */}
-                                <td className="whitespace-nowrap px-4 py-3 align-middle text-right font-semibold tabular-nums text-foreground">
+                                <TableCell
+                                    align="right"
+                                    nowrap
+                                    className="
+                            font-semibold
+                            tabular-nums
+                            text-foreground
+                        "
+                                >
                                     {formatCurrencyGB(req.subtotal)}
-                                </td>
+                                </TableCell>
 
                                 {/* Shop */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="font-medium text-foreground">
                                             {req.shopCode}
                                         </span>
 
-                                        <span className="text-xs text-muted-foreground truncate max-w-[220px]">
+                                        <span className="max-w-[220px] truncate text-xs text-muted-foreground">
                                             {req.shopName}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
 
                                 {/* Last Modified */}
-                                <td className="px-4 py-3 align-middle">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateTime(lastDate) ?? "—"}
                                         </span>
 
-                                        <span className="text-xs text-muted-foreground truncate max-w-[160px]">
-                                            {lastUser ?? "System"}
+                                        <span className="max-w-[160px] truncate text-xs text-muted-foreground">
+                                            {lastUser}
                                         </span>
                                     </div>
-                                </td>
+                                </TableCell>
                             </TableRow>
                         );
                     })}

@@ -14,6 +14,8 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 import { TableHeaderRow } from "@/components/ui/table/table-header-row";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter } from "@/components/ui/table/table";
+import { TableRow } from "@/components/ui/table/table-row";
 
 type Props = {
     readonly: boolean;
@@ -157,131 +159,103 @@ function TasksTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                    <thead className="sticky top-0 z-10 bg-surface-elevated border-b border-border">
+                <table className="min-w-full">
+                    <TableHeader>
                         <TableHeaderRow>
-                            <HeaderCell>
+                            <TableHeaderCell>
                                 Week Ending
-                            </HeaderCell>
+                            </TableHeaderCell>
 
-                            <HeaderCell>
-                                Sun
-                            </HeaderCell>
+                            <TableHeaderCell align="center">Sun</TableHeaderCell>
+                            <TableHeaderCell align="center">Mon</TableHeaderCell>
+                            <TableHeaderCell align="center">Tue</TableHeaderCell>
+                            <TableHeaderCell align="center">Wed</TableHeaderCell>
+                            <TableHeaderCell align="center">Thu</TableHeaderCell>
+                            <TableHeaderCell align="center">Fri</TableHeaderCell>
+                            <TableHeaderCell align="center">Sat</TableHeaderCell>
 
-                            <HeaderCell>
-                                Mon
-                            </HeaderCell>
-
-                            <HeaderCell>
-                                Tue
-                            </HeaderCell>
-
-                            <HeaderCell>
-                                Wed
-                            </HeaderCell>
-
-                            <HeaderCell>
-                                Thu
-                            </HeaderCell>
-
-                            <HeaderCell>
-                                Fri
-                            </HeaderCell>
-
-                            <HeaderCell>
-                                Sat
-                            </HeaderCell>
-
-                            <HeaderCell>
+                            <TableHeaderCell align="right">
                                 Total Qty
-                            </HeaderCell>
+                            </TableHeaderCell>
 
-                            <HeaderCell>
+                            <TableHeaderCell align="right">
                                 Rate
-                            </HeaderCell>
+                            </TableHeaderCell>
 
-                            <HeaderCell>
+                            <TableHeaderCell align="right">
                                 Total
-                            </HeaderCell>
+                            </TableHeaderCell>
 
                             {!readonly && (
-                                <HeaderCell>
+                                <TableHeaderCell align="right" nowrap>
                                     Actions
-                                </HeaderCell>
+                                </TableHeaderCell>
                             )}
                         </TableHeaderRow>
-                    </thead>
+                    </TableHeader>
 
-                    <tbody className="divide-y divide-border">
+                    <TableBody>
                         {tasks.map((task) => (
-                            <tr
-                                key={
-                                    task.clientId
-                                }
-                            >
-
-                                <BodyCell>
+                            <TableRow key={task.clientId}>
+                                <TableCell>
                                     {task.weekEndingDate
                                         ? task.weekEndingDate.toLocaleDateString()
                                         : "-"}
-                                </BodyCell>
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .sunday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.sunday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .monday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.monday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .tuesday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.tuesday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .wednesday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.wednesday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .thursday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.thursday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .friday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.friday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
-                                    {task.quantities
-                                        .saturday ?? "-"}
-                                </BodyCell>
+                                <TableCell align="center">
+                                    {task.quantities.saturday ?? "-"}
+                                </TableCell>
 
-                                <BodyCell>
+                                <TableCell align="right">
                                     {task.totalNumber}
-                                </BodyCell>
+                                </TableCell>
 
-                                <BodyCell>
+                                <TableCell
+                                    align="right"
+                                    className="tabular-nums"
+                                >
                                     {formatCurrencyGB(task.ratePerJob ?? 0)}
-                                </BodyCell>
+                                </TableCell>
 
-                                <BodyCell>
+                                <TableCell
+                                    align="right"
+                                    className="font-semibold tabular-nums"
+                                >
                                     {formatCurrencyGB(task.totalValue)}
-                                </BodyCell>
+                                </TableCell>
 
                                 {!readonly && (
-                                    <BodyCell>
-                                        <div className="flex gap-2">
-
+                                    <TableCell align="right" nowrap>
+                                        <div className="flex justify-end gap-2">
                                             <IconButton
                                                 variant="ghost"
-                                                onClick={() =>
-                                                    onEdit(task)
-                                                }
+                                                tone="accent"
+                                                onClick={() => onEdit(task)}
                                             >
                                                 <Pencil size={14} />
                                             </IconButton>
@@ -290,119 +264,40 @@ function TasksTable({
                                                 tone="danger"
                                                 variant="ghost"
                                                 onClick={() =>
-                                                    onDelete(
-                                                        task.clientId,
-                                                    )
+                                                    onDelete(task.clientId)
                                                 }
                                             >
                                                 <Trash2 size={14} />
                                             </IconButton>
-
                                         </div>
-                                    </BodyCell>
+                                    </TableCell>
                                 )}
-
-                            </tr>
+                            </TableRow>
                         ))}
-                    </tbody>
-                    <tfoot className="border-t border-border bg-muted/20">
-                        <tr>
-                            <FooterCell>
-                                Totals
-                            </FooterCell>
+                    </TableBody>
 
-                            <FooterCell>
-                                {totals.sunday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.monday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.tuesday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.wednesday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.thursday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.friday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.saturday}
-                            </FooterCell>
-
-                            <FooterCell>
-                                {totals.totalJobs}
-                            </FooterCell>
-
-                            <FooterCell>
-                                -
-                            </FooterCell>
-
-                            <FooterCell>
+                    <TableFooter>
+                        <TableRow className="hover:bg-transparent">
+                            <TableCell>Totals</TableCell>
+                            <TableCell align="center">{totals.sunday}</TableCell>
+                            <TableCell align="center">{totals.monday}</TableCell>
+                            <TableCell align="center">{totals.tuesday}</TableCell>
+                            <TableCell align="center">{totals.wednesday}</TableCell>
+                            <TableCell align="center">{totals.thursday}</TableCell>
+                            <TableCell align="center">{totals.friday}</TableCell>
+                            <TableCell align="center">{totals.saturday}</TableCell>
+                            <TableCell align="right">{totals.totalJobs}</TableCell>
+                            <td></td>
+                            <TableCell align="right" className="tabular-nums">
                                 {formatCurrencyGB(totals.subtotal)}
-                            </FooterCell>
+                            </TableCell>
                             {!readonly && (
-                                <FooterCell>
-                                    -
-                                </FooterCell>
+                                <td></td>
                             )}
-                        </tr>
-                    </tfoot>
+                        </TableRow>
+                    </TableFooter>
                 </table>
             </div>
         </div>
-    );
-}
-
-type CellProps = {
-    children: React.ReactNode;
-};
-
-function HeaderCell({
-    children,
-}: Readonly<CellProps>) {
-    return (
-        <th
-            className="
-                px-4 py-3 text-left text-xs
-                font-medium uppercase tracking-wide
-                text-foreground font-semibold
-            "
-        >
-            {children}
-        </th>
-    );
-}
-
-function BodyCell({
-    children,
-}: Readonly<CellProps>) {
-    return (
-        <td className="px-4 py-3 text-sm">
-            {children}
-        </td>
-    );
-}
-
-function FooterCell({
-    children,
-}: Readonly<CellProps>) {
-    return (
-        <td
-            className="
-                px-4 py-3 text-sm font-semibold
-            "
-        >
-            {children}
-        </td>
     );
 }
