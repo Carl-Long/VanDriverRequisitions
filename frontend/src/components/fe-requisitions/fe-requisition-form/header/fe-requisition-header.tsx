@@ -81,7 +81,7 @@ export function FeRequisitionHeader({
                                     rounded-full
                                     border border-warning-border
                                     bg-warning-surface
-                                    px-2 py-0.5
+                                    px-3 py-1
                                     text-xs font-medium
                                     text-warning
                                 "

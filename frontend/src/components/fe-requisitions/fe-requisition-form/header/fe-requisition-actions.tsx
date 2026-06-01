@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button/button";
-import { ArrowRight, ArrowRightCircle, Save, Send } from "lucide-react";
+import { ArrowRight, ArrowRightCircle, LogOut, Save, Send } from "lucide-react";
 
 type Props = {
     isSaving: boolean;
@@ -22,7 +22,6 @@ export function FeRequisitionActions({
         <div className="flex flex-wrap items-center gap-3">
 
             <Button
-                size="sm"
                 disabled={isSaving}
                 onClick={onSaveAndContinue}
                 
@@ -35,21 +34,20 @@ export function FeRequisitionActions({
 
 
             <Button
-                size="sm"
                 variant="outline"
                 disabled={isSaving}
                 onClick={onSaveDraft}
             >
                 <Save size={14} />
+                <LogOut size={14} />
 
                 {isSaving
                     ? "Saving..."
-                    : "Save Draft"}
+                    : "Save And Close"}
             </Button>
 
             {canSubmit && (
                 <Button
-                    size="sm"
                     tone="danger"
                     disabled={isSaving}
                     onClick={onSubmit}

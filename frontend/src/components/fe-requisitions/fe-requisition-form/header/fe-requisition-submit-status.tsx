@@ -33,7 +33,7 @@ export function FeRequisitionSubmitStatus({
 
     if (status.currentWindow) {
         return (
-            <span className="inline-flex items-center gap-1.5 text-xs rounded-xl border border-success-border bg-success-surface p-2 ">
+            <span className="inline-flex items-center gap-1.5 text-xs rounded-xl border border-success-border bg-success-surface p-3 font-semibold">
                 <CalendarCheck size={14} className="text-success" />
 
                 <span>

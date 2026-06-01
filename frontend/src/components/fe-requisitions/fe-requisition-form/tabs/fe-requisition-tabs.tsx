@@ -41,7 +41,7 @@ export function FeRequisitionTabs({
     return (
         <div className="space-y-6">
             <div className="overflow-x-auto">
-                <div className="inline-flex min-w-max gap-1 rounded-2xl bg-muted p-1">
+                <div className="inline-flex min-w-max gap-1 rounded-2xl bg-surface-elevated p-1">
                     {tabs.map((tab) => (
                         <TabButton
                             key={tab.key}
@@ -108,14 +108,14 @@ function TabButton({
                 "cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200",
                 active
                     ? [
-                        "bg-background",
-                        "text-foreground",
+                        "bg-accent",
+                        "text-accent-foreground",
                         "shadow-sm",
                     ].join(" ")
                     : [
                         "text-muted-foreground",
                         "hover:text-foreground",
-                        "hover:bg-background/50",
+                        "hover:bg-accent/20",
                     ].join(" "),
             ].join(" ")}
         >

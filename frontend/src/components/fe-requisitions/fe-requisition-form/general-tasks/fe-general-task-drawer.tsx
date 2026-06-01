@@ -183,6 +183,37 @@ export function FeGeneralTaskDrawer({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {limitRule && (
+                        <div
+                            className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4"
+                        >
+                            <Info
+                                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                            />
+
+                            <div className="text-sm">
+                                <div className="font-medium">
+                                    Requisiton Item Limits
+                                </div>
+
+                                <div className="mt-1 text-muted-foreground">
+                                    Maximum quantity per day:
+                                    {" "}
+                                    <strong className="text-foreground">
+                                        {limitRule.maxQuantity}
+                                    </strong>
+                                </div>
+
+                                <div className="text-muted-foreground">
+                                    Maximum rate per job:
+                                    {" "}
+                                    <strong className="text-foreground">
+                                        {formatCurrencyGB(limitRule.maxRate)}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <Field
                         label="Week Ending"
@@ -206,37 +237,6 @@ export function FeGeneralTaskDrawer({
                             }
                         />
                     </Field>
-                    {limitRule && (
-                        <div
-                            className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4"
-                        >
-                            <Info
-                                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                            />
-
-                            <div className="text-sm">
-                                <div className="font-medium">
-                                    Requisition Limits
-                                </div>
-
-                                <div className="mt-1 text-muted-foreground">
-                                    Maximum quantity per day:
-                                    {" "}
-                                    <strong className="text-foreground">
-                                        {limitRule.maxQuantity}
-                                    </strong>
-                                </div>
-
-                                <div className="text-muted-foreground">
-                                    Maximum rate per job:
-                                    {" "}
-                                    <strong className="text-foreground">
-                                        {formatCurrencyGB(limitRule.maxRate)}
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-7 gap-3">
 

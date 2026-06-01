@@ -72,7 +72,10 @@ export function DatePicker({
                 <DayPicker
                     mode="single"
                     selected={value}
-                    onSelect={onChange}
+                    onSelect={(date) => {
+                        onChange(date);
+                        setOpen(false);
+                    }}
                     fixedWeeks
                     components={{
                         Chevron: ({

@@ -35,7 +35,7 @@ export function ToastHost({ toasts, onDismiss }: Readonly<{ toasts: Toast[]; onD
     return (
         <div
             className="
-                pointer-events-none fixed bottom-6 right-6 z-[100]
+                pointer-events-none fixed top-20 right-6 z-[100]
                 flex w-full max-w-sm flex-col gap-3
             "
         >
