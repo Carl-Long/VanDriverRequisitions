@@ -18,33 +18,13 @@ export function createFeGeneralTaskFormSchema(
 
             quantities:
                 z.object({
-                    sunday:
-                        z.number()
-                            .nullable(),
-
-                    monday:
-                        z.number()
-                            .nullable(),
-
-                    tuesday:
-                        z.number()
-                            .nullable(),
-
-                    wednesday:
-                        z.number()
-                            .nullable(),
-
-                    thursday:
-                        z.number()
-                            .nullable(),
-
-                    friday:
-                        z.number()
-                            .nullable(),
-
-                    saturday:
-                        z.number()
-                            .nullable(),
+                    sunday: quantitySchema,
+                    monday: quantitySchema,
+                    tuesday: quantitySchema,
+                    wednesday: quantitySchema,
+                    thursday: quantitySchema,
+                    friday: quantitySchema,
+                    saturday: quantitySchema,
                 }),
 
             ratePerJob:
@@ -95,9 +75,7 @@ export function createFeGeneralTaskFormSchema(
                 ) {
                     ctx.addIssue({
                         code: "custom",
-
                         path: ["form"],
-
                         message:
                             "At least one job quantity is required",
                     });
@@ -160,3 +138,9 @@ export function createFeGeneralTaskFormSchema(
             },
         );
 }
+
+const quantitySchema = z
+    .number()
+    .int("Must be a whole number")
+    .min(0, "Cannot be negative")
+    .nullable();
