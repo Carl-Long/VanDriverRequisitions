@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Api.Extensions;
+using VanDriverRequisitions.Api.Middleware;
 using VanDriverRequisitions.Application.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
@@ -36,6 +37,7 @@ app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseMiddleware<FakeLatencyMiddleware>();
     app.UseCors();
 }
 
