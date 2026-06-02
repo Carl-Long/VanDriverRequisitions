@@ -54,12 +54,8 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
             vanDriverId: params.id,
             vanDriverLabel: params.label,
-
             vanDriverSummary: params.summary,
 
-            // Default driver name from trader
-            vanDriverName:
-                params.summary?.tradersName ?? "",
         }));
     }
 

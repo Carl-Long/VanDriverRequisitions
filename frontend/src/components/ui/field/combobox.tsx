@@ -20,6 +20,7 @@ import { fieldBase } from "./fieldstyles";
 export type ComboboxOption = {
     value: string;
     label: string;
+    data?: unknown;
 };
 
 type Props = {

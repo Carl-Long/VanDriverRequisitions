@@ -1,16 +1,8 @@
 "use client";
 
 import { Field } from "@/components/ui/field/field";
-
-import {
-    Combobox,
-    ComboboxOption,
-} from "@/components/ui/field/combobox";
-
-import {
-    vanDriversApi,
-    VanDriverLookup,
-} from "@/lib/api/van-drivers";
+import { Combobox, ComboboxOption } from "@/components/ui/field/combobox";
+import { vanDriversApi, VanDriverLookup } from "@/lib/api/van-drivers";
 
 type Props = {
     disabled?: boolean;
@@ -20,9 +12,7 @@ type Props = {
     onChange: (
         params: {
             id: string | null;
-
             label: string | null;
-
             summary: VanDriverLookup | null;
         },
     ) => void;
@@ -60,12 +50,12 @@ export function FeVanDriverField({
                             x,
                         ): ComboboxOption => ({
                             value: x.id,
-
                             label: `${x.code} - ${x.tradersName}`,
+                            data: x
                         }),
                     );
                 }}
-                onChange={async (
+                onChange={(
                     value,
                     option,
                 ) => {
@@ -82,16 +72,10 @@ export function FeVanDriverField({
                         return;
                     }
 
-                    const summary =
-                        await vanDriversApi.getById(
-                            value,
-                        );
-
                     onChange({
                         id: value,
-                        label:
-                            option.label,
-                        summary,
+                        label: option.label,
+                        summary: option.data as VanDriverLookup,
                     });
                 }}
             />
