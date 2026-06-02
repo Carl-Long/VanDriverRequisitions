@@ -126,6 +126,9 @@ export default function RequisitionLimitRulesPage() {
                 : "Requisition limit rule created",
         );
 
+        setModalOpen(false);
+        setEditing(null);
+
         await load();
     }
 

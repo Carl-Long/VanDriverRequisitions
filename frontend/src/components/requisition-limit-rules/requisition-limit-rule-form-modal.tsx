@@ -130,8 +130,7 @@ export function RequisitionLimitRuleFormModal({
                 maxQuantity: data.maxQuantity,
                 maxRate: data.maxRate,
             });
-
-            onClose();
+            
         } catch (err) {
             if (err instanceof ApiError) {
                 setServerError(err.message ?? "Error");
