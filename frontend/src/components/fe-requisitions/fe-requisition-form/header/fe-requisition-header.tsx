@@ -1,22 +1,23 @@
 "use client";
 
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { formatCurrencyGB } from "@/lib/format/currency";
-
 import { StatusPill } from "../../status-pill";
 import { RequisitionStatus } from "../../constants";
-
 import { FeRequisitionActions } from "./fe-requisition-actions";
 import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { SaveAction } from "../components/fe-requisition-shell";
+import { SubmitWindowStatus } from "@/lib/api/submit-windows";
+
 
 type Props = {
     mode: FeRequisitionPageMode;
-    requisitionNumber: string | null;
+    requisitionNumber?: string | null;
     status: RequisitionStatus | null;
-    activeAction: SaveAction;
     subtotal: number;
+    submitWindowStatus: SubmitWindowStatus | null;
+    submitStatusLoading: boolean;
+    activeAction: SaveAction;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -27,18 +28,14 @@ export function FeRequisitionHeader({
     requisitionNumber,
     status,
     subtotal,
+    submitWindowStatus,
+    submitStatusLoading,
     activeAction,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
 }: Readonly<Props>) {
-    const {
-        status: submitStatus,
-        loading: submitStatusLoading,
-    } = useSubmitWindowStatus();
-
-    const canSubmit =
-        !!submitStatus?.currentWindow;
+    const canSubmit = !!submitWindowStatus?.currentWindow;
 
     return (
         <div className="pb-2">
@@ -52,7 +49,7 @@ export function FeRequisitionHeader({
                                     : mode === "readonly"
                                         ? "Viewing Requisition"
                                         : "Editing Requisition"}
-                                        
+
                             </span>
 
                             {mode !== "create" && requisitionNumber && (
@@ -65,7 +62,7 @@ export function FeRequisitionHeader({
 
                     {mode !== "readonly" && (
                         <FeRequisitionSubmitStatus
-                            status={submitStatus}
+                            status={submitWindowStatus}
                             loading={submitStatusLoading}
                         />
                     )}

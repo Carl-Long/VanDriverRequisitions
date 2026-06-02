@@ -5,7 +5,6 @@ import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft, } from "../hooks/use-fe-requisition-draft";
-import { useFeTaskTypes } from "../hooks/use-fe-task-types";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
@@ -20,10 +19,15 @@ import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 import { ApiError } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
+import { FeTaskType } from "@/lib/api/fe-task-types";
+import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 
 type Props = {
     mode: FeRequisitionPageMode;
     limitRules: RequisitionLimitRuleSummary[];
+    taskTypes: FeTaskType[];
+    submitWindowStatus: SubmitWindowStatus | null;
+    submitWindowStatusLoading: boolean;
     feRequisition?: FeRequisitionDetail;
 };
 
@@ -33,7 +37,7 @@ export type SaveAction =
     | "submit"
     | null;
 
-export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly<Props>) {
+export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition, submitWindowStatus, submitWindowStatusLoading }: Readonly<Props>) {
 
     const initialDraft = feRequisition
         ? mapFeRequisitionDetailToDraft(feRequisition)
@@ -75,8 +79,6 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
     const [activeTab, setActiveTab] = useState("details");
 
     const [isSaving, setIsSaving] = useState(false);
-
-    const { taskTypes } = useFeTaskTypes();
 
     const isReadonly = mode === "readonly";
 
@@ -184,6 +186,8 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
                 requisitionNumber={draft.requisitionNumber}
                 status={draft.status}
                 subtotal={subtotal}
+                submitWindowStatus={submitWindowStatus}
+                submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}

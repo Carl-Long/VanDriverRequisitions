@@ -2,25 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import { PageContainer } from "@/components/layout/page-container";
-import { PageHeader } from "@/components/ui/page-header";
-
 import { feRequisitionsApi, FeRequisitionDetail, } from "@/lib/api/fe-requisitions";
-
 import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
-
 import { useToast } from "@/providers/toast-provider";
 import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
+import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
+import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
 
 export default function Page() {
 
     const params = useParams<{ id: string }>();
     const router = useRouter();
     const toast = useToast();
-    const { limitRules } = useRequisitionLimitRules();
+    const { limitRules, loading: limitRulesLoading } = useRequisitionLimitRules();
+    const {
+        taskTypes,
+        loading: taskTypesLoading,
+    } = useFeTaskTypes();
+
+    const { status: submitWindowStatus, loading: submitWindowStatusLoading } = useSubmitWindowStatus();
     const [requisition, setRequisition] = useState<FeRequisitionDetail | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const pageLoading =
+        loading ||
+        limitRulesLoading ||
+        submitWindowStatusLoading ||
+        taskTypesLoading;
 
     useEffect(() => {
         let cancelled = false;
@@ -34,7 +44,6 @@ export default function Page() {
 
                 if (!cancelled) {
                     setRequisition(result);
-                    setLoading(false);
                 }
             } catch {
                 if (!cancelled) {
@@ -45,6 +54,10 @@ export default function Page() {
                     router.push(
                         "/home-van-drivers",
                     );
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
                 }
             }
         }
@@ -62,9 +75,9 @@ export default function Page() {
 
     return (
         <PageContainer>
-            {loading || !requisition ? (
+            {pageLoading || !requisition ? (
                 <div>
-                    Loading requisition...
+                    <FeRequisitionShellSkeleton />
                 </div>
             ) : (
                 <FeRequisitionShell
@@ -73,10 +86,11 @@ export default function Page() {
                             ? "edit"
                             : "readonly"
                     }
-                    feRequisition={
-                        requisition
-                    }
+                    feRequisition={requisition}
                     limitRules={limitRules}
+                    taskTypes={taskTypes}
+                    submitWindowStatus={submitWindowStatus}
+                    submitWindowStatusLoading={submitWindowStatusLoading}
                 />
             )}
         </PageContainer>
