@@ -105,7 +105,6 @@ export function TaskTypeFormModal({
 
         try {
             await onSubmit(data);
-            handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
                 applyApiErrors(err);
@@ -175,6 +174,7 @@ export function TaskTypeFormModal({
                         variant="outline"
                         tone="primary"
                         onClick={handleClose}
+                        disabled={isSubmitting}
                     >
                         Cancel
                     </Button>

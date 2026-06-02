@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { formatDateTime, timeUntil } from "@/lib/format/date";
+import { Skeleton } from "../ui/skeleton";
 
 type SubmitWindowHeroProps = {
   status: SubmitWindowStatus | null;
@@ -57,11 +58,26 @@ export function SubmitWindowHero({
   variant = "full",
 }: Readonly<SubmitWindowHeroProps>) {
   if (loading) {
+    if (variant === "compact") {
+      return (
+        <div className="rounded-xl border border-border px-4 py-3">
+          <Skeleton className="mx-auto h-4 w-52" />
+          <Skeleton className="mx-auto mt-2 h-3 w-36" />
+        </div>
+      );
+    }
+
     return (
-      <div className="mb-8 h-28 animate-pulse rounded-2xl border border-border bg-surface" />
+      <div className="mb-8 flex items-center gap-4 rounded-2xl border border-border px-6 py-5">
+        <Skeleton className="h-12 w-12 rounded-xl" />
+
+        <div className="flex-1">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="mt-2 h-3 w-64" />
+        </div>
+      </div>
     );
   }
-
   if (!status) return null;
 
   const state = getWindowState(status);

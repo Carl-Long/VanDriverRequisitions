@@ -87,7 +87,6 @@ export function ReasonFormModal({
 
         try {
             await onSubmit(data);
-            handleClose();
         } catch (err) {
             if (err instanceof ApiError) {
                 applyApiValidationErrors(err);
@@ -136,6 +135,7 @@ export function ReasonFormModal({
                         variant="outline"
                         tone="primary"
                         onClick={handleClose}
+                        disabled={isSubmitting}
                     >
                         Cancel
                     </Button>

@@ -217,11 +217,19 @@ export function RequisitionLimitRuleFormModal({
 
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
-                    <Button type="button" variant="outline" onClick={onClose}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                    >
                         Cancel
                     </Button>
 
-                    <Button type="submit" loading={isSubmitting}>
+                    <Button
+                        type="submit"
+                        loading={isSubmitting}
+                    >
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

@@ -1,5 +1,6 @@
 using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.Middleware;
+using VanDriverRequisitions.Api.Middleware.Dev;
 using VanDriverRequisitions.Application.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;

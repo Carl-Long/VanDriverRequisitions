@@ -33,6 +33,7 @@ import type {
 import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FeRequisitionFiltersToolbar } from "@/components/fe-requisitions/fe-requisition-filters-toolbar";
+import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
 
 
 export default function HomeVanDriversPage() {
@@ -189,7 +190,7 @@ export default function HomeVanDriversPage() {
 
             {/* Loading */}
 
-            {loading && <TableSkeleton />}
+            {loading && <FeRequisitionTableSkeleton />}
 
             {/* Empty */}
 

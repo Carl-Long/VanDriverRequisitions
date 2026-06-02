@@ -65,6 +65,8 @@
     --muted: 241 245 249;
 
     --ring: 237 0 45;
+
+    --skeleton: 226 232 240;
 }
 
 .dark-brand {
@@ -127,6 +129,8 @@
     --muted: 30 41 59;
 
     --ring: 237 0 45;
+
+    --skeleton: 42 52 68;
 }
 
 .light-mono {
@@ -190,6 +194,8 @@
     --muted: 244 244 245;
 
     --ring: 24 24 27;
+
+    --skeleton: 228 228 231;
 }
 
 .dark-mono {
@@ -221,7 +227,7 @@
     --accent-surface: 28 28 31;
     --accent-surface-hover: 40 40 44;
     --accent-border: 60 60 65;
-    
+
     --success: 200 200 205;
     --success-foreground: 10 10 11;
     --success-surface: 28 28 30;
@@ -252,6 +258,8 @@
     --muted: 32 32 35;
 
     --ring: 245 245 245;
+
+    --skeleton: 50 50 54;
 }
 
 html {
@@ -295,6 +303,8 @@ body {
     --color-muted: rgb(var(--muted));
 
     --color-ring: rgb(var(--ring));
+
+    --color-skeleton: rgb(var(--skeleton));
 
     --color-primary: rgb(var(--primary));
     --color-primary-foreground: rgb(var(--primary-foreground));

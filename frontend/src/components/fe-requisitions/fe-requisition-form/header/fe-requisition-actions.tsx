@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button/button";
-import { ArrowRight, ArrowRightCircle, LogOut, Save, Send } from "lucide-react";
+import {
+    ArrowRightCircle,
+    LogOut,
+    Save,
+    Send,
+} from "lucide-react";
+import { SaveAction } from "../components/fe-requisition-shell";
 
 type Props = {
-    isSaving: boolean;
+    activeAction: SaveAction
     canSubmit: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
@@ -10,21 +16,20 @@ type Props = {
 };
 
 export function FeRequisitionActions({
-    isSaving,
+    activeAction,
     canSubmit,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
 }: Readonly<Props>) {
-
+    const isBusy = activeAction !== null;
 
     return (
         <div className="flex flex-wrap items-center gap-3">
-
             <Button
-                disabled={isSaving}
+                loading={activeAction === "saveAndContinue"}
+                disabled={isBusy}
                 onClick={onSaveAndContinue}
-                
             >
                 <Save size={14} />
                 <ArrowRightCircle size={14} />
@@ -32,24 +37,23 @@ export function FeRequisitionActions({
                 Save & Continue
             </Button>
 
-
             <Button
                 variant="outline"
-                disabled={isSaving}
+                loading={activeAction === "saveAndClose"}
+                disabled={isBusy}
                 onClick={onSaveDraft}
             >
                 <Save size={14} />
                 <LogOut size={14} />
 
-                {isSaving
-                    ? "Saving..."
-                    : "Save And Close"}
+                Save & Close
             </Button>
 
             {canSubmit && (
                 <Button
                     tone="danger"
-                    disabled={isSaving}
+                    loading={activeAction === "submit"}
+                    disabled={isBusy}
                     onClick={onSubmit}
                 >
                     <Send size={14} />

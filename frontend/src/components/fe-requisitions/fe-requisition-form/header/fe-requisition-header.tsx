@@ -9,12 +9,13 @@ import { RequisitionStatus } from "../../constants";
 import { FeRequisitionActions } from "./fe-requisition-actions";
 import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
+import { SaveAction } from "../components/fe-requisition-shell";
 
 type Props = {
     mode: FeRequisitionPageMode;
     requisitionNumber: string | null;
     status: RequisitionStatus | null;
-    isSaving: boolean;
+    activeAction: SaveAction;
     subtotal: number;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
@@ -26,7 +27,7 @@ export function FeRequisitionHeader({
     requisitionNumber,
     status,
     subtotal,
-    isSaving,
+    activeAction,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
@@ -105,7 +106,7 @@ export function FeRequisitionHeader({
 
                     {mode !== "readonly" && (
                         <FeRequisitionActions
-                            isSaving={isSaving}
+                            activeAction={activeAction}
                             canSubmit={canSubmit}
                             onSaveDraft={onSaveDraft}
                             onSaveAndContinue={onSaveAndContinue}

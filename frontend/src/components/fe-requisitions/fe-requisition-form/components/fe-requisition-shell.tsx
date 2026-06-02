@@ -27,6 +27,12 @@ type Props = {
     feRequisition?: FeRequisitionDetail;
 };
 
+export type SaveAction =
+    | "saveAndContinue"
+    | "saveAndClose"
+    | "submit"
+    | null;
+
 export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly<Props>) {
 
     const initialDraft = feRequisition
@@ -46,6 +52,7 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
+    const [activeAction, setActiveAction] = useState<SaveAction>(null);
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -139,15 +146,33 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
 
 
     async function handleSaveDraft() {
-        await saveRequisition();
+        setActiveAction("saveAndClose");
+
+        try {
+            await saveRequisition();
+        } finally {
+            setActiveAction(null);
+        }
     }
 
     async function handleSaveAndContinue() {
-        await saveRequisition(true);
+        setActiveAction("saveAndContinue");
+
+        try {
+            await saveRequisition(true);
+        } finally {
+            setActiveAction(null);
+        }
     }
 
     async function handleSubmit() {
-        await saveRequisition();
+        setActiveAction("submit");
+
+        try {
+            await saveRequisition();
+        } finally {
+            setActiveAction(null);
+        }
     }
 
 
@@ -156,16 +181,12 @@ export function FeRequisitionShell({ mode, limitRules, feRequisition }: Readonly
         <div className="space-y-4">
             <FeRequisitionHeader
                 mode={mode}
-                requisitionNumber={
-                    draft.requisitionNumber
-                }
+                requisitionNumber={draft.requisitionNumber}
                 status={draft.status}
                 subtotal={subtotal}
-                isSaving={isSaving}
+                activeAction={activeAction}
                 onSaveDraft={handleSaveDraft}
-                onSaveAndContinue={
-                    handleSaveAndContinue
-                }
+                onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmit}
             />
 

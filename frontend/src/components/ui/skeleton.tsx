@@ -1,12 +1,14 @@
 import { cn } from "@/lib/utils";
 
-export function Skeleton({ className }: Readonly<{ className?: string }>) {
-    return (
-        <div
-            className={cn(
-                "animate-pulse rounded-md bg-surface-hover",
-                className
-            )}
-        />
-    );
+type SkeletonProps = { className?: string; };
+
+export function Skeleton({ className }: Readonly<SkeletonProps>) {
+  return (
+    <div
+      className={cn(
+        "animate-pulse rounded-md bg-skeleton",
+        className
+      )}
+    />
+  );
 }

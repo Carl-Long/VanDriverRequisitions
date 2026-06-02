@@ -1,4 +1,4 @@
-namespace VanDriverRequisitions.Api.Middleware;
+namespace VanDriverRequisitions.Api.Middleware.Dev;
 
 public sealed class FakeLatencyMiddleware(RequestDelegate next)
 {

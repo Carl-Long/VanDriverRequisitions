@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
+
 import { Tone, Variant, toneMap } from "../theme";
+import { Spinner } from "../spinner";
 
 type ButtonSize = "sm" | "md";
 
@@ -24,25 +26,37 @@ export function Button({
     tone = "primary",
     variant = "solid",
     size = "md",
-    loading,
+    loading = false,
     disabled,
     className,
     children,
     ...props
-}: ButtonProps) {
+}: Readonly<ButtonProps>) {
     return (
         <button
             className={cn(
                 base,
                 sizeMap[size],
                 toneMap[tone][variant],
-                loading && "cursor-wait opacity-70",
+                loading && "cursor-wait",
                 className
             )}
             disabled={disabled || loading}
+            aria-busy={loading}
             {...props}
         >
-            {children}
+            {loading && (
+                <Spinner className="h-4 w-4 shrink-0" />
+            )}
+
+            <span
+                className={cn(
+                    "flex items-center gap-2",
+                    loading && "cursor-wait"
+                )}
+            >
+                {children}
+            </span>
         </button>
     );
 }

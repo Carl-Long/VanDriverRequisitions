@@ -78,7 +78,6 @@ export default function FeReasonsPage() {
         setEditing(reason);
         setModalOpen(true);
     }
-
     async function handleSubmit(data: { reason: string }) {
         if (editing) {
             await feReasonsApi.update(editing.id, data);
@@ -92,9 +91,11 @@ export default function FeReasonsPage() {
                 : `Reason "${data.reason}" created`,
         );
 
-        await load();
-    }
+        setModalOpen(false);
+        setEditing(null);
 
+        load();
+    }
     async function handleToggleActive(reason: FeReason) {
         try {
             if (reason.isActive) {

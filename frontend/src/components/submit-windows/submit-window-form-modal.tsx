@@ -265,6 +265,7 @@ export function SubmitWindowFormModal({
                         variant="outline"
                         tone="primary"
                         onClick={handleClose}
+                        disabled={isSubmitting}
                     >
                         Cancel
                     </Button>

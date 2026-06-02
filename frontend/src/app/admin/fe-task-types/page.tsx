@@ -6,7 +6,6 @@ import { Plus, Search } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
@@ -78,19 +77,24 @@ export default function FeTaskTypesPage() {
         setModalOpen(true);
     }
 
-    async function handleSubmit(data: {
-        name: string;
-        code: string;
-    }) {
+    async function handleSubmit(data: { name: string; code: string; }) {
         if (editing) {
             await feTaskTypesApi.update(editing.id, data);
         } else {
             await feTaskTypesApi.create(data);
         }
-        toast.success(editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`);
-        await load();
-    }
 
+        toast.success(
+            editing
+                ? `Task type "${data.name}" updated`
+                : `Task type "${data.name}" created`
+        );
+
+        setModalOpen(false);
+        setEditing(null);
+
+        load();
+    }
     async function handleToggleActive(taskType: FeTaskType) {
         try {
             if (taskType.isActive) {
