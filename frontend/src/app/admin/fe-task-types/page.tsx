@@ -21,6 +21,7 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -170,11 +171,10 @@ export default function FeTaskTypesPage() {
             )}
 
             {loading && (
-                <div className="space-y-3">
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                </div>
+                <TableSkeleton
+                    rows={6}
+                    columns={5}
+                />
             )}
 
             {!loading && filtered.length === 0 && (

@@ -23,6 +23,7 @@ import type { FeTaskType } from "@/lib/api/fe-task-types";
 import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/requisition-limit-rule-table";
 import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -176,11 +177,10 @@ export default function RequisitionLimitRulesPage() {
             )}
 
             {loading && (
-                <div className="space-y-3">
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                    <Surface className="h-10 animate-pulse bg-surface-hover" />
-                </div>
+                <TableSkeleton
+                    rows={6}
+                    columns={7}
+                />
             )}
 
             {!loading && filtered.length === 0 && (

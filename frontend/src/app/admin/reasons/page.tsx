@@ -21,8 +21,8 @@ import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
@@ -173,11 +173,10 @@ export default function FeReasonsPage() {
             )}
 
             {loading && (
-                <div className="space-y-3">
-                    <Skeleton className="h-10" />
-                    <Skeleton className="h-10" />
-                    <Skeleton className="h-10" />
-                </div>
+                <TableSkeleton
+                    rows={6}
+                    columns={4}
+                />
             )}
 
             {!loading && filtered.length === 0 && (

@@ -25,6 +25,8 @@ import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { Alert } from "@/components/ui/alert";
 
 const PAGE_SIZE = 10;
 
@@ -225,30 +227,23 @@ export default function SubmitWindowsPage() {
                 </div>
             </div>
 
-            {/* Error */}
-            {
-                error && (
-                    <Surface className="mb-6 border-danger-border bg-danger-surface px-4 py-3">
-                        <p className="text-sm text-danger">
-                            {error}
-                        </p>
-                    </Surface>
-                )
-            }
 
-            {/* Loading */}
-            {
-                loading && (
-                    <div className="space-y-3">
-                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
-                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
-                        <Surface className="h-10 animate-pulse bg-surface-subtle" />
-                    </div>
-                )
-            }
+            {error && (
+                <Alert>
+                    <p className="text-sm text-danger">
+                        {error}
+                    </p>
+                </Alert>
+            )}
+
+            {loading && (
+                <TableSkeleton
+                    rows={6}
+                    columns={5}
+                />
+            )}
 
             {/* Empty state */}
-
             {!loading && data?.items.length === 0 && (
                 <EmptyState
                     icon={emptyState.icon}
