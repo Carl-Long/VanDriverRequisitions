@@ -122,8 +122,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 saved = await feRequisitionsApi.update(draft.requisitionId, request);
                 setRowVersion(saved.rowVersion);
             } else {
-                saved =
-                    await feRequisitionsApi.create(request);
+                saved = await feRequisitionsApi.create(request);
             }
 
             toast.success(`Requisition #${saved.requisitionNumber} saved`);

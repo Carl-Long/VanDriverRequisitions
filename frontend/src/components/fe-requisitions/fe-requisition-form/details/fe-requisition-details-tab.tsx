@@ -155,27 +155,32 @@ export function FeRequisitionDetailsTab({
                         </Field>
                     </div>
                     {(draft.poNumber || draft.rejectionNotes) && (
-                        <div className="mt-8 border-t pt-6">
+                        <div className="mt-8 border-t border-border pt-6">
                             <h3 className="text-sm font-medium">
                                 Processing Information
                             </h3>
 
-                            <div className="mt-4 space-y-4">
+                            <div className="mt-4 space-y-3">
                                 {draft.poNumber && (
-                                    <Field label="PO Number">
-                                        <Input
-                                            disabled
-                                            value={draft.poNumber}
-                                        />
-                                    </Field>
+                                    <div>
+                                        <div className="text-sm font-medium">
+                                            PO Number
+                                        </div>
+                                        <div className="mt-1 text-sm text-muted-foreground">
+                                            {draft.poNumber}
+                                        </div>
+                                    </div>
                                 )}
 
                                 {draft.rejectionNotes && (
-                                    <Field label="Rejection Reason">
-                                        <div className="rounded-md border bg-muted/30 p-3 text-sm">
+                                    <div>
+                                        <div className="text-sm font-medium">
+                                            Rejection Reason
+                                        </div>
+                                        <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                                             {draft.rejectionNotes}
                                         </div>
-                                    </Field>
+                                    </div>
                                 )}
                             </div>
                         </div>
