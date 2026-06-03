@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   CalendarPlus,
   CalendarX,
+  Loader2,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ import { Skeleton } from "../ui/skeleton";
 type SubmitWindowHeroProps = {
   status: SubmitWindowStatus | null;
   loading: boolean;
+  refreshing?: boolean;
   variant?: "full" | "compact";
 };
 
@@ -52,9 +54,22 @@ function getWindowState(status: SubmitWindowStatus) {
   };
 }
 
+function UpdatingIndicator() {
+  return (
+    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <Loader2
+        size={12}
+        className="animate-spin"
+      />
+      Updating...
+    </div>
+  );
+}
+
 export function SubmitWindowHero({
   status,
   loading,
+  refreshing = false,
   variant = "full",
 }: Readonly<SubmitWindowHeroProps>) {
   if (loading) {
@@ -147,10 +162,14 @@ export function SubmitWindowHero({
         </div>
 
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <h3 className="text-sm font-semibold text-foreground">
               {copy.open}
             </h3>
+
+            {refreshing && (
+              <UpdatingIndicator />
+            )}
           </div>
 
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -175,9 +194,15 @@ export function SubmitWindowHero({
         </div>
 
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-foreground">
-            {copy.next(state.opensIn)}
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-semibold text-foreground">
+              {copy.next(state.opensIn)}
+            </h3>
+
+            {refreshing && (
+              <UpdatingIndicator />
+            )}
+          </div>
 
           <p className="mt-0.5 text-sm text-muted-foreground">
             {formatDateTime(state.openFrom)} —{" "}
@@ -200,9 +225,15 @@ export function SubmitWindowHero({
       </div>
 
       <div className="flex-1">
-        <h3 className="text-sm font-semibold text-foreground">
-          No Upcoming Submission Windows
-        </h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-sm font-semibold text-foreground">
+            No Upcoming Submission Windows
+          </h3>
+
+          {refreshing && (
+            <UpdatingIndicator />
+          )}
+        </div>
 
         <p className="mt-0.5 text-sm text-muted-foreground">
           {copy.noneStrict}

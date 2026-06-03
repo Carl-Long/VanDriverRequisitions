@@ -7,7 +7,6 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
-import { Surface } from "@/components/ui/surface";
 
 import { SubmitWindowHero } from "@/components/submit-windows/submit-window-hero";
 import { SubmitWindowFormModal } from "@/components/submit-windows/submit-window-form-modal";
@@ -49,6 +48,7 @@ export default function SubmitWindowsPage() {
     const {
         status: windowStatus,
         loading: statusLoading,
+        refreshing: statusRefreshing,
         refresh: refreshStatus,
     } = useSubmitWindowStatus();
 
@@ -146,8 +146,10 @@ export default function SubmitWindowsPage() {
         setModalOpen(false);
         setEditing(null);
 
-        await load();
-        await refreshStatus();
+        await Promise.all([
+            load(),
+            refreshStatus(),
+        ]);
     }
 
     async function handleDelete(window: SubmitWindow) {
@@ -156,8 +158,10 @@ export default function SubmitWindowsPage() {
 
             toast.success("Submit window deleted");
 
-            await load();
-            await refreshStatus();
+            await Promise.all([
+                load(),
+                refreshStatus(),
+            ]);
         } catch {
             setError("Failed to delete submit window.");
         }
@@ -182,6 +186,7 @@ export default function SubmitWindowsPage() {
             <SubmitWindowHero
                 status={windowStatus}
                 loading={statusLoading}
+                refreshing={statusRefreshing}
             />
 
             <div className="mb-2 flex justify-end">

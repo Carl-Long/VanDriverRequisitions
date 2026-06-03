@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
 import {
     submitWindowsApi,
     type SubmitWindowStatus,
@@ -9,21 +10,44 @@ import {
 export function useSubmitWindowStatus() {
     const [status, setStatus] = useState<SubmitWindowStatus | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        async function loadInitial() {
+            try {
+                const data = await submitWindowsApi.getStatus();
+                setStatus(data);
+            } catch {
+                // silent fail
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadInitial();
+    }, []);
 
     const refresh = useCallback(async () => {
+        setRefreshing(true);
+        const started = Date.now();
         try {
             const data = await submitWindowsApi.getStatus();
             setStatus(data);
-        } catch {
-            // Silently fail — sidebar badge shouldn't break the app
         } finally {
-            setLoading(false);
+            const elapsed = Date.now() - started;
+
+            if (elapsed < 400) {
+                await new Promise((resolve) =>
+                    setTimeout(resolve, 400 - elapsed)
+                );
+            }
+            setRefreshing(false);
         }
     }, []);
 
-    useEffect(() => {
-        refresh();
-    }, [refresh]);
-
-    return { status, loading, refresh };
+    return {
+        status,
+        loading,
+        refreshing,
+        refresh,
+    };
 }
