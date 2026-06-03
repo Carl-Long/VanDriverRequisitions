@@ -45,9 +45,20 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAtUtc = now;
-                entry.Entity.CreatedById = user.Id;
-                entry.Entity.CreatedByNameSnapshot = user.Name;
+                if (entry.Entity.CreatedAtUtc == default)
+                {
+                    entry.Entity.CreatedAtUtc = now;
+                }
+
+                if (entry.Entity.CreatedById == Guid.Empty)
+                {
+                    entry.Entity.CreatedById = user.Id;
+                }
+
+                if (string.IsNullOrWhiteSpace(entry.Entity.CreatedByNameSnapshot))
+                {
+                    entry.Entity.CreatedByNameSnapshot = user.Name;
+                }
             }
             else if (entry.State == EntityState.Modified)
             {

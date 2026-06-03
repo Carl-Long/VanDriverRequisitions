@@ -5,8 +5,7 @@ using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public sealed class FeGeneralTask
-    : AuditableEntity, IFeRequisitionChild
+public sealed class FeGeneralTask : AuditableEntity, IFeRequisitionChild
 {
     private FeGeneralTask() { } // EF
 
@@ -55,10 +54,7 @@ public sealed class FeGeneralTask
             ratePerJob);
     }
     
-    public void Update(
-        DateOnly weekEndingDate,
-        WeeklyQuantities week,
-        decimal? ratePerJob)
+    public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerJob)
     {
         WeekEndingDate = weekEndingDate;
         Week = week;
@@ -70,9 +66,6 @@ public sealed class FeGeneralTask
     private void RecalculateTotals()
     {
         TotalNumber = Week.Total;
-
-        TotalValue = WeeklyCalculator.Calculate(
-            TotalNumber,
-            RatePerJob);
+        TotalValue = WeeklyCalculator.Calculate(TotalNumber, RatePerJob);
     }
 }

@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
 
@@ -332,14 +334,13 @@ public static class DevDataSeeder
         (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
     ];
 
-    private static async Task SeedRequisitionsAsync(
-        VanDriverDbContext context,
-        ILogger? logger)
+    private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
     {
         const int count = 100;
-
         var rng = new Random(123);
 
+        var taskTypes = await context.FeTaskTypes.ToListAsync();
+        
         var shops = await context.Shops
             .Where(x => x.IsActive)
             .Take(200)
@@ -358,69 +359,61 @@ public static class DevDataSeeder
             var driver = drivers[rng.Next(drivers.Count)];
             var user = SeedUsers[rng.Next(SeedUsers.Length)];
 
-            var createdDate = DateTime.UtcNow
-                .AddDays(-rng.Next(0, 120));
+            var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
 
             var status = GetRandomStatus(rng);
 
-            var requisition = new FeRequisition
+            var hasVat = rng.Next(0, 2) == 1;
+
+            var details = new RequisitionDetails(
+                DateOnly.FromDateTime(createdDate),
+                new VanDriverSnapshot(
+                    driver.Id,
+                    driver.Code,
+                    driver.TradersName,
+                    driver.TradersName,
+                    hasVat),
+                new ShopSnapshot(
+                    shop.Id,
+                    shop.Code,
+                    shop.Name));
+
+            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+
+            var requisitionNumber = $"F{i:D9}";
+
+            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+            requisition.CreatedAtUtc = createdDate;
+            requisition.CreatedById = user.Id;
+            requisition.CreatedByNameSnapshot = user.Name;
+            
+            switch (status)
             {
-                Id = Guid.NewGuid(),
+                case RequisitionStatus.Draft:
+                    break;
 
-                RequisitionNumber = $"F{i:D10}",
+                case RequisitionStatus.Submitted:
+                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    requisition.Submit(user.Id, submitter.Name, createdDate.AddHours(2));
+                    break;
 
-                RequisitionDate =
-                    DateOnly.FromDateTime(createdDate),
+                case RequisitionStatus.Rejected:
+                    var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)]; 
+                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
+                    requisition.Reject(user.Id, rejecter.Name, rejectedReason, createdDate.AddDays(1));
+                    break;
 
-                VanDriverId = driver.Id,
-                VanDriverName = driver.TradersName,
-                TradersName = driver.TradersName,
-                VanDriverCode = driver.Code,
-
-                ShopId = shop.Id,
-                ShopCode = shop.Code,
-                ShopName = shop.Name,
-
-                Status = status,
-
-                IsVatApplicable = rng.Next(0, 2) == 1,
-
-                Subtotal =
-                    Math.Round((decimal)rng.NextDouble() * 750m, 2),
-
-                CreatedAtUtc = createdDate,
-
-                CreatedById = user.Id,
-                CreatedByNameSnapshot = user.Name
-            };
-
-            if (status != RequisitionStatus.Draft)
-            {
-                requisition.SubmittedById = user.Id;
-                requisition.SubmittedAtUtc =
-                    createdDate.AddHours(2);
+                case RequisitionStatus.Approved:
+                    var approver = SeedUsers[rng.Next(SeedUsers.Length)];
+                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
+                    requisition.Approve(user.Id, approver.Name, createdDate.AddDays(2));
+                    requisition.PoNumber = $"PO-{rng.Next(100000, 999999)}";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);
             }
-
-            if (status == RequisitionStatus.Rejected)
-            {
-                requisition.RejectedById = user.Id;
-                requisition.RejectedAtUtc =
-                    createdDate.AddDays(1);
-
-                requisition.RejectionNotes =
-                    "Seeded test rejection";
-            }
-
-            if (status == RequisitionStatus.Processed)
-            {
-                requisition.ProcessedById = user.Id;
-                requisition.ProcessedAtUtc =
-                    createdDate.AddDays(2);
-
-                requisition.PoNumber =
-                    $"PO-{rng.Next(100000, 999999)}";
-            }
-
+            
             requisitions.Add(requisition);
         }
 
@@ -428,9 +421,7 @@ public static class DevDataSeeder
 
         await context.SaveChangesAsync();
 
-        logger?.LogInformation(
-            "Seeded {Count} requisitions.",
-            count);
+        logger?.LogInformation("Seeded {Count} requisitions.", count);
     }
     
     private static RequisitionStatus GetRandomStatus(Random rng)
@@ -440,14 +431,56 @@ public static class DevDataSeeder
             RequisitionStatus.Draft,
             RequisitionStatus.Submitted,
             RequisitionStatus.Rejected,
-            RequisitionStatus.Resubmitted,
-            RequisitionStatus.SentToFinance,
-            RequisitionStatus.Processed,
-            RequisitionStatus.ReturnedFromFinance
+            RequisitionStatus.Approved
         };
 
         return statuses[rng.Next(statuses.Length)];
     }
     
+    private static List<FeGeneralTaskUpdateModel> BuildSeedTasks(Random rng, List<FeTaskType> taskTypes, DateOnly requisitionDate)
+    {
+        var taskCount = rng.Next(1, 4);
+        var selectedTaskTypes = taskTypes
+            .OrderBy(_ => rng.Next())
+            .Take(taskCount);
+        
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+        
+        var tasks = new List<FeGeneralTaskUpdateModel>();
+
+        foreach (var taskType in selectedTaskTypes)
+        {
+            tasks.Add(new FeGeneralTaskUpdateModel(
+                    null,
+                    taskType.Id,
+                    taskType.Name,
+                    taskType.Code,
+                    weekEndingDate,
+                    new WeeklyQuantities(
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6)),
+                    Math.Round(
+                        (decimal)(rng.NextDouble() * 15 + 5),
+                        2)));
+        }
+
+        return tasks;
+    }
+    
     private static string Esc(string value) => value.Replace("'", "''");
+    
+    private static readonly string[] RejectionReasons =
+    [
+        "Quantity exceeds permitted limit.",
+        "Incorrect rate entered.",
+        "Missing supporting information.",
+        "Duplicate requisition submitted.",
+        "Week ending date is invalid.",
+        "Requires manager review before approval."
+    ];
 }

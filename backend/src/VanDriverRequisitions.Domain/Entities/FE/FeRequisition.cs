@@ -15,40 +15,38 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public Guid ShopId { get; set; }
     public string ShopCode { get; set; } = string.Empty;
     public string ShopName { get; set; } = string.Empty;
-    public RequisitionStatus Status { get; init; }
-    public Guid? SubmittedById { get; set; }
-    public DateTime? SubmittedAtUtc { get; set; }
-    public Guid? ProcessedById { get; set; }
-    public DateTime? ProcessedAtUtc { get; set; }
-    public Guid? RejectedById { get; set; }
-    public DateTime? RejectedAtUtc { get; set; }
-    public string? RejectionNotes { get; set; }
-    public string? PoNumber { get; set; }
     public bool IsVatApplicable { get; set; }
-    // Calculated and persisted for reporting/performance
-    public decimal Subtotal { get; set; }
+    
+    public decimal Subtotal { get; private set; }
+    public RequisitionStatus Status { get; private set; }
+    
+    public Guid? SubmittedById { get; private set; }
+    public string? SubmittedByNameSnapshot { get; private set; }
+    public DateTime? SubmittedAtUtc { get; private set; }
+    
+    public Guid? ApprovedById { get; private set; }
+    public DateTime? ApprovedAtUtc { get; private set; }
+    public string? ApprovedByNameSnapshot { get; private set; }
+    public string? PoNumber { get; set; }
+    
+    public Guid? RejectedById { get; private set; }
+    public DateTime? RejectedAtUtc { get; private set; }
+    public string? RejectedByNameSnapshot { get; private set; }
+    public string? RejectionNotes { get; private set; }
     
     private readonly List<FeGeneralTask> _feGeneralTasks = [];
     private readonly List<FeMileage> _feMileages = [];
     private readonly List<FeTransfer> _feTransfers = [];
     private readonly List<FeAdditionalCost> _feAdditionalCosts = [];
 
-    public IReadOnlyCollection<FeGeneralTask> FeGeneralTasks
-        => _feGeneralTasks;
-
-    public IReadOnlyCollection<FeMileage> FeMileages
-        => _feMileages;
-
-    public IReadOnlyCollection<FeTransfer> FeTransfers
-        => _feTransfers;
-
-    public IReadOnlyCollection<FeAdditionalCost> FeAdditionalCosts
-        => _feAdditionalCosts;
+    public IReadOnlyCollection<FeGeneralTask> FeGeneralTasks => _feGeneralTasks;
+    public IReadOnlyCollection<FeMileage> FeMileages => _feMileages;
+    public IReadOnlyCollection<FeTransfer> FeTransfers => _feTransfers;
+    public IReadOnlyCollection<FeAdditionalCost> FeAdditionalCosts => _feAdditionalCosts;
     
-    public static FeRequisition Create(
-        string requisitionNumber,
-        RequisitionDetails details,
-        IEnumerable<FeGeneralTaskUpdateModel> taskModels)
+    public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
+    
+    public static FeRequisition Create(string requisitionNumber, RequisitionDetails details, IEnumerable<FeGeneralTaskUpdateModel> taskModels)
     {
         var requisition = new FeRequisition
         {
@@ -57,9 +55,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         };
 
         requisition.UpdateDetails(details);
-
         requisition.SyncGeneralTasks(taskModels);
-
+        
         return requisition;
     }
     
@@ -67,26 +64,20 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public void UpdateDetails(RequisitionDetails details)
     {
         RequisitionDate = details.RequisitionDate;
-
         VanDriverId = details.Driver.Id;
         VanDriverCode = details.Driver.Code;
         VanDriverName = details.Driver.Name;
         TradersName = details.Driver.TradersName;
-
         ShopId = details.Shop.Id;
         ShopCode = details.Shop.Code;
         ShopName = details.Shop.Name;
-
         IsVatApplicable = details.Driver.HasVat;
     }
     
-    public void SyncGeneralTasks(
-        IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
+    public void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
         var incomingList = incomingTasks.ToList();
-
-        var existingTasks = _feGeneralTasks
-            .ToDictionary(x => x.Id);
+        var existingTasks = _feGeneralTasks.ToDictionary(x => x.Id);
 
         var incomingIds = incomingList
             .Where(x => x.Id.HasValue)
@@ -106,18 +97,12 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         {
             if (incoming.Id.HasValue)
             {
-                if (!existingTasks.TryGetValue(
-                        incoming.Id.Value,
-                        out var existing))
+                if (!existingTasks.TryGetValue(incoming.Id.Value, out var existing))
                 {
-                    throw new InvalidOperationException(
-                        $"Task '{incoming.Id}' not found.");
+                    throw new InvalidOperationException($"Task '{incoming.Id}' not found.");
                 }
 
-                existing.Update(
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
+                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerJob);
             }
             else
             {
@@ -134,6 +119,52 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         }
 
         RecalculateSubtotal();
+    }
+    
+    public void Submit(Guid submittedById, string submittedByName, DateTime submittedAtUtc)
+    {
+        if (!CanSubmit) throw new InvalidOperationException("Only draft or rejected requisitions can be submitted.");
+
+        Status = RequisitionStatus.Submitted;
+        SubmittedById = submittedById;
+        SubmittedByNameSnapshot = submittedByName;
+        SubmittedAtUtc = submittedAtUtc;
+        RejectedById = null;
+        RejectedAtUtc = null;
+        RejectedByNameSnapshot = null;
+        RejectionNotes = null;
+    }
+    
+    public void Approve(Guid approvedById, string approvedByName, DateTime approvedAtUtc)
+    {
+        if (Status != RequisitionStatus.Submitted)
+        {
+            throw new InvalidOperationException("Only submitted requisitions can be approved.");
+        }
+
+        Status = RequisitionStatus.Approved;
+        ApprovedById = approvedById;
+        ApprovedByNameSnapshot = approvedByName;
+        ApprovedAtUtc = approvedAtUtc;
+        
+        RejectedById = null;
+        RejectedByNameSnapshot = null;
+        RejectedAtUtc = null;
+        RejectionNotes = null;
+    }
+    
+    public void Reject(Guid rejectedById, string rejectedByName, string rejectionNotes, DateTime rejectedAtUtc)
+    {
+        if (Status != RequisitionStatus.Submitted)
+        {
+            throw new InvalidOperationException("Only submitted requisitions can be rejected.");
+        }
+
+        Status = RequisitionStatus.Rejected;
+        RejectedById = rejectedById;
+        RejectedByNameSnapshot = rejectedByName;
+        RejectedAtUtc = rejectedAtUtc;
+        RejectionNotes = rejectionNotes;
     }
 
     private void RecalculateSubtotal()

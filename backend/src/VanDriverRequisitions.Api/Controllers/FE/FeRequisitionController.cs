@@ -48,4 +48,23 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         var result = await feRequisitionService.UpdateAsync(id, saveFeRequisitionDto, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpPost("submit")]
+    [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SubmitNew([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.SubmitAsync(null, saveFeRequisitionDto, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/submit")]
+    [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SubmitExisting(Guid id, [FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.SubmitAsync(id, saveFeRequisitionDto, cancellationToken);
+        return Ok(result);
+    }
 }

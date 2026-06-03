@@ -25,10 +25,16 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
         
         builder.Property(x => x.SubmittedById);
         builder.Property(x => x.SubmittedAtUtc).HasColumnType("datetime2");
-        builder.Property(x => x.ProcessedById);
-        builder.Property(x => x.ProcessedAtUtc).HasColumnType("datetime2");
+        builder.Property(x => x.SubmittedByNameSnapshot).HasMaxLength(256);
+        
+        builder.Property(x => x.ApprovedById);
+        builder.Property(x => x.ApprovedAtUtc).HasColumnType("datetime2");
+        builder.Property(x => x.ApprovedByNameSnapshot).HasMaxLength(256);
+        
         builder.Property(x => x.RejectedById);
         builder.Property(x => x.RejectedAtUtc).HasColumnType("datetime2");
+        builder.Property(x => x.RejectedByNameSnapshot).HasMaxLength(256);
+        
         builder.Property(x => x.Subtotal)
             .HasPrecision(18, 2)
             .HasDefaultValue(0);
