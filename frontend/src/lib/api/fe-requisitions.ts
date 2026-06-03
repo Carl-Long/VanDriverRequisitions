@@ -174,20 +174,41 @@ export const feRequisitionsApi = {
         if (query.requisitionNumber) params.set("requisitionNumber", query.requisitionNumber);
         if (query.status) params.set("status", query.status);
         if (query.shopId) params.set("shopId", query.shopId);
-        if (query.createdByUserId) {params.set("createdByUserId", query.createdByUserId);}
+        if (query.createdByUserId) { params.set("createdByUserId", query.createdByUserId); }
         return apiFetch<PagedResult<FeRequisitionSummary>>(`${BASE}?${params}`);
     },
     getById: (id: string) => apiFetch<FeRequisitionDetail>(`${BASE}/${id}`),
+    
     create: (data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(BASE, {
             method: "POST",
             body: data,
         }),
+        
     update: (id: string, data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}`, {
             method: "PUT",
             body: data,
         }),
-    submit: (id: string) =>
-        apiFetch<FeRequisitionDetail>(`${BASE}/${id}/submit`, { method: "POST" }),
+
+    submitNew: (data: SaveFeRequisition) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/submit`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
+
+    submitExisting: (
+        id: string,
+        data: SaveFeRequisition,
+    ) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/${id}/submit`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
 };

@@ -18,6 +18,7 @@ type Props = {
     submitWindowStatus: SubmitWindowStatus | null;
     submitStatusLoading: boolean;
     activeAction: SaveAction;
+    canSubmit: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -31,11 +32,11 @@ export function FeRequisitionHeader({
     submitWindowStatus,
     submitStatusLoading,
     activeAction,
+    canSubmit,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
 }: Readonly<Props>) {
-    const canSubmit = !!submitWindowStatus?.currentWindow;
 
     return (
         <div className="pb-2">

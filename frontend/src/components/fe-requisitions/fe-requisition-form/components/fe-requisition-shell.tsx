@@ -85,7 +85,14 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     const router = useRouter();
     const toast = useToast();
 
-    async function saveRequisition(continueEditing: boolean = false) {
+    const canSubmitStatus =
+        draft.status === null ||
+        draft.status === "Draft" ||
+        draft.status === "Rejected";
+
+    const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
+
+    async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
         const result =
             feRequisitionSchema.safeParse(
                 draft,
@@ -146,6 +153,58 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         }
     }
 
+    async function submitRequisition() {
+        const result = feRequisitionSchema.safeParse(draft);
+
+        if (!result.success) {
+            setErrors(
+                mapZodErrors(
+                    result.error,
+                ),
+            );
+
+            setActiveTab("details");
+            return;
+        }
+
+        try {
+            setErrors({});
+            setIsSaving(true);
+
+            const request = mapFeRequisitionDraftToSaveRequest(draft);
+
+            const submitted = draft.requisitionId
+                ? await feRequisitionsApi.submitExisting(
+                    draft.requisitionId,
+                    request,
+                )
+                : await feRequisitionsApi.submitNew(
+                    request,
+                );
+
+            toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
+            router.push("/home-van-drivers");
+
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form:
+                        err.detail ??
+                        err.message,
+                });
+
+                return;
+            }
+
+            setErrors({
+                form:
+                    "Failed to submit requisition",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
 
     async function handleSaveDraft() {
         setActiveAction("saveAndClose");
@@ -171,12 +230,11 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         setActiveAction("submit");
 
         try {
-            await saveRequisition();
+            await submitRequisition();
         } finally {
             setActiveAction(null);
         }
     }
-
 
 
     return (
@@ -189,6 +247,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 submitWindowStatus={submitWindowStatus}
                 submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction}
+                canSubmit={canSubmit}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmit}
@@ -208,22 +267,12 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 taskTypes={taskTypes}
                 details={
                     <FeRequisitionDetailsTab
-                        readonly={
-                            isReadonly
-                        }
+                        readonly={isReadonly}
                         draft={draft}
-                        onRequisitionDateChange={
-                            setRequisitionDate
-                        }
-                        onVanDriverChange={
-                            setVanDriver
-                        }
-                        onVanDriverNameChange={
-                            setVanDriverName
-                        }
-                        onShopChange={
-                            setShop
-                        }
+                        onRequisitionDateChange={setRequisitionDate}
+                        onVanDriverChange={setVanDriver}
+                        onVanDriverNameChange={setVanDriverName}
+                        onShopChange={setShop}
                         errors={errors}
                         clearError={clearError}
                     />
