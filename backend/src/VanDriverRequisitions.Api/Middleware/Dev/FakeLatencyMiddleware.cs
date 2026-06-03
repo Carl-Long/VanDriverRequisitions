@@ -6,7 +6,7 @@ public sealed class FakeLatencyMiddleware(RequestDelegate next)
 
     public async Task InvokeAsync(HttpContext context)
     {
-        await Task.Delay(Random.Shared.Next(500, 1500));
+        await Task.Delay(Random.Shared.Next(0, 500));
 
         await _next(context);
     }
