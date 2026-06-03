@@ -4,10 +4,7 @@ export const REQUISITION_STATUSES = [
     "Draft",
     "Submitted",
     "Rejected",
-    "Resubmitted",
-    "SentToFinance",
-    "Processed",
-    "ReturnedFromFinance",
+    "Approved"
 ] as const;
 
 export type RequisitionStatus =
@@ -16,7 +13,8 @@ export type RequisitionStatus =
 export const statusVariants = {
     neutral:
         "bg-surface-subtle text-foreground-subtle border border-border",
-    info:
+
+    pending:
         "bg-info-surface text-info border border-info-border",
 
     warning:
@@ -51,7 +49,7 @@ export const requisitionStatusConfig: Record<
 
     Submitted: {
         label: "Submitted",
-        variant: "info",
+        variant: "pending",
     },
 
     Rejected: {
@@ -59,25 +57,11 @@ export const requisitionStatusConfig: Record<
         variant: "danger",
     },
 
-    Resubmitted: {
-        label: "Resubmitted",
-        variant: "warning",
-    },
+    Approved: {
+        label: "Approved",
+        variant: "success"
+    }
 
-    SentToFinance: {
-        label: "Sent to Finance",
-        variant: "accent",
-    },
-
-    Processed: {
-        label: "Processed",
-        variant: "success",
-    },
-
-    ReturnedFromFinance: {
-        label: "Returned",
-        variant: "warning",
-    },
 } as const;
 
 export const INITIAL_FILTERS: FeRequisitionFilters = {
