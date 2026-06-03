@@ -15,10 +15,17 @@ public sealed class FeRequisitionDetailDto
     public required string ShopCode { get; init; }
     public required string ShopName { get; init; }
     public string Status { get; init; } = string.Empty;
-    public string? PoNumber { get; init; }
-    public string? RejectionNotes { get; init; }
     public decimal Subtotal { get; init; }
     public required List<FeGeneralTaskDetailDto> FeGeneralTasks { get; init; }
 
     public bool IsEditable { get; init; }
+    public DateTime? SubmittedAtUtc { get; init; }
+    public string? SubmittedByNameSnapshot { get; init; }
+
+    public DateTime? ApprovedAtUtc { get; init; }
+    public string? ApprovedByNameSnapshot { get; init; }
+    public string? PoNumber { get; init; }
+    public DateTime? RejectedAtUtc { get; init; }
+    public string? RejectedByNameSnapshot { get; init; }
+    public string? RejectionNotes { get; init; }
 }

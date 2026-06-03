@@ -34,7 +34,13 @@ public static class FeRequisitionMapper
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
             IsEditable = requisition.Status == RequisitionStatus.Draft || requisition.Status == RequisitionStatus.Rejected,
-
+            ApprovedAtUtc = requisition.ApprovedAtUtc,
+            ApprovedByNameSnapshot = requisition.ApprovedByNameSnapshot,
+            RejectedAtUtc = requisition.RejectedAtUtc,
+            RejectedByNameSnapshot = requisition.RejectedByNameSnapshot,
+            SubmittedAtUtc = requisition.SubmittedAtUtc,
+            SubmittedByNameSnapshot =requisition.SubmittedByNameSnapshot,
+            
             FeGeneralTasks = requisition.FeGeneralTasks
                     .Select(MapGeneralTaskDetail)
                     .ToList()

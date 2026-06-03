@@ -8,6 +8,8 @@ import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
+import { Calendar, User } from "lucide-react";
+import { formatDateTime } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -50,6 +52,11 @@ export function FeRequisitionDetailsTab({
     onVanDriverNameChange,
     onShopChange,
 }: Readonly<Props>) {
+
+    const isApproved = draft.status === "Approved"
+    const isRejected = draft.status === "Rejected"
+    const processedAtUtc = draft.approvedAtUtc ?? draft.rejectedAtUtc;
+
     return (
         <div className="space-y-6">
             <div>
@@ -154,29 +161,69 @@ export function FeRequisitionDetailsTab({
                             />
                         </Field>
                     </div>
-                    {(draft.poNumber || draft.rejectionNotes) && (
+                    {(isApproved || isRejected) && (
                         <div className="mt-8 border-t border-border pt-6">
-                            <h3 className="text-sm font-medium">
-                                Processing Information
-                            </h3>
+                            <div className="flex items-start justify-between">
+                                <h3 className="text-sm font-medium">
+                                    Processing Information
+                                </h3>
+
+                                {/* Top-right audit summary */}
+                                <div className="text-right text-sm text-muted-foreground space-y-0.5">
+                                    {isApproved && draft.approvedByNameSnapshot && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <User className="h-4 w-4" />
+
+                                            <span className="font-medium text-foreground">
+                                                Approved by{" "}
+                                                {draft.approvedByNameSnapshot}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {isRejected && draft.rejectedByNameSnapshot && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <User className="h-4 w-4" />
+
+                                            <span className="font-medium text-foreground">
+                                                Rejected by{" "}
+                                                {draft.rejectedByNameSnapshot}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {processedAtUtc && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            <span>
+                                                {formatDateTime(processedAtUtc)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
                             <div className="mt-4 space-y-3">
-                                {draft.poNumber && (
+                                {/* APPROVED */}
+                                {isApproved && draft.poNumber && (
                                     <div>
                                         <div className="text-sm font-medium">
                                             PO Number
                                         </div>
+
                                         <div className="mt-1 text-sm text-muted-foreground">
                                             {draft.poNumber}
                                         </div>
                                     </div>
                                 )}
 
-                                {draft.rejectionNotes && (
+                                {/* REJECTED */}
+                                {isRejected && (
                                     <div>
                                         <div className="text-sm font-medium">
                                             Rejection Reason
                                         </div>
+
                                         <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                                             {draft.rejectionNotes}
                                         </div>

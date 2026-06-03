@@ -107,8 +107,6 @@ export type FeRequisitionDetail = {
     shopName: string;
     status: string;
     isVatApplicable: boolean;
-    poNumber: string | null;
-    rejectionNotes: string | null;
     subtotal: number;
     isEditable: boolean;
     isVanDriverActive: boolean;
@@ -117,6 +115,14 @@ export type FeRequisitionDetail = {
     feMileages: FeMileage[];
     feTransfers: FeTransfer[];
     feAdditionalCosts: FeAdditionalCost[];
+    submittedByNameSnapshot: string | null;
+    submittedAtUtc: string | null;
+    approvedByNameSnapshot: string | null;
+    approvedAtUtc: string | null;
+    poNumber: string | null;
+    rejectedByNameSnapshot: string | null;
+    rejectedAtUtc: string | null;
+    rejectionNotes: string | null;
 };
 
 export type SaveFeGeneralTask = {
@@ -178,13 +184,13 @@ export const feRequisitionsApi = {
         return apiFetch<PagedResult<FeRequisitionSummary>>(`${BASE}?${params}`);
     },
     getById: (id: string) => apiFetch<FeRequisitionDetail>(`${BASE}/${id}`),
-    
+
     create: (data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(BASE, {
             method: "POST",
             body: data,
         }),
-        
+
     update: (id: string, data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}`, {
             method: "PUT",

@@ -16,8 +16,16 @@ export type FeRequisitionDraft = {
     shopId: string | null;
     shopLabel: string | null;
 
+    submittedByNameSnapshot: string | null;
+    submittedAtUtc: string | null;
+
     poNumber: string | null;
+    approvedByNameSnapshot: string | null;
+    approvedAtUtc: string | null;
+
     rejectionNotes: string | null;
+    rejectedByNameSnapshot: string | null;
+    rejectedAtUtc: string | null;
 
     feGeneralTasks: FeGeneralTaskDraft[];
     mileageRows: [];

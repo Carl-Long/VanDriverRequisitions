@@ -247,6 +247,8 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction}
                 canSubmit={canSubmit}
+                submittedAtUtc={draft.submittedAtUtc}
+                submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmit}
