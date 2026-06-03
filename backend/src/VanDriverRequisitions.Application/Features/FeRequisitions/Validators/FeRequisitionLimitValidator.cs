@@ -29,12 +29,28 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
                 continue;
             }
 
-            if (task.TotalNumber > rule.MaxQuantity)
+            var dailyValues = new[]
             {
-                failures.Add(
-                    new ValidationFailure(
-                        nameof(task.TotalNumber),
-                        $"{task.TaskTypeName} exceeds maximum quantity of {rule.MaxQuantity}."));
+                task.Week.Sunday,
+                task.Week.Monday,
+                task.Week.Tuesday,
+                task.Week.Wednesday,
+                task.Week.Thursday,
+                task.Week.Friday,
+                task.Week.Saturday
+            };
+
+            for (var i = 0; i < dailyValues.Length; i++)
+            {
+                var value = dailyValues[i];
+
+                if (value > rule.MaxQuantity)
+                {
+                    failures.Add(
+                        new ValidationFailure(
+                            nameof(task.TotalNumber),
+                            $"{task.TaskTypeName} exceeds daily maximum of {rule.MaxQuantity} on {GetDayName(i)}."));
+                }
             }
 
             if (task.RatePerJob > rule.MaxRate)
@@ -51,4 +67,17 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
             throw new ValidationException(failures);
         }
     }
+
+    private static string GetDayName(int index) => index switch
+    {
+        0 => "Sunday",
+        1 => "Monday",
+        2 => "Tuesday",
+        3 => "Wednesday",
+        4 => "Thursday",
+        5 => "Friday",
+        6 => "Saturday",
+        _ => "Unknown"
+    };
+
 }
