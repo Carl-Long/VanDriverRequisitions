@@ -9,6 +9,7 @@ type ModalProps = {
     open: boolean;
     onClose: () => void;
     title: string;
+    titleClassName?: string;
     children: ReactNode;
 };
 
@@ -16,6 +17,7 @@ export function Modal({
     open,
     onClose,
     title,
+    titleClassName,
     children,
 }: Readonly<ModalProps>) {
     const dialogRef = useRef<HTMLDialogElement>(null);
@@ -50,7 +52,12 @@ export function Modal({
             )}
         >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2
+                    className={cn(
+                        "text-lg font-semibold text-foreground",
+                        titleClassName,
+                    )}
+                >
                     {title}
                 </h2>
                 <IconButton

@@ -21,6 +21,7 @@ import { ApiError } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/lib/api/fe-task-types";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
+import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -57,7 +58,6 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     } = useFeRequisitionDraft(initialDraft);
 
     const [activeAction, setActiveAction] = useState<SaveAction>(null);
-
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     function clearError(
@@ -77,7 +77,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     }
 
     const [activeTab, setActiveTab] = useState("details");
-
+    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const isReadonly = mode === "readonly";
@@ -91,6 +91,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
+
 
     async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
         const result =
@@ -225,7 +226,12 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         }
     }
 
-    async function handleSubmit() {
+    function handleSubmitRequest() {
+        setIsSubmitModalOpen(true);
+    }
+
+    async function handleSubmitConfirm() {
+        setIsSubmitModalOpen(false);
         setActiveAction("submit");
 
         try {
@@ -234,7 +240,6 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             setActiveAction(null);
         }
     }
-
 
     return (
         <div className="space-y-4">
@@ -251,7 +256,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
-                onSubmit={handleSubmit}
+                onSubmit={handleSubmitRequest}
             />
 
             {errors.form && (
@@ -347,6 +352,13 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                         />
                     );
                 }}
+            />
+
+            <FeRequisitionSubmitModal
+                open={isSubmitModalOpen}
+                loading={activeAction === "submit"}
+                onClose={() => setIsSubmitModalOpen(false)}
+                onConfirm={handleSubmitConfirm}
             />
         </div>
     );
