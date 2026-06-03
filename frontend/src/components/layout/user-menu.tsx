@@ -82,7 +82,7 @@ export function UserMenu() {
                                 )}
                             >
                                 <Palette size={16} />
-                                Appearance
+                                Theme
                             </button>
 
                             <button

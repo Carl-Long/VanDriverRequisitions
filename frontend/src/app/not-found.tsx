@@ -1,34 +1,39 @@
 "use client";
 
-import { ShieldAlert } from "lucide-react";
-import Link from "next/link";
+import { SearchX } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button/button";
 
-export default function UnauthorisedPage() {
+export default function NotFoundPage() {
+    const router = useRouter();
+
     return (
         <div className="flex h-full items-center justify-center p-6">
             <div className="max-w-md text-center">
                 <div className="mb-6 flex justify-center">
-                    <ShieldAlert
+                    <SearchX
                         size={56}
                         className="text-muted-foreground"
                     />
                 </div>
 
                 <h1 className="text-2xl font-semibold">
-                    Access denied
+                    Page not found
                 </h1>
 
                 <p className="text-muted-foreground mt-3">
-                    You don't have permission to view this page.
+                    The page or resource you're looking for
+                    doesn't exist or may have been removed.
                 </p>
 
                 <div className="mt-6">
-                    <Button>
-                        <Link href="/">
-                            Return to home
-                        </Link>
+                    <Button
+                        onClick={() =>
+                            router.push("/home-van-drivers")
+                        }
+                    >
+                        Return to requisitions
                     </Button>
                 </div>
             </div>

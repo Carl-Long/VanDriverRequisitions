@@ -18,10 +18,11 @@ import {
     type FeTaskType,
 } from "@/lib/api/fe-task-types";
 
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { Alert } from "@/components/ui/alert";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -44,11 +45,12 @@ export default function FeTaskTypesPage() {
             const data = await feTaskTypesApi.getAll(showInactive);
             setTaskTypes(data);
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.detail ?? err.message);
-            } else {
-                setError("Failed to load task types.");
-            }
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to load task types limit rules.",
+                ),
+            );
         } finally {
             setLoading(false);
         }
@@ -106,11 +108,12 @@ export default function FeTaskTypesPage() {
             toast.success(taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`);
             await load();
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.detail ?? err.message);
-            } else {
-                setError("Failed to update task type.");
-            }
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed update task type",
+                ),
+            );
         }
     }
 
@@ -163,11 +166,9 @@ export default function FeTaskTypesPage() {
             </div>
 
             {error && (
-                <Surface className="mb-6 border-danger bg-danger/10 px-4 py-3">
-                    <p className="text-sm text-danger">
-                        {error}
-                    </p>
-                </Surface>
+                <Alert>
+                    {error}
+                </Alert>
             )}
 
             {loading && (

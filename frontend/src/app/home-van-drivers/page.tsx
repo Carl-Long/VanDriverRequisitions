@@ -2,16 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { Inbox, Plus } from "lucide-react";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
-import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-
 import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -34,56 +30,19 @@ import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FeRequisitionFiltersToolbar } from "@/components/fe-requisitions/fe-requisition-filters-toolbar";
 import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { Alert } from "@/components/ui/alert";
 
 
 export default function HomeVanDriversPage() {
     const router = useRouter();
     const { user } = useAuth();
-
-    // =========================
-    // Filter state
-    // =========================
-
-    const [filters, setFilters] =
-        useState<FeRequisitionFilters>(
-            INITIAL_FILTERS,
-        );
-
-    // =========================
-    // Pagination
-    // =========================
-
+    const [filters, setFilters] = useState<FeRequisitionFilters>(INITIAL_FILTERS);
     const [page, setPage] = useState(1);
-
-
-    // =========================
-    // Debounced requisition search
-    // =========================
-
-    const debouncedReqNumber =
-        useDebounce(
-            filters.requisitionNumber,
-            400,
-        );
-
-    // =========================
-    // Data state
-    // =========================
-
-    const [data, setData] =
-        useState<
-            PagedResult<FeRequisitionSummary> | null
-        >(null);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [error, setError] =
-        useState<string | null>(null);
-
-    // =========================
-    // Fetch
-    // =========================
+    const debouncedReqNumber = useDebounce(filters.requisitionNumber, 400);
+    const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -93,25 +52,27 @@ export default function HomeVanDriversPage() {
             setError(null);
 
             try {
-                const result =
-                    await feRequisitionsApi.getAll(
-                        buildFeRequisitionQuery(
-                            page,
-                            {
-                                ...filters,
-                                requisitionNumber: debouncedReqNumber,
-                            },
-                            user!.id
-                        ),
-                    );
+                const result = await feRequisitionsApi.getAll(
+                    buildFeRequisitionQuery(
+                        page,
+                        {
+                            ...filters,
+                            requisitionNumber: debouncedReqNumber,
+                        },
+                        user!.id
+                    ),
+                );
 
                 if (!cancelled) {
                     setData(result);
                 }
-            } catch {
+            } catch (err) {
                 if (!cancelled) {
                     setError(
-                        "Failed to load requisitions.",
+                        getApiErrorMessage(
+                            err,
+                            "Failed to load requisitions.",
+                        ),
                     );
                 }
             } finally {
@@ -183,9 +144,9 @@ export default function HomeVanDriversPage() {
             {/* Error */}
 
             {error && (
-                <div className="mb-4 rounded bg-red-500/10 p-3 text-sm text-red-600">
+                <Alert>
                     {error}
-                </div>
+                </Alert>
             )}
 
             {/* Loading */}

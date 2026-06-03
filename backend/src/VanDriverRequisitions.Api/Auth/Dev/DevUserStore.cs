@@ -13,7 +13,7 @@ public static class DevUserStore
 
         ["admin@test.com"] = new DevUser(
             Guid.Parse("8a91d4b2-6f3e-4a10-9c6d-2f5e7b1c9d88"),
-            "Admin User",
+            "Carl Long",
             "admin@test.com",
             "Admin"
         )

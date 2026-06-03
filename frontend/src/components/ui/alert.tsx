@@ -45,7 +45,7 @@ export function Alert({
     return (
         <div
             className={cn(
-                "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm",
+                "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm mb-3",
                 toneMap[tone],
                 className,
             )}

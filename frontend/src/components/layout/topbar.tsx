@@ -23,6 +23,16 @@ export function Topbar() {
                     <h1 className="font-semibold text-base hidden sm:block">
                         Van Driver Requisitions
                     </h1>
+                    <span
+                        className={cn(
+                            "rounded-full border border-border",
+                            "px-2 py-0.5",
+                            "text-xs font-medium",
+                            "text-muted-foreground",
+                        )}
+                    >
+                        Prototype • Next.js + .NET API
+                    </span>
                 </div>
             </div>
             <div className="flex items-center gap-3">

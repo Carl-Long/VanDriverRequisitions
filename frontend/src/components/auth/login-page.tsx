@@ -4,6 +4,9 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { LogIn } from "lucide-react";
+import { Alert } from "../ui/alert";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { Button } from "../ui/button/button";
 
 const DEV_ACCOUNTS = [
     { label: "Admin User", email: "admin@test.com" },
@@ -28,9 +31,10 @@ export function LoginPage() {
             await login(email.trim());
         } catch (err) {
             setError(
-                err instanceof Error
-                    ? err.message
-                    : "Login failed. Please try again.",
+                getApiErrorMessage(
+                    err,
+                    "Failed to reach API. Is it running?",
+                ),
             );
         } finally {
             setLoading(false);
@@ -60,6 +64,10 @@ export function LoginPage() {
 
                 {/* Login card */}
                 <div className="rounded-2xl border border-border bg-surface p-6 card-shadow">
+                    <Alert tone="info">
+                        This development version uses mock sign-in accounts.
+                        Production users will be redirected to Microsoft Entra ID.
+                    </Alert>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label
@@ -85,24 +93,19 @@ export function LoginPage() {
                         </div>
 
                         {error && (
-                            <p className="rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
+                            <Alert>
                                 {error}
-                            </p>
+                            </Alert>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
-                            disabled={loading}
-                            className={cn(
-                                "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5",
-                                "bg-primary text-primary-foreground text-sm font-medium",
-                                "hover:opacity-90 transition",
-                                "disabled:pointer-events-none disabled:opacity-50",
-                            )}
+                            loading={loading}
+                            className="w-full"
                         >
                             <LogIn size={16} />
-                            {loading ? "Signing in..." : "Sign in"}
-                        </button>
+                            Sign in
+                        </Button>
                     </form>
 
                     {/* Dev quick-login buttons */}
@@ -120,7 +123,7 @@ export function LoginPage() {
                                     }
                                     className={cn(
                                         "flex items-center justify-between rounded-lg border border-border px-3 py-2",
-                                        "text-sm text-foreground transition hover:bg-muted",
+                                        "text-sm text-foreground transition hover:bg-muted cursor-pointer",
                                     )}
                                 >
                                     <span>{account.label}</span>

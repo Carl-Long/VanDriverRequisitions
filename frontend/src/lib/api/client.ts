@@ -109,6 +109,17 @@ async function buildApiError(response: Response): Promise<ApiError> {
     });
 }
 
+export function getApiErrorMessage(
+    error: unknown,
+    fallback: string,
+): string {
+    if (error instanceof ApiError) {
+        return error.detail ?? error.message;
+    }
+
+    return fallback;
+}
+
 /**
  * Centralized API client.
  */

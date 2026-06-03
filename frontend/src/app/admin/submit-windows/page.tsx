@@ -26,6 +26,7 @@ import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
+import { getApiErrorMessage } from "@/lib/api/client";
 
 const PAGE_SIZE = 10;
 
@@ -100,9 +101,12 @@ export default function SubmitWindowsPage() {
                 );
 
             setData(result);
-        } catch {
+        } catch (err) {
             setError(
-                "Failed to load submit windows. Is the API running?",
+                getApiErrorMessage(
+                    err,
+                    "Failed to load submit windows.",
+                ),
             );
         } finally {
             setLoading(false);
@@ -155,15 +159,18 @@ export default function SubmitWindowsPage() {
     async function handleDelete(window: SubmitWindow) {
         try {
             await submitWindowsApi.delete(window.id);
-
             toast.success("Submit window deleted");
-
             await Promise.all([
                 load(),
                 refreshStatus(),
             ]);
-        } catch {
-            setError("Failed to delete submit window.");
+        } catch (err) {
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to delete submit window.",
+                ),
+            );
         }
     }
 
@@ -235,9 +242,7 @@ export default function SubmitWindowsPage() {
 
             {error && (
                 <Alert>
-                    <p className="text-sm text-danger">
-                        {error}
-                    </p>
+                    {error}
                 </Alert>
             )}
 

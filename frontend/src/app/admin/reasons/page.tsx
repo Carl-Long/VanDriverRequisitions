@@ -17,7 +17,7 @@ import {
     type FeReason,
 } from "@/lib/api/fe-reasons";
 
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";
@@ -45,11 +45,12 @@ export default function FeReasonsPage() {
             const data = await feReasonsApi.getAll(showInactive);
             setReasons(data);
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.detail ?? err.message);
-            } else {
-                setError("Failed to load reasons.");
-            }
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to load reasons.",
+                ),
+            );
         } finally {
             setLoading(false);
         }
@@ -111,11 +112,12 @@ export default function FeReasonsPage() {
 
             await load();
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.detail ?? err.message);
-            } else {
-                setError("Failed to update reason.");
-            }
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to upadte reason.",
+                ),
+            );
         }
     }
 
@@ -167,7 +169,7 @@ export default function FeReasonsPage() {
             </div>
 
             {error && (
-                <Alert tone="danger" className="mb-6">
+                <Alert>
                     {error}
                 </Alert>
             )}

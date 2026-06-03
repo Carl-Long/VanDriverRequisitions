@@ -14,7 +14,7 @@ import { Field } from "@/components/ui/field/field";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import {
     categoryOptions,
     fasciaOptions,
@@ -130,13 +130,14 @@ export function RequisitionLimitRuleFormModal({
                 maxQuantity: data.maxQuantity,
                 maxRate: data.maxRate,
             });
-            
+
         } catch (err) {
-            if (err instanceof ApiError) {
-                setServerError(err.message ?? "Error");
-            } else {
-                setServerError("Unexpected error occurred.");
-            }
+            setServerError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to save requisition limit rule.",
+                ),
+            );
         }
     }
 

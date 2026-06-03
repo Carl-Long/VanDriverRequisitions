@@ -11,7 +11,7 @@ import { Surface } from "@/components/ui/surface";
 
 import { useToast } from "@/providers/toast-provider";
 
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import {
     requisitionLimitRulesApi,
     type RequisitionLimitRuleSummary,
@@ -24,12 +24,14 @@ import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/
 import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { Alert } from "@/components/ui/alert";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
+    const [taskTypeError, setTaskTypeError] = useState<string | null>(null);
 
     const [search, setSearch] = useState("");
 
@@ -49,11 +51,12 @@ export default function RequisitionLimitRulesPage() {
             const data = await requisitionLimitRulesApi.getAll();
             setRules(data);
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.detail ?? err.message);
-            } else {
-                setError("Failed to load requisition limit rules.");
-            }
+            setError(
+                getApiErrorMessage(
+                    err,
+                    "Failed to load submit windows.",
+                ),
+            );
         } finally {
             setLoading(false);
         }
@@ -63,13 +66,24 @@ export default function RequisitionLimitRulesPage() {
         load();
     }, [load]);
 
+
     useEffect(() => {
-        feTaskTypesApi.getAll(false)
-            .then(setTaskTypes)
-            .catch(() => {
-                toast.error("Failed to load task types");
-            });
-    }, [toast]);
+        async function loadTaskTypes() {
+            try {
+                setTaskTypeError(null);
+                const data = await feTaskTypesApi.getAll(false);
+                setTaskTypes(data);
+            } catch (err) {
+                setTaskTypeError(
+                    getApiErrorMessage(
+                        err,
+                        "Failed to load task types.",
+                    ),
+                );
+            }
+        }
+        loadTaskTypes();
+    }, []);
 
     /* ---------------- filter ---------------- */
 
@@ -171,9 +185,15 @@ export default function RequisitionLimitRulesPage() {
             </div>
 
             {error && (
-                <Surface className="mb-6 border-danger bg-danger/10 px-4 py-3">
-                    <p className="text-sm text-danger">{error}</p>
-                </Surface>
+                <Alert>
+                    {error}
+                </Alert>
+            )}
+
+            {taskTypeError && (
+                <Alert>
+                    {taskTypeError}
+                </Alert>
             )}
 
             {loading && (
