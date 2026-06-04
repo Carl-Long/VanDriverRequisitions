@@ -157,6 +157,76 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, requisitionData.DriverSummary);
     }
+    
+    public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.User is null)
+        {
+            throw new NotFoundException("Approval must be performed by a user.");
+        }
+
+        var requisition = await LoadFullAsync(id, cancellationToken)
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(requisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = approveFeRequisitionDto.RowVersion;
+
+        requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, approveFeRequisitionDto.PoNumber);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException(
+                "This requisition has been updated by another user.");
+        }
+
+        var driverSummary = await context.VanDrivers
+            .AsNoTracking()
+            .Where(x => x.Id == requisition.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
+    
+    public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.User is null)
+        {
+            throw new NotFoundException("Rejection must be performed by a user.");
+        }
+
+        var requisition = await LoadFullAsync(id, cancellationToken)
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(requisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = rejectFeRequisitionDto.RowVersion;
+
+        requisition.RejectSubmission(currentUser.User.Id, currentUser.User.Name, rejectFeRequisitionDto.RejectionNotes, DateTime.UtcNow);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException(
+                "This requisition has been updated by another user.");
+        }
+
+        var driverSummary = await context.VanDrivers
+            .AsNoTracking()
+            .Where(x => x.Id == requisition.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
 
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
     {

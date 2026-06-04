@@ -67,4 +67,18 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         var result = await feRequisitionService.SubmitAsync(id, saveFeRequisitionDto, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpPost("{id:guid}/approve")]
+    public async Task<IActionResult> Approve(Guid id, [FromBody] ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.ApproveAsync(id, approveFeRequisitionDto, cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpPost("{id:guid}/reject")]
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.RejectAsync(id, rejectFeRequisitionDto, cancellationToken);
+        return Ok(result);
+    }
 }

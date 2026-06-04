@@ -199,6 +199,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         RejectedByNameSnapshot = rejectedByName;
         RejectedAtUtc = rejectedAtUtc;
         RejectionNotes = rejectionNotes;
+        
+        PoNumber = null;
     }
     
     public void RejectSubmission(Guid rejectedById, string rejectedByName, string rejectionNotes, DateTime rejectedAtUtc)
