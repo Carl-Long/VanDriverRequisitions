@@ -2,6 +2,8 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "./button/button";
+import { IconButton } from "./button/icon-button";
 
 type PaginationProps = {
     page: number;
@@ -18,7 +20,6 @@ export function Pagination({
 }: Readonly<PaginationProps>) {
     if (totalPages <= 1) return null;
 
-    // Build page numbers: always show first, last, current, and neighbours
     function getPageNumbers(): (number | "ellipsis")[] {
         const pages: (number | "ellipsis")[] = [];
         const delta = 1;
@@ -43,59 +44,48 @@ export function Pagination({
             aria-label="Pagination"
             className={cn("flex items-center justify-center gap-1", className)}
         >
-            <button
-                type="button"
+            <IconButton
+                size="md"
+                tone="accent"
+                aria-label="Previous page"
                 onClick={() => onPageChange(page - 1)}
                 disabled={page <= 1}
-                className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg transition",
-                    "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    "disabled:pointer-events-none disabled:opacity-40",
-                )}
-                aria-label="Previous page"
             >
-                <ChevronLeft size={16} />
-            </button>
+                <ChevronLeft className="h-4 w-4" />
+            </IconButton>
 
             {getPageNumbers().map((p, idx) =>
                 p === "ellipsis" ? (
                     <span
                         key={`ellipsis-${idx}`}
-                        className="flex h-9 w-9 items-center justify-center text-xs text-muted-foreground"
+                        className="flex h-10 w-10 items-center justify-center text-sm text-muted-foreground"
                     >
-                        ...
+                        …
                     </span>
                 ) : (
-                    <button
+                    <Button
                         key={p}
-                        type="button"
+                        size="md"
+                        variant={p === page ? "solid" : "ghost"}
+                        tone={p === page ? "primary" : "accent"}
                         onClick={() => onPageChange(p)}
-                        className={cn(
-                            "flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition",
-                            p === page
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
                         aria-current={p === page ? "page" : undefined}
+                        className="h-10 min-w-10 px-0"
                     >
                         {p}
-                    </button>
+                    </Button>
                 ),
             )}
 
-            <button
-                type="button"
+            <IconButton
+                size="md"
+                tone="accent"
+                aria-label="Next page"
                 onClick={() => onPageChange(page + 1)}
                 disabled={page >= totalPages}
-                className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-lg transition",
-                    "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    "disabled:pointer-events-none disabled:opacity-40",
-                )}
-                aria-label="Next page"
             >
-                <ChevronRight size={16} />
-            </button>
+                <ChevronRight className="h-4 w-4" />
+            </IconButton>
         </nav>
     );
 }
