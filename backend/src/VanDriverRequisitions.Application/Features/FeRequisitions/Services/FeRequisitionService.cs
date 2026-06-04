@@ -180,8 +180,7 @@ public class FeRequisitionService(
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new ConflictException(
-                "This requisition has been updated by another user.");
+            throw new ConflictException("This requisition has been updated by another user.");
         }
 
         var driverSummary = await context.VanDrivers
@@ -215,8 +214,7 @@ public class FeRequisitionService(
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new ConflictException(
-                "This requisition has been updated by another user.");
+            throw new ConflictException("This requisition has been updated by another user.");
         }
 
         var driverSummary = await context.VanDrivers

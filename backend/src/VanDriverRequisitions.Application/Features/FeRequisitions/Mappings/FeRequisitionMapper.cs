@@ -43,8 +43,9 @@ public static class FeRequisitionMapper
             
             FeGeneralTasks = requisition.FeGeneralTasks
                     .Select(MapGeneralTaskDetail)
-                    .ToList()
-
+                    .ToList(),
+            
+            SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };
     }
     
@@ -86,5 +87,22 @@ public static class FeRequisitionMapper
             Friday = week.Friday,
             Saturday = week.Saturday
         };
+    }
+    
+    private static List<FeRequisitionSubmissionHistoryDto> MapSubmissionHistory(IEnumerable<FeRequisitionSubmission> submissions)
+    {
+        return submissions
+            .OrderByDescending(x => x.SubmissionNumber)
+            .Select(x => new FeRequisitionSubmissionHistoryDto
+            {
+                SubmissionNumber = x.SubmissionNumber,
+                Status = x.Status.ToString(),
+                SubmittedByName = x.SubmittedByNameSnapshot,
+                SubmittedAtUtc = x.SubmittedAtUtc,
+                ReviewedByName = x.ReviewedByNameSnapshot,
+                ReviewedAtUtc = x.ReviewedAtUtc,
+                RejectionNotes = x.RejectionNotes
+            })
+            .ToList();
     }
 }
