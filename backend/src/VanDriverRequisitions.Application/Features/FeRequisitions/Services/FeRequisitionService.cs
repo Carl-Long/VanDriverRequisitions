@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -224,6 +225,39 @@ public class FeRequisitionService(
             .SingleAsync(cancellationToken);
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
+    
+    public async Task<FeRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
+    {
+        var submission = await context.FeRequisitionSubmissions
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                x => x.Id == submissionId,
+                cancellationToken);
+
+        if (submission is null)
+        {
+            throw new NotFoundException($"Submission '{submissionId}' was not found.");
+        }
+        
+        var snapshot = JsonSerializer.Deserialize<FeRequisitionSnapshotDto>(submission.SnapshotJson);
+        if (snapshot is null)
+        {
+            throw new InvalidOperationException($"Submission '{submissionId}' contains an invalid snapshot.");
+        }
+        
+        return new FeRequisitionSubmissionDetailDto
+        {
+            Id = submission.Id,
+            SubmissionNumber = submission.SubmissionNumber,
+            Status = submission.Status.ToString(),
+            SubmittedByName = submission.SubmittedByNameSnapshot,
+            SubmittedAtUtc = submission.SubmittedAtUtc,
+            ReviewedByName = submission.ReviewedByNameSnapshot,
+            ReviewedAtUtc = submission.ReviewedAtUtc,
+            RejectionNotes = submission.RejectionNotes,
+            Snapshot = snapshot
+        };
     }
 
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)

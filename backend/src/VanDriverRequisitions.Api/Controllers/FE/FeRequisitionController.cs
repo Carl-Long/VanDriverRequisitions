@@ -68,6 +68,14 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         return Ok(result);
     }
     
+    [HttpGet("submissions/{submissionId:guid}")]
+    [ProducesResponseType(typeof(FeRequisitionSubmissionDetailDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSubmission(Guid submissionId, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.GetSubmissionAsync(submissionId, cancellationToken);
+        return Ok(result);
+    }
+    
     [HttpPost("{id:guid}/approve")]
     public async Task<IActionResult> Approve(Guid id, [FromBody] ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken)
     {
