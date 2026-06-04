@@ -9,6 +9,7 @@ export const THEMES = [
   { label: "Dark Brand", value: "dark-brand" },
   { label: "Light Mono", value: "light-mono" },
   { label: "Dark Mono", value: "dark-mono" },
+  { label: "High Contrast", value: "high-contrast"}
 ] as const;
 
 export type ThemeValue = (typeof THEMES)[number]["value"];
