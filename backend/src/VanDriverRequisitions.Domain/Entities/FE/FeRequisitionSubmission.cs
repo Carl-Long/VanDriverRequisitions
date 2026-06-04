@@ -39,4 +39,32 @@ public sealed class FeRequisitionSubmission : AuditableEntity
             SnapshotJson = snapshotJson
         };
     }
+    
+    public void Approve(Guid reviewedById, string reviewedByName, DateTime reviewedAtUtc)
+    {
+        if (Status != SubmissionStatus.Pending)
+        {
+            throw new InvalidOperationException("Only pending submissions can be approved.");
+        }
+
+        Status = SubmissionStatus.Approved;
+        ReviewedById = reviewedById;
+        ReviewedByNameSnapshot = reviewedByName;
+        ReviewedAtUtc = reviewedAtUtc;
+        RejectionNotes = null;
+    }
+    
+    public void Reject(Guid reviewedById, string reviewedByName, string? rejectionNotes, DateTime reviewedAtUtc)
+    {
+        if (Status != SubmissionStatus.Pending)
+        {
+            throw new InvalidOperationException("Only pending submissions can be rejected.");
+        }
+
+        Status = SubmissionStatus.Rejected;
+        ReviewedById = reviewedById;
+        ReviewedByNameSnapshot = reviewedByName;
+        ReviewedAtUtc = reviewedAtUtc;
+        RejectionNotes = rejectionNotes;
+    }
 }
