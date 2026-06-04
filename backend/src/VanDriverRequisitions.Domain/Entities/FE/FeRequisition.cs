@@ -38,11 +38,13 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     private readonly List<FeMileage> _feMileages = [];
     private readonly List<FeTransfer> _feTransfers = [];
     private readonly List<FeAdditionalCost> _feAdditionalCosts = [];
+    private readonly List<FeRequisitionSubmission> _submissions = [];
 
     public IReadOnlyCollection<FeGeneralTask> FeGeneralTasks => _feGeneralTasks;
     public IReadOnlyCollection<FeMileage> FeMileages => _feMileages;
     public IReadOnlyCollection<FeTransfer> FeTransfers => _feTransfers;
     public IReadOnlyCollection<FeAdditionalCost> FeAdditionalCosts => _feAdditionalCosts;
+    public IReadOnlyCollection<FeRequisitionSubmission> Submissions => _submissions;
     
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
     
