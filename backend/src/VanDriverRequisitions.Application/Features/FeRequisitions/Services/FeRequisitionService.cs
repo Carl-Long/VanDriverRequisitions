@@ -5,6 +5,7 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
@@ -139,7 +140,18 @@ public class FeRequisitionService(
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        requisition.Submit(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow);
+        var now = DateTime.UtcNow;
+        var snapshotJson = FeRequisitionSnapshotFactory.CreateJson(requisition);
+
+        var submission = FeRequisitionSubmission.Create(
+                requisition.NextSubmissionNumber,
+                currentUser.User.Id,
+                currentUser.User.Name,
+                now,
+                snapshotJson);
+
+        requisition.AddSubmission(submission);
+        requisition.Submit(currentUser.User.Id, currentUser.User.Name, now);
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -153,6 +165,7 @@ public class FeRequisitionService(
             .Include(x => x.FeMileages)
             .Include(x => x.FeTransfers)
             .Include(x => x.FeAdditionalCosts)
+            .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 

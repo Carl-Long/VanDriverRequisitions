@@ -18,4 +18,25 @@ public sealed class FeRequisitionSubmission : AuditableEntity
     public DateTime? ReviewedAtUtc { get; private set; }
     public string? RejectionNotes { get; private set; }
     public string SnapshotJson { get; private set; } = string.Empty;
+    
+    public static FeRequisitionSubmission Create(
+        int submissionNumber,
+        Guid submittedById,
+        string submittedByName,
+        DateTime submittedAtUtc,
+        string snapshotJson)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(submittedByName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(snapshotJson);
+        
+        return new FeRequisitionSubmission
+        {
+            SubmissionNumber = submissionNumber,
+            Status = SubmissionStatus.Pending,
+            SubmittedById = submittedById,
+            SubmittedByNameSnapshot = submittedByName,
+            SubmittedAtUtc = submittedAtUtc,
+            SnapshotJson = snapshotJson
+        };
+    }
 }

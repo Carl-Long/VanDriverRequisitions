@@ -46,6 +46,12 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public IReadOnlyCollection<FeAdditionalCost> FeAdditionalCosts => _feAdditionalCosts;
     public IReadOnlyCollection<FeRequisitionSubmission> Submissions => _submissions;
     
+    public FeRequisitionSubmission? LatestSubmission => _submissions
+        .OrderByDescending(x => x.SubmissionNumber)
+        .FirstOrDefault();
+    
+    public int NextSubmissionNumber => _submissions.Count + 1;
+    
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
     
     public static FeRequisition Create(string requisitionNumber, RequisitionDetails details, IEnumerable<FeGeneralTaskUpdateModel> taskModels)
@@ -61,7 +67,6 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         
         return requisition;
     }
-    
     
     public void UpdateDetails(RequisitionDetails details)
     {
@@ -135,6 +140,12 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         RejectedAtUtc = null;
         RejectedByNameSnapshot = null;
         RejectionNotes = null;
+    }
+    
+    public void AddSubmission(FeRequisitionSubmission submission)
+    {
+        ArgumentNullException.ThrowIfNull(submission);
+        _submissions.Add(submission);
     }
     
     public void Approve(Guid approvedById, string approvedByName, DateTime approvedAtUtc)
