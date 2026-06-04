@@ -1,0 +1,486 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
+using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
+using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.ValueObjects;
+
+namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
+
+/// <summary>
+/// Seeds development/test data for LimitValues and FeTaskTypes.
+/// Uses raw SQL to bypass the <see cref="Interceptors.AuditableEntityInterceptor"/>
+/// which requires an authenticated HTTP context.
+/// </summary>
+public static class DevDataSeeder
+{
+    // ─────────────────────────────────────────────
+    // Task Types (lookup only)
+    // ─────────────────────────────────────────────
+
+    private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
+    private static readonly Guid DeliveriesTaskTypeId  = new("c0000001-0001-0001-0001-000000000002");
+    private static readonly Guid WasteTaskTypeId       = new("c0000001-0001-0001-0001-000000000003");
+    private static readonly Guid LoadingTaskTypeId     = new("c0000001-0001-0001-0001-000000000004");
+
+    // ─────────────────────────────────────────────
+    // System user (audit fallback)
+    // ─────────────────────────────────────────────
+
+    private static readonly Guid SystemUserId = Guid.Empty;
+    private const string SystemUserName = "SYSTEM_SEED";
+
+    public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
+    {
+        var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
+        var hasRules     = await context.RequisitionLimitRules.AnyAsync();
+        var hasShops     = await context.Shops.AnyAsync();
+        var hasDrivers   = await context.VanDrivers.AnyAsync();
+        var hasRequisitions = await context.FeRequisitions.AnyAsync();
+
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers)
+        {
+            logger?.LogInformation("Dev seed already exists — skipping.");
+            return;
+        }
+
+        logger?.LogInformation("Seeding development data...");
+
+        var now = DateTime.UtcNow;
+
+        // ─────────────────────────────────────────────
+        // 1. TASK TYPES (pure lookup only)
+        // ─────────────────────────────────────────────
+
+        if (!hasTaskTypes)
+        {
+            context.FeTaskTypes.AddRange(
+                new FeTaskType { Id = CollectionsTaskTypeId, Name = "Collections", Code = "23707" },
+                new FeTaskType { Id = DeliveriesTaskTypeId,  Name = "Deliveries",  Code = "23709" },
+                new FeTaskType { Id = WasteTaskTypeId,       Name = "Waste",       Code = "20097" },
+                new FeTaskType { Id = LoadingTaskTypeId,     Name = "Loading&Unloading", Code = "10119" }
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded FeTaskTypes");
+        }
+
+        // ─────────────────────────────────────────────
+        // 2. LIMIT RULES
+        // ─────────────────────────────────────────────
+
+       if (!hasRules)
+        {
+            context.RequisitionLimitRules.AddRange(
+
+                // ─── General Task rules ─────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = CollectionsTaskTypeId,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 30,
+                    MaxRate = 15.00m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = DeliveriesTaskTypeId,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 25,
+                    MaxRate = 20.00m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = WasteTaskTypeId,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 10,
+                    MaxRate = 25.00m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.GeneralTask,
+                    FeTaskTypeId = LoadingTaskTypeId,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 15,
+                    MaxRate = 12.50m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Mileage ────────────────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.Mileage,
+                    FeTaskTypeId = null,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 500,
+                    MaxRate = 0.45m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Transfers ──────────────────────────────
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.Transfer,
+                    FeTaskTypeId = null,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 20,
+                    MaxRate = 18.00m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                },
+
+                // ─── Additional Costs (now REQUIRED values) ─
+                new RequisitionLimitRule
+                {
+                    Id = Guid.NewGuid(),
+                    Category = RequisitionRowCategory.AdditionalCost,
+                    FeTaskTypeId = null,
+                    Fascia = Fascia.Fe,
+                    MaxQuantity = 1,
+                    MaxRate = 50.00m,
+                    CreatedAtUtc = now,
+                    CreatedById = SystemUserId,
+                    CreatedByNameSnapshot = SystemUserName
+                }
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded RequisitionLimitRules");
+        }
+
+        // ─────────────────────────────────────────────
+        // 3. Shops
+        // ─────────────────────────────────────────────
+
+        if (!hasShops)
+        {
+            await SeedShopsAsync(context, logger);
+        }
+
+        // ─────────────────────────────────────────────
+        // 4. Van Drivers
+        // ─────────────────────────────────────────────
+
+        if (!hasDrivers)
+        {
+            await SeedVanDriversAsync(context, logger);
+        }
+
+        if (!hasRequisitions)
+        {
+            await SeedRequisitionsAsync(context, logger);
+        }
+
+        logger?.LogInformation("Development seeding complete.");
+    }
+    // ─── Shop seed data ────────────────────────────────────────────────────
+
+    private static readonly string[] Towns =
+    [
+        "London", "Birmingham", "Manchester", "Leeds", "Sheffield",
+        "Liverpool", "Bristol", "Newcastle", "Nottingham", "Southampton",
+        "Leicester", "Coventry", "Bradford", "Cardiff", "Belfast",
+        "Edinburgh", "Glasgow", "Aberdeen", "Swansea", "Oxford",
+        "Cambridge", "Brighton", "Plymouth", "Wolverhampton", "Derby",
+        "Stoke-on-Trent", "Sunderland", "York", "Portsmouth", "Reading",
+        "Luton", "Bournemouth", "Middlesbrough", "Blackpool", "Bolton",
+        "Ipswich", "Peterborough", "Telford", "Huddersfield", "Slough",
+    ];
+
+    private static readonly string[] Counties =
+    [
+        "Greater London", "West Midlands", "Greater Manchester", "West Yorkshire", "South Yorkshire",
+        "Merseyside", "Avon", "Tyne and Wear", "Nottinghamshire", "Hampshire",
+        "Leicestershire", "West Midlands", "West Yorkshire", "South Glamorgan", "Antrim",
+        "Midlothian", "Lanarkshire", "Aberdeenshire", "West Glamorgan", "Oxfordshire",
+        "Cambridgeshire", "East Sussex", "Devon", "West Midlands", "Derbyshire",
+        "Staffordshire", "Tyne and Wear", "North Yorkshire", "Hampshire", "Berkshire",
+        "Bedfordshire", "Dorset", "Cleveland", "Lancashire", "Greater Manchester",
+        "Suffolk", "Cambridgeshire", "Shropshire", "West Yorkshire", "Berkshire",
+    ];
+
+    private static readonly string[] StreetNames =
+    [
+        "High Street", "Station Road", "Church Lane", "Park Avenue", "Mill Road",
+        "Victoria Street", "King Street", "Queen Street", "London Road", "Market Street",
+        "Bridge Street", "Castle Road", "Elm Grove", "Oak Drive", "Cedar Close",
+        "Maple Way", "Willow Lane", "Birch Road", "Ash Street", "Pine Avenue",
+    ];
+
+    private static readonly string[] ShopPrefixes =
+    [
+        "Central", "North", "South", "East", "West", "Upper", "Lower", "Old", "New", "Great",
+        "Little", "Market", "Royal", "City", "Town", "Valley", "Hill", "Park", "Lake", "River",
+    ];
+
+    private static readonly string[] ShopSuffixes =
+    [
+        "Store", "Shop", "Market", "Express", "Local", "Depot", "Branch", "Outlet",
+        "Centre", "Point", "Hub", "Place", "Corner", "Square", "Yard",
+    ];
+
+    private static async Task SeedShopsAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 1000;
+        var rng = new Random(42); // deterministic
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("INSERT INTO Shops (Id, Code, Name, Address, Address2, Town, County, Postcode, Phone, IsActive) VALUES");
+
+        for (var i = 0; i < count; i++)
+        {
+            var id = new Guid($"d0000000-0000-0000-0000-{i:D12}");
+            var code = $"T{i + 1:D4}";
+            var townIdx = i % Towns.Length;
+            var town = Towns[townIdx];
+            var county = Counties[townIdx];
+            var prefix = ShopPrefixes[i % ShopPrefixes.Length];
+            var suffix = ShopSuffixes[i % ShopSuffixes.Length];
+            var name = $"{prefix} {town} {suffix}";
+            var address = $"{rng.Next(1, 200)} {StreetNames[i % StreetNames.Length]}";
+            var postcode = $"{(char)('A' + (i % 26))}{(char)('A' + (i / 26 % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var phone = $"0{rng.Next(1000, 9999)} {rng.Next(100000, 999999)}";
+            var isActive = i < 800 ? 1 : 0; // 80% active
+
+            var separator = i < count - 1 ? "," : ";";
+            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(name)}', '{Esc(address)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {isActive}){separator}");
+        }
+
+        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        logger?.LogInformation("Seeded {Count} shops ({Active} active, {Inactive} inactive).", count, 800, 200);
+    }
+
+    // ─── Van Driver seed data ──────────────────────────────────────────────
+
+    private static readonly string[] FirstNames =
+    [
+        "James", "John", "Robert", "Michael", "David", "William", "Richard", "Thomas", "Daniel", "Matthew",
+        "Andrew", "Christopher", "Joseph", "Mark", "Paul", "Steven", "George", "Edward", "Brian", "Kevin",
+        "Ian", "Peter", "Alan", "Simon", "Gary", "Stephen", "Philip", "Colin", "Martin", "Graham",
+        "Barry", "Stuart", "Craig", "Derek", "Neil", "Keith", "Gordon", "Ross", "Darren", "Lee",
+    ];
+
+    private static readonly string[] LastNames =
+    [
+        "Smith", "Jones", "Williams", "Brown", "Taylor", "Davies", "Wilson", "Evans", "Thomas", "Johnson",
+        "Roberts", "Walker", "Wright", "Robinson", "Thompson", "White", "Hughes", "Edwards", "Green", "Hall",
+        "Lewis", "Harris", "Clarke", "Patel", "Jackson", "Wood", "Turner", "Martin", "Cooper", "Hill",
+        "Ward", "Morris", "Moore", "Clark", "King", "Baker", "Harrison", "Morgan", "Allen", "James",
+    ];
+
+    private static async Task SeedVanDriversAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 1000;
+        var rng = new Random(99); // deterministic, different from shops
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("INSERT INTO VanDrivers (Id, Code, TradersName, Address1, Address2, Town, County, Postcode, Phone, VatNumber, IsActive) VALUES");
+
+        for (var i = 0; i < count; i++)
+        {
+            var id = new Guid($"e0000000-0000-0000-0000-{i:D12}");
+            var code = $"81{i + 1:D4}";
+            var first = FirstNames[i % FirstNames.Length];
+            var last = LastNames[(i / FirstNames.Length + i) % LastNames.Length];
+            var tradersName = $"{first} {last}";
+            var townIdx = (i + 7) % Towns.Length; // offset from shops
+            var town = Towns[townIdx];
+            var county = Counties[townIdx];
+            var address1 = $"{rng.Next(1, 300)} {StreetNames[(i + 3) % StreetNames.Length]}";
+            var postcode = $"{(char)('A' + ((i + 5) % 26))}{(char)('A' + ((i / 26 + 3) % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var phone = $"07{rng.Next(100, 999)} {rng.Next(100000, 999999)}";
+            var hasVat = i % 3 == 0; // ~33% with VAT
+            var vatNumber = hasVat ? $"GB{rng.Next(100000000, 999999999)}" : "NULL";
+            var isActive = i < 800 ? 1 : 0; // 80% active
+
+            var vatValue = hasVat ? $"'{vatNumber}'" : "NULL";
+            var separator = i < count - 1 ? "," : ";";
+            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(tradersName)}', '{Esc(address1)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {vatValue}, {isActive}){separator}");
+        }
+
+        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        logger?.LogInformation("Seeded {Count} van drivers ({Active} active, {Inactive} inactive).", count, 800, 200);
+    }
+    private static readonly (Guid Id, string Name)[] SeedUsers =
+    [
+        (new Guid("10000000-0000-0000-0000-000000000001"), "John Smith"),
+        (new Guid("10000000-0000-0000-0000-000000000002"), "Sarah Jones"),
+        (new Guid("10000000-0000-0000-0000-000000000003"), "Mike Brown"),
+        (new Guid("10000000-0000-0000-0000-000000000004"), "Emma Wilson"),
+        (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
+    ];
+
+    private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 100;
+        var rng = new Random(123);
+
+        var taskTypes = await context.FeTaskTypes.ToListAsync();
+        
+        var shops = await context.Shops
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var drivers = await context.VanDrivers
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var requisitions = new List<FeRequisition>();
+
+        for (var i = 1; i <= count; i++)
+        {
+            var shop = shops[rng.Next(shops.Count)];
+            var driver = drivers[rng.Next(drivers.Count)];
+            var user = SeedUsers[rng.Next(SeedUsers.Length)];
+
+            var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
+
+            var status = GetRandomStatus(rng);
+
+            var hasVat = rng.Next(0, 2) == 1;
+
+            var details = new RequisitionDetails(
+                DateOnly.FromDateTime(createdDate),
+                new VanDriverSnapshot(
+                    driver.Id,
+                    driver.Code,
+                    driver.TradersName,
+                    driver.TradersName,
+                    hasVat),
+                new ShopSnapshot(
+                    shop.Id,
+                    shop.Code,
+                    shop.Name));
+
+            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+
+            var requisitionNumber = $"F{i:D9}";
+
+            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+            requisition.CreatedAtUtc = createdDate;
+            requisition.CreatedById = user.Id;
+            requisition.CreatedByNameSnapshot = user.Name;
+            
+            switch (status)
+            {
+                case RequisitionStatus.Draft:
+                    break;
+
+                case RequisitionStatus.Submitted:
+                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    requisition.Submit(user.Id, submitter.Name, createdDate.AddHours(2));
+                    break;
+
+                case RequisitionStatus.Rejected:
+                    var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)]; 
+                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
+                    requisition.Reject(user.Id, rejecter.Name, rejectedReason, createdDate.AddDays(1));
+                    break;
+
+                case RequisitionStatus.Approved:
+                    var approver = SeedUsers[rng.Next(SeedUsers.Length)];
+                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
+                    requisition.Approve(user.Id, approver.Name, createdDate.AddDays(2));
+                    requisition.PoNumber = $"PO-{rng.Next(100000, 999999)}";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);
+            }
+            
+            requisitions.Add(requisition);
+        }
+
+        context.FeRequisitions.AddRange(requisitions);
+
+        await context.SaveChangesAsync();
+
+        logger?.LogInformation("Seeded {Count} requisitions.", count);
+    }
+    
+    private static RequisitionStatus GetRandomStatus(Random rng)
+    {
+        var statuses = new[]
+        {
+            RequisitionStatus.Draft,
+            RequisitionStatus.Submitted,
+            RequisitionStatus.Rejected,
+            RequisitionStatus.Approved
+        };
+
+        return statuses[rng.Next(statuses.Length)];
+    }
+    
+    private static List<FeGeneralTaskUpdateModel> BuildSeedTasks(Random rng, List<FeTaskType> taskTypes, DateOnly requisitionDate)
+    {
+        var taskCount = rng.Next(1, 4);
+        var selectedTaskTypes = taskTypes
+            .OrderBy(_ => rng.Next())
+            .Take(taskCount);
+        
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+        
+        var tasks = new List<FeGeneralTaskUpdateModel>();
+
+        foreach (var taskType in selectedTaskTypes)
+        {
+            tasks.Add(new FeGeneralTaskUpdateModel(
+                    null,
+                    taskType.Id,
+                    taskType.Name,
+                    taskType.Code,
+                    weekEndingDate,
+                    new WeeklyQuantities(
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6),
+                        rng.Next(0, 6)),
+                    Math.Round(
+                        (decimal)(rng.NextDouble() * 15 + 5),
+                        2)));
+        }
+
+        return tasks;
+    }
+    
+    private static string Esc(string value) => value.Replace("'", "''");
+    
+    private static readonly string[] RejectionReasons =
+    [
+        "Quantity exceeds permitted limit.",
+        "Incorrect rate entered.",
+        "Missing supporting information.",
+        "Duplicate requisition submitted.",
+        "Week ending date is invalid.",
+        "Requires manager review before approval."
+    ];
+}

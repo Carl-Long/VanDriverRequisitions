@@ -1,0 +1,245 @@
+"use client";
+
+import { DatePicker } from "@/components/ui/date/date-picker";
+import { Field } from "@/components/ui/field/field";
+import { Input } from "@/components/ui/field/input";
+import { ShopFilterField } from "../../filter-fields/shop-filter-field";
+import { FeRequisitionDraft } from "../types/fe-requisition-draft";
+import { VanDriverLookup } from "@/lib/api/van-drivers";
+import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
+import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
+import { Calendar, User } from "lucide-react";
+import { formatDateTime } from "@/lib/format/date";
+
+type Props = {
+    readonly: boolean;
+    draft: FeRequisitionDraft;
+    errors: Record<string, string>;
+
+    clearError: (field: string) => void;
+
+    onRequisitionDateChange: (
+        date: Date | null,
+    ) => void;
+
+    onVanDriverChange: (
+        params: {
+            id: string | null;
+            label: string | null;
+            summary: VanDriverLookup | null;
+        },
+    ) => void;
+
+    onVanDriverNameChange: (
+        value: string,
+    ) => void;
+
+    onShopChange: (
+        params: {
+            id: string | null;
+            label: string | null;
+        },
+    ) => void;
+};
+
+export function FeRequisitionDetailsTab({
+    readonly,
+    draft,
+    errors,
+    clearError,
+    onRequisitionDateChange,
+    onVanDriverChange,
+    onVanDriverNameChange,
+    onShopChange,
+}: Readonly<Props>) {
+
+    const isApproved = draft.status === "Approved"
+    const isRejected = draft.status === "Rejected"
+    const processedAtUtc = draft.approvedAtUtc ?? draft.rejectedAtUtc;
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-lg font-semibold">
+                    Requisition Details
+                </h2>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Manage requisition information
+                </p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+                <div className="rounded-2xl border border-border bg-surface p-6">
+                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                        <Field
+                            label="Requisition Date"
+                            error={errors.requisitionDate}
+                            required
+                        >
+                            <DatePicker
+                                disabled={readonly}
+                                value={
+                                    draft.requisitionDate ??
+                                    undefined
+                                }
+                                onChange={(date) =>
+                                    onRequisitionDateChange(
+                                        date ?? null,
+                                    )
+                                }
+                            />
+                        </Field>
+
+                        <ShopFilterField
+                            required
+                            disabled={readonly}
+                            error={errors.shopId}
+                            value={draft.shopId}
+                            label={draft.shopLabel}
+                            onChange={(
+                                value,
+                                label,
+                            ) => {
+                                onShopChange({
+                                    id: value,
+                                    label,
+                                });
+
+                                clearError(
+                                    "shopId",
+                                );
+                            }}
+                        />
+
+                        <FeVanDriverField
+                            disabled={readonly}
+                            error={errors.vanDriverId}
+                            value={draft.vanDriverId}
+                            label={draft.vanDriverLabel}
+                            onChange={(params) => {
+                                onVanDriverChange(params);
+
+                                clearError(
+                                    "vanDriverId",
+                                );
+
+                                clearError(
+                                    "vanDriverName",
+                                );
+                            }}
+                        />
+
+                        <Field
+                            label="Driver Name"
+                            error={errors.vanDriverName}
+                            required
+                        >
+                            <Input
+                                disabled={readonly}
+                                value={
+                                    draft.vanDriverName ?? ""
+                                }
+                                state={
+                                    errors.vanDriverName
+                                        ? "error"
+                                        : "default"
+                                }
+                                onChange={(e) => {
+                                    onVanDriverNameChange(
+                                        e.target.value,
+                                    );
+
+                                    if (
+                                        e.target.value.trim()
+                                    ) {
+                                        clearError(
+                                            "vanDriverName",
+                                        );
+                                    }
+                                }}
+                            />
+                        </Field>
+                    </div>
+                    {(isApproved || isRejected) && (
+                        <div className="mt-8 border-t border-border pt-6">
+                            <div className="flex items-start justify-between">
+                                <h3 className="text-sm font-medium">
+                                    Processing Information
+                                </h3>
+
+                                {/* Top-right audit summary */}
+                                <div className="text-right text-sm text-muted-foreground space-y-0.5">
+                                    {isApproved && draft.approvedByNameSnapshot && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <User className="h-4 w-4" />
+
+                                            <span className="font-medium text-foreground">
+                                                Approved by{" "}
+                                                {draft.approvedByNameSnapshot}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {isRejected && draft.rejectedByNameSnapshot && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <User className="h-4 w-4" />
+
+                                            <span className="font-medium text-foreground">
+                                                Rejected by{" "}
+                                                {draft.rejectedByNameSnapshot}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {processedAtUtc && (
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            <span>
+                                                {formatDateTime(processedAtUtc)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="mt-4 space-y-3">
+                                {/* APPROVED */}
+                                {isApproved && draft.poNumber && (
+                                    <div>
+                                        <div className="text-sm font-medium">
+                                            PO Number
+                                        </div>
+
+                                        <div className="mt-1 text-sm text-muted-foreground">
+                                            {draft.poNumber}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* REJECTED */}
+                                {isRejected && (
+                                    <div>
+                                        <div className="text-sm font-medium">
+                                            Rejection Reason
+                                        </div>
+
+                                        <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
+                                            {draft.rejectionNotes}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <VanDriverSummaryCard
+                    vanDriver={
+                        draft.vanDriverSummary
+                    }
+                />
+            </div>
+        </div>
+    );
+}

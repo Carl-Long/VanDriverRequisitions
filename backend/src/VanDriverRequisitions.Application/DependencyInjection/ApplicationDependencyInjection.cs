@@ -1,0 +1,32 @@
+using Microsoft.Extensions.DependencyInjection;
+using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Common.Validation;
+using VanDriverRequisitions.Application.Features.FeReasons.Services;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
+using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
+using VanDriverRequisitions.Application.Features.Shops.Services;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
+using VanDriverRequisitions.Application.Features.Users.Services;
+using VanDriverRequisitions.Application.Features.VanDrivers.Services;
+
+namespace VanDriverRequisitions.Application.DependencyInjection;
+
+public static class ApplicationDependencyInjection
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddScoped<IFeRequisitionService, FeRequisitionService>();
+        services.AddScoped<IFeTaskTypeService, FeTaskTypeService>();
+        services.AddScoped<IFeReasonService, FeReasonService>();
+        services.AddScoped<ISubmitWindowService, SubmitWindowService>();
+        services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();
+        services.AddScoped<IShopService, ShopService>();
+        services.AddScoped<IFeRequisitionUserService, FeRequisitionUserService>();
+        services.AddScoped<IFeRequisitionLimitValidator, FeRequisitionLimitValidator>();
+        services.AddScoped<IVanDriverService, VanDriverService>();
+        services.AddScoped<IValidatorService, ValidatorService>();
+        return services;
+    }
+}

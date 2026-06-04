@@ -1,23 +1,58 @@
+using VanDriverRequisitions.Api.Extensions;
+using VanDriverRequisitions.Api.Middleware;
+using VanDriverRequisitions.Api.Middleware.Dev;
+using VanDriverRequisitions.Application.DependencyInjection;
+using VanDriverRequisitions.Infrastructure.DependencyInjection;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddApi();
+builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+}
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<FakeLatencyMiddleware>();
+    app.UseCors();
+}
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<VanDriverDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    await DevDataSeeder.SeedAsync(db, logger);
+}
+
+await app.RunAsync();

@@ -1,0 +1,125 @@
+"use client";
+
+import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
+import { FeTaskType } from "@/lib/api/fe-task-types";
+import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
+import { useMemo } from "react";
+
+type Props = {
+    mode: FeRequisitionPageMode;
+    taskTypes: FeTaskType[];
+    activeKey: string;
+    onActiveKeyChange: (
+        key: string,
+    ) => void;
+
+    details: React.ReactNode;
+    renderTaskTypeTab: (
+        taskTypeId: string,
+    ) => React.ReactNode;
+};
+
+export function FeRequisitionTabs({
+    taskTypes,
+    activeKey,
+    onActiveKeyChange,
+    details,
+    renderTaskTypeTab,
+}: Readonly<Props>) {
+    const tabs = useMemo(
+        () =>
+            buildFeRequisitionTabs(
+                taskTypes,
+            ),
+        [taskTypes],
+    );
+
+    const activeTab = tabs.find(
+        (x) => x.key === activeKey,
+    );
+
+    return (
+        <div className="space-y-6">
+            <div className="overflow-x-auto">
+                <div className="inline-flex min-w-max gap-1 rounded-2xl bg-surface-elevated p-1">
+                    {tabs.map((tab) => (
+                        <TabButton
+                            key={tab.key}
+                            active={
+                                tab.key ===
+                                activeKey
+                            }
+                            onClick={() =>
+                                onActiveKeyChange(
+                                    tab.key,
+                                )
+                            }
+                        >
+                            {tab.label}
+                        </TabButton>
+                    ))}
+                </div>
+            </div>
+
+            <div>
+                {activeTab?.type ===
+                    "details" && details}
+
+                {activeTab?.type ===
+                    "general-task" &&
+                    renderTaskTypeTab(
+                        activeTab.taskTypeId,
+                    )}
+
+                {activeTab?.type !==
+                    "details" &&
+                    activeTab?.type !==
+                    "general-task" && (
+                        <div className="rounded-2xl border border-dashed border-border p-12 text-center">
+                            <div className="text-sm text-muted-foreground">
+                                This section
+                                will be
+                                implemented
+                                later
+                            </div>
+                        </div>
+                    )}
+            </div>
+        </div>
+    );
+}
+
+type TabButtonProps = {
+    active: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+};
+
+function TabButton({
+    active,
+    onClick,
+    children,
+}: Readonly<TabButtonProps>) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={[
+                "cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200",
+                active
+                    ? [
+                        "bg-accent",
+                        "text-accent-foreground",
+                        "shadow-sm",
+                    ].join(" ")
+                    : [
+                        "text-muted-foreground",
+                        "hover:text-foreground",
+                        "hover:bg-accent/20",
+                    ].join(" "),
+            ].join(" ")}
+        >
+            {children}
+        </button>
+    );
+}
