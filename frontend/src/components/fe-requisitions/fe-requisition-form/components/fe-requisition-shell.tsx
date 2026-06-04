@@ -22,6 +22,7 @@ import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/lib/api/fe-task-types";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
+import { FeSubmissionHistoryTab } from "../submission-history/fe-submission-history-tab";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -91,6 +92,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
+    const showHistory = draft.submissionHistory.length > 0;
 
 
     async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
@@ -271,6 +273,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 activeKey={activeTab}
                 onActiveKeyChange={setActiveTab}
                 taskTypes={taskTypes}
+                submissionHistoryCount={draft.submissionHistory.length}
                 details={
                     <FeRequisitionDetailsTab
                         readonly={isReadonly}
@@ -281,6 +284,13 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                         onShopChange={setShop}
                         errors={errors}
                         clearError={clearError}
+                    />
+                }
+                submissionHistory={
+                    <FeSubmissionHistoryTab
+                        submissions={
+                            draft.submissionHistory
+                        }
                     />
                 }
                 renderTaskTypeTab={(

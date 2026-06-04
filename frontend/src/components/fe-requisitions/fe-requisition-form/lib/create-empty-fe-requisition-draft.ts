@@ -13,9 +13,19 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         vanDriverName: "",
         shopId: null,
         shopLabel: null,
+        submittedByNameSnapshot: null,
+        submittedAtUtc: null,
+        approvedByNameSnapshot: null,
+        approvedAtUtc: null,
+        poNumber: null,
+        rejectedByNameSnapshot: null,
+        rejectedAtUtc: null,
+        rejectionNotes: null,
         feGeneralTasks: [],
         mileageRows: [],
         transferRows: [],
         additionalCostRows: [],
+        submissionHistory: [],
+
     };
 }

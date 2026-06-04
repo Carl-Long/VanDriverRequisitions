@@ -95,11 +95,12 @@ public static class FeRequisitionMapper
             .OrderByDescending(x => x.SubmissionNumber)
             .Select(x => new FeRequisitionSubmissionHistoryDto
             {
+                Id = x.Id,
                 SubmissionNumber = x.SubmissionNumber,
                 Status = x.Status.ToString(),
-                SubmittedByName = x.SubmittedByNameSnapshot,
+                SubmittedByNameSnapshot = x.SubmittedByNameSnapshot,
                 SubmittedAtUtc = x.SubmittedAtUtc,
-                ReviewedByName = x.ReviewedByNameSnapshot,
+                ReviewedByNameSnapshot = x.ReviewedByNameSnapshot,
                 ReviewedAtUtc = x.ReviewedAtUtc,
                 RejectionNotes = x.RejectionNotes
             })

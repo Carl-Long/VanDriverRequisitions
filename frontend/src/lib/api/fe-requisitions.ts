@@ -123,7 +123,20 @@ export type FeRequisitionDetail = {
     rejectedByNameSnapshot: string | null;
     rejectedAtUtc: string | null;
     rejectionNotes: string | null;
+    submissionHistory: FeRequisitionSubmissionHistory[];
 };
+
+export type FeRequisitionSubmissionHistory = {
+    id: string;
+    submissionNumber: number;
+    status: string;
+    submittedByNameSnapshot: string;
+    submittedAtUtc: string;
+    reviewedByNameSnapshot: string | null;
+    reviewedAtUtc: string | null;
+    rejectionNotes: string | null;
+};
+
 
 export type SaveFeGeneralTask = {
     id?: string | null;
