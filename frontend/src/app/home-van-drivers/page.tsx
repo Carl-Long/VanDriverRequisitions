@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Inbox, Plus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
@@ -10,39 +10,31 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/providers/auth-provider";
-
-import {
-    feRequisitionsApi,
-    type FeRequisitionSummary,
-} from "@/lib/api/fe-requisitions";
-
+import { feRequisitionsApi, type FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 import type { PagedResult } from "@/lib/types";
-
-import {
-    INITIAL_FILTERS,
-} from "@/components/fe-requisitions/constants";
-
-import type {
-    FeRequisitionFilters,
-} from "@/components/fe-requisitions/types";
-
+import type { FeRequisitionFilters } from "@/components/fe-requisitions/types";
 import { buildFeRequisitionQuery } from "@/components/fe-requisitions/helpers";
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FeRequisitionFiltersToolbar } from "@/components/fe-requisitions/fe-requisition-filters-toolbar";
 import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
+import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams } from "@/components/fe-requisitions/url-state";
 
 
 export default function HomeVanDriversPage() {
-    const router = useRouter();
     const { user } = useAuth();
-    const [filters, setFilters] = useState<FeRequisitionFilters>(INITIAL_FILTERS);
-    const [page, setPage] = useState(1);
+    const router = useRouter();
+
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const filters = filtersFromSearchParams(searchParams);
+    const page = pageFromSearchParams(searchParams);
     const debouncedReqNumber = useDebounce(filters.requisitionNumber, 400);
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
 
     useEffect(() => {
         let cancelled = false;
@@ -89,7 +81,13 @@ export default function HomeVanDriversPage() {
         };
     }, [
         page,
-        filters,
+        filters.status,
+        filters.shopId,
+        filters.createdBy.type,
+        filters.createdBy.type ===
+            "user"
+            ? filters.createdBy.userId
+            : "",
         debouncedReqNumber,
     ]);
 
@@ -98,13 +96,13 @@ export default function HomeVanDriversPage() {
     function handleFiltersChange(
         next: FeRequisitionFilters,
     ) {
-        setPage(1);
-        setFilters(next);
+        const params = buildSearchParams(next, 1);
+        router.replace(`${pathname}?${params.toString()}`
+        );
     }
 
     function resetFilters() {
-        setPage(1);
-        setFilters(INITIAL_FILTERS);
+        router.replace(pathname);
     }
 
     // =========================
@@ -183,7 +181,10 @@ export default function HomeVanDriversPage() {
                 <Pagination
                     page={data.page}
                     totalPages={data.totalPages}
-                    onPageChange={setPage}
+                    onPageChange={(nextPage) => {
+                        const params = buildSearchParams(filters, nextPage);
+                        router.push(`${pathname}?${params.toString()}`);
+                    }}
                     className="mt-6"
                 />
             )}
