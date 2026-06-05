@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, LogOut, Palette, User } from "lucide-react";
+import { Check, ChevronLeft, LogOut, Palette, Type, User } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "next-themes";
-import { THEMES } from "@/lib/constants";
+import { TEXT_SIZES, THEMES } from "@/lib/constants";
+import { useTextSize } from "@/providers/text-size-provider";
 
 export function UserMenu() {
     const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
     const [submenu, setSubmenu] = useState<string | null>(null);
     const { theme, setTheme } = useTheme();
+    const { textSize, setTextSize } = useTextSize();
 
     if (!user) return null;
 
@@ -86,6 +88,17 @@ export function UserMenu() {
                             </button>
 
                             <button
+                                onClick={() => setSubmenu("text-size")}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left"
+                                )}
+                            >
+                                <Type size={16} />
+                                Text size
+                            </button>
+
+                            <button
                                 onClick={() => {
                                     setOpen(false);
                                     logout();
@@ -133,6 +146,43 @@ export function UserMenu() {
                                     <span>{t.label}</span>
 
                                     {theme === t.value && (
+                                        <Check size={16} />
+                                    )}
+                                </button>
+                            ))}
+
+                        </div>
+                    )}
+
+                    {submenu === "text-size" && (
+                        <div className="py-1">
+
+                            <button
+                                onClick={() => setSubmenu(null)}
+                                className={cn(
+                                    "w-full flex items-center gap-2 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left"
+                                )}
+                            >
+                                <ChevronLeft size={16} />
+                                Back
+                            </button>
+
+                            <div className="my-1 border-t border-border/50" />
+
+                            {TEXT_SIZES.map((size) => (
+                                <button
+                                    key={size.value}
+                                    onClick={() => {
+                                        setTextSize(size.value);
+                                        setOpen(false);
+                                        setSubmenu(null);
+                                    }}
+                                    className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm hover:bg-muted"
+                                >
+                                    <span>{size.label}</span>
+
+                                    {textSize === size.value && (
                                         <Check size={16} />
                                     )}
                                 </button>
