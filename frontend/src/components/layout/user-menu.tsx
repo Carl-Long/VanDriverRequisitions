@@ -138,8 +138,6 @@ export function UserMenu() {
                                     key={t.value}
                                     onClick={() => {
                                         setTheme(t.value);
-                                        setOpen(false);
-                                        setSubmenu(null);
                                     }}
                                     className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm hover:bg-muted"
                                 >
@@ -175,16 +173,28 @@ export function UserMenu() {
                                     key={size.value}
                                     onClick={() => {
                                         setTextSize(size.value);
-                                        setOpen(false);
-                                        setSubmenu(null);
                                     }}
                                     className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm hover:bg-muted"
                                 >
                                     <span>{size.label}</span>
 
-                                    {textSize === size.value && (
-                                        <Check size={16} />
-                                    )}
+                                    <div className="flex items-center gap-3">
+                                        <span
+                                            className={cn(
+                                                "font-medium text-foreground-subtle",
+                                                size.value === "default" && "text-sm",
+                                                size.value === "large" && "text-base",
+                                                size.value === "extra-large" && "text-lg",
+                                                size.value === "largest" && "text-xl"
+                                            )}
+                                        >
+                                            Aa
+                                        </span>
+
+                                        {textSize === size.value && (
+                                            <Check size={16} />
+                                        )}
+                                    </div>
                                 </button>
                             ))}
 
