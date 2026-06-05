@@ -92,8 +92,6 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
-    const showHistory = draft.submissionHistory.length > 0;
-
 
     async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
         const result =

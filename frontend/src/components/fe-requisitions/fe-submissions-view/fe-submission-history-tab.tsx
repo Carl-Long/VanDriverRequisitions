@@ -3,7 +3,6 @@
 import { Calendar, ChevronRight, User } from "lucide-react";
 import { formatDateTime } from "@/lib/format/date";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useRouter } from "next/navigation";
 import { SubmissionStatusPill } from "./submission-status-pill";
 import { SubmissionStatus } from "./submission-status";
 import Link from "next/link";
