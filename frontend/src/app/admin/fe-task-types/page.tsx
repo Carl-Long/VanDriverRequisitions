@@ -18,7 +18,7 @@ import {
     type FeTaskType,
 } from "@/lib/api/fe-task-types";
 
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";

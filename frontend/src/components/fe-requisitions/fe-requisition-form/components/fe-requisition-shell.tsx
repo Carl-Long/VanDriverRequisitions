@@ -22,7 +22,7 @@ import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/lib/api/fe-task-types";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
-import { FeSubmissionHistoryTab } from "../submission-history/fe-submission-history-tab";
+import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 
 type Props = {
     mode: FeRequisitionPageMode;

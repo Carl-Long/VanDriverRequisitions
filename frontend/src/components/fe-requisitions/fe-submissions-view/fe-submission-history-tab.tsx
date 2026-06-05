@@ -1,13 +1,17 @@
 "use client";
 
-import { Calendar, User } from "lucide-react";
+import { Calendar, ChevronRight, User } from "lucide-react";
 import { formatDateTime } from "@/lib/format/date";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useRouter } from "next/navigation";
+import { SubmissionStatusPill } from "./submission-status-pill";
+import { SubmissionStatus } from "./submission-status";
+import Link from "next/link";
 
 type SubmissionHistoryItem = {
     id: string;
     submissionNumber: number;
-    status: string;
+    status: SubmissionStatus;
     submittedByNameSnapshot: string;
     submittedAtUtc: string;
     reviewedByNameSnapshot: string | null;
@@ -22,6 +26,7 @@ type Props = {
 export function FeSubmissionHistoryTab({
     submissions,
 }: Readonly<Props>) {
+
     const orderedSubmissions = [...submissions].sort(
         (a, b) =>
             b.submissionNumber -
@@ -29,11 +34,7 @@ export function FeSubmissionHistoryTab({
     );
 
     if (orderedSubmissions.length === 0) {
-        return (
-            <EmptyState
-                title="No Submission History"
-            />
-        );
+        return (<EmptyState title="No Submission History" />);
     }
 
     return (
@@ -58,42 +59,72 @@ function SubmissionCard({
     submission,
 }: Readonly<SubmissionCardProps>) {
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6">
+        <Link
+            href={`/home-van-drivers/submissions/${submission.id}`}
+            className="
+                group
+                block
+                rounded-2xl
+                border
+                border-border
+                bg-surface
+                p-6
+                transition-all
+                duration-200
+                hover:-translate-y-0.5
+                hover:border-accent-border
+                hover:bg-surface-elevated
+                hover:shadow-md
+            "
+        >
             <div className="flex items-start justify-between">
-                <div>
+                <div className="flex items-center gap-3">
                     <h3 className="font-semibold">
-                        Submission #
-                        {submission.submissionNumber}
+                        Submission #{submission.submissionNumber}
                     </h3>
 
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {submission.status}
-                    </p>
+                    <SubmissionStatusPill
+                        status={submission.status}
+                    />
                 </div>
 
-                <StatusBadge
-                    status={submission.status}
-                />
+                <div
+                    className="
+                        flex
+                        h-8
+                        w-8
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-surface-elevated
+                    "
+                >
+                    <ChevronRight
+                        className="
+                            h-4
+                            w-4
+                            text-muted-foreground
+                            transition-transform
+                            group-hover:translate-x-0.5
+                        "
+                    />
+                </div>
             </div>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
                 <div>
                     <div className="text-sm font-medium">
-                        Submitted
+                        Submitted By
                     </div>
 
                     <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
-                        {
-                            submission.submittedByNameSnapshot
-                        }
+                        {submission.submittedByNameSnapshot}
                     </div>
 
                     <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        {formatDateTime(
-                            submission.submittedAtUtc,
-                        )}
+                        {formatDateTime(submission.submittedAtUtc)}
                     </div>
                 </div>
 
@@ -105,16 +136,12 @@ function SubmissionCard({
 
                         <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                             <User className="h-4 w-4" />
-                            {
-                                submission.reviewedByNameSnapshot
-                            }
+                            {submission.reviewedByNameSnapshot}
                         </div>
 
                         <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            {formatDateTime(
-                                submission.reviewedAtUtc,
-                            )}
+                            {formatDateTime(submission.reviewedAtUtc)}
                         </div>
                     </div>
                 )}
@@ -127,33 +154,10 @@ function SubmissionCard({
                     </div>
 
                     <div className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                        {
-                            submission.rejectionNotes
-                        }
+                        {submission.rejectionNotes}
                     </div>
                 </div>
             )}
-        </div>
-    );
-}
-
-function StatusBadge({
-    status,
-}: Readonly<{
-    status: string;
-}>) {
-    const classes =
-        status === "Approved"
-            ? "bg-green-100 text-green-800"
-            : status === "Rejected"
-                ? "bg-red-100 text-red-800"
-                : "bg-yellow-100 text-yellow-800";
-
-    return (
-        <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${classes}`}
-        >
-            {status}
-        </span>
+        </Link>
     );
 }
