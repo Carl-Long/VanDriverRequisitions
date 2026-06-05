@@ -27,7 +27,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public Guid? ApprovedById { get; private set; }
     public DateTime? ApprovedAtUtc { get; private set; }
     public string? ApprovedByNameSnapshot { get; private set; }
-    public string? PoNumber { get; set; }
+    public string? PoNumber { get; private set; }
     
     public Guid? RejectedById { get; private set; }
     public DateTime? RejectedAtUtc { get; private set; }
@@ -38,11 +38,22 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     private readonly List<FeMileage> _feMileages = [];
     private readonly List<FeTransfer> _feTransfers = [];
     private readonly List<FeAdditionalCost> _feAdditionalCosts = [];
+    private readonly List<FeRequisitionSubmission> _submissions = [];
 
     public IReadOnlyCollection<FeGeneralTask> FeGeneralTasks => _feGeneralTasks;
     public IReadOnlyCollection<FeMileage> FeMileages => _feMileages;
     public IReadOnlyCollection<FeTransfer> FeTransfers => _feTransfers;
     public IReadOnlyCollection<FeAdditionalCost> FeAdditionalCosts => _feAdditionalCosts;
+    public IReadOnlyCollection<FeRequisitionSubmission> Submissions => _submissions;
+    
+    public FeRequisitionSubmission? LatestSubmission => _submissions
+        .OrderByDescending(x => x.SubmissionNumber)
+        .FirstOrDefault();
+    
+    public FeRequisitionSubmission? PendingSubmission => _submissions
+        .SingleOrDefault(x => x.Status == SubmissionStatus.Pending);
+    
+    public int NextSubmissionNumber => _submissions.Count + 1;
     
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
     
@@ -59,7 +70,6 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         
         return requisition;
     }
-    
     
     public void UpdateDetails(RequisitionDetails details)
     {
@@ -135,7 +145,19 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         RejectionNotes = null;
     }
     
-    public void Approve(Guid approvedById, string approvedByName, DateTime approvedAtUtc)
+    public void AddSubmission(FeRequisitionSubmission submission)
+    {
+        ArgumentNullException.ThrowIfNull(submission);
+        
+        if (Status == RequisitionStatus.Approved)
+        {
+            throw new InvalidOperationException("Approved requisitions cannot be resubmitted.");
+        }
+
+        _submissions.Add(submission);
+    }
+    
+    public void Approve(Guid approvedById, string approvedByName, DateTime approvedAtUtc,  string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)
         {
@@ -147,11 +169,23 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ApprovedByNameSnapshot = approvedByName;
         ApprovedAtUtc = approvedAtUtc;
         
+        PoNumber = poNumber;
+        
         RejectedById = null;
         RejectedByNameSnapshot = null;
         RejectedAtUtc = null;
         RejectionNotes = null;
     }
+    
+    public void ApproveSubmission(Guid approvedById, string approvedByName, DateTime approvedAtUtc, string poNumber)
+    {
+        var submission = PendingSubmission ?? throw new InvalidOperationException("No pending submission exists.");
+        submission.Approve(approvedById, approvedByName, approvedAtUtc);
+        
+        Approve(approvedById, approvedByName, approvedAtUtc, poNumber);
+    }
+    
+    
     
     public void Reject(Guid rejectedById, string rejectedByName, string rejectionNotes, DateTime rejectedAtUtc)
     {
@@ -165,6 +199,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         RejectedByNameSnapshot = rejectedByName;
         RejectedAtUtc = rejectedAtUtc;
         RejectionNotes = rejectionNotes;
+        
+        PoNumber = null;
+    }
+    
+    public void RejectSubmission(Guid rejectedById, string rejectedByName, string rejectionNotes, DateTime rejectedAtUtc)
+    {
+        var submission = PendingSubmission ?? throw new InvalidOperationException("No pending submission exists.");
+        submission.Reject(rejectedById, rejectedByName, rejectionNotes, rejectedAtUtc);
+        
+        Reject(rejectedById, rejectedByName, rejectionNotes, rejectedAtUtc);
     }
 
     private void RecalculateSubtotal()

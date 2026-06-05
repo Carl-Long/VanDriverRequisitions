@@ -17,6 +17,8 @@ type Props = {
     renderTaskTypeTab: (
         taskTypeId: string,
     ) => React.ReactNode;
+    submissionHistory: React.ReactNode;
+    submissionHistoryCount: number;
 };
 
 export function FeRequisitionTabs({
@@ -25,13 +27,16 @@ export function FeRequisitionTabs({
     onActiveKeyChange,
     details,
     renderTaskTypeTab,
+    submissionHistory,
+    submissionHistoryCount
 }: Readonly<Props>) {
     const tabs = useMemo(
         () =>
             buildFeRequisitionTabs(
                 taskTypes,
+                submissionHistoryCount,
             ),
-        [taskTypes],
+        [taskTypes, submissionHistoryCount ],
     );
 
     const activeTab = tabs.find(
@@ -62,28 +67,9 @@ export function FeRequisitionTabs({
             </div>
 
             <div>
-                {activeTab?.type ===
-                    "details" && details}
-
-                {activeTab?.type ===
-                    "general-task" &&
-                    renderTaskTypeTab(
-                        activeTab.taskTypeId,
-                    )}
-
-                {activeTab?.type !==
-                    "details" &&
-                    activeTab?.type !==
-                    "general-task" && (
-                        <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-                            <div className="text-sm text-muted-foreground">
-                                This section
-                                will be
-                                implemented
-                                later
-                            </div>
-                        </div>
-                    )}
+                {activeTab?.type === "details" && details}
+                {activeTab?.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
+                {activeTab?.type === "submission-history" && submissionHistory}
             </div>
         </div>
     );

@@ -24,16 +24,31 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
             .HasConversion<int>();
         
         builder.Property(x => x.SubmittedById);
-        builder.Property(x => x.SubmittedAtUtc).HasColumnType("datetime2");
         builder.Property(x => x.SubmittedByNameSnapshot).HasMaxLength(256);
+        builder.Property(x => x.SubmittedAtUtc).HasColumnType("datetime2")
+            .HasConversion(
+                v => v,
+                v => v.HasValue
+                    ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+                    : v);
         
         builder.Property(x => x.ApprovedById);
-        builder.Property(x => x.ApprovedAtUtc).HasColumnType("datetime2");
         builder.Property(x => x.ApprovedByNameSnapshot).HasMaxLength(256);
+        builder.Property(x => x.ApprovedAtUtc).HasColumnType("datetime2")
+            .HasConversion(
+                v => v,
+                v => v.HasValue
+                    ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+                    : v);
         
         builder.Property(x => x.RejectedById);
-        builder.Property(x => x.RejectedAtUtc).HasColumnType("datetime2");
         builder.Property(x => x.RejectedByNameSnapshot).HasMaxLength(256);
+        builder.Property(x => x.RejectedAtUtc).HasColumnType("datetime2")
+            .HasConversion(
+                v => v,
+                v => v.HasValue
+                    ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)
+                    : v);
         
         builder.Property(x => x.Subtotal)
             .HasPrecision(18, 2)
@@ -109,6 +124,14 @@ public class FeRequisitionConfiguration : IEntityTypeConfiguration<FeRequisition
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(x => x.FeAdditionalCosts)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+        
+        builder.HasMany(x => x.Submissions)
+            .WithOne()
+            .HasForeignKey(x => x.FeRequisitionId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.Navigation(x => x.Submissions)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
         
         // Indexes

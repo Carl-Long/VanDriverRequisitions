@@ -25,6 +25,7 @@ export function mapFeRequisitionDetailToDraft(
         rejectedByNameSnapshot: detail.rejectedByNameSnapshot,
         rejectedAtUtc: detail.rejectedAtUtc,
         rejectionNotes: detail.rejectionNotes,
+        submissionHistory: detail.submissionHistory,
 
         feGeneralTasks:
             detail.feGeneralTasks.map(

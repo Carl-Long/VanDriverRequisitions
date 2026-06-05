@@ -407,8 +407,7 @@ public static class DevDataSeeder
                 case RequisitionStatus.Approved:
                     var approver = SeedUsers[rng.Next(SeedUsers.Length)];
                     requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
-                    requisition.Approve(user.Id, approver.Name, createdDate.AddDays(2));
-                    requisition.PoNumber = $"PO-{rng.Next(100000, 999999)}";
+                    requisition.Approve(user.Id, approver.Name, createdDate.AddDays(2),$"PO-{rng.Next(100000, 999999)}");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);

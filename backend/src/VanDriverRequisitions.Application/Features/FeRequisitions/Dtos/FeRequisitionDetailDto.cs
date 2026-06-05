@@ -28,4 +28,6 @@ public sealed class FeRequisitionDetailDto
     public DateTime? RejectedAtUtc { get; init; }
     public string? RejectedByNameSnapshot { get; init; }
     public string? RejectionNotes { get; init; }
+    
+    public List<FeRequisitionSubmissionHistoryDto> SubmissionHistory { get; init; } = [];
 }

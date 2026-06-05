@@ -2,6 +2,7 @@ import { VanDriverLookup } from "@/lib/api/van-drivers";
 
 import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 import { RequisitionStatus } from "../../constants";
+import { FeSubmissionHistoryDraft } from "./fe-submission-history-draft";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;
@@ -31,4 +32,5 @@ export type FeRequisitionDraft = {
     mileageRows: [];
     transferRows: [];
     additionalCostRows: [];
+    submissionHistory: FeSubmissionHistoryDraft[];
 };

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -5,6 +6,7 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
@@ -139,11 +141,123 @@ public class FeRequisitionService(
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        requisition.Submit(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow);
+        var now = DateTime.UtcNow;
+        var snapshotJson = FeRequisitionSnapshotFactory.CreateJson(requisition);
+
+        var submission = FeRequisitionSubmission.Create(
+                requisition.NextSubmissionNumber,
+                currentUser.User.Id,
+                currentUser.User.Name,
+                now,
+                snapshotJson);
+
+        requisition.AddSubmission(submission);
+        requisition.Submit(currentUser.User.Id, currentUser.User.Name, now);
 
         await context.SaveChangesAsync(cancellationToken);
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, requisitionData.DriverSummary);
+    }
+    
+    public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.User is null)
+        {
+            throw new NotFoundException("Approval must be performed by a user.");
+        }
+
+        var requisition = await LoadFullAsync(id, cancellationToken)
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(requisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = approveFeRequisitionDto.RowVersion;
+
+        requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, approveFeRequisitionDto.PoNumber);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("This requisition has been updated by another user.");
+        }
+
+        var driverSummary = await context.VanDrivers
+            .AsNoTracking()
+            .Where(x => x.Id == requisition.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
+    
+    public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
+    {
+        if (currentUser.User is null)
+        {
+            throw new NotFoundException("Rejection must be performed by a user.");
+        }
+
+        var requisition = await LoadFullAsync(id, cancellationToken)
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+
+        context.Entry(requisition)
+            .Property(nameof(FeRequisition.RowVersion))
+            .OriginalValue = rejectFeRequisitionDto.RowVersion;
+
+        requisition.RejectSubmission(currentUser.User.Id, currentUser.User.Name, rejectFeRequisitionDto.RejectionNotes, DateTime.UtcNow);
+
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("This requisition has been updated by another user.");
+        }
+
+        var driverSummary = await context.VanDrivers
+            .AsNoTracking()
+            .Where(x => x.Id == requisition.VanDriverId)
+            .Select(VanDriverProjections.AsLookupDto)
+            .SingleAsync(cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
+    }
+    
+    public async Task<FeRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
+    {
+        var submission = await context.FeRequisitionSubmissions
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                x => x.Id == submissionId,
+                cancellationToken);
+
+        if (submission is null)
+        {
+            throw new NotFoundException($"Submission '{submissionId}' was not found.");
+        }
+        
+        var snapshot = JsonSerializer.Deserialize<FeRequisitionSnapshotDto>(submission.SnapshotJson);
+        if (snapshot is null)
+        {
+            throw new InvalidOperationException($"Submission '{submissionId}' contains an invalid snapshot.");
+        }
+        
+        return new FeRequisitionSubmissionDetailDto
+        {
+            Id = submission.Id,
+            SubmissionNumber = submission.SubmissionNumber,
+            Status = submission.Status.ToString(),
+            SubmittedByName = submission.SubmittedByNameSnapshot,
+            SubmittedAtUtc = submission.SubmittedAtUtc,
+            ReviewedByName = submission.ReviewedByNameSnapshot,
+            ReviewedAtUtc = submission.ReviewedAtUtc,
+            RejectionNotes = submission.RejectionNotes,
+            Snapshot = snapshot
+        };
     }
 
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
@@ -153,6 +267,7 @@ public class FeRequisitionService(
             .Include(x => x.FeMileages)
             .Include(x => x.FeTransfers)
             .Include(x => x.FeAdditionalCosts)
+            .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 

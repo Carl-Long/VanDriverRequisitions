@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
 import { VanDriverLookup } from "./van-drivers";
+import { SubmissionStatus } from "@/components/fe-requisitions/fe-submissions-view/submission-status";
 
 const BASE = "/api/v1/fe-requisitions";
 
@@ -123,6 +124,53 @@ export type FeRequisitionDetail = {
     rejectedByNameSnapshot: string | null;
     rejectedAtUtc: string | null;
     rejectionNotes: string | null;
+    submissionHistory: FeRequisitionSubmissionHistory[];
+};
+
+export type FeRequisitionSubmissionHistory = {
+    id: string;
+    submissionNumber: number;
+    status: SubmissionStatus;
+    submittedByNameSnapshot: string;
+    submittedAtUtc: string;
+    reviewedByNameSnapshot: string | null;
+    reviewedAtUtc: string | null;
+    rejectionNotes: string | null;
+};
+
+export type FeRequisitionSnapshot = {
+    requisitionNumber: string;
+    requisitionDate: string;
+    vanDriverCode: string;
+    vanDriverName: string;
+    tradersName: string;
+    shopCode: string;
+    shopName: string;
+    isVatApplicable: boolean;
+    subtotal: number;
+    generalTasks: FeGeneralTaskSnapshot[];
+};
+
+export type FeGeneralTaskSnapshot = {
+    taskTypeCode: string;
+    taskTypeName: string;
+    weekEndingDate: string;
+    totalNumber: number;
+    ratePerJob: number;
+    totalValue: number;
+    week: WeeklyQuantities;
+};
+
+export type FeRequisitionSubmissionDetail = {
+    id: string;
+    submissionNumber: number;
+    status: SubmissionStatus;
+    submittedByName: string;
+    submittedAtUtc: string;
+    reviewedByName: string | null;
+    reviewedAtUtc: string | null;
+    rejectionNotes: string | null;
+    snapshot: FeRequisitionSnapshot;
 };
 
 export type SaveFeGeneralTask = {
@@ -217,4 +265,7 @@ export const feRequisitionsApi = {
                 body: data,
             },
         ),
+
+    getSubmission: (submissionId: string) =>
+        apiFetch<FeRequisitionSubmissionDetail>(`${BASE}/submissions/${submissionId}`,),
 };
