@@ -220,6 +220,15 @@ export type SaveFeRequisition = {
     feAdditionalCosts: SaveFeAdditionalCost[];
 };
 
+export type ApproveFeRequisitionRequest = {
+    rowVersion: string | null;
+};
+
+export type RejectFeRequisitionRequest = {
+    rowVersion: string;
+    rejectionNotes: string;
+};
+
 export const feRequisitionsApi = {
     getAll: (query: FeRequisitionQuery = {}) => {
         const params = new URLSearchParams();
@@ -268,4 +277,22 @@ export const feRequisitionsApi = {
 
     getSubmission: (submissionId: string) =>
         apiFetch<FeRequisitionSubmissionDetail>(`${BASE}/submissions/${submissionId}`,),
+
+    approve: (id: string, data: ApproveFeRequisitionRequest) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/${id}/approve`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
+
+    reject: (id: string, data: RejectFeRequisitionRequest) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/${id}/reject`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
 };

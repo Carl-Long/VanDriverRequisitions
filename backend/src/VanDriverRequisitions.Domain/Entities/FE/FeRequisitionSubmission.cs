@@ -54,7 +54,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
         RejectionNotes = null;
     }
     
-    public void Reject(Guid reviewedById, string reviewedByName, string? rejectionNotes, DateTime reviewedAtUtc)
+    public void Reject(Guid reviewedById, string reviewedByName, string rejectionNotes, DateTime reviewedAtUtc)
     {
         if (Status != SubmissionStatus.Pending)
         {

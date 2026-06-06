@@ -81,7 +81,9 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const isReadonly = mode === "readonly";
+    const isReadonly =
+        mode === "readonly" ||
+        mode === "approval";
 
     const router = useRouter();
     const toast = useToast();
