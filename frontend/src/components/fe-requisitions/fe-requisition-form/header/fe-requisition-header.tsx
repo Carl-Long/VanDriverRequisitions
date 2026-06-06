@@ -10,6 +10,7 @@ import { SaveAction } from "../components/fe-requisition-shell";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { formatDateTime } from "@/lib/format/date";
 import { User, Calendar } from "lucide-react";
+import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
 
 
 type Props = {
@@ -26,6 +27,8 @@ type Props = {
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
+    onApprove: () => void;
+    onReject: () => void;
 };
 
 export function FeRequisitionHeader({
@@ -42,7 +45,22 @@ export function FeRequisitionHeader({
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
+    onApprove,
+    onReject,
 }: Readonly<Props>) {
+
+    const TITLES: Record<FeRequisitionPageMode, string> = {
+        create: "Create New Requisition",
+        edit: "Editing Requisition",
+        readonly: "Viewing Requisition",
+        approval: "Reviewing Requisition",
+    };
+
+    const title = TITLES[mode];
+
+    const canApproveOrReject =
+        mode === "approval" &&
+        status === "Submitted";
 
     return (
         <div className="pb-2">
@@ -51,12 +69,7 @@ export function FeRequisitionHeader({
                     <div className="min-w-0">
                         <h1 className="flex flex-wrap items-center gap-3 font-semibold text-lg leading-none tracking-tight">
                             <span>
-                                {mode === "create"
-                                    ? "Create New Requisition"
-                                    : mode === "readonly"
-                                        ? "Viewing Requisition"
-                                        : "Editing Requisition"}
-
+                                {title}
                             </span>
 
                             {mode !== "create" && requisitionNumber && (
@@ -66,8 +79,7 @@ export function FeRequisitionHeader({
                             )}
                         </h1>
                     </div>
-
-                    {mode !== "readonly" && (
+                    {mode !== "readonly" && mode !== "approval" && (
                         <FeRequisitionSubmitStatus
                             status={submitWindowStatus}
                             loading={submitStatusLoading}
@@ -126,13 +138,24 @@ export function FeRequisitionHeader({
                         )}
                     </div>
 
-                    {mode !== "readonly" && (
+                    {mode !== "readonly" && mode !== "approval" && (
                         <FeRequisitionActions
                             activeAction={activeAction}
                             canSubmit={canSubmit}
                             onSaveDraft={onSaveDraft}
                             onSaveAndContinue={onSaveAndContinue}
                             onSubmit={onSubmit}
+                        />
+                    )}
+
+                    {canApproveOrReject && (
+                        <FeRequisitionApprovalActions
+                            loading={
+                                activeAction === "approve" ||
+                                activeAction === "reject"
+                            }
+                            onApprove={onApprove}
+                            onReject={onReject}
                         />
                     )}
                 </div>

@@ -225,7 +225,7 @@ export type ApproveFeRequisitionRequest = {
 };
 
 export type RejectFeRequisitionRequest = {
-    rowVersion: string;
+    rowVersion: string | null;
     rejectionNotes: string;
 };
 
@@ -263,10 +263,7 @@ export const feRequisitionsApi = {
             },
         ),
 
-    submitExisting: (
-        id: string,
-        data: SaveFeRequisition,
-    ) =>
+    submitExisting: (id: string, data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(
             `${BASE}/${id}/submit`,
             {
