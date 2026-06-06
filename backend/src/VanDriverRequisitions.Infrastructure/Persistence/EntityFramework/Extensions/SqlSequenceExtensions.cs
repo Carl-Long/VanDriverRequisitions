@@ -12,6 +12,11 @@ public static class SequenceExtensions
             .StartsAt(DbSequences.FeRequisitionNumberStartsAt)
             .IncrementsBy(DbSequences.FeRequisitionNumberIncrementsBy);
 
+        modelBuilder.HasSequence<long>(DbSequences.PoNumber)
+            .StartsAt(DbSequences.PoNumberStartsAt)
+            .IncrementsBy(DbSequences.PoNumberIncrementsBy
+            );
+            
         // Future sequences:
         //  modelBuilder.HasSequence<long>(DbSequences.StdRequisitionNumber)
         //      .StartsAt(DbSequences.StdRequisitionNumberStartsAt)

@@ -5,6 +5,7 @@ using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Infrastructure.Identity;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Interceptors;
+using VanDriverRequisitions.Infrastructure.Services;
 
 namespace VanDriverRequisitions.Infrastructure.DependencyInjection;
 
@@ -16,6 +17,7 @@ public static class InfrastructureDependencyInjection
     {
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IPoNumberGenerator, SqlPoNumberGenerator>();
 
         services.AddDbContext<VanDriverDbContext>((sp, options) =>
         {

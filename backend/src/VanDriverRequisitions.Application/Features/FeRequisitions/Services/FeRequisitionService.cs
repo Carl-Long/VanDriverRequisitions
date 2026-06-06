@@ -21,6 +21,7 @@ public class FeRequisitionService(
     IApplicationDbContext context,
     ICurrentUserService currentUser,
     IValidatorService validator,
+    IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -175,7 +176,7 @@ public class FeRequisitionService(
             .Property(nameof(FeRequisition.RowVersion))
             .OriginalValue = approveFeRequisitionDto.RowVersion;
 
-        var poNumber = "New0001";
+        var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
         requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, poNumber);
 
