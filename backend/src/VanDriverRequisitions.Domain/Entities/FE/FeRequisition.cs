@@ -180,12 +180,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public void ApproveSubmission(Guid approvedById, string approvedByName, DateTime approvedAtUtc, string poNumber)
     {
         var submission = PendingSubmission ?? throw new InvalidOperationException("No pending submission exists.");
-        submission.Approve(approvedById, approvedByName, approvedAtUtc);
         
+        submission.Approve(approvedById, approvedByName, approvedAtUtc, poNumber);
         Approve(approvedById, approvedByName, approvedAtUtc, poNumber);
     }
-    
-    
     
     public void Reject(Guid rejectedById, string rejectedByName, string rejectionNotes, DateTime rejectedAtUtc)
     {

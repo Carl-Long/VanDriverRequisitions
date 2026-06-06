@@ -6,6 +6,7 @@ public sealed class FeRequisitionSubmissionHistoryDto
     public int SubmissionNumber { get; init; }
     public string Status { get; init; } = string.Empty;
     public string SubmittedByNameSnapshot { get; init; } = string.Empty;
+    public string? PoNumber { get; init; }
     public DateTime SubmittedAtUtc { get; init; }
     public string? ReviewedByNameSnapshot { get; init; }
     public DateTime? ReviewedAtUtc { get; init; }

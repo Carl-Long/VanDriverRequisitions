@@ -1,5 +1,6 @@
 "use client";
 
+import { SummaryField } from "@/components/ui/field/summary-field";
 import { FeRequisitionSnapshot } from "@/lib/api/fe-requisitions";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
@@ -66,28 +67,6 @@ export function FeSubmissionSnapshotSummary({
                     }
                 />
 
-            </div>
-        </div>
-    );
-}
-
-type SummaryFieldProps = {
-    label: string;
-    value: string;
-};
-
-function SummaryField({
-    label,
-    value,
-}: Readonly<SummaryFieldProps>) {
-    return (
-        <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {label}
-            </div>
-
-            <div className="mt-1 text-sm font-medium">
-                {value}
             </div>
         </div>
     );

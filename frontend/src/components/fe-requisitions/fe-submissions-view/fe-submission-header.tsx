@@ -1,9 +1,9 @@
 "use client";
 
-import { Calendar, User } from "lucide-react";
-import { formatDateTime } from "@/lib/format/date";
 import { FeRequisitionSubmissionDetail } from "@/lib/api/fe-requisitions";
 import { SubmissionStatusPill } from "./submission-status-pill";
+import { AuditField } from "@/components/ui/field/audit-field";
+import { SummaryField } from "@/components/ui/field/summary-field";
 
 type Props = {
     submission: FeRequisitionSubmissionDetail;
@@ -31,54 +31,46 @@ export function FeSubmissionHeader({
             </div>
 
             <div className="mt-8 grid gap-6 md:grid-cols-2">
-                <div>
-                    <div className="text-sm font-medium">
-                        Submitted By
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="h-4 w-4" />
-                        {submission.submittedByName}
-                    </div>
-
-                    <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {formatDateTime(
-                            submission.submittedAtUtc,
-                        )}
-                    </div>
-                </div>
+                <AuditField
+                    label="Submitted By"
+                    name={submission.submittedByName}
+                    dateTime={submission.submittedAtUtc}
+                />
 
                 {submission.reviewedAtUtc && (
-                    <div>
-                        <div className="text-sm font-medium">
-                            Reviewed
-                        </div>
-
-                        <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="h-4 w-4" />
-                            {submission.reviewedByName}
-                        </div>
-
-                        <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            {formatDateTime(
-                                submission.reviewedAtUtc,
-                            )}
-                        </div>
+                    <div className="space-y-4">
+                        <AuditField
+                            label="Reviewed By"
+                            name={submission.reviewedByName}
+                            dateTime={submission.reviewedAtUtc}
+                        />
                     </div>
                 )}
             </div>
 
+            {submission.poNumber && (
+                <div className="mt-6 border-t border-border pt-4">
+                    <SummaryField
+                        label="Purchase Order Number"
+                        value={
+                            <div className="whitespace-pre-wrap">
+                                {submission.poNumber}
+                            </div>
+                        }
+                    />
+                </div>
+            )}
+
             {submission.rejectionNotes && (
                 <div className="mt-6 border-t border-border pt-4">
-                    <div className="text-sm font-medium">
-                        Rejection Notes
-                    </div>
-
-                    <div className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                        {submission.rejectionNotes}
-                    </div>
+                    <SummaryField
+                        label="Rejection Notes"
+                        value={
+                            <div className="whitespace-pre-wrap font-normal">
+                                {submission.rejectionNotes}
+                            </div>
+                        }
+                    />
                 </div>
             )}
         </div>

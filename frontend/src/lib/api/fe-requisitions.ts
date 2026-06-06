@@ -135,6 +135,7 @@ export type FeRequisitionSubmissionHistory = {
     submittedAtUtc: string;
     reviewedByNameSnapshot: string | null;
     reviewedAtUtc: string | null;
+    poNumber: string | null;
     rejectionNotes: string | null;
 };
 
@@ -170,6 +171,7 @@ export type FeRequisitionSubmissionDetail = {
     reviewedByName: string | null;
     reviewedAtUtc: string | null;
     rejectionNotes: string | null;
+    poNumber: string | null;
     snapshot: FeRequisitionSnapshot;
 };
 

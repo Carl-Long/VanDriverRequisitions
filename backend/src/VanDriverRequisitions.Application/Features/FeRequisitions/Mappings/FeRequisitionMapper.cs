@@ -100,6 +100,7 @@ public static class FeRequisitionMapper
                 Status = x.Status.ToString(),
                 SubmittedByNameSnapshot = x.SubmittedByNameSnapshot,
                 SubmittedAtUtc = x.SubmittedAtUtc,
+                PoNumber = x.PoNumber,
                 ReviewedByNameSnapshot = x.ReviewedByNameSnapshot,
                 ReviewedAtUtc = x.ReviewedAtUtc,
                 RejectionNotes = x.RejectionNotes

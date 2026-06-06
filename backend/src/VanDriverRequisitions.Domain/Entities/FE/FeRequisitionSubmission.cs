@@ -16,6 +16,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
     public Guid? ReviewedById { get; private set; }
     public string? ReviewedByNameSnapshot { get; private set; }
     public DateTime? ReviewedAtUtc { get; private set; }
+    public string? PoNumber { get; private set; }
     public string? RejectionNotes { get; private set; }
     public string SnapshotJson { get; private set; } = string.Empty;
     
@@ -39,19 +40,21 @@ public sealed class FeRequisitionSubmission : AuditableEntity
             SnapshotJson = snapshotJson
         };
     }
-    
-    public void Approve(Guid reviewedById, string reviewedByName, DateTime reviewedAtUtc)
+    public void Approve(Guid reviewedById, string reviewedByName, DateTime reviewedAtUtc, string poNumber)
     {
         if (Status != SubmissionStatus.Pending)
         {
             throw new InvalidOperationException("Only pending submissions can be approved.");
         }
 
+        ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
+
         Status = SubmissionStatus.Approved;
         ReviewedById = reviewedById;
         ReviewedByNameSnapshot = reviewedByName;
         ReviewedAtUtc = reviewedAtUtc;
         RejectionNotes = null;
+        PoNumber = poNumber;
     }
     
     public void Reject(Guid reviewedById, string reviewedByName, string rejectionNotes, DateTime reviewedAtUtc)

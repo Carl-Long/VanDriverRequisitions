@@ -259,6 +259,7 @@ public class FeRequisitionService(
             Status = submission.Status.ToString(),
             SubmittedByName = submission.SubmittedByNameSnapshot,
             SubmittedAtUtc = submission.SubmittedAtUtc,
+            PoNumber = submission.PoNumber,
             ReviewedByName = submission.ReviewedByNameSnapshot,
             ReviewedAtUtc = submission.ReviewedAtUtc,
             RejectionNotes = submission.RejectionNotes,

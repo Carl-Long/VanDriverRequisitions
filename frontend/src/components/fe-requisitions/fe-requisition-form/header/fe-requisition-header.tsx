@@ -113,27 +113,28 @@ export function FeRequisitionHeader({
                         </div>
 
                         {submittedByNameSnapshot && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <User className="h-4 w-4" />
-                                <span className="flex items-center gap-2">
-                                    <span className="font-medium text-foreground">
-                                        Submitted by {submittedByNameSnapshot}
-                                    </span>
-                                    {submittedAtUtc && (
-                                        <>
-                                            <span className="text-muted-foreground">
-                                                •
-                                            </span>
+                            <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
 
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="h-3.5 w-3.5" />
-                                                <span>
-                                                    {formatDateTime(submittedAtUtc)}
-                                                </span>
-                                            </span>
-                                        </>
-                                    )}
+                                <span className="font-medium text-foreground">
+                                    Submitted by {submittedByNameSnapshot}
                                 </span>
+
+                                {submittedAtUtc && (
+                                    <>
+                                        <span className="text-muted-foreground">
+                                            •
+                                        </span>
+
+                                        <span className="flex items-center gap-1 text-muted-foreground">
+                                            <Calendar className="h-3.5 w-3.5" />
+
+                                            <span>
+                                                {formatDateTime(submittedAtUtc)}
+                                            </span>
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>

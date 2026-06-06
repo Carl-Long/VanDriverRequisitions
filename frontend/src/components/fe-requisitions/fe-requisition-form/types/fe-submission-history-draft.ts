@@ -6,6 +6,7 @@ export type FeSubmissionHistoryDraft = {
     status: SubmissionStatus;
     submittedByNameSnapshot: string;
     submittedAtUtc: string;
+    poNumber: string | null;
     reviewedByNameSnapshot: string | null;
     reviewedAtUtc: string | null;
     rejectionNotes: string | null;
