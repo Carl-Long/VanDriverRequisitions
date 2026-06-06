@@ -1,38 +1,42 @@
-import { CheckCircle, XCircle, } from "lucide-react";
-
+import { CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
+import { SaveAction } from "../components/fe-requisition-shell";
 
 type Props = {
-    loading: boolean;
+    activeAction: SaveAction;
     onApprove: () => void;
     onReject: () => void;
 };
 
 export function FeRequisitionApprovalActions({
-    loading,
+    activeAction,
     onApprove,
     onReject,
 }: Readonly<Props>) {
+    const isBusy = activeAction !== null;
+
     return (
         <div className="flex flex-wrap items-center gap-3">
             <Button
                 type="button"
-                tone="secondary"
-                disabled={loading}
+                tone="danger"
+                loading={activeAction === "reject"}
+                disabled={isBusy}
                 onClick={onReject}
             >
-                <XCircle size={16} />
-                <span>Reject</span>
+                <XCircle size={14} />
+                Reject
             </Button>
 
             <Button
                 type="button"
                 tone="success"
-                disabled={loading}
+                loading={activeAction === "approve"}
+                disabled={isBusy}
                 onClick={onApprove}
             >
-                <CheckCircle size={16} />
-                <span>Approve</span>
+                <CheckCircle size={14} />
+                Approve
             </Button>
         </div>
     );

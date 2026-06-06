@@ -150,10 +150,7 @@ export function FeRequisitionHeader({
 
                     {canApproveOrReject && (
                         <FeRequisitionApprovalActions
-                            loading={
-                                activeAction === "approve" ||
-                                activeAction === "reject"
-                            }
+                            activeAction={activeAction}
                             onApprove={onApprove}
                             onReject={onReject}
                         />
