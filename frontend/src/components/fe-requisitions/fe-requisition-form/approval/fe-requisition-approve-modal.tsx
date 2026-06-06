@@ -64,8 +64,7 @@ export function FeRequisitionApproveModal({
                         loading={loading}
                         onClick={onConfirm}
                     >
-                        <CheckCircle size={14} />
-                        Yes, Approve Requisition
+                        Approve Requisition
                     </Button>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { CheckCircle, XCircle, } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
 
@@ -14,23 +14,24 @@ export function FeRequisitionApprovalActions({
     onReject,
 }: Readonly<Props>) {
     return (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
             <Button
                 type="button"
                 tone="secondary"
                 disabled={loading}
                 onClick={onReject}
             >
-                <X size={16} />
+                <XCircle size={16} />
                 <span>Reject</span>
             </Button>
 
             <Button
                 type="button"
+                tone="success"
                 disabled={loading}
                 onClick={onApprove}
             >
-                <Check size={16} />
+                <CheckCircle size={16} />
                 <span>Approve</span>
             </Button>
         </div>

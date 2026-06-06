@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { z } from "zod";
 import { XCircle } from "lucide-react";
-
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
+import { Field } from "@/components/ui/field/field";
+import { Textarea } from "@/components/ui/field/textarea";
 
 const rejectSchema = z.object({
     rejectionNotes: z
@@ -29,13 +30,15 @@ export function FeRequisitionRejectModal({
     onConfirm,
 }: Readonly<Props>) {
     const [rejectionNotes, setRejectionNotes] = useState("");
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | undefined>();
 
     function handleClose() {
-        if (loading) return;
+        if (loading) {
+            return;
+        }
 
         setRejectionNotes("");
-        setError(null);
+        setError(undefined);
         onClose();
     }
 
@@ -53,7 +56,7 @@ export function FeRequisitionRejectModal({
             return;
         }
 
-        setError(null);
+        setError(undefined);
         onConfirm(result.data.rejectionNotes);
     }
 
@@ -83,33 +86,24 @@ export function FeRequisitionRejectModal({
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <label
-                        htmlFor="rejectionNotes"
-                        className="text-sm font-medium text-foreground"
-                    >
-                        Rejection notes
-                    </label>
-
-                    <textarea
-                        id="rejectionNotes"
+                <Field
+                    label="Rejection notes"
+                    required
+                    error={error}
+                    hint="Explain what needs to be corrected before this can be resubmitted."
+                >
+                    <Textarea
                         value={rejectionNotes}
                         rows={5}
                         disabled={loading}
+                        state={error ? "error" : "default"}
                         onChange={(event) => {
                             setRejectionNotes(event.target.value);
-                            setError(null);
+                            setError(undefined);
                         }}
-                        className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder="Explain why this requisition is being rejected..."
                     />
-
-                    {error && (
-                        <p className="text-sm text-danger">
-                            {error}
-                        </p>
-                    )}
-                </div>
+                </Field>
 
                 <div className="flex justify-end gap-3">
                     <Button
@@ -127,8 +121,7 @@ export function FeRequisitionRejectModal({
                         loading={loading}
                         onClick={handleConfirm}
                     >
-                        <XCircle size={14} />
-                        Yes, Reject Requisition
+                        Reject Requisition
                     </Button>
                 </div>
             </div>
