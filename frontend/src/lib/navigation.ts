@@ -6,6 +6,7 @@ import {
     Sofa,
     Shirt,
     Gauge,
+    ClipboardCheck,
 } from "lucide-react";
 
 export const navigation = [
@@ -23,6 +24,14 @@ export const navigation = [
         title: "Volunteer Van Drivers",
         href: "/volunteer-drivers",
         icon: HeartHandshake,
+    },
+];
+
+export const approvalNavigation = [
+    {
+        title: "Approvals",
+        href: "/home-van-drivers/approvals",
+        icon: ClipboardCheck,
     },
 ];
 

@@ -3,15 +3,12 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { HomeIcon, PanelLeft } from "lucide-react";
-
 import { cn } from "@/lib/utils";
-import { navigation, adminNavigation } from "@/lib/navigation";
+import { navigation, adminNavigation, approvalNavigation } from "@/lib/navigation";
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
-
 import { NavItem } from "@/components/layout/nav-item";
-
 import { useAuth } from "@/providers/auth-provider";
-import { isAdmin } from "@/lib/auth/roles";
+import { isAdmin, isApprover, isUser } from "@/lib/auth/roles";
 import { IconButton } from "../ui/button/icon-button";
 
 export function Sidebar() {
@@ -19,6 +16,8 @@ export function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
 
     const { user } = useAuth();
+    const showMainNavigation = isUser(user);
+    const showApprovals = isApprover(user);
     const showAdmin = isAdmin(user);
 
     // Auto-collapse on small screens
@@ -118,18 +117,35 @@ export function Sidebar() {
                 )}
 
                 {/* MAIN NAV */}
-                <div className="mt-2 space-y-1">
-                    {navigation.map((item) => (
-                        <NavItem
-                            key={item.href}
-                            href={item.href}
-                            label={item.title}
-                            icon={item.icon}
-                            active={isActive(item.href)}
-                            collapsed={collapsed}
-                        />
-                    ))}
-                </div>
+                {showMainNavigation && (
+                    <div className="mt-2 space-y-1">
+                        {navigation.map((item) => (
+                            <NavItem
+                                key={item.href}
+                                href={item.href}
+                                label={item.title}
+                                icon={item.icon}
+                                active={isActive(item.href)}
+                                collapsed={collapsed}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {showApprovals && (
+                    <div className="mt-2 space-y-1">
+                        {approvalNavigation.map((item) => (
+                            <NavItem
+                                key={item.href}
+                                href={item.href}
+                                label={item.title}
+                                icon={item.icon}
+                                active={pathname.startsWith(item.href)}
+                                collapsed={collapsed}
+                            />
+                        ))}
+                    </div>
+                )}
 
                 {/* ADMIN */}
                 {showAdmin && (
