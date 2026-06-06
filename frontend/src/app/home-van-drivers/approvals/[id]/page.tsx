@@ -16,6 +16,9 @@ import {
     getApiErrorMessage,
 } from "@/lib/api/client";
 
+import { useAuth } from "@/providers/auth-provider";
+import { isApprover } from "@/lib/auth/roles";
+
 import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
 import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
@@ -24,6 +27,7 @@ import NotFound from "@/app/not-found";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
+    const { user } = useAuth();
 
     const {
         limitRules,
@@ -111,6 +115,11 @@ export default function Page() {
     if (notFound) {
         return <NotFound />;
     }
+
+    if (!isApprover(user)) {
+        return <NotFound />;
+    }
+
 
     if (errors.length > 0) {
         return (

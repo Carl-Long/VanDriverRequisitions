@@ -20,6 +20,8 @@ import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requ
 import { getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams } from "@/components/fe-requisitions/url-state";
+import { isUser } from "@/lib/auth/roles";
+import NotFound from "../not-found";
 
 
 export default function HomeVanDriversPage() {
@@ -34,7 +36,6 @@ export default function HomeVanDriversPage() {
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
 
     useEffect(() => {
         let cancelled = false;
@@ -103,6 +104,10 @@ export default function HomeVanDriversPage() {
 
     function resetFilters() {
         router.replace(pathname);
+    }
+
+    if (!isUser(user)) {
+        return <NotFound />;
     }
 
     // =========================

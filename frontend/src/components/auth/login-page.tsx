@@ -11,6 +11,7 @@ import { Button } from "../ui/button/button";
 const DEV_ACCOUNTS = [
     { label: "Admin User", email: "admin@test.com" },
     { label: "Standard User", email: "user@test.com" },
+    { label: "Approver User", email: "approver@test.com" },
 ] as const;
 
 export function LoginPage() {

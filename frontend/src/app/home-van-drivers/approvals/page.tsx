@@ -20,11 +20,15 @@ import { getApiErrorMessage } from "@/lib/api/client";
 import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
 import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
 import { pageFromSearchParams } from "@/components/fe-requisitions/url-state";
+import NotFound from "@/app/not-found";
+import { isApprover } from "@/lib/auth/roles";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { user } = useAuth();
 
     const page = pageFromSearchParams(searchParams);
 
@@ -75,6 +79,10 @@ export default function FeRequisitionApprovalsPage() {
     }, [page]);
 
     const items = data?.items ?? [];
+
+    if (!isApprover(user)) {
+        return <NotFound />;
+    }
 
     return (
         <PageContainer>

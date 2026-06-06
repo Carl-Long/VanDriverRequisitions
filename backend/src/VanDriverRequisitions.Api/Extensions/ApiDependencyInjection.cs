@@ -21,16 +21,20 @@ public static class ApiDependencyInjection
             options.DefaultApiVersion = new ApiVersion(1, 0);
             options.ReportApiVersions = true;
         });
-        
+
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.AddValidatorsFromAssembly(typeof(CreateFeTaskTypeDtoValidator).Assembly);
         services.AddExceptionHandling();
-        
+
         services.AddAuthorizationBuilder()
             .AddPolicy(Policies.AdminOnly, p =>
-                p.RequireRole(Roles.Admin));
+                p.RequireRole(Roles.Admin))
+            .AddPolicy(Policies.UserOnly, p =>
+                p.RequireRole(Roles.User))
+            .AddPolicy(Policies.ApproverOnly, p =>
+                p.RequireRole(Roles.Approver));
 
         return services;
     }

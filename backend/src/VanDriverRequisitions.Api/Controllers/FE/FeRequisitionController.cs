@@ -30,6 +30,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPost]
+    [Authorize(Policy = Policies.UserOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
     {
@@ -38,6 +39,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = Policies.UserOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -51,6 +53,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPost("submit")]
+    [Authorize(Policy = Policies.UserOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SubmitNew([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
@@ -60,6 +63,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPost("{id:guid}/submit")]
+    [Authorize(Policy = Policies.UserOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -78,7 +82,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.ApproverOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -91,7 +95,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.ApproverOnly)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

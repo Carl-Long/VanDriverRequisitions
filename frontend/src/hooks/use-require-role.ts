@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthUser } from "@/providers/auth-provider";
-import { getRole } from "@/lib/auth/roles";
+import { hasRole } from "@/lib/auth/roles";
 
 type Options = {
     user: AuthUser | null;
@@ -24,9 +24,7 @@ export function useRequireRole({
     useEffect(() => {
         if (loading) return;
 
-        const userRole = getRole(user);
-
-        if (userRole !== role.toLowerCase()) {
+        if (!hasRole(user, role)) {
             router.replace(redirectTo);
         }
     }, [user, loading, role, redirectTo, router]);

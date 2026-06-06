@@ -20,7 +20,7 @@ export type AuthUser = {
     id: string;
     name: string;
     email: string;
-    role: string;
+    roles: string[];
     initial: string;
 };
 
@@ -37,23 +37,51 @@ const AuthContext = createContext<AuthState | null>(null);
 const TOKEN_KEY = "dev-auth-token";
 const USER_KEY = "dev-auth-user";
 
-function parseJwt(token: string): Record<string, string> {
+function parseJwt(token: string): Record<string, unknown> {
     const base64 = token.split(".")[1];
     const json = atob(base64);
     return JSON.parse(json);
 }
 
+function toStringArray(value: unknown): string[] {
+    if (Array.isArray(value)) {
+        return value.filter(
+            (item): item is string =>
+                typeof item === "string",
+        );
+    }
+
+    if (typeof value === "string") {
+        return [value];
+    }
+
+    return [];
+}
+
 function userFromToken(token: string): AuthUser {
     const claims = parseJwt(token);
-    const name = claims.name ?? "Unknown";
+
+    const name =
+        typeof claims.name === "string"
+            ? claims.name
+            : "Unknown";
+
+    const roleClaim =
+        claims[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ];
+
     return {
-        id: claims.oid,
+        id:
+            typeof claims.oid === "string"
+                ? claims.oid
+                : "",
         name,
-        email: claims.preferred_username ?? "",
-        role:
-            claims[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-            ] ?? "User",
+        email:
+            typeof claims.preferred_username === "string"
+                ? claims.preferred_username
+                : "",
+        roles: toStringArray(roleClaim),
         initial: name.charAt(0).toUpperCase(),
     };
 }

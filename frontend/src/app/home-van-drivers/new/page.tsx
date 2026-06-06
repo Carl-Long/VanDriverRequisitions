@@ -7,6 +7,9 @@ import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requ
 import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { Alert } from "@/components/ui/alert";
+import NotFound from "@/app/not-found";
+import { isUser } from "@/lib/auth/roles";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function NewRequisitionPage() {
     const {
@@ -37,6 +40,12 @@ export default function NewRequisitionPage() {
         taskTypesError,
         submitWindowStatusError,
     ].filter(Boolean);
+
+    const { user } = useAuth();
+
+    if (!isUser(user)) {
+        return <NotFound />;
+    }
 
     if (loading) {
         return (
