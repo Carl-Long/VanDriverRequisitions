@@ -21,17 +21,17 @@ export type RequisitionLimitRuleSummary = {
 };
 
 export type CreateRequisitionLimitRule = {
-    categoryId: number;
+    category: number;
     feTaskTypeId?: string | null;
-    fasciaId: number;
+    fascia: number;
     maxQuantity: number;
     maxRate: number;
 };
 
 export type UpdateRequisitionLimitRule = {
-    categoryId: number;
+    category: number;
     feTaskTypeId?: string | null;
-    fasciaId: number;
+    fascia: number;
     maxQuantity: number;
     maxRate: number;
 };
