@@ -1,32 +1,21 @@
 "use client";
 
-import { Calendar, ChevronRight, User } from "lucide-react";
-import { formatDateTime } from "@/lib/format/date";
-import { EmptyState } from "@/components/ui/empty-state";
-import { useRouter } from "next/navigation";
-import { SubmissionStatusPill } from "./submission-status-pill";
-import { SubmissionStatus } from "./submission-status";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-type SubmissionHistoryItem = {
-    id: string;
-    submissionNumber: number;
-    status: SubmissionStatus;
-    submittedByNameSnapshot: string;
-    submittedAtUtc: string;
-    reviewedByNameSnapshot: string | null;
-    reviewedAtUtc: string | null;
-    rejectionNotes: string | null;
-};
+import { EmptyState } from "@/components/ui/empty-state";
+import type { FeRequisitionSubmissionHistory } from "@/lib/api/fe-requisitions";
+
+import { SubmissionStatusPill } from "./submission-status-pill";
+import { AuditField } from "@/components/ui/field/audit-field";
 
 type Props = {
-    submissions: SubmissionHistoryItem[];
+    submissions: FeRequisitionSubmissionHistory[];
 };
 
 export function FeSubmissionHistoryTab({
     submissions,
 }: Readonly<Props>) {
-
     const orderedSubmissions = [...submissions].sort(
         (a, b) =>
             b.submissionNumber -
@@ -34,25 +23,23 @@ export function FeSubmissionHistoryTab({
     );
 
     if (orderedSubmissions.length === 0) {
-        return (<EmptyState title="No Submission History" />);
+        return <EmptyState title="No Submission History" />;
     }
 
     return (
         <div className="space-y-4">
-            {orderedSubmissions.map(
-                (submission) => (
-                    <SubmissionCard
-                        key={submission.id}
-                        submission={submission}
-                    />
-                ),
-            )}
+            {orderedSubmissions.map((submission) => (
+                <SubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                />
+            ))}
         </div>
     );
 }
 
 type SubmissionCardProps = {
-    submission: SubmissionHistoryItem;
+    submission: FeRequisitionSubmissionHistory;
 };
 
 function SubmissionCard({
@@ -112,48 +99,28 @@ function SubmissionCard({
             </div>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
-                <div>
-                    <div className="text-sm font-medium">
-                        Submitted By
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="h-4 w-4" />
-                        {submission.submittedByNameSnapshot}
-                    </div>
-
-                    <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {formatDateTime(submission.submittedAtUtc)}
-                    </div>
-                </div>
+                <AuditField
+                    label="Submitted By"
+                    name={submission.submittedByNameSnapshot}
+                    dateTime={submission.submittedAtUtc}
+                />
 
                 {submission.reviewedAtUtc && (
-                    <div>
-                        <div className="text-sm font-medium">
-                            Reviewed
-                        </div>
-
-                        <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="h-4 w-4" />
-                            {submission.reviewedByNameSnapshot}
-                        </div>
-
-                        <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            {formatDateTime(submission.reviewedAtUtc)}
-                        </div>
-                    </div>
+                    <AuditField
+                        label="Reviewed By"
+                        name={submission.reviewedByNameSnapshot}
+                        dateTime={submission.reviewedAtUtc}
+                    />
                 )}
             </div>
 
             {submission.rejectionNotes && (
                 <div className="mt-6 border-t border-border pt-4">
-                    <div className="text-sm font-medium">
+                    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         Rejection Reason
                     </div>
 
-                    <div className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                    <div className="mt-2 whitespace-pre-wrap text-sm font-medium">
                         {submission.rejectionNotes}
                     </div>
                 </div>

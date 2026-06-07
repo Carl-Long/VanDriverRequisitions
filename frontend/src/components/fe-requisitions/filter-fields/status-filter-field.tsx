@@ -53,7 +53,7 @@ export function StatusFilterField({
                         value
                     ].label
                     }`
-                    : "Status: All statuses"
+                    : "Status: All"
             }
             pinnedOptions={STATIC_OPTIONS}
             options={statusOptions}

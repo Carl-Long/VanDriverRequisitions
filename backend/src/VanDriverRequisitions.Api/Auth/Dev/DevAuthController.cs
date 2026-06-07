@@ -18,15 +18,16 @@ public class DevAuthController : ControllerBase
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(DevJwtConstants.DevKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
+
         var claims = new List<Claim>
         {
             new("oid", user.Oid.ToString()),
             new("preferred_username", user.UserPrincipalName),
             new("name", user.DisplayName),
-            new(ClaimTypes.Role, user.Role)
         };
-        
+
+        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
         var token = new JwtSecurityToken(
             issuer: "https://dev.local",
             audience: "api",

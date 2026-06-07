@@ -36,7 +36,7 @@ public class SubmitWindowsController(
     }
 
     [HttpPost]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -48,7 +48,7 @@ public class SubmitWindowsController(
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -64,7 +64,7 @@ public class SubmitWindowsController(
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)

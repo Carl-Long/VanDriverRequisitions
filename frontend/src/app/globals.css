@@ -5,6 +5,11 @@
     --radius: 1rem;
 }
 
+.text-size-default { font-size: 16px; }
+.text-size-large { font-size: 18px; }
+.text-size-extra-large { font-size: 20px; }
+.text-size-largest { font-size: 24px; }
+
 .light-brand {
     --background: 245 245 247;
 

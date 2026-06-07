@@ -19,6 +19,9 @@ public class FeRequisitionSubmissionConfiguration : IEntityTypeConfiguration<FeR
 
         builder.Property(x => x.ReviewedByNameSnapshot)
             .HasMaxLength(256);
+        
+        builder.Property(x => x.PoNumber)
+            .HasMaxLength(50);
 
         builder.Property(x => x.RejectionNotes)
             .HasMaxLength(1000);

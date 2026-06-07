@@ -23,9 +23,12 @@ import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requis
 import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import NotFound from "@/app/not-found";
+import { useAuth } from "@/providers/auth-provider";
+import { canCreateRequisitions } from "@/lib/auth/roles";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
+    const { user } = useAuth();
 
     const {
         limitRules,
@@ -106,6 +109,15 @@ export default function Page() {
         (e): e is string => Boolean(e),
     );
 
+
+    if (!canCreateRequisitions(user)) {
+        return <NotFound />;
+    }
+
+    if (notFound) {
+        return <NotFound />;
+    }
+
     if (pageLoading) {
         return (
             <PageContainer>
@@ -114,8 +126,8 @@ export default function Page() {
         );
     }
 
-    if (notFound) {
-        return <NotFound />;
+    if (!requisition) {
+        return null;
     }
 
     if (errors.length > 0) {
@@ -130,11 +142,6 @@ export default function Page() {
                 </div>
             </PageContainer>
         );
-    }
-
-    
-    if (!requisition) {
-        return null;
     }
 
     return (

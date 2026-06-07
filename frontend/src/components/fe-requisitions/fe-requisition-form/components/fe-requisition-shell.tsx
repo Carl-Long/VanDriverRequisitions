@@ -23,6 +23,8 @@ import { FeTaskType } from "@/lib/api/fe-task-types";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
+import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";
+import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -37,6 +39,8 @@ export type SaveAction =
     | "saveAndContinue"
     | "saveAndClose"
     | "submit"
+    | "approve"
+    | "reject"
     | null;
 
 export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition, submitWindowStatus, submitWindowStatusLoading }: Readonly<Props>) {
@@ -79,9 +83,13 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
 
     const [activeTab, setActiveTab] = useState("details");
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const isReadonly = mode === "readonly";
+    const isReadonly =
+        mode === "readonly" ||
+        mode === "approval";
 
     const router = useRouter();
     const toast = useToast();
@@ -92,8 +100,6 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
-    const showHistory = draft.submissionHistory.length > 0;
-
 
     async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
         const result =
@@ -243,6 +249,104 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         }
     }
 
+    function handleApproveRequest() {
+        if (mode !== "approval") {
+            return;
+        }
+
+        setIsApproveModalOpen(true);
+    }
+
+    function handleRejectRequest() {
+        if (mode !== "approval") {
+            return;
+        }
+
+        setIsRejectModalOpen(true);
+    }
+
+    async function handleApproveConfirm() {
+        if (!draft.requisitionId) {
+            return;
+        }
+
+        setIsApproveModalOpen(false);
+        setActiveAction("approve");
+
+        try {
+            setErrors({});
+            setIsSaving(true);
+
+            const approved = await feRequisitionsApi.approve(
+                draft.requisitionId,
+                {
+                    rowVersion: draft.rowVersion,
+                },
+            );
+
+            toast.success(`Requisition #${approved.requisitionNumber} approved`);
+            router.push("/home-van-drivers/approvals");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form:
+                        err.detail ??
+                        err.message,
+                });
+
+                return;
+            }
+
+            setErrors({
+                form: "Failed to approve requisition",
+            });
+        } finally {
+            setIsSaving(false);
+            setActiveAction(null);
+        }
+    }
+
+    async function handleRejectConfirm(rejectionNotes: string) {
+        if (!draft.requisitionId) {
+            return;
+        }
+
+        setIsRejectModalOpen(false);
+        setActiveAction("reject");
+
+        try {
+            setErrors({});
+            setIsSaving(true);
+
+            const rejected = await feRequisitionsApi.reject(draft.requisitionId,
+                {
+                    rowVersion: draft.rowVersion,
+                    rejectionNotes,
+                },
+            );
+
+            toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
+            router.push("/home-van-drivers/approvals");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form:
+                        err.detail ??
+                        err.message,
+                });
+
+                return;
+            }
+
+            setErrors({
+                form: "Failed to reject requisition",
+            });
+        } finally {
+            setIsSaving(false);
+            setActiveAction(null);
+        }
+    }
+
     return (
         <div className="space-y-4">
             <FeRequisitionHeader
@@ -259,6 +363,8 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmitRequest}
+                onApprove={handleApproveRequest}
+                onReject={handleRejectRequest}
             />
 
             {errors.form && (
@@ -364,12 +470,32 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 }}
             />
 
-            <FeRequisitionSubmitModal
-                open={isSubmitModalOpen}
-                loading={activeAction === "submit"}
-                onClose={() => setIsSubmitModalOpen(false)}
-                onConfirm={handleSubmitConfirm}
-            />
+            {canSubmit && (
+                <FeRequisitionSubmitModal
+                    open={isSubmitModalOpen}
+                    loading={activeAction === "submit"}
+                    onClose={() => setIsSubmitModalOpen(false)}
+                    onConfirm={handleSubmitConfirm}
+                />
+            )}
+
+            {mode === "approval" && (
+                <>
+                    <FeRequisitionApproveModal
+                        open={isApproveModalOpen}
+                        loading={activeAction === "approve"}
+                        onClose={() => setIsApproveModalOpen(false)}
+                        onConfirm={handleApproveConfirm}
+                    />
+
+                    <FeRequisitionRejectModal
+                        open={isRejectModalOpen}
+                        loading={activeAction === "reject"}
+                        onClose={() => setIsRejectModalOpen(false)}
+                        onConfirm={handleRejectConfirm}
+                    />
+                </>
+            )}
         </div>
     );
 }

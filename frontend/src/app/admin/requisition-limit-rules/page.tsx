@@ -7,11 +7,8 @@ import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
-import { Surface } from "@/components/ui/surface";
-
 import { useToast } from "@/providers/toast-provider";
-
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 import {
     requisitionLimitRulesApi,
     type RequisitionLimitRuleSummary,

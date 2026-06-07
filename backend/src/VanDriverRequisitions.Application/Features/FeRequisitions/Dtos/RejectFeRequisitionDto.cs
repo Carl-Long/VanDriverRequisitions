@@ -2,6 +2,6 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
 public sealed class RejectFeRequisitionDto
 {
-    public required byte[] RowVersion { get; init; }
-    public required string RejectionNotes { get; init; }
+    public byte[]? RowVersion { get; init; }
+    public string RejectionNotes { get; init; } = string.Empty;
 }

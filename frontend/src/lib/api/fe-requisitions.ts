@@ -135,6 +135,7 @@ export type FeRequisitionSubmissionHistory = {
     submittedAtUtc: string;
     reviewedByNameSnapshot: string | null;
     reviewedAtUtc: string | null;
+    poNumber: string | null;
     rejectionNotes: string | null;
 };
 
@@ -170,6 +171,7 @@ export type FeRequisitionSubmissionDetail = {
     reviewedByName: string | null;
     reviewedAtUtc: string | null;
     rejectionNotes: string | null;
+    poNumber: string | null;
     snapshot: FeRequisitionSnapshot;
 };
 
@@ -220,6 +222,15 @@ export type SaveFeRequisition = {
     feAdditionalCosts: SaveFeAdditionalCost[];
 };
 
+export type ApproveFeRequisitionRequest = {
+    rowVersion: string | null;
+};
+
+export type RejectFeRequisitionRequest = {
+    rowVersion: string | null;
+    rejectionNotes: string;
+};
+
 export const feRequisitionsApi = {
     getAll: (query: FeRequisitionQuery = {}) => {
         const params = new URLSearchParams();
@@ -254,10 +265,7 @@ export const feRequisitionsApi = {
             },
         ),
 
-    submitExisting: (
-        id: string,
-        data: SaveFeRequisition,
-    ) =>
+    submitExisting: (id: string, data: SaveFeRequisition) =>
         apiFetch<FeRequisitionDetail>(
             `${BASE}/${id}/submit`,
             {
@@ -268,4 +276,22 @@ export const feRequisitionsApi = {
 
     getSubmission: (submissionId: string) =>
         apiFetch<FeRequisitionSubmissionDetail>(`${BASE}/submissions/${submissionId}`,),
+
+    approve: (id: string, data: ApproveFeRequisitionRequest) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/${id}/approve`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
+
+    reject: (id: string, data: RejectFeRequisitionRequest) =>
+        apiFetch<FeRequisitionDetail>(
+            `${BASE}/${id}/reject`,
+            {
+                method: "POST",
+                body: data,
+            },
+        ),
 };

@@ -28,6 +28,7 @@ import { mapZodErrors } from "../lib/map-zod-errors";
 
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 import { formatCurrencyGB } from "@/lib/format/currency";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     open: boolean;
@@ -404,15 +405,9 @@ export function FeGeneralTaskDrawer({
                         />
                     </div>
                     {errors.form && (
-                        <div
-                            className="
-                                rounded-lg border border-danger/30
-                                bg-danger/5 px-3 py-2
-                                text-sm text-danger
-                            "
-                        >
+                        <Alert>
                             {errors.form}
-                        </div>
+                        </Alert>
                     )}
 
                     <Field

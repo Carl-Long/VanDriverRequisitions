@@ -9,5 +9,9 @@ public static class DbSequences
     public const string StdRequisitionNumber = "StdRequisitionNumber";
     public const int StdRequisitionNumberStartsAt = 1;
     public const int StdRequisitionNumberIncrementsBy = 1;
+
+    public const string PoNumber = "PoNumber";
+    public const int PoNumberStartsAt = 1;
+    public const int PoNumberIncrementsBy = 1;
     
 }

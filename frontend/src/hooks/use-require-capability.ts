@@ -2,32 +2,28 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { AuthUser } from "@/providers/auth-provider";
 
-import { AuthUser } from "@/providers/auth-provider";
-import { getRole } from "@/lib/auth/roles";
-
-type Options = {
+type Props = {
     user: AuthUser | null;
     loading: boolean;
-    role: string;
+    allowed: (user?: AuthUser | null) => boolean;
     redirectTo?: string;
 };
 
-export function useRequireRole({
+export function useRequireCapability({
     user,
     loading,
-    role,
+    allowed,
     redirectTo = "/unauthorised",
-}: Options) {
+}: Readonly<Props>) {
     const router = useRouter();
 
     useEffect(() => {
         if (loading) return;
 
-        const userRole = getRole(user);
-
-        if (userRole !== role.toLowerCase()) {
+        if (!allowed(user)) {
             router.replace(redirectTo);
         }
-    }, [user, loading, role, redirectTo, router]);
+    }, [user, loading, allowed, redirectTo, router]);
 }

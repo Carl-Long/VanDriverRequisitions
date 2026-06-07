@@ -30,10 +30,10 @@ export default function NotFoundPage() {
                 <div className="mt-6">
                     <Button
                         onClick={() =>
-                            router.push("/home-van-drivers")
+                            router.push("/")
                         }
                     >
-                        Return to requisitions
+                        Return to home
                     </Button>
                 </div>
             </div>

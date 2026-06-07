@@ -21,9 +21,9 @@ public static class DevDataSeeder
     // ─────────────────────────────────────────────
 
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
-    private static readonly Guid DeliveriesTaskTypeId  = new("c0000001-0001-0001-0001-000000000002");
-    private static readonly Guid WasteTaskTypeId       = new("c0000001-0001-0001-0001-000000000003");
-    private static readonly Guid LoadingTaskTypeId     = new("c0000001-0001-0001-0001-000000000004");
+    private static readonly Guid DeliveriesTaskTypeId = new("c0000001-0001-0001-0001-000000000002");
+    private static readonly Guid WasteTaskTypeId = new("c0000001-0001-0001-0001-000000000003");
+    private static readonly Guid LoadingTaskTypeId = new("c0000001-0001-0001-0001-000000000004");
 
     // ─────────────────────────────────────────────
     // System user (audit fallback)
@@ -35,9 +35,9 @@ public static class DevDataSeeder
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
-        var hasRules     = await context.RequisitionLimitRules.AnyAsync();
-        var hasShops     = await context.Shops.AnyAsync();
-        var hasDrivers   = await context.VanDrivers.AnyAsync();
+        var hasRules = await context.RequisitionLimitRules.AnyAsync();
+        var hasShops = await context.Shops.AnyAsync();
+        var hasDrivers = await context.VanDrivers.AnyAsync();
         var hasRequisitions = await context.FeRequisitions.AnyAsync();
 
         if (hasTaskTypes && hasRules && hasShops && hasDrivers)
@@ -58,9 +58,9 @@ public static class DevDataSeeder
         {
             context.FeTaskTypes.AddRange(
                 new FeTaskType { Id = CollectionsTaskTypeId, Name = "Collections", Code = "23707" },
-                new FeTaskType { Id = DeliveriesTaskTypeId,  Name = "Deliveries",  Code = "23709" },
-                new FeTaskType { Id = WasteTaskTypeId,       Name = "Waste",       Code = "20097" },
-                new FeTaskType { Id = LoadingTaskTypeId,     Name = "Loading&Unloading", Code = "10119" }
+                new FeTaskType { Id = DeliveriesTaskTypeId, Name = "Deliveries", Code = "23709" },
+                new FeTaskType { Id = WasteTaskTypeId, Name = "Waste", Code = "20097" },
+                new FeTaskType { Id = LoadingTaskTypeId, Name = "Loading&Unloading", Code = "10119" }
             );
 
             await context.SaveChangesAsync();
@@ -71,7 +71,7 @@ public static class DevDataSeeder
         // 2. LIMIT RULES
         // ─────────────────────────────────────────────
 
-       if (!hasRules)
+        if (!hasRules)
         {
             context.RequisitionLimitRules.AddRange(
 
@@ -340,7 +340,7 @@ public static class DevDataSeeder
         var rng = new Random(123);
 
         var taskTypes = await context.FeTaskTypes.ToListAsync();
-        
+
         var shops = await context.Shops
             .Where(x => x.IsActive)
             .Take(200)
@@ -386,33 +386,89 @@ public static class DevDataSeeder
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
             requisition.CreatedByNameSnapshot = user.Name;
-            
+
             switch (status)
             {
                 case RequisitionStatus.Draft:
                     break;
 
                 case RequisitionStatus.Submitted:
-                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-                    requisition.Submit(user.Id, submitter.Name, createdDate.AddHours(2));
-                    break;
+                    {
+                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                        var submittedAtUtc = createdDate.AddHours(2);
+
+                        var submission = FeRequisitionSubmission.Create(
+                            requisition.NextSubmissionNumber,
+                            submitter.Id,
+                            submitter.Name,
+                            submittedAtUtc,
+                            BuildSeedSnapshotJson(requisition));
+
+                        requisition.AddSubmission(submission);
+                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+
+                        break;
+                    }
 
                 case RequisitionStatus.Rejected:
-                    var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
-                    var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)]; 
-                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
-                    requisition.Reject(user.Id, rejecter.Name, rejectedReason, createdDate.AddDays(1));
-                    break;
+                    {
+                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                        var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
+                        var submittedAtUtc = createdDate.AddHours(2);
+                        var rejectedAtUtc = createdDate.AddDays(1);
+                        var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
+
+                        var submission = FeRequisitionSubmission.Create(
+                            requisition.NextSubmissionNumber,
+                            submitter.Id,
+                            submitter.Name,
+                            submittedAtUtc,
+                            BuildSeedSnapshotJson(requisition));
+
+                        requisition.AddSubmission(submission);
+                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+
+                        requisition.RejectSubmission(
+                            rejecter.Id,
+                            rejecter.Name,
+                            rejectedReason,
+                            rejectedAtUtc);
+
+                        break;
+                    }
 
                 case RequisitionStatus.Approved:
-                    var approver = SeedUsers[rng.Next(SeedUsers.Length)];
-                    requisition.Submit(user.Id, user.Name, createdDate.AddHours(2));
-                    requisition.Approve(user.Id, approver.Name, createdDate.AddDays(2),$"PO-{rng.Next(100000, 999999)}");
-                    break;
+                    {
+                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                        var approver = SeedUsers[rng.Next(SeedUsers.Length)];
+                        var submittedAtUtc = createdDate.AddHours(2);
+                        var approvedAtUtc = createdDate.AddDays(2);
+                        var poNumber = BuildSeedPoNumber(i);
+
+                        var submission = FeRequisitionSubmission.Create(
+                            requisition.NextSubmissionNumber,
+                            submitter.Id,
+                            submitter.Name,
+                            submittedAtUtc,
+                            BuildSeedSnapshotJson(requisition));
+
+                        requisition.AddSubmission(submission);
+                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+
+                        requisition.ApproveSubmission(
+                            approver.Id,
+                            approver.Name,
+                            approvedAtUtc,
+                            poNumber);
+
+                        break;
+                    }
+
                 default:
-                    throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);
+                    throw new ArgumentOutOfRangeException(
+                        message: "Unknown status attempted during seed",
+                        null);
             }
-            
             requisitions.Add(requisition);
         }
 
@@ -422,7 +478,7 @@ public static class DevDataSeeder
 
         logger?.LogInformation("Seeded {Count} requisitions.", count);
     }
-    
+
     private static RequisitionStatus GetRandomStatus(Random rng)
     {
         var statuses = new[]
@@ -435,16 +491,16 @@ public static class DevDataSeeder
 
         return statuses[rng.Next(statuses.Length)];
     }
-    
+
     private static List<FeGeneralTaskUpdateModel> BuildSeedTasks(Random rng, List<FeTaskType> taskTypes, DateOnly requisitionDate)
     {
         var taskCount = rng.Next(1, 4);
         var selectedTaskTypes = taskTypes
             .OrderBy(_ => rng.Next())
             .Take(taskCount);
-        
+
         var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
-        
+
         var tasks = new List<FeGeneralTaskUpdateModel>();
 
         foreach (var taskType in selectedTaskTypes)
@@ -470,9 +526,9 @@ public static class DevDataSeeder
 
         return tasks;
     }
-    
+
     private static string Esc(string value) => value.Replace("'", "''");
-    
+
     private static readonly string[] RejectionReasons =
     [
         "Quantity exceeds permitted limit.",
@@ -482,4 +538,39 @@ public static class DevDataSeeder
         "Week ending date is invalid.",
         "Requires manager review before approval."
     ];
+
+    private static string BuildSeedPoNumber(int i)
+    {
+        return $"PO-SEED-{i:D6}";
+    }
+
+    private static string BuildSeedSnapshotJson(FeRequisition requisition)
+    {
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            requisition.Id,
+            requisition.RequisitionNumber,
+            requisition.RequisitionDate,
+            requisition.VanDriverId,
+            requisition.VanDriverName,
+            requisition.TradersName,
+            requisition.VanDriverCode,
+            requisition.ShopId,
+            requisition.ShopCode,
+            requisition.ShopName,
+            requisition.IsVatApplicable,
+            requisition.Subtotal,
+            GeneralTasks = requisition.FeGeneralTasks.Select(x => new
+            {
+                x.Id,
+                x.FeTaskTypeId,
+                x.TaskTypeName,
+                x.TaskTypeCode,
+                x.WeekEndingDate,
+                x.Week,
+                x.RatePerJob,
+                x.TotalValue
+            })
+        });
+    }
 }

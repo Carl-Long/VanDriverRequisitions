@@ -1,4 +1,5 @@
 export type FeRequisitionPageMode =
     | "create"
     | "edit"
-    | "readonly";
+    | "readonly"
+    | "approval";

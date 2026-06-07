@@ -8,38 +8,26 @@ import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
-import { Calendar, User } from "lucide-react";
-import { formatDateTime } from "@/lib/format/date";
+import { AuditField } from "@/components/ui/field/audit-field";
+import { SummaryField } from "@/components/ui/field/summary-field";
+import { StatusPill } from "../../status-pill";
 
 type Props = {
     readonly: boolean;
     draft: FeRequisitionDraft;
     errors: Record<string, string>;
-
     clearError: (field: string) => void;
-
-    onRequisitionDateChange: (
-        date: Date | null,
-    ) => void;
-
-    onVanDriverChange: (
-        params: {
-            id: string | null;
-            label: string | null;
-            summary: VanDriverLookup | null;
-        },
-    ) => void;
-
-    onVanDriverNameChange: (
-        value: string,
-    ) => void;
-
-    onShopChange: (
-        params: {
-            id: string | null;
-            label: string | null;
-        },
-    ) => void;
+    onRequisitionDateChange: (date: Date | null) => void;
+    onVanDriverChange: (params: {
+        id: string | null;
+        label: string | null;
+        summary: VanDriverLookup | null;
+    }) => void;
+    onVanDriverNameChange: (value: string) => void;
+    onShopChange: (params: {
+        id: string | null;
+        label: string | null;
+    }) => void;
 };
 
 export function FeRequisitionDetailsTab({
@@ -52,10 +40,23 @@ export function FeRequisitionDetailsTab({
     onVanDriverNameChange,
     onShopChange,
 }: Readonly<Props>) {
+    const isApproved = draft.status === "Approved";
+    const isRejected = draft.status === "Rejected";
+    const showProcessingInfo = isApproved || isRejected;
 
-    const isApproved = draft.status === "Approved"
-    const isRejected = draft.status === "Rejected"
-    const processedAtUtc = draft.approvedAtUtc ?? draft.rejectedAtUtc;
+    const processedByName = isApproved
+        ? draft.approvedByNameSnapshot
+        : draft.rejectedByNameSnapshot;
+
+    const processedAtUtc = isApproved
+        ? draft.approvedAtUtc
+        : draft.rejectedAtUtc;
+
+    const processingStatus = isApproved
+        ? "Approved"
+        : isRejected
+            ? "Rejected"
+            : null;
 
     return (
         <div className="space-y-6">
@@ -79,14 +80,9 @@ export function FeRequisitionDetailsTab({
                         >
                             <DatePicker
                                 disabled={readonly}
-                                value={
-                                    draft.requisitionDate ??
-                                    undefined
-                                }
+                                value={draft.requisitionDate ?? undefined}
                                 onChange={(date) =>
-                                    onRequisitionDateChange(
-                                        date ?? null,
-                                    )
+                                    onRequisitionDateChange(date ?? null)
                                 }
                             />
                         </Field>
@@ -97,18 +93,13 @@ export function FeRequisitionDetailsTab({
                             error={errors.shopId}
                             value={draft.shopId}
                             label={draft.shopLabel}
-                            onChange={(
-                                value,
-                                label,
-                            ) => {
+                            onChange={(value, label) => {
                                 onShopChange({
                                     id: value,
                                     label,
                                 });
 
-                                clearError(
-                                    "shopId",
-                                );
+                                clearError("shopId");
                             }}
                         />
 
@@ -119,14 +110,8 @@ export function FeRequisitionDetailsTab({
                             label={draft.vanDriverLabel}
                             onChange={(params) => {
                                 onVanDriverChange(params);
-
-                                clearError(
-                                    "vanDriverId",
-                                );
-
-                                clearError(
-                                    "vanDriverName",
-                                );
+                                clearError("vanDriverId");
+                                clearError("vanDriverName");
                             }}
                         />
 
@@ -137,96 +122,75 @@ export function FeRequisitionDetailsTab({
                         >
                             <Input
                                 disabled={readonly}
-                                value={
-                                    draft.vanDriverName ?? ""
-                                }
+                                value={draft.vanDriverName ?? ""}
                                 state={
                                     errors.vanDriverName
                                         ? "error"
                                         : "default"
                                 }
                                 onChange={(e) => {
-                                    onVanDriverNameChange(
-                                        e.target.value,
-                                    );
+                                    onVanDriverNameChange(e.target.value);
 
-                                    if (
-                                        e.target.value.trim()
-                                    ) {
-                                        clearError(
-                                            "vanDriverName",
-                                        );
+                                    if (e.target.value.trim()) {
+                                        clearError("vanDriverName");
                                     }
                                 }}
                             />
                         </Field>
                     </div>
-                    {(isApproved || isRejected) && (
+
+                    {showProcessingInfo && (
                         <div className="mt-8 border-t border-border pt-6">
-                            <div className="flex items-start justify-between">
-                                <h3 className="text-sm font-medium">
-                                    Processing Information
-                                </h3>
+                            <div className="mb-6 flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 className="text-sm font-medium">
+                                        Processing Information
+                                    </h3>
 
-                                {/* Top-right audit summary */}
-                                <div className="text-right text-sm text-muted-foreground space-y-0.5">
-                                    {isApproved && draft.approvedByNameSnapshot && (
-                                        <div className="flex items-center justify-end gap-2">
-                                            <User className="h-4 w-4" />
-
-                                            <span className="font-medium text-foreground">
-                                                Approved by{" "}
-                                                {draft.approvedByNameSnapshot}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {isRejected && draft.rejectedByNameSnapshot && (
-                                        <div className="flex items-center justify-end gap-2">
-                                            <User className="h-4 w-4" />
-
-                                            <span className="font-medium text-foreground">
-                                                Rejected by{" "}
-                                                {draft.rejectedByNameSnapshot}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {processedAtUtc && (
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Calendar className="h-3.5 w-3.5" />
-                                            <span>
-                                                {formatDateTime(processedAtUtc)}
-                                            </span>
-                                        </div>
-                                    )}
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Review outcome for this requisition
+                                    </p>
                                 </div>
+
+                                {processingStatus && (
+                                    <StatusPill
+                                        status={processingStatus}
+                                    />
+                                )}
                             </div>
 
-                            <div className="mt-4 space-y-3">
-                                {/* APPROVED */}
-                                {isApproved && draft.poNumber && (
-                                    <div>
-                                        <div className="text-sm font-medium">
-                                            PO Number
-                                        </div>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <AuditField
+                                    label={
+                                        isApproved
+                                            ? "Approved By"
+                                            : "Rejected By"
+                                    }
+                                    name={processedByName}
+                                    dateTime={processedAtUtc}
+                                />
 
-                                        <div className="mt-1 text-sm text-muted-foreground">
-                                            {draft.poNumber}
-                                        </div>
-                                    </div>
+                                {isApproved && draft.poNumber && (
+                                    <SummaryField
+                                        label="PO Number"
+                                        value={
+                                            <span className="font-mono">
+                                                {draft.poNumber}
+                                            </span>
+                                        }
+                                    />
                                 )}
 
-                                {/* REJECTED */}
                                 {isRejected && (
-                                    <div>
-                                        <div className="text-sm font-medium">
-                                            Rejection Reason
-                                        </div>
-
-                                        <div className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
-                                            {draft.rejectionNotes}
-                                        </div>
+                                    <div className="md:col-span-2">
+                                        <SummaryField
+                                            label="Rejection Reason"
+                                            value={
+                                                <div className="whitespace-pre-wrap font-normal">
+                                                    {draft.rejectionNotes}
+                                                </div>
+                                            }
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -235,9 +199,7 @@ export function FeRequisitionDetailsTab({
                 </div>
 
                 <VanDriverSummaryCard
-                    vanDriver={
-                        draft.vanDriverSummary
-                    }
+                    vanDriver={draft.vanDriverSummary}
                 />
             </div>
         </div>

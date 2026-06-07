@@ -1,10 +1,5 @@
-using System.Security.Claims;
-using System.Text;
 using Asp.Versioning;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using VanDriverRequisitions.Api.Auth.Dev;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Validators;
 
@@ -21,15 +16,19 @@ public static class ApiDependencyInjection
             options.DefaultApiVersion = new ApiVersion(1, 0);
             options.ReportApiVersions = true;
         });
-        
+
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.AddValidatorsFromAssembly(typeof(CreateFeTaskTypeDtoValidator).Assembly);
         services.AddExceptionHandling();
-        
+
         services.AddAuthorizationBuilder()
-            .AddPolicy(Policies.AdminOnly, p =>
+            .AddPolicy(Policies.CanCreateRequisitions, p =>
+                p.RequireRole(Roles.User, Roles.Admin))
+            .AddPolicy(Policies.CanApproveRequisitions, p =>
+                p.RequireRole(Roles.Approver))
+            .AddPolicy(Policies.CanManageConfiguration, p =>
                 p.RequireRole(Roles.Admin));
 
         return services;

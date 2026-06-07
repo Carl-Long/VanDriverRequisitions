@@ -44,7 +44,7 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
             }
         }
     }
-    
+
     public new EntityEntry Entry(object entity)
     {
         return base.Entry(entity);
@@ -57,5 +57,17 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
             .ToListAsync(cancellationToken);
 
         return $"F{result[0]:D9}";
+    }
+
+    public async Task<string> NextPoNumberAsync(CancellationToken cancellationToken)
+    {
+        var result = await Database
+            .SqlQueryRaw<long>(
+                $"SELECT NEXT VALUE FOR {DbSequences.PoNumber} AS Value")
+            .ToListAsync(cancellationToken);
+
+        var year = DateTime.UtcNow.ToString("yy");
+
+        return $"PO{year}-{result[0]:D6}";
     }
 }

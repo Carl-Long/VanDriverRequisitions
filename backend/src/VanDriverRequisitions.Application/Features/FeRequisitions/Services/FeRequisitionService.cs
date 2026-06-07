@@ -21,6 +21,7 @@ public class FeRequisitionService(
     IApplicationDbContext context,
     ICurrentUserService currentUser,
     IValidatorService validator,
+    IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -63,11 +64,11 @@ public class FeRequisitionService(
     public async Task<FeRequisitionDetailDto> CreateAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
-        
+
         var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
         var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
         var requisition = FeRequisition.Create(requisitionNumber, requisitionData.Details, requisitionData.TaskModels);
-        
+
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
         context.FeRequisitions.Add(requisition);
@@ -76,7 +77,7 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, requisitionData.DriverSummary);
     }
-    
+
     public async Task<FeRequisitionDetailDto> UpdateAsync(Guid id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
@@ -109,11 +110,11 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(existingRequisition, requisitionData.DriverSummary);
     }
-    
+
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         if (currentUser.User is null) throw new NotFoundException("Submissions must be done via a user.");
-        
+
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
         FeRequisition requisition;
@@ -158,13 +159,15 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, requisitionData.DriverSummary);
     }
-    
+
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         if (currentUser.User is null)
         {
             throw new NotFoundException("Approval must be performed by a user.");
         }
+
+        await validator.ValidateAsync(approveFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
@@ -173,7 +176,9 @@ public class FeRequisitionService(
             .Property(nameof(FeRequisition.RowVersion))
             .OriginalValue = approveFeRequisitionDto.RowVersion;
 
-        requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, approveFeRequisitionDto.PoNumber);
+        var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
+
+        requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, poNumber);
 
         try
         {
@@ -192,13 +197,15 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
     }
-    
+
     public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         if (currentUser.User is null)
         {
             throw new NotFoundException("Rejection must be performed by a user.");
         }
+
+        await validator.ValidateAsync(rejectFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
@@ -226,7 +233,7 @@ public class FeRequisitionService(
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary);
     }
-    
+
     public async Task<FeRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
     {
         var submission = await context.FeRequisitionSubmissions
@@ -239,13 +246,13 @@ public class FeRequisitionService(
         {
             throw new NotFoundException($"Submission '{submissionId}' was not found.");
         }
-        
+
         var snapshot = JsonSerializer.Deserialize<FeRequisitionSnapshotDto>(submission.SnapshotJson);
         if (snapshot is null)
         {
             throw new InvalidOperationException($"Submission '{submissionId}' contains an invalid snapshot.");
         }
-        
+
         return new FeRequisitionSubmissionDetailDto
         {
             Id = submission.Id,
@@ -253,6 +260,7 @@ public class FeRequisitionService(
             Status = submission.Status.ToString(),
             SubmittedByName = submission.SubmittedByNameSnapshot,
             SubmittedAtUtc = submission.SubmittedAtUtc,
+            PoNumber = submission.PoNumber,
             ReviewedByName = submission.ReviewedByNameSnapshot,
             ReviewedAtUtc = submission.ReviewedAtUtc,
             RejectionNotes = submission.RejectionNotes,
@@ -298,7 +306,7 @@ public class FeRequisitionService(
             })
             .ToList();
     }
-    
+
     private async Task<RequisitionBuildData> BuildRequisitionDataAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
     {
         var driverSummary = await context.VanDrivers
@@ -337,6 +345,6 @@ public class FeRequisitionService(
 
         return new RequisitionBuildData(driverSummary, details, taskModels);
     }
-    
+
     private sealed record RequisitionBuildData(VanDriverLookupDto DriverSummary, RequisitionDetails Details, List<FeGeneralTaskUpdateModel> TaskModels);
 }

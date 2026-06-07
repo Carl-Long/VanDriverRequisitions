@@ -1,6 +1,8 @@
 namespace VanDriverRequisitions.Application.Common.Security;
 
-public class Policies
+public static class Policies
 {
-    public const string AdminOnly = "AdminOnly";
+    public const string CanCreateRequisitions = "CanCreateRequisitions";
+    public const string CanApproveRequisitions = "CanApproveRequisitions";
+    public const string CanManageConfiguration = "CanManageConfiguration";
 }

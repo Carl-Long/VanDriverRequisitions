@@ -24,6 +24,8 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.HasSequence("FeRequisitionNumber");
 
+            modelBuilder.HasSequence("PoNumber");
+
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.RequisitionLimitRule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -695,6 +697,10 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.Property<Guid>("FeRequisitionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PoNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("RejectionNotes")
                         .HasMaxLength(1000)
