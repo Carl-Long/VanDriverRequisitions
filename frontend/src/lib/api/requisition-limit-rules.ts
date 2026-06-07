@@ -1,5 +1,3 @@
-// lib/api/requisition-limit-rules.ts
-
 import { apiFetch } from "@/lib/api/client";
 
 const BASE = "/api/v1/requisition-limit-rules";

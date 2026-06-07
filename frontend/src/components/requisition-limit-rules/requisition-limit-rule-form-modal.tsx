@@ -41,12 +41,12 @@ const schema = z.object({
     feTaskTypeId: z.string().nullable(),
 
     maxQuantity: z.number({
-        error: "MaxQuantity must be greater than 0.",
-    }).gt(0, "MaxQuantity must be greater than 0."),
+        error: "Max Quantity must be greater than 0.",
+    }).gt(0, "Max Quantity must be greater than 0."),
 
     maxRate: z.number({
-        error: "MaxRate must be greater than 0.",
-    }).gt(0, "MaxRate must be greater than 0."),
+        error: "Max Rate must be greater than 0.",
+    }).gt(0, "Max Rate must be greater than 0."),
 }).superRefine((data, ctx) => {
     const isGeneralTask = data.categoryId === "0";
 
@@ -93,13 +93,14 @@ export function RequisitionLimitRuleFormModal({
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
 
+
     const {
         register,
         handleSubmit,
         reset,
         control,
         setValue,
-        formState: { isSubmitting },
+        formState: { isSubmitting, errors },
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -177,7 +178,11 @@ export function RequisitionLimitRuleFormModal({
                 )}
 
                 {/* CATEGORY */}
-                <Field label="Category" required>
+                <Field
+                    label="Category"
+                    required
+                    error={errors.categoryId?.message}
+                >
                     <select className={fieldBase} {...register("categoryId")}>
                         <option value="">Select category</option>
                         {categoryOptions.map(opt => (
@@ -189,7 +194,7 @@ export function RequisitionLimitRuleFormModal({
                 </Field>
 
                 {/* FASCIA */}
-                <Field label="Fascia" required>
+                <Field label="Fascia" required error={errors.fasciaId?.message}>
                     <select className={fieldBase} {...register("fasciaId")}>
                         <option value="">Select fascia</option>
                         {fasciaOptions.map(opt => (
@@ -202,7 +207,7 @@ export function RequisitionLimitRuleFormModal({
 
                 {/* TASK TYPE */}
                 {isGeneralTask && (
-                    <Field label="Task Type">
+                    <Field label="Task Type" error={errors.feTaskTypeId?.message}>
                         <select className={fieldBase} {...register("feTaskTypeId")}>
                             <option value="">None</option>
                             {taskTypes.map(t => (
@@ -217,7 +222,7 @@ export function RequisitionLimitRuleFormModal({
                 {/* Max Quantity */}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {/* Max Quantity */}
-                    <Field label="Max Quantity" required>
+                    <Field label="Max Quantity" required error={errors.maxQuantity?.message}>
                         <Input
                             type="number"
                             {...register("maxQuantity", { valueAsNumber: true })}
@@ -225,7 +230,7 @@ export function RequisitionLimitRuleFormModal({
                     </Field>
 
                     {/* Max Rate */}
-                    <Field label="Max Rate" required>
+                    <Field label="Max Rate (£)" required error={errors.maxRate?.message}>
                         <Input
                             type="number"
                             step="0.01"

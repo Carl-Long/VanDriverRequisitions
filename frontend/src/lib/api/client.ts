@@ -114,7 +114,17 @@ export function getApiErrorMessage(
     fallback: string,
 ): string {
     if (error instanceof ApiError) {
-        return error.detail ?? error.message;
+        const validationMessages = error.errors
+            ? Object.values(error.errors)
+                .flat()
+                .filter(Boolean)
+            : [];
+
+        if (validationMessages.length > 0) {
+            return validationMessages.join("\n");
+        }
+
+        return error.detail || error.message || fallback;
     }
 
     return fallback;
