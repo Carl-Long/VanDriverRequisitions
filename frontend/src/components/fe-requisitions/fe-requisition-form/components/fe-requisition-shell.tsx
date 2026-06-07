@@ -17,7 +17,7 @@ import { mapZodErrors } from "../lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/lib/api/fe-task-types";
 import { SubmitWindowStatus } from "@/lib/api/submit-windows";
@@ -144,9 +144,10 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form:
-                        err.detail ??
-                        err.message,
+                    form: getApiErrorMessage(
+                        err,
+                        "Failed to save requisition",
+                    ),
                 });
 
                 return;
@@ -196,9 +197,10 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form:
-                        err.detail ??
-                        err.message,
+                    form: getApiErrorMessage(
+                        err,
+                        "Failed to save requisition",
+                    ),
                 });
 
                 return;
@@ -289,9 +291,10 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form:
-                        err.detail ??
-                        err.message,
+                    form: getApiErrorMessage(
+                        err,
+                        "Failed to save requisition",
+                    ),
                 });
 
                 return;
@@ -330,9 +333,10 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form:
-                        err.detail ??
-                        err.message,
+                    form: getApiErrorMessage(
+                        err,
+                        "Failed to save requisition",
+                    ),
                 });
 
                 return;
@@ -368,11 +372,14 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             />
 
             {errors.form && (
-                <Alert tone="warning">
-                    {errors.form}
+                <Alert tone="danger">
+                    <ul className="list-disc space-y-1 pl-5">
+                        {errors.form.split("\n").map((message) => (
+                            <li key={message}>{message}</li>
+                        ))}
+                    </ul>
                 </Alert>
             )}
-
 
             <FeRequisitionTabs
                 mode={mode}
