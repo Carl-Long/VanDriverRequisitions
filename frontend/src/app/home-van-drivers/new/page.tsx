@@ -8,7 +8,7 @@ import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form
 import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
-import { isUser } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function NewRequisitionPage() {
@@ -30,22 +30,21 @@ export default function NewRequisitionPage() {
         error: submitWindowStatusError,
     } = useSubmitWindowStatus();
 
-    const loading =
-        limitRulesLoading ||
-        taskTypesLoading ||
-        submitWindowStatusLoading;
-
     const errors = [
         limitRulesError,
         taskTypesError,
         submitWindowStatusError,
     ].filter(Boolean);
 
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
-    if (!isUser(user)) {
-        return <NotFound />;
-    }
+    const canCreate = canCreateRequisitions(user);
+
+    const loading =
+        authLoading ||
+        limitRulesLoading ||
+        taskTypesLoading ||
+        submitWindowStatusLoading;
 
     if (loading) {
         return (
@@ -53,6 +52,10 @@ export default function NewRequisitionPage() {
                 <FeRequisitionShellSkeleton />
             </PageContainer>
         );
+    }
+
+    if (!canCreate) {
+        return <NotFound />;
     }
 
     if (errors.length > 0) {

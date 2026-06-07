@@ -1,10 +1,5 @@
-using System.Security.Claims;
-using System.Text;
 using Asp.Versioning;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using VanDriverRequisitions.Api.Auth.Dev;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Validators;
 
@@ -29,12 +24,12 @@ public static class ApiDependencyInjection
         services.AddExceptionHandling();
 
         services.AddAuthorizationBuilder()
-            .AddPolicy(Policies.AdminOnly, p =>
-                p.RequireRole(Roles.Admin))
-            .AddPolicy(Policies.UserOnly, p =>
-                p.RequireRole(Roles.User))
-            .AddPolicy(Policies.ApproverOnly, p =>
-                p.RequireRole(Roles.Approver));
+            .AddPolicy(Policies.CanCreateRequisitions, p =>
+                p.RequireRole(Roles.User, Roles.Admin))
+            .AddPolicy(Policies.CanApproveRequisitions, p =>
+                p.RequireRole(Roles.Approver))
+            .AddPolicy(Policies.CanManageConfiguration, p =>
+                p.RequireRole(Roles.Admin));
 
         return services;
     }

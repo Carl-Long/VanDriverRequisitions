@@ -31,7 +31,7 @@ public class FeReasonsController(
     }
 
     [HttpPost]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(FeReasonSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -42,7 +42,7 @@ public class FeReasonsController(
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(FeReasonSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -57,7 +57,7 @@ public class FeReasonsController(
     }
 
     [HttpPost("{id:guid}/activate")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Activate([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -66,7 +66,7 @@ public class FeReasonsController(
     }
 
     [HttpPost("{id:guid}/deactivate")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Deactivate([FromRoute] Guid id, CancellationToken cancellationToken)
     {

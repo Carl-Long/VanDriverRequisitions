@@ -8,7 +8,7 @@ import { navigation, adminNavigation, approvalNavigation } from "@/lib/navigatio
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
 import { NavItem } from "@/components/layout/nav-item";
 import { useAuth } from "@/providers/auth-provider";
-import { isAdmin, isApprover, isUser } from "@/lib/auth/roles";
+import { canApproveRequisitions, canCreateRequisitions, canManageConfiguration } from "@/lib/auth/roles";
 import { IconButton } from "../ui/button/icon-button";
 
 export function Sidebar() {
@@ -16,9 +16,9 @@ export function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
 
     const { user } = useAuth();
-    const showMainNavigation = isUser(user);
-    const showApprovals = isApprover(user);
-    const showAdmin = isAdmin(user);
+    const showMainNavigation = canCreateRequisitions(user);
+    const showApprovals = canApproveRequisitions(user);
+    const showAdmin = canManageConfiguration(user);
 
     // Auto-collapse on small screens
     useEffect(() => {

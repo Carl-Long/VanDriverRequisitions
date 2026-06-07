@@ -13,9 +13,9 @@ public static class DevUserStore
 
         ["admin@test.com"] = new DevUser(
             Guid.Parse("8a91d4b2-6f3e-4a10-9c6d-2f5e7b1c9d88"),
-            "Carl Long",
+            "Admin User",
             "admin@test.com",
-            ["Admin", "User"]
+            ["Admin"]
         ),
 
         ["approver@test.com"] = new DevUser(
@@ -23,6 +23,13 @@ public static class DevUserStore
             "Approver User",
             "approver@test.com",
             ["Approver"]
+        ),
+
+        ["superuser@test.com"] = new DevUser(
+            Guid.Parse("7f3c9f2a-5d8e-4a71-9c42-6be1d94e8f17"),
+            "Carl Long",
+            "superuser@test.com",
+            ["Admin", "User", "Approver"]
         )
     };
 

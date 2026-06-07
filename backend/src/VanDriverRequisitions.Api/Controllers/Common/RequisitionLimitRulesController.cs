@@ -34,7 +34,7 @@ public class RequisitionLimitRulesController(
     }
 
     [HttpPost]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -48,7 +48,7 @@ public class RequisitionLimitRulesController(
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Policy = Policies.AdminOnly)]
+    [Authorize(Policy = Policies.CanManageConfiguration)]
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

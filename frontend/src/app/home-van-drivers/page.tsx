@@ -20,7 +20,7 @@ import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requ
 import { getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams } from "@/components/fe-requisitions/url-state";
-import { isUser } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/lib/auth/roles";
 import NotFound from "../not-found";
 
 
@@ -38,6 +38,7 @@ export default function HomeVanDriversPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!canCreateRequisitions(user)) return;
         let cancelled = false;
 
         async function run() {
@@ -106,7 +107,7 @@ export default function HomeVanDriversPage() {
         router.replace(pathname);
     }
 
-    if (!isUser(user)) {
+    if (!canCreateRequisitions(user)) {
         return <NotFound />;
     }
 

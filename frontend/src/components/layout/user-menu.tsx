@@ -55,25 +55,39 @@ export function UserMenu() {
                 )}>
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-border/50">
-                        <p className="text-sm font-medium">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                        <p className="mt-1 text-xs text-muted-foreground/60">{user.role}</p>
-                    </div>
+                        <div className="flex items-center gap-2">
+                            <User
+                                size={14}
+                                className="text-muted-foreground"
+                            />
 
+                            <p className="text-sm font-medium">
+                                {user.name}
+                            </p>
+                        </div>
+
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                            {user.email}
+                        </p>
+
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                            {user.roles.map((role) => (
+                                <span
+                                    key={role}
+                                    className={cn(
+                                        "rounded-full border border-border",
+                                        "bg-muted px-2 py-0.5",
+                                        "text-xs text-muted-foreground"
+                                    )}
+                                >
+                                    {role}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
                     {/* Menu Items */}
                     {submenu === null && (
                         <div className="py-1">
-
-                            <button
-                                className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left"
-                                )}
-                            >
-                                <User size={16} />
-                                Profile
-                            </button>
-
                             <button
                                 onClick={() =>
                                     setSubmenu("theme")

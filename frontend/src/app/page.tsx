@@ -4,7 +4,7 @@ import { LaunchCard } from "@/components/landing-page/launch-card";
 import { WelcomeHeading } from "@/components/landing-page/welcome-heading";
 import { PageContainer } from "@/components/layout/page-container";
 import { SubmitWindowHeroCompact } from "@/components/submit-windows/submit-window-hero-compact";
-import { isUser, isApprover } from "@/lib/auth/roles";
+import { canApproveRequisitions, canCreateRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import {
     HeartHandshake,
@@ -43,10 +43,10 @@ export default function HomePage() {
     const { user } = useAuth();
 
     const visibleCards = [
-        ...(isUser(user)
+        ...(canCreateRequisitions(user)
             ? cards
             : []),
-        ...(isApprover(user)
+        ...(canApproveRequisitions(user)
             ? [
                 {
                     title: "Home Approvals",

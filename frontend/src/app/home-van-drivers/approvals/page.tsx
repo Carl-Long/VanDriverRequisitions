@@ -9,10 +9,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 
-import {
-    feRequisitionsApi,
-    type FeRequisitionSummary,
-} from "@/lib/api/fe-requisitions";
+import { feRequisitionsApi, type FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 
 import type { PagedResult } from "@/lib/types";
 import { getApiErrorMessage } from "@/lib/api/client";
@@ -21,14 +18,14 @@ import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-
 import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
 import { pageFromSearchParams } from "@/components/fe-requisitions/url-state";
 import NotFound from "@/app/not-found";
-import { isApprover } from "@/lib/auth/roles";
+import { canApproveRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     const page = pageFromSearchParams(searchParams);
 
@@ -38,7 +35,11 @@ export default function FeRequisitionApprovalsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const canApprove = canApproveRequisitions(user);
+
     useEffect(() => {
+        if (authLoading || !canApprove) return;
+
         let cancelled = false;
 
         async function run() {
@@ -76,11 +77,19 @@ export default function FeRequisitionApprovalsPage() {
         return () => {
             cancelled = true;
         };
-    }, [page]);
+    }, [page, authLoading, canApprove]);
 
     const items = data?.items ?? [];
 
-    if (!isApprover(user)) {
+    if (authLoading) {
+        return (
+            <PageContainer>
+                <FeRequisitionTableSkeleton />
+            </PageContainer>
+        );
+    }
+
+    if (!canApprove) {
         return <NotFound />;
     }
 
@@ -91,11 +100,7 @@ export default function FeRequisitionApprovalsPage() {
                 description="Review submitted FE requisitions awaiting approval."
             />
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
             {loading && <FeRequisitionTableSkeleton />}
 

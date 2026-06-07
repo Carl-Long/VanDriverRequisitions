@@ -17,6 +17,8 @@ export function hasRole(
     );
 }
 
+
+
 export function isAdmin(user?: AuthUser | null): boolean {
     return hasRole(user, Roles.Admin);
 }
@@ -27,4 +29,17 @@ export function isUser(user?: AuthUser | null): boolean {
 
 export function isApprover(user?: AuthUser | null): boolean {
     return hasRole(user, Roles.Approver);
+}
+
+
+export function canCreateRequisitions(user?: AuthUser | null): boolean {
+    return isUser(user) || isAdmin(user);
+}
+
+export function canApproveRequisitions(user?: AuthUser | null): boolean {
+    return isApprover(user);
+}
+
+export function canManageConfiguration(user?: AuthUser | null): boolean {
+    return isAdmin(user);
 }

@@ -17,7 +17,7 @@ import {
 } from "@/lib/api/client";
 
 import { useAuth } from "@/providers/auth-provider";
-import { isApprover } from "@/lib/auth/roles";
+import { canApproveRequisitions } from "@/lib/auth/roles";
 
 import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
@@ -27,7 +27,7 @@ import NotFound from "@/app/not-found";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     const {
         limitRules,
@@ -47,8 +47,11 @@ export default function Page() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [notFound, setNotFound] = useState(false);
+    const canApprove = canApproveRequisitions(user);
 
     useEffect(() => {
+        if (authLoading || !canApprove) return;
+
         let cancelled = false;
 
         async function load() {
@@ -91,7 +94,7 @@ export default function Page() {
         return () => {
             cancelled = true;
         };
-    }, [params.id]);
+    }, [params.id, authLoading, canApprove]);
 
     const pageLoading =
         loading ||
@@ -104,7 +107,7 @@ export default function Page() {
         taskTypesError,
     ].filter((e): e is string => Boolean(e));
 
-    if (pageLoading) {
+    if (authLoading || pageLoading) {
         return (
             <PageContainer>
                 <FeRequisitionShellSkeleton />
@@ -112,14 +115,13 @@ export default function Page() {
         );
     }
 
+    if (!canApprove) {
+        return <NotFound />;
+    }
+
     if (notFound) {
         return <NotFound />;
     }
-
-    if (!isApprover(user)) {
-        return <NotFound />;
-    }
-
 
     if (errors.length > 0) {
         return (
