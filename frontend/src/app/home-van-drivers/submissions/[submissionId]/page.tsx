@@ -49,10 +49,12 @@ export default function SubmissionPage() {
 
     return (
         <PageContainer>
-            <div className="space-y-6 submission-print">
-                <FeSubmissionHeader submission={submission} />
-                <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
-                <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
+            <div className="print-page">
+                <div className="space-y-6 submission-print">
+                    <FeSubmissionHeader submission={submission} />
+                    <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
+                    <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
+                </div>
             </div>
         </PageContainer>
     );

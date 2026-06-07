@@ -13,8 +13,8 @@ export function FeSubmissionSnapshotSummary({
     snapshot,
 }: Readonly<Props>) {
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6">
-            <div className="mb-6">
+        <div className="rounded-2xl border border-border bg-surface p-6 print-card">
+            <div className="mb-6 print-section-heading">
                 <h2 className="text-lg font-semibold">
                     Snapshot Summary
                 </h2>
@@ -24,7 +24,7 @@ export function FeSubmissionSnapshotSummary({
                 </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 print-summary-grid">
                 <SummaryField
                     label="Requisition Number"
                     value={snapshot.requisitionNumber}

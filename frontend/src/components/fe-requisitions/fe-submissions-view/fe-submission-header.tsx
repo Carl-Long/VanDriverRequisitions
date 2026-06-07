@@ -4,6 +4,8 @@ import { FeRequisitionSubmissionDetail } from "@/lib/api/fe-requisitions";
 import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
+import { Button } from "@/components/ui/button/button";
+import { Printer } from "lucide-react";
 
 type Props = {
     submission: FeRequisitionSubmissionDetail;
@@ -13,10 +15,10 @@ export function FeSubmissionHeader({
     submission,
 }: Readonly<Props>) {
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6">
-            <div className="flex items-start justify-between">
+        <div className="rounded-2xl border border-border bg-surface p-6 print-card">
+            <div className="flex items-start justify-between print-header-row">
                 <div>
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-xl font-bold">
                         Submission #{submission.submissionNumber}
                     </h1>
 
@@ -25,12 +27,24 @@ export function FeSubmissionHeader({
                     </p>
                 </div>
 
-                <SubmissionStatusPill
-                    status={submission.status}
-                />
+                <div className="flex items-center gap-3">
+                    <SubmissionStatusPill
+                        status={submission.status}
+                    />
+
+                    <Button
+                        type="button"
+                        tone="accent"
+                        className="no-print"
+                        onClick={() => globalThis.print()}
+                    >
+                        <Printer size={14} />
+                        Print
+                    </Button>
+                </div>
             </div>
 
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <div className="mt-8 grid gap-6 md:grid-cols-2 print-audit-grid">
                 <AuditField
                     label="Submitted By"
                     name={submission.submittedByName}
@@ -49,7 +63,7 @@ export function FeSubmissionHeader({
             </div>
 
             {submission.poNumber && (
-                <div className="mt-6 border-t border-border pt-4">
+                <div className="mt-6 border-t border-border pt-4 print-notes-block">
                     <SummaryField
                         label="Purchase Order Number"
                         value={
@@ -62,7 +76,7 @@ export function FeSubmissionHeader({
             )}
 
             {submission.rejectionNotes && (
-                <div className="mt-6 border-t border-border pt-4">
+                <div className="mt-6 border-t border-border pt-4 print-notes-block">
                     <SummaryField
                         label="Rejection Notes"
                         value={
