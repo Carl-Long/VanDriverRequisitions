@@ -74,8 +74,8 @@ export function FeSubmissionGeneralTasksTable({
         },
     );
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6">
-            <div className="mb-6">
+        <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
+            <div className="mb-6 print-section-heading">
                 <h2 className="text-lg font-semibold">
                     General Tasks
                 </h2>
@@ -91,56 +91,56 @@ export function FeSubmissionGeneralTasksTable({
                 </p>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                <div className="overflow-x-auto">
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface print-table-wrapper">
+                <div className="overflow-x-auto print-table-scroll">
                     <Table>
                         <TableHeader>
                             <TableHeaderRow>
-                                <TableHeaderCell nowrap>
+                                <TableHeaderCell nowrap className="print-col-task">
                                     Task Type
                                 </TableHeaderCell>
 
-                                <TableHeaderCell nowrap>
+                                <TableHeaderCell nowrap className="print-col-week">
                                     Week Ending
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Sun
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Mon
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Tue
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Wed
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Thu
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Fri
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="center">
+                                <TableHeaderCell align="center" className="print-col-day">
                                     Sat
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
+                                <TableHeaderCell align="right" nowrap className="print-col-total">
                                     Total
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
+                                <TableHeaderCell align="right" nowrap className="print-col-rate">
                                     Rate
                                 </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
+                                <TableHeaderCell align="right" nowrap className="print-col-value">
                                     Value
                                 </TableHeaderCell>
                             </TableHeaderRow>
@@ -151,7 +151,7 @@ export function FeSubmissionGeneralTasksTable({
                                 <TableRow
                                     key={`${task.taskTypeCode}-${index}`}
                                 >
-                                    <TableCell>
+                                    <TableCell className="print-col-task">
                                         <div className="font-medium">
                                             {task.taskTypeName}
                                         </div>
@@ -160,49 +160,49 @@ export function FeSubmissionGeneralTasksTable({
                                             {task.taskTypeCode}
                                         </div>
                                     </TableCell>
-                                    <TableCell nowrap>
+                                    <TableCell nowrap className="print-col-week">
                                         {formatDateGB(task.weekEndingDate)}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.sunday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.monday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.tuesday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.wednesday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.thursday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.friday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="center">
+                                    <TableCell align="center" className="print-col-day">
                                         {task.week.saturday ?? 0}
                                     </TableCell>
 
-                                    <TableCell align="right">
+                                    <TableCell align="right" className="print-col-total">
                                         {task.totalNumber}
                                     </TableCell>
 
-                                    <TableCell align="right">
+                                    <TableCell align="right" className="print-col-rate">
                                         {formatCurrencyGB(task.ratePerJob)}
                                     </TableCell>
 
                                     <TableCell
                                         align="right"
-                                        className="font-semibold tabular-nums"
+                                        className="font-semibold tabular-nums print-col-value"
                                     >
                                         {formatCurrencyGB(task.totalValue)}
                                     </TableCell>
@@ -212,49 +212,49 @@ export function FeSubmissionGeneralTasksTable({
                         </TableBody>
                         <TableFooter>
                             <TableRow>
-                                <TableCell>
+                                <TableCell className="print-col-task">
                                     Totals
                                 </TableCell>
 
-                                <TableCell />
+                                <TableCell className="print-col-week"/>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.sunday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.monday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.tuesday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.wednesday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.thursday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.friday}
                                 </TableCell>
 
-                                <TableCell align="center">
+                                <TableCell align="center" className="print-col-day">
                                     {totals.saturday}
                                 </TableCell>
 
-                                <TableCell align="right">
+                                <TableCell align="right" className="print-col-total">
                                     {totals.totalJobs}
                                 </TableCell>
 
-                                <TableCell />
+                                <TableCell className="print-col-rate"/>
 
                                 <TableCell
                                     align="right"
-                                    className="font-semibold tabular-nums"
+                                    className="font-semibold tabular-nums print-col-value"
                                 >
                                     {formatCurrencyGB(
                                         totals.subtotal,
