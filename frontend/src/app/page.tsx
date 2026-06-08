@@ -49,7 +49,7 @@ export default function HomePage() {
         ...(canApproveRequisitions(user)
             ? [
                 {
-                    title: "Home Approvals",
+                    title: "Homve Van Driver Approvals",
                     description:
                         "Review submitted FE requisitions awaiting approval",
                     href: "/home-van-drivers/approvals",
