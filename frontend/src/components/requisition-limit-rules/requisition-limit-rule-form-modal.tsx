@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,7 @@ import { Field } from "@/components/ui/field/field";
 import type { FeTaskType } from "@/lib/api/fe-task-types";
 import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 import {
     categoryOptions,
     fasciaOptions,
@@ -31,24 +31,50 @@ type FormValues = {
     maxRate: number;
 };
 
-/* ---------------- schema ---------------- */
-
 const schema = z.object({
-    categoryId: z.string().min(1),
-    fasciaId: z.string().min(1),
-    feTaskTypeId: z.string().nullable(),
-    maxQuantity: z.number(),
-    maxRate: z.number(),
-});
+    categoryId: z.string()
+        .min(1, "Category is required and must be valid."),
 
-/* ---------------- props ---------------- */
+    fasciaId: z.string()
+        .min(1, "Fascia is required and must be valid."),
+
+    feTaskTypeId: z.string().nullable(),
+
+    maxQuantity: z.number({
+        error: "Max Quantity must be greater than 0.",
+    }).gt(0, "Max Quantity must be greater than 0."),
+
+    maxRate: z.number({
+        error: "Max Rate must be greater than 0.",
+    }).gt(0, "Max Rate must be greater than 0."),
+}).superRefine((data, ctx) => {
+    const isGeneralTask = data.categoryId === "0";
+
+    if (isGeneralTask && !data.feTaskTypeId) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["feTaskTypeId"],
+            message:
+                "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+        });
+    }
+
+    if (!isGeneralTask && data.feTaskTypeId) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["feTaskTypeId"],
+            message:
+                "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+        });
+    }
+});
 
 type Props = {
     open: boolean;
     onClose: () => void;
     onSubmit: (data: {
-        categoryId: number;
-        fasciaId: number;
+        category: number;
+        fascia: number;
         feTaskTypeId: string | null;
         maxQuantity: number;
         maxRate: number;
@@ -67,13 +93,14 @@ export function RequisitionLimitRuleFormModal({
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
 
+
     const {
         register,
         handleSubmit,
         reset,
         control,
         setValue,
-        formState: { isSubmitting },
+        formState: { isSubmitting, errors },
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -85,17 +112,8 @@ export function RequisitionLimitRuleFormModal({
         },
     });
 
-    /* ---------------- watch ---------------- */
-
     const categoryId = useWatch({ control, name: "categoryId" });
-
-    const categoryLabel = useMemo(() => {
-        return categoryOptions.find(x => x.value === categoryId)?.label;
-    }, [categoryId]);
-
-    const isGeneralTask = categoryLabel === "General Task";
-
-    /* ---------------- hydrate form ---------------- */
+    const isGeneralTask = categoryId === "0";
 
     useEffect(() => {
         if (!open) return;
@@ -123,14 +141,18 @@ export function RequisitionLimitRuleFormModal({
 
     async function onValid(data: FormValues) {
         try {
+            const category = Number(data.categoryId);
+
             await onSubmit({
-                categoryId: Number(data.categoryId),
-                fasciaId: Number(data.fasciaId),
-                feTaskTypeId: data.feTaskTypeId,
+                category,
+                fascia: Number(data.fasciaId),
+                feTaskTypeId:
+                    category === 0
+                        ? data.feTaskTypeId || null
+                        : null,
                 maxQuantity: data.maxQuantity,
                 maxRate: data.maxRate,
             });
-
         } catch (err) {
             setServerError(
                 getApiErrorMessage(
@@ -156,7 +178,11 @@ export function RequisitionLimitRuleFormModal({
                 )}
 
                 {/* CATEGORY */}
-                <Field label="Category" required>
+                <Field
+                    label="Category"
+                    required
+                    error={errors.categoryId?.message}
+                >
                     <select className={fieldBase} {...register("categoryId")}>
                         <option value="">Select category</option>
                         {categoryOptions.map(opt => (
@@ -168,7 +194,7 @@ export function RequisitionLimitRuleFormModal({
                 </Field>
 
                 {/* FASCIA */}
-                <Field label="Fascia" required>
+                <Field label="Fascia" required error={errors.fasciaId?.message}>
                     <select className={fieldBase} {...register("fasciaId")}>
                         <option value="">Select fascia</option>
                         {fasciaOptions.map(opt => (
@@ -181,7 +207,7 @@ export function RequisitionLimitRuleFormModal({
 
                 {/* TASK TYPE */}
                 {isGeneralTask && (
-                    <Field label="Task Type">
+                    <Field label="Task Type" error={errors.feTaskTypeId?.message}>
                         <select className={fieldBase} {...register("feTaskTypeId")}>
                             <option value="">None</option>
                             {taskTypes.map(t => (
@@ -196,7 +222,7 @@ export function RequisitionLimitRuleFormModal({
                 {/* Max Quantity */}
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {/* Max Quantity */}
-                    <Field label="Max Quantity" required>
+                    <Field label="Max Quantity" required error={errors.maxQuantity?.message}>
                         <Input
                             type="number"
                             {...register("maxQuantity", { valueAsNumber: true })}
@@ -204,7 +230,7 @@ export function RequisitionLimitRuleFormModal({
                     </Field>
 
                     {/* Max Rate */}
-                    <Field label="Max Rate" required>
+                    <Field label="Max Rate (£)" required error={errors.maxRate?.message}>
                         <Input
                             type="number"
                             step="0.01"

@@ -1,5 +1,3 @@
-// lib/api/requisition-limit-rules.ts
-
 import { apiFetch } from "@/lib/api/client";
 
 const BASE = "/api/v1/requisition-limit-rules";
@@ -21,17 +19,17 @@ export type RequisitionLimitRuleSummary = {
 };
 
 export type CreateRequisitionLimitRule = {
-    categoryId: number;
+    category: number;
     feTaskTypeId?: string | null;
-    fasciaId: number;
+    fascia: number;
     maxQuantity: number;
     maxRate: number;
 };
 
 export type UpdateRequisitionLimitRule = {
-    categoryId: number;
+    category: number;
     feTaskTypeId?: string | null;
-    fasciaId: number;
+    fascia: number;
     maxQuantity: number;
     maxRate: number;
 };

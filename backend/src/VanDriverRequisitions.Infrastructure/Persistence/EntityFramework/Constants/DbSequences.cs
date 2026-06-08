@@ -3,7 +3,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Const
 public static class DbSequences
 {
     public const string FeRequisitionNumber = "FeRequisitionNumber";
-    public const int FeRequisitionNumberStartsAt = 1;
+    public const int FeRequisitionNumberStartsAt = 101; // set at 101 to avoid needing to amend on seeding
     public const int FeRequisitionNumberIncrementsBy = 1;
     
     public const string StdRequisitionNumber = "StdRequisitionNumber";

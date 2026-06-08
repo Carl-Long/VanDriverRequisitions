@@ -1,12 +1,12 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
 
@@ -44,13 +44,9 @@ public class RequisitionLimitRuleService(
         return RequisitionLimitRuleMapper.ToSummaryDto(requisitionLimitRule);
     }
 
-    public async Task<RequisitionLimitRuleSummaryDto> CreateAsync(
-        CreateRequisitionLimitRuleDto createRequisitionLimitRuleDto,
-        CancellationToken cancellationToken = default)
+    public async Task<RequisitionLimitRuleSummaryDto> CreateAsync(CreateRequisitionLimitRuleDto createRequisitionLimitRuleDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(createRequisitionLimitRuleDto, cancellationToken);
-
-        EnforceBusinessRules(createRequisitionLimitRuleDto.Category, createRequisitionLimitRuleDto.FeTaskTypeId);
 
         var newRequisitionLimitRule = new RequisitionLimitRule
         {
@@ -63,7 +59,16 @@ public class RequisitionLimitRuleService(
 
         context.RequisitionLimitRules.Add(newRequisitionLimitRule);
 
-        await context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+        {
+            throw new ValidationException([
+                new ValidationFailure( "Form", "A limit rule already exists for this category, task type, and fascia.")
+                ]);
+        }
 
         return RequisitionLimitRuleMapper.ToSummaryDto(newRequisitionLimitRule);
     }
@@ -83,39 +88,24 @@ public class RequisitionLimitRuleService(
         if (existingRequisitionLimitRule is null)
             throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
 
-        EnforceBusinessRules(updateRequisitionLimitRuleDto.Category, updateRequisitionLimitRuleDto.FeTaskTypeId);
-
         existingRequisitionLimitRule.Category = updateRequisitionLimitRuleDto.Category;
         existingRequisitionLimitRule.FeTaskTypeId = updateRequisitionLimitRuleDto.FeTaskTypeId;
         existingRequisitionLimitRule.Fascia = updateRequisitionLimitRuleDto.Fascia;
         existingRequisitionLimitRule.MaxQuantity = updateRequisitionLimitRuleDto.MaxQuantity;
         existingRequisitionLimitRule.MaxRate = updateRequisitionLimitRuleDto.MaxRate;
 
-        await context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+        {
+            throw new ValidationException([
+                new ValidationFailure( "Form","A limit rule already exists for this category, task type, and fascia.")
+                ]);
+        }
 
         return RequisitionLimitRuleMapper.ToSummaryDto(existingRequisitionLimitRule);
     }
 
-    private static void EnforceBusinessRules(
-        RequisitionRowCategory category,
-        Guid? feTaskTypeId)
-    {
-        if (category == RequisitionRowCategory.GeneralTask && feTaskTypeId is null)
-        {
-            throw new ValidationException([
-                new ValidationFailure(
-                    nameof(feTaskTypeId),
-                    "FeTaskTypeId is required when Category is GeneralTask.")
-            ]);
-        }
-
-        if (category != RequisitionRowCategory.GeneralTask && feTaskTypeId is not null)
-        {
-            throw new ValidationException([
-                new ValidationFailure(
-                    nameof(feTaskTypeId),
-                    "FeTaskTypeId must be null unless Category is GeneralTask.")
-            ]);
-        }
-    }
 }

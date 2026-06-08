@@ -99,10 +99,15 @@ export function createFeGeneralTaskFormSchema(
                     });
                 }
 
-                //
-                // LIMIT VALIDATION
-                //
+            
                 if (!limitRule) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["form"],
+                        message:
+                            "No limit rule is configured for this item. Please contact an administrator.",
+                    });
+
                     return;
                 }
 

@@ -1,31 +1,18 @@
 "use client";
 
-import {
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
-
-import { Check, Info, Plus, X } from "lucide-react";
-
+import { useEffect, useMemo, useState } from "react";
+import { Info, Plus, X } from "lucide-react";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Button } from "@/components/ui/button/button";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 
-import type {
-    RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
-
+import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
-
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
-
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-
 import { mapZodErrors } from "../lib/map-zod-errors";
-
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { Alert } from "@/components/ui/alert";
@@ -50,64 +37,34 @@ export function FeGeneralTaskDrawer({
     onSave,
 }: Readonly<Props>) {
 
-    const [form, setForm] =
-        useState<FeGeneralTaskForm>(
-            createEmptyFeGeneralTaskForm(),
-        );
-
-    const [errors, setErrors] =
-        useState<
-            Record<string, string>
-        >({});
-
-    const schema =
-        createFeGeneralTaskFormSchema(
-            limitRule,
-        );
-
-    const isEditMode =
-        initialValues !== undefined;
+    const [form, setForm] = useState<FeGeneralTaskForm>(createEmptyFeGeneralTaskForm());
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const schema = createFeGeneralTaskFormSchema(limitRule);
+    const isEditMode = initialValues !== undefined;
 
     useEffect(() => {
         if (!open) return;
 
-        setForm(
-            initialValues ??
-            createEmptyFeGeneralTaskForm(),
-        );
+        setForm(initialValues ?? createEmptyFeGeneralTaskForm());
 
         setErrors({});
     }, [open, initialValues]);
 
-    const totals = useMemo(
-        () =>
-            calculateFeGeneralTaskFormTotals(
-                form,
-            ),
-
-        [form],
-    );
+    const totals = useMemo(() => calculateFeGeneralTaskFormTotals(form), [form]);
 
     function handleSave() {
-        const result =
-            schema.safeParse(
-                form,
-            );
+        const result = schema.safeParse(form);
 
         if (!result.success) {
             setErrors(
-                mapZodErrors(
-                    result.error,
-                ),
+                mapZodErrors(result.error),
             );
 
             return;
         }
 
         setErrors({});
-
         onSave(result.data);
-
         onClose();
     }
 
@@ -121,16 +78,11 @@ export function FeGeneralTaskDrawer({
 
 
     function handleSaveAndAddAnother() {
-        const result =
-            schema.safeParse(
-                form,
-            );
+        const result = schema.safeParse(form);
 
         if (!result.success) {
             setErrors(
-                mapZodErrors(
-                    result.error,
-                ),
+                mapZodErrors(result.error),
             );
             console.log(result.error.issues);
 
@@ -141,10 +93,7 @@ export function FeGeneralTaskDrawer({
 
         onSave(result.data);
 
-        setForm(
-            createEmptyFeGeneralTaskForm(
-                result.data.weekEndingDate,
-            ),
+        setForm(createEmptyFeGeneralTaskForm(result.data.weekEndingDate),
         );
     }
 

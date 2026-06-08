@@ -19,6 +19,7 @@ type Props = {
     ) => React.ReactNode;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
+    getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
 };
 
 export function FeRequisitionTabs({
@@ -28,15 +29,17 @@ export function FeRequisitionTabs({
     details,
     renderTaskTypeTab,
     submissionHistory,
-    submissionHistoryCount
+    submissionHistoryCount,
+    getTaskTypeTabHasWarning,
 }: Readonly<Props>) {
+
     const tabs = useMemo(
         () =>
             buildFeRequisitionTabs(
                 taskTypes,
                 submissionHistoryCount,
             ),
-        [taskTypes, submissionHistoryCount ],
+        [taskTypes, submissionHistoryCount],
     );
 
     const activeTab = tabs.find(
@@ -60,7 +63,17 @@ export function FeRequisitionTabs({
                                 )
                             }
                         >
-                            {tab.label}
+                            <span className="inline-flex items-center gap-2">
+                                {tab.label}
+
+                                {tab.type === "general-task" &&
+                                    getTaskTypeTabHasWarning?.(tab.taskTypeId) && (
+                                        <span
+                                            className="h-2 w-2 rounded-full bg-warning"
+                                            title="This tab has limit warnings"
+                                        />
+                                    )}
+                            </span>
                         </TabButton>
                     ))}
                 </div>

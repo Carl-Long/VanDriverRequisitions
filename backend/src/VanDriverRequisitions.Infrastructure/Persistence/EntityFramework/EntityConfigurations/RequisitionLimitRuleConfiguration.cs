@@ -12,7 +12,7 @@ public class RequisitionLimitRuleConfiguration
         builder.ToTable("RequisitionLimitRules");
 
         builder.HasKey(x => x.Id);
-        
+
         builder.Property(x => x.Category)
             .IsRequired()
             .HasConversion<int>();
@@ -23,27 +23,36 @@ public class RequisitionLimitRuleConfiguration
         builder.Property(x => x.Fascia)
             .IsRequired()
             .HasConversion<int>();
-        
+
         builder.Property(x => x.MaxQuantity)
             .IsRequired();
 
         builder.Property(x => x.MaxRate)
             .IsRequired()
             .HasPrecision(18, 2);
-        
+
         builder.HasOne(x => x.FeTaskType)
             .WithMany()
             .HasForeignKey(x => x.FeTaskTypeId)
             .OnDelete(DeleteBehavior.SetNull);
-        
+
         builder.HasIndex(x => new
-            {
-                x.Category,
-                x.FeTaskTypeId,
-                x.Fascia
-            })
-            .IsUnique();
-        
+        {
+            x.Category,
+            x.FeTaskTypeId,
+            x.Fascia
+        })
+        .IsUnique()
+        .HasFilter("[FeTaskTypeId] IS NOT NULL");
+
+        builder.HasIndex(x => new
+        {
+            x.Category,
+            x.Fascia
+        })
+        .IsUnique()
+        .HasFilter("[FeTaskTypeId] IS NULL");
+
         builder.ToTable(t =>
         {
             t.HasCheckConstraint(

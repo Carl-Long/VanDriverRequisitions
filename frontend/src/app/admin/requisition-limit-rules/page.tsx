@@ -112,24 +112,16 @@ export default function RequisitionLimitRulesPage() {
     /* ---------------- submit ---------------- */
 
     async function handleSubmit(data: {
-        categoryId: number;
-        fasciaId: number;
+        category: number;
+        fascia: number;
         feTaskTypeId: string | null;
         maxQuantity: number;
         maxRate: number;
     }) {
-        const payload = {
-            categoryId: data.categoryId,
-            fasciaId: data.fasciaId,
-            feTaskTypeId: data.feTaskTypeId,
-            maxQuantity: data.maxQuantity,
-            maxRate: data.maxRate,
-        };
-
         if (editing) {
-            await requisitionLimitRulesApi.update(editing.id, payload);
+            await requisitionLimitRulesApi.update(editing.id, data);
         } else {
-            await requisitionLimitRulesApi.create(payload);
+            await requisitionLimitRulesApi.create(data);
         }
 
         toast.success(
