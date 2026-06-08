@@ -16,7 +16,7 @@ public class VanDriverService(IApplicationDbContext context) : IVanDriverService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<VanDriver> query = context.VanDrivers.Where(x => x.IsActive);
+        var query = context.VanDrivers.Where(x => x.IsActive);
 
         if (!string.IsNullOrWhiteSpace(search))
         {

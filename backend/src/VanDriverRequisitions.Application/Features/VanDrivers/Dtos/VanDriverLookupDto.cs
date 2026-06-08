@@ -13,4 +13,5 @@ public class VanDriverLookupDto
     public string? Phone { get; init; }
     public string? VatNumber { get; init; }
     public bool HasVat { get; init; }
+    public bool IsActive { get; init; }
 }

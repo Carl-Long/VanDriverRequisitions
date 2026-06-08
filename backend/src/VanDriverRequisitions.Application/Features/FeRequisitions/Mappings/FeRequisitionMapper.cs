@@ -14,9 +14,11 @@ public static class FeRequisitionMapper
     // DETAIL DTO
     // =========================
 
-    public static FeRequisitionDetailDto MapRequisitionToDetailDto(FeRequisition requisition, VanDriverLookupDto vanDriverSummary)
+    public static FeRequisitionDetailDto MapRequisitionToDetailDto(
+        FeRequisition requisition,
+        VanDriverLookupDto vanDriverSummary,
+        bool isShopActive)
     {
-
         return new FeRequisitionDetailDto
         {
             Id = requisition.Id,
@@ -26,10 +28,12 @@ public static class FeRequisitionMapper
             VanDriverSummary = vanDriverSummary,
             VanDriverId = requisition.VanDriverId,
             VanDriverName = requisition.VanDriverName,
+            IsVanDriverActive = vanDriverSummary.IsActive,
             ShopId = requisition.ShopId,
             ShopCode = requisition.ShopCode,
             ShopName = requisition.ShopName,
-            Status = EnumExtensions.GetDisplayName(requisition.Status),
+            IsShopActive = isShopActive,
+            Status = requisition.Status.GetDisplayName(),
             PoNumber = requisition.PoNumber,
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,

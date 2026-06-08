@@ -14,9 +14,10 @@ export type FeRequisitionDraft = {
     vanDriverLabel: string | null;
     vanDriverSummary: VanDriverLookup | null;
     vanDriverName: string | null;
+    isVanDriverActive: boolean;
     shopId: string | null;
     shopLabel: string | null;
-
+    isShopActive: boolean;
     submittedByNameSnapshot: string | null;
     submittedAtUtc: string | null;
 

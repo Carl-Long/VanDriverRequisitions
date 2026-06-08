@@ -20,5 +20,6 @@ public static class VanDriverProjections
          Phone = x.Phone,
          VatNumber = x.VatNumber,
          HasVat = x.HasVat,
+         IsActive = x.IsActive,
      };
 }

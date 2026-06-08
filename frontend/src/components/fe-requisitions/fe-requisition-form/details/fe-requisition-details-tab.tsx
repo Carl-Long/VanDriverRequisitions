@@ -11,6 +11,7 @@ import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 import { StatusPill } from "../../status-pill";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     readonly: boolean;
@@ -87,34 +88,46 @@ export function FeRequisitionDetailsTab({
                             />
                         </Field>
 
-                        <ShopFilterField
-                            required
-                            disabled={readonly}
-                            error={errors.shopId}
-                            value={draft.shopId}
-                            label={draft.shopLabel}
-                            onChange={(value, label) => {
-                                onShopChange({
-                                    id: value,
-                                    label,
-                                });
+                        <div className="space-y-2">
+                            <ShopFilterField
+                                required
+                                disabled={readonly}
+                                error={errors.shopId}
+                                value={draft.shopId}
+                                label={draft.shopLabel}
+                                onChange={(value, label) => {
+                                    onShopChange({ id: value, label });
+                                    clearError("shopId");
+                                }}
+                            />
 
-                                clearError("shopId");
-                            }}
-                        />
+                            {draft.isShopActive === false && (
+                                <Alert tone="warning">
+                                    This shop is inactive. If changed, it cannot be selected again.
+                                </Alert>
+                            )}
+                        </div>
 
-                        <FeVanDriverField
-                            disabled={readonly}
-                            error={errors.vanDriverId}
-                            value={draft.vanDriverId}
-                            label={draft.vanDriverLabel}
-                            onChange={(params) => {
-                                onVanDriverChange(params);
-                                clearError("vanDriverId");
-                                clearError("vanDriverName");
-                            }}
-                        />
+                        <div className="space-y-2">
+                            <FeVanDriverField
+                                disabled={readonly}
+                                error={errors.vanDriverId}
+                                value={draft.vanDriverId}
+                                label={draft.vanDriverLabel}
+                                onChange={(params) => {
+                                    onVanDriverChange(params);
+                                    clearError("vanDriverId");
+                                    clearError("vanDriverName");
+                                }}
+                            />
 
+                            {draft.isVanDriverActive === false && (
+                                <Alert tone="warning">
+                                    This van driver is inactive. If changed, they cannot be selected again.
+                                </Alert>
+                            )}
+                        </div>
+                        
                         <Field
                             label="Driver Name"
                             error={errors.vanDriverName}

@@ -15,6 +15,7 @@ export type VanDriverLookup = {
     phone: string | null;
     vatNumber: string | null;
     hasVat: boolean;
+    isActive: boolean;
 };
 
 export type VanDriverSearchQuery = {
