@@ -101,7 +101,7 @@ export function FeRequisitionDetailsTab({
                                 }}
                             />
 
-                            {draft.isShopActive === false && (
+                            {!readonly && draft.isShopActive === false && (
                                 <Alert tone="warning">
                                     This shop is inactive. If changed, it cannot be selected again.
                                 </Alert>
@@ -121,13 +121,14 @@ export function FeRequisitionDetailsTab({
                                 }}
                             />
 
-                            {draft.isVanDriverActive === false && (
+
+                            {!readonly && draft.vanDriverSummary?.isActive === false && (
                                 <Alert tone="warning">
                                     This van driver is inactive. If changed, they cannot be selected again.
                                 </Alert>
                             )}
                         </div>
-                        
+
                         <Field
                             label="Driver Name"
                             error={errors.vanDriverName}

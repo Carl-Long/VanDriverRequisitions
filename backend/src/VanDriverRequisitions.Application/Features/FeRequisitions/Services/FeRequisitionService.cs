@@ -373,14 +373,9 @@ public class FeRequisitionService(
             .Select(VanDriverProjections.AsLookupDto)
             .SingleAsync(cancellationToken);
 
-        var isShopActive = await IsShopActiveAsync(
-            requisition.ShopId,
-            cancellationToken);
+        var isShopActive = await IsShopActiveAsync(requisition.ShopId, cancellationToken);
 
-        return FeRequisitionMapper.MapRequisitionToDetailDto(
-            requisition,
-            driverSummary,
-            isShopActive);
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, isShopActive);
     }
     
 }

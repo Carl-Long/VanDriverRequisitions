@@ -15,7 +15,6 @@ export function mapFeRequisitionDetailToDraft(
         vanDriverLabel: `${detail.vanDriverSummary.code} - ${detail.vanDriverSummary.tradersName}`,
         vanDriverSummary: detail.vanDriverSummary,
         vanDriverName: detail.vanDriverName,
-        isVanDriverActive: detail.isVanDriverActive,
         shopId: detail.shopId,
         shopLabel: `${detail.shopCode} - ${detail.shopName}`,
         isShopActive: detail.isShopActive,

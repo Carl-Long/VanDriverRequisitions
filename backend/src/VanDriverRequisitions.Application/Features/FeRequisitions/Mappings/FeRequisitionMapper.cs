@@ -28,7 +28,6 @@ public static class FeRequisitionMapper
             VanDriverSummary = vanDriverSummary,
             VanDriverId = requisition.VanDriverId,
             VanDriverName = requisition.VanDriverName,
-            IsVanDriverActive = vanDriverSummary.IsActive,
             ShopId = requisition.ShopId,
             ShopCode = requisition.ShopCode,
             ShopName = requisition.ShopName,

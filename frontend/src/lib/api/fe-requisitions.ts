@@ -110,7 +110,6 @@ export type FeRequisitionDetail = {
     isVatApplicable: boolean;
     subtotal: number;
     isEditable: boolean;
-    isVanDriverActive: boolean;
     isShopActive: boolean;
     feGeneralTasks: FeGeneralTask[];
     feMileages: FeMileage[];
