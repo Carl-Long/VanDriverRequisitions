@@ -13,6 +13,7 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         vanDriverName: "",
         shopId: null,
         shopLabel: null,
+        isShopActive: true,
         submittedByNameSnapshot: null,
         submittedAtUtc: null,
         approvedByNameSnapshot: null,

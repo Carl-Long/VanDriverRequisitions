@@ -13,8 +13,8 @@ export type VanDriverLookup = {
     county: string | null;
     postcode: string;
     phone: string | null;
-    vatNumber: string | null;
     hasVat: boolean;
+    isActive: boolean;
 };
 
 export type VanDriverSearchQuery = {

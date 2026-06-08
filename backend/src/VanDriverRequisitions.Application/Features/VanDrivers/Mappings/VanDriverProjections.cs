@@ -18,7 +18,7 @@ public static class VanDriverProjections
          County = x.County,
          Postcode = x.Postcode,
          Phone = x.Phone,
-         VatNumber = x.VatNumber,
          HasVat = x.HasVat,
+         IsActive = x.IsActive,
      };
 }

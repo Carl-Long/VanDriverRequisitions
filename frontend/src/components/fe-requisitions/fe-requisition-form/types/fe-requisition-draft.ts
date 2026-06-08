@@ -16,7 +16,7 @@ export type FeRequisitionDraft = {
     vanDriverName: string | null;
     shopId: string | null;
     shopLabel: string | null;
-
+    isShopActive: boolean;
     submittedByNameSnapshot: string | null;
     submittedAtUtc: string | null;
 

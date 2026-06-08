@@ -11,6 +11,6 @@ public class VanDriverLookupDto
     public string? County { get; init; }
     public string Postcode { get; init; } = string.Empty;
     public string? Phone { get; init; }
-    public string? VatNumber { get; init; }
     public bool HasVat { get; init; }
+    public bool IsActive { get; init; }
 }

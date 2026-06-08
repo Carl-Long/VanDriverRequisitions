@@ -55,7 +55,7 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
             vanDriverId: params.id,
             vanDriverLabel: params.label,
             vanDriverSummary: params.summary,
-
+            isVanDriverActive: true,
         }));
     }
 
@@ -77,6 +77,7 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
             shopId: params.id,
             shopLabel: params.label,
+            isShopActive: true,
         }));
     }
 

@@ -27,14 +27,22 @@ export function VanDriverSummaryCard({
 
     return (
         <div className="rounded-2xl border border-border bg-surface-elevated p-6 card-shadow">
-            <div>
-                <h3 className="font-semibold">
-                    {vanDriver.tradersName}
-                </h3>
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="font-semibold">
+                        {vanDriver.tradersName}
+                    </h3>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                    {vanDriver.code}
-                </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {vanDriver.code}
+                    </p>
+                </div>
+
+                {!vanDriver.isActive && (
+                    <span className="inline-flex rounded-full border border-warning-border bg-warning-surface px-2 py-0.5 text-xs font-medium text-warning">
+                        Inactive
+                    </span>
+                )}
             </div>
 
             <div className="mt-6 space-y-4">
@@ -58,8 +66,7 @@ export function VanDriverSummaryCard({
                     <div>
                         {vanDriver.hasVat ? (
                             <span className="inline-flex rounded-full border border-success-border bg-success-surface px-2 py-0.5 text-xs font-medium text-success">
-                                {vanDriver.vatNumber ??
-                                    "Registered"}
+                                VAT Registered
                             </span>
                         ) : (
                             <span className="inline-flex rounded-full border border-border bg-surface-subtle px-2 py-0.5 text-xs font-medium text-muted-foreground">
