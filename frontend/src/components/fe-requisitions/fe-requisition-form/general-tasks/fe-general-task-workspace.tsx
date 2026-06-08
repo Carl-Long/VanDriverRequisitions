@@ -14,6 +14,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow } from "@/components/ui/table/table";
+import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -89,6 +90,7 @@ export function FeGeneralTaskWorkspace({
                 <TasksTable
                     readonly={readonly}
                     tasks={tasks}
+                    limitRule={limitRule}
                     onEdit={(task) => {
                         setEditingTask(task);
                         setOpen(true);
@@ -137,13 +139,11 @@ export function FeGeneralTaskWorkspace({
 
 type TableProps = {
     readonly: boolean;
-
+    limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
-
     onEdit: (
         task: FeGeneralTaskDraft,
     ) => void;
-
     onDelete: (
         clientId: string,
     ) => void;
@@ -151,14 +151,13 @@ type TableProps = {
 
 function TasksTable({
     readonly,
+    limitRule,
     tasks,
     onEdit,
     onDelete,
 }: Readonly<TableProps>) {
-    const totals =
-        calculateFeGeneralTaskTotals(
-            tasks,
-        );
+    const totals = calculateFeGeneralTaskTotals(tasks);
+
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
@@ -173,18 +172,9 @@ function TasksTable({
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Thu</TableHeaderCell>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Fri</TableHeaderCell>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Sat</TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Total Qty
-                            </TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Rate
-                            </TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Total
-                            </TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Total Qty</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Rate</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Total</TableHeaderCell>
 
                             {!readonly && (
                                 <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right" nowrap>
@@ -195,85 +185,115 @@ function TasksTable({
                     </TableHeader>
 
                     <TableBody>
-                        {tasks.map((task) => (
-                            <TableRow key={task.clientId}>
-                                <TableCell>
-                                    {task.weekEndingDate
-                                        ? task.weekEndingDate.toLocaleDateString()
-                                        : "-"}
-                                </TableCell>
+                        {tasks.map((task) => {
+                            const limitStatus = getGeneralTaskLimitStatus(task, limitRule);
+                            const hasLimitIssue =!readonly && limitStatus.state !== "ok";
 
-                                <TableCell align="center">
-                                    {task.quantities.sunday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.monday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.tuesday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.wednesday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.thursday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.friday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="center">
-                                    {task.quantities.saturday ?? "-"}
-                                </TableCell>
-
-                                <TableCell align="right">
-                                    {task.totalNumber}
-                                </TableCell>
-
-                                <TableCell
-                                    align="right"
-                                    className="tabular-nums"
+                            return (
+                                <TableRow
+                                    key={task.clientId}
+                                    className={hasLimitIssue ? "bg-warning/10" : undefined}
                                 >
-                                    {formatCurrencyGB(task.ratePerJob ?? 0)}
-                                </TableCell>
+                                    <TableCell>
+                                        <div>
+                                            <div>
+                                                {task.weekEndingDate
+                                                    ? task.weekEndingDate.toLocaleDateString()
+                                                    : "-"}
+                                            </div>
 
-                                <TableCell
-                                    align="right"
-                                    className="font-semibold tabular-nums"
-                                >
-                                    {formatCurrencyGB(task.totalValue)}
-                                </TableCell>
+                                            {hasLimitIssue && (
+                                                <div className="mt-1 space-y-1">
+                                                    <div className="text-xs font-medium text-warning">
+                                                        {limitStatus.state === "missing-limit"
+                                                            ? "Missing limit"
+                                                            : "Exceeds limit"}
+                                                    </div>
 
-                                {!readonly && (
-                                    <TableCell align="right" nowrap>
-                                        <div className="flex justify-end gap-2">
-                                            <IconButton
-                                                variant="ghost"
-                                                tone="accent"
-                                                onClick={() => onEdit(task)}
-                                            >
-                                                <Pencil size={14} />
-                                            </IconButton>
-
-                                            <IconButton
-                                                tone="danger"
-                                                variant="ghost"
-                                                onClick={() =>
-                                                    onDelete(task.clientId)
-                                                }
-                                            >
-                                                <Trash2 size={14} />
-                                            </IconButton>
+                                                    <ul className="list-disc pl-4 text-xs text-warning">
+                                                        {limitStatus.messages.map((message) => (
+                                                            <li key={message}>
+                                                                {message}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
                                     </TableCell>
-                                )}
-                            </TableRow>
-                        ))}
+
+                                    <TableCell align="center">
+                                        {task.quantities.sunday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.monday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.tuesday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.wednesday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.thursday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.friday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="center">
+                                        {task.quantities.saturday ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell align="right">
+                                        {task.totalNumber}
+                                    </TableCell>
+
+                                    <TableCell
+                                        align="right"
+                                        className="tabular-nums"
+                                    >
+                                        {formatCurrencyGB(task.ratePerJob ?? 0)}
+                                    </TableCell>
+
+                                    <TableCell
+                                        align="right"
+                                        className="font-semibold tabular-nums"
+                                    >
+                                        {formatCurrencyGB(task.totalValue)}
+                                    </TableCell>
+
+                                    {!readonly && (
+                                        <TableCell align="right" nowrap>
+                                            <div className="flex justify-end gap-2">
+                                                <IconButton
+                                                    variant="ghost"
+                                                    tone="accent"
+                                                    onClick={() => onEdit(task)}
+                                                >
+                                                    <Pencil size={14} />
+                                                </IconButton>
+
+                                                <IconButton
+                                                    tone="danger"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        onDelete(task.clientId)
+                                                    }
+                                                >
+                                                    <Trash2 size={14} />
+                                                </IconButton>
+                                            </div>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
 
                     <TableFooter>
@@ -291,6 +311,7 @@ function TasksTable({
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated tabular-nums" align="right">
                                 {formatCurrencyGB(totals.subtotal)}
                             </TableCell>
+
                             {!readonly && (
                                 <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" />
                             )}

@@ -26,6 +26,11 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
 
             if (rule is null)
             {
+                failures.Add(
+                    new ValidationFailure(
+                        "Form",
+                        $"No limit rule is configured for {task.TaskTypeName}."));
+
                 continue;
             }
 
@@ -58,7 +63,7 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
                 failures.Add(
                     new ValidationFailure(
                         nameof(task.RatePerJob),
-                        $"{task.TaskTypeName} exceeds maximum rate of {rule.MaxRate:C}."));
+                        $"{task.TaskTypeName} exceeds maximum rate of £{rule.MaxRate:0.00}."));
             }
         }
 

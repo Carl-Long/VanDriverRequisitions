@@ -25,6 +25,7 @@ import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";
 import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
+import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -215,6 +216,22 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         }
     }
 
+    function getTaskTypeTabHasWarning(taskTypeId: string) {
+        if (isReadonly) {
+            return false;
+        }
+
+        const tasks = draft.feGeneralTasks.filter(task => task.taskTypeId === taskTypeId);
+
+        const limitRule = resolveFeRequisitionLimitRule({
+            rules: limitRules,
+            categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+            taskTypeId,
+        });
+
+        return tasks.some(task => getGeneralTaskLimitStatus(task, limitRule).state !== "ok");
+    }
+
 
     async function handleSaveDraft() {
         setActiveAction("saveAndClose");
@@ -387,6 +404,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                 onActiveKeyChange={setActiveTab}
                 taskTypes={taskTypes}
                 submissionHistoryCount={draft.submissionHistory.length}
+                getTaskTypeTabHasWarning={getTaskTypeTabHasWarning}
                 details={
                     <FeRequisitionDetailsTab
                         readonly={isReadonly}
