@@ -1,12 +1,12 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
-import { SubmitWindowHeroCompact } from "@/components/submit-windows/submit-window-hero-compact";
 import { canApproveRequisitions, canCreateRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { HeartHandshake, Sofa, Shirt, ClipboardCheck } from "lucide-react";
 import { LaunchCard, type LaunchCardProps } from "./launch-card";
 import { WelcomeHeading } from "./welcome-heading";
+import { SubmitWindowHeroCompact } from "@/features/submit-windows/components/submit-window-hero-compact";
 
 const cards: LaunchCardProps[] = [
     {

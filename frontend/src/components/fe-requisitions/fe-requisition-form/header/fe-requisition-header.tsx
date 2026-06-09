@@ -7,10 +7,10 @@ import { FeRequisitionActions } from "./fe-requisition-actions";
 import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { SaveAction } from "../components/fe-requisition-shell";
-import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { formatDateTime } from "@/lib/format/date";
 import { User, Calendar } from "lucide-react";
 import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
+import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 
 
 type Props = {

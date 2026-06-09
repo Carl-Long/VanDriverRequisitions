@@ -1,16 +1,11 @@
 import { Pencil, Trash2 } from "lucide-react";
-
 import { Surface } from "@/components/ui/surface";
 import { IconButton } from "@/components/ui/button/icon-button";
-
-import type {
-    SubmitWindow,
-    SubmitWindowFilter,
-} from "@/lib/api/submit-windows";
-
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/format/date";
-import { TableBody, TableCell, TableHeader, TableHeaderCell, TableHeaderRow, TableRow } from "../ui/table/table";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
+import { SubmitWindow, SubmitWindowFilter } from "../types/submit-window.types";
+import { getWindowStatus, WindowStatus } from "../utils/get-window-status";
 
 type Props = {
     items: SubmitWindow[];
@@ -19,20 +14,6 @@ type Props = {
     onDelete: (item: SubmitWindow) => void;
 };
 
-type WindowStatus = "upcoming" | "open" | "closed" | "deleted";
-
-function getWindowStatus(window: SubmitWindow): WindowStatus {
-    if (window.isDeleted) return "deleted";
-
-    const now = new Date();
-    const from = new Date(window.openFrom);
-    const to = new Date(window.openTo);
-
-    if (now < from) return "upcoming";
-    if (now >= from && now <= to) return "open";
-
-    return "closed";
-}
 
 const statusConfig: Record<
     WindowStatus,

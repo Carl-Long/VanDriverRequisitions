@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  CalendarClock,
-  CalendarCheck,
-  CalendarPlus,
-  CalendarX,
-  Loader2,
-} from "lucide-react";
+import { CalendarClock, CalendarCheck, CalendarPlus, CalendarX, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { SubmitWindowStatus } from "@/lib/api/submit-windows";
-import { formatDateTime, timeUntil } from "@/lib/format/date";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+import { timeUntil, formatDateTime } from "@/lib/format/date";
+import { SubmitWindowStatus } from "../types/submit-window.types";
 
 type SubmitWindowHeroProps = {
   status: SubmitWindowStatus | null;

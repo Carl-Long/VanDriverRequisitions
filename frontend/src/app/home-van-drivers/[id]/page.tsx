@@ -21,7 +21,7 @@ import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requ
 
 import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
 import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import NotFound from "@/app/not-found";
 import { useAuth } from "@/providers/auth-provider";
 import { canCreateRequisitions } from "@/lib/auth/roles";

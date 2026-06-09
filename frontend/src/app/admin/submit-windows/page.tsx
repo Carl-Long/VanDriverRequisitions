@@ -8,17 +8,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { Pagination } from "@/components/ui/pagination";
 
-import { SubmitWindowHero } from "@/components/submit-windows/submit-window-hero";
-import { SubmitWindowFormModal } from "@/components/submit-windows/submit-window-form-modal";
-import { SubmitWindowTable } from "@/components/submit-windows/submit-window-table";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
-
-import {
-    SubmitWindowFilter,
-    submitWindowsApi,
-    type SubmitWindow,
-} from "@/lib/api/submit-windows";
 
 import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -27,6 +18,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
 import { getApiErrorMessage } from "@/lib/api/client";
+import { submitWindowsApi } from "@/features/submit-windows/api/submit-windows-api";
+import { SubmitWindowFormModal } from "@/features/submit-windows/components/submit-window-form-modal";
+import { SubmitWindowHero } from "@/features/submit-windows/components/submit-window-hero";
+import { SubmitWindowTable } from "@/features/submit-windows/components/submit-window-table";
+import { SubmitWindow, SubmitWindowFilter } from "@/features/submit-windows/types/submit-window.types";
 
 const PAGE_SIZE = 10;
 

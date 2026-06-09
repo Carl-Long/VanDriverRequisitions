@@ -1,41 +1,9 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
+import { SubmitWindowFilter, SubmitWindow, SubmitWindowStatus, CreateSubmitWindow, UpdateSubmitWindow } from "../types/submit-window.types";
 
 const BASE = "/api/v1/submit-windows";
 
-export type SubmitWindow = {
-    id: string;
-    openFrom: string;
-    openTo: string;
-    isDeleted: boolean;
-    createdAtUtc: string;
-    createdByNameSnapshot: string;
-    updatedAtUtc: string | null;
-    updatedByNameSnapshot: string | null;
-    deletedAtUtc: string;
-    deletedByNameSnapshot: string | null;
-};
-
-export type CreateSubmitWindow = {
-    openFrom: string;
-    openTo: string;
-};
-
-export type UpdateSubmitWindow = {
-    openFrom: string;
-    openTo: string;
-};
-
-export type SubmitWindowStatus = {
-    currentWindow: SubmitWindow | null;
-    nextWindow: SubmitWindow | null;
-    hasUpcoming: boolean;
-};
-
-export type SubmitWindowFilter =
-    | "active"
-    | "past"
-    | "deleted";
 
 export const submitWindowsApi = {
     getAll: (

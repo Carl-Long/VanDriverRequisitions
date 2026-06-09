@@ -20,12 +20,12 @@ import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/lib/api/fe-task-types";
-import { SubmitWindowStatus } from "@/lib/api/submit-windows";
 import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";
 import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
+import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 
 type Props = {
     mode: FeRequisitionPageMode;

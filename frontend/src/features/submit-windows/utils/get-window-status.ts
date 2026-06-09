@@ -1,12 +1,8 @@
-import type { SubmitWindow } from "@/lib/api/submit-windows";
+import { SubmitWindow } from "../types/submit-window.types";
 
-export type WindowStatus =
-    | "upcoming"
-    | "open"
-    | "closed"
-    | "deleted";
+export type WindowStatus = "upcoming" | "open" | "closed" | "deleted";
 
-export function getWindowStatus( window: SubmitWindow ): WindowStatus {
+export function getWindowStatus(window: SubmitWindow): WindowStatus {
     if (window.isDeleted) return "deleted";
 
     const now = new Date();

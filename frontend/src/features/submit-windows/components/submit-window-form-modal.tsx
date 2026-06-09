@@ -7,12 +7,12 @@ import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button/button";
+import { Alert } from "@/components/ui/alert";
+import { DateTimePicker } from "@/components/ui/date/date-time-picker";
+import { Field } from "@/components/ui/field/field";
+import { setTime, addDays } from "@/lib/format/date";
+import { SubmitWindow } from "../types/submit-window.types";
 
-import type { SubmitWindow } from "@/lib/api/submit-windows";
-import { DateTimePicker } from "../ui/date/date-time-picker";
-import { addDays, setTime } from "@/lib/format/date";
-import { Field } from "../ui/field/field";
-import { Alert } from "../ui/alert";
 
 const submitWindowSchema = z
     .object({

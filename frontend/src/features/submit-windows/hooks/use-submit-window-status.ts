@@ -1,15 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
-import {
-    getApiErrorMessage,
-} from "@/lib/api/client";
-
-import {
-    submitWindowsApi,
-    type SubmitWindowStatus,
-} from "@/lib/api/submit-windows";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { submitWindowsApi } from "../api/submit-windows-api";
+import { SubmitWindowStatus } from "../types/submit-window.types";
 
 export function useSubmitWindowStatus() {
     const [status, setStatus] = useState<SubmitWindowStatus | null>(null);

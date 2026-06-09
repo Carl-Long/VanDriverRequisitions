@@ -1,7 +1,7 @@
 "use client";
 
-import { SubmitWindowHero } from "@/components/submit-windows/submit-window-hero";
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
+import { SubmitWindowHero } from "./submit-window-hero";
 
 export function SubmitWindowHeroCompact() {
   const {
