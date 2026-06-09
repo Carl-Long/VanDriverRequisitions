@@ -154,10 +154,10 @@ public static class DevDataSeeder
             await SeedVanDriversAsync(context, logger);
         }
 
-        // if (!hasRequisitions)
-        // {
-        //     await SeedRequisitionsAsync(context, logger);
-        // }
+         if (!hasRequisitions)
+         {
+             await SeedRequisitionsAsync(context, logger);
+         }
 
         logger?.LogInformation("Development seeding complete.");
     }
