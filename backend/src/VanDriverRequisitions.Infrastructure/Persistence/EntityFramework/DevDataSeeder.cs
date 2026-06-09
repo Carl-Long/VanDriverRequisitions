@@ -70,107 +70,71 @@ public static class DevDataSeeder
         // ─────────────────────────────────────────────
         // 2. LIMIT RULES
         // ─────────────────────────────────────────────
-        //
-        // if (!hasRules)
-        // {
-        //     context.RequisitionLimitRules.AddRange(
-        //
-        //         // ─── General Task rules ─────────────────────
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.GeneralTask,
-        //             FeTaskTypeId = CollectionsTaskTypeId,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 30,
-        //             MaxRate = 15.00m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.GeneralTask,
-        //             FeTaskTypeId = DeliveriesTaskTypeId,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 25,
-        //             MaxRate = 20.00m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.GeneralTask,
-        //             FeTaskTypeId = WasteTaskTypeId,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 10,
-        //             MaxRate = 25.00m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.GeneralTask,
-        //             FeTaskTypeId = LoadingTaskTypeId,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 15,
-        //             MaxRate = 12.50m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //
-        //         // ─── Mileage ────────────────────────────────
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.Mileage,
-        //             FeTaskTypeId = null,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 500,
-        //             MaxRate = 0.45m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //
-        //         // ─── Transfers ──────────────────────────────
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.Transfer,
-        //             FeTaskTypeId = null,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 20,
-        //             MaxRate = 18.00m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         },
-        //
-        //         // ─── Additional Costs (now REQUIRED values) ─
-        //         new RequisitionLimitRule
-        //         {
-        //             Id = Guid.NewGuid(),
-        //             Category = RequisitionRowCategory.AdditionalCost,
-        //             FeTaskTypeId = null,
-        //             Fascia = Fascia.Fe,
-        //             MaxQuantity = 1,
-        //             MaxRate = 50.00m,
-        //             CreatedAtUtc = now,
-        //             CreatedById = SystemUserId,
-        //             CreatedByNameSnapshot = SystemUserName
-        //         }
-        //     );
-        //
-        //     await context.SaveChangesAsync();
-        //     logger?.LogInformation("Seeded RequisitionLimitRules");
-        // }
+
+        if (!hasRules)
+        {
+            context.RequisitionLimitRules.AddRange(
+                // ─── General Task rules ─────────────────────
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.GeneralTask,
+                        CollectionsTaskTypeId,
+                        Fascia.Fe,
+                        30,
+                        15.00m)),
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.GeneralTask,
+                        DeliveriesTaskTypeId,
+                        Fascia.Fe,
+                        40,
+                        20.00m)),
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.GeneralTask,
+                        WasteTaskTypeId,
+                        Fascia.Fe,
+                        50,
+                        30.00m)),
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.GeneralTask,
+                        LoadingTaskTypeId,
+                        Fascia.Fe,
+                        30,
+                        15.00m)),
+
+                // ─── Mileage ────────────────────────────────
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.Mileage,
+                        null,
+                        Fascia.Fe,
+                        300,
+                        0.50m)),
+
+                // ─── Transfers ──────────────────────────────
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.Transfer,
+                        null,
+                        Fascia.Fe,
+                        50,
+                        10.00m)),
+
+                // ─── Additional Costs ─
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.AdditionalCost,
+                        null,
+                        Fascia.Fe,
+                        30,
+                        15.00m))
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded RequisitionLimitRules");
+        }
 
         // ─────────────────────────────────────────────
         // 3. Shops
@@ -249,7 +213,8 @@ public static class DevDataSeeder
         var rng = new Random(42); // deterministic
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("INSERT INTO Shops (Id, Code, Name, Address, Address2, Town, County, Postcode, Phone, IsActive) VALUES");
+        sb.AppendLine(
+            "INSERT INTO Shops (Id, Code, Name, Address, Address2, Town, County, Postcode, Phone, IsActive) VALUES");
 
         for (var i = 0; i < count; i++)
         {
@@ -262,12 +227,14 @@ public static class DevDataSeeder
             var suffix = ShopSuffixes[i % ShopSuffixes.Length];
             var name = $"{prefix} {town} {suffix}";
             var address = $"{rng.Next(1, 200)} {StreetNames[i % StreetNames.Length]}";
-            var postcode = $"{(char)('A' + (i % 26))}{(char)('A' + (i / 26 % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var postcode =
+                $"{(char)('A' + (i % 26))}{(char)('A' + (i / 26 % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
             var phone = $"0{rng.Next(1000, 9999)} {rng.Next(100000, 999999)}";
             var isActive = i < 800 ? 1 : 0; // 80% active
 
             var separator = i < count - 1 ? "," : ";";
-            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(name)}', '{Esc(address)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {isActive}){separator}");
+            sb.AppendLine(
+                $"    ('{id}', '{Esc(code)}', '{Esc(name)}', '{Esc(address)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {isActive}){separator}");
         }
 
         await context.Database.ExecuteSqlRawAsync(sb.ToString());
@@ -298,7 +265,8 @@ public static class DevDataSeeder
         var rng = new Random(99); // deterministic, different from shops
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("INSERT INTO VanDrivers (Id, Code, TradersName, Address1, Address2, Town, County, Postcode, Phone, VatNumber, IsActive) VALUES");
+        sb.AppendLine(
+            "INSERT INTO VanDrivers (Id, Code, TradersName, Address1, Address2, Town, County, Postcode, Phone, VatNumber, IsActive) VALUES");
 
         for (var i = 0; i < count; i++)
         {
@@ -311,7 +279,8 @@ public static class DevDataSeeder
             var town = Towns[townIdx];
             var county = Counties[townIdx];
             var address1 = $"{rng.Next(1, 300)} {StreetNames[(i + 3) % StreetNames.Length]}";
-            var postcode = $"{(char)('A' + ((i + 5) % 26))}{(char)('A' + ((i / 26 + 3) % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
+            var postcode =
+                $"{(char)('A' + ((i + 5) % 26))}{(char)('A' + ((i / 26 + 3) % 26))}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
             var phone = $"07{rng.Next(100, 999)} {rng.Next(100000, 999999)}";
             var hasVat = i % 3 == 0; // ~33% with VAT
             var vatNumber = hasVat ? $"GB{rng.Next(100000000, 999999999)}" : "NULL";
@@ -319,12 +288,14 @@ public static class DevDataSeeder
 
             var vatValue = hasVat ? $"'{vatNumber}'" : "NULL";
             var separator = i < count - 1 ? "," : ";";
-            sb.AppendLine($"    ('{id}', '{Esc(code)}', '{Esc(tradersName)}', '{Esc(address1)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {vatValue}, {isActive}){separator}");
+            sb.AppendLine(
+                $"    ('{id}', '{Esc(code)}', '{Esc(tradersName)}', '{Esc(address1)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {vatValue}, {isActive}){separator}");
         }
 
         await context.Database.ExecuteSqlRawAsync(sb.ToString());
         logger?.LogInformation("Seeded {Count} van drivers ({Active} active, {Inactive} inactive).", count, 800, 200);
     }
+
     private static readonly (Guid Id, string Name)[] SeedUsers =
     [
         (new Guid("10000000-0000-0000-0000-000000000001"), "John Smith"),
@@ -334,150 +305,149 @@ public static class DevDataSeeder
         (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
     ];
 
-    // private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
-    // {
-    //     const int count = 100;
-    //     var rng = new Random(123);
-    //
-    //     var taskTypes = await context.FeTaskTypes.ToListAsync();
-    //
-    //     var shops = await context.Shops
-    //         .Where(x => x.IsActive)
-    //         .Take(200)
-    //         .ToListAsync();
-    //
-    //     var drivers = await context.VanDrivers
-    //         .Where(x => x.IsActive)
-    //         .Take(200)
-    //         .ToListAsync();
-    //
-    //     var requisitions = new List<FeRequisition>();
-    //
-    //     for (var i = 1; i <= count; i++)
-    //     {
-    //         var shop = shops[rng.Next(shops.Count)];
-    //         var driver = drivers[rng.Next(drivers.Count)];
-    //         var user = SeedUsers[rng.Next(SeedUsers.Length)];
-    //
-    //         var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
-    //
-    //         var status = GetRandomStatus(rng);
-    //
-    //         var hasVat = rng.Next(0, 2) == 1;
-    //
-    //         var details = new RequisitionDetails(
-    //             DateOnly.FromDateTime(createdDate),
-    //             new VanDriverSnapshot(
-    //                 driver.Id,
-    //                 driver.Code,
-    //                 driver.TradersName,
-    //                 driver.TradersName,
-    //                 hasVat),
-    //             new ShopSnapshot(
-    //                 shop.Id,
-    //                 shop.Code,
-    //                 shop.Name));
-    //
-    //         var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
-    //
-    //         var requisitionNumber = $"F{i:D9}";
-    //
-    //         var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
-    //         requisition.CreatedAtUtc = createdDate;
-    //         requisition.CreatedById = user.Id;
-    //         requisition.CreatedByNameSnapshot = user.Name;
-    //
-    //         switch (status)
-    //         {
-    //             case RequisitionStatus.Draft:
-    //                 break;
-    //
-    //             case RequisitionStatus.Submitted:
-    //                 {
-    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-    //                     var submittedAtUtc = createdDate.AddHours(2);
-    //
-    //                     var submission = FeRequisitionSubmission.Create(
-    //                         requisition.NextSubmissionNumber,
-    //                         submitter.Id,
-    //                         submitter.Name,
-    //                         submittedAtUtc,
-    //                         BuildSeedSnapshotJson(requisition));
-    //
-    //                     requisition.AddSubmission(submission);
-    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-    //
-    //                     break;
-    //                 }
-    //
-    //             case RequisitionStatus.Rejected:
-    //                 {
-    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-    //                     var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
-    //                     var submittedAtUtc = createdDate.AddHours(2);
-    //                     var rejectedAtUtc = createdDate.AddDays(1);
-    //                     var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
-    //
-    //                     var submission = FeRequisitionSubmission.Create(
-    //                         requisition.NextSubmissionNumber,
-    //                         submitter.Id,
-    //                         submitter.Name,
-    //                         submittedAtUtc,
-    //                         BuildSeedSnapshotJson(requisition));
-    //
-    //                     requisition.AddSubmission(submission);
-    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-    //
-    //                     requisition.RejectSubmission(
-    //                         rejecter.Id,
-    //                         rejecter.Name,
-    //                         rejectedReason,
-    //                         rejectedAtUtc);
-    //
-    //                     break;
-    //                 }
-    //
-    //             case RequisitionStatus.Approved:
-    //                 {
-    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-    //                     var approver = SeedUsers[rng.Next(SeedUsers.Length)];
-    //                     var submittedAtUtc = createdDate.AddHours(2);
-    //                     var approvedAtUtc = createdDate.AddDays(2);
-    //                     var poNumber = BuildSeedPoNumber(i);
-    //
-    //                     var submission = FeRequisitionSubmission.Create(
-    //                         requisition.NextSubmissionNumber,
-    //                         submitter.Id,
-    //                         submitter.Name,
-    //                         submittedAtUtc,
-    //                         BuildSeedSnapshotJson(requisition));
-    //
-    //                     requisition.AddSubmission(submission);
-    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-    //
-    //                     requisition.ApproveSubmission(
-    //                         approver.Id,
-    //                         approver.Name,
-    //                         approvedAtUtc,
-    //                         poNumber);
-    //
-    //                     break;
-    //                 }
-    //
-    //             default:
-    //                 throw new ArgumentOutOfRangeException(
-    //                     message: "Unknown status attempted during seed",
-    //                     null);
-    //         }
-    //         requisitions.Add(requisition);
-    //     }
-    //
-    //     context.FeRequisitions.AddRange(requisitions);
-    //
-    //     await context.SaveChangesAsync();
-    //
-    //     logger?.LogInformation("Seeded {Count} requisitions.", count);
-    // }
+    private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        const int count = 100;
+        var rng = new Random(123);
+
+        var taskTypes = await context.FeTaskTypes.ToListAsync();
+
+        var shops = await context.Shops
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var drivers = await context.VanDrivers
+            .Where(x => x.IsActive)
+            .Take(200)
+            .ToListAsync();
+
+        var requisitions = new List<FeRequisition>();
+
+        for (var i = 1; i <= count; i++)
+        {
+            var shop = shops[rng.Next(shops.Count)];
+            var driver = drivers[rng.Next(drivers.Count)];
+            var user = SeedUsers[rng.Next(SeedUsers.Length)];
+
+            var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
+
+            var status = GetRandomStatus(rng);
+
+            var hasVat = rng.Next(0, 2) == 1;
+
+            var details = new RequisitionDetails(
+                DateOnly.FromDateTime(createdDate),
+                new VanDriverSnapshot(
+                    driver.Id,
+                    driver.Code,
+                    driver.TradersName,
+                    driver.TradersName,
+                    hasVat),
+                new ShopSnapshot(
+                    shop.Id,
+                    shop.Code,
+                    shop.Name));
+
+            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+
+            var requisitionNumber = $"F{i:D9}";
+
+            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+            requisition.CreatedAtUtc = createdDate;
+            requisition.CreatedById = user.Id;
+            requisition.CreatedByNameSnapshot = user.Name;
+
+            switch (status)
+            {
+                case RequisitionStatus.Draft:
+                    break;
+
+                case RequisitionStatus.Submitted:
+                {
+                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    var submittedAtUtc = createdDate.AddHours(2);
+
+                    requisition.Submit(
+                        new AuditUser(
+                            submitter.Id,
+                            submitter.Name),
+                        submittedAtUtc,
+                        BuildSeedSnapshotJson(requisition));
+
+                    break;
+                }
+
+                case RequisitionStatus.Rejected:
+                {
+                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
+
+                    var submittedAtUtc = createdDate.AddHours(2);
+                    var rejectedAtUtc = createdDate.AddDays(1);
+
+                    var rejectedReason =
+                        RejectionReasons[rng.Next(RejectionReasons.Length)];
+
+                    requisition.Submit(
+                        new AuditUser(
+                            submitter.Id,
+                            submitter.Name),
+                        submittedAtUtc,
+                        BuildSeedSnapshotJson(requisition));
+
+                    requisition.RejectSubmission(
+                        new AuditUser(
+                            rejecter.Id,
+                            rejecter.Name),
+                        rejectedAtUtc,
+                        rejectedReason);
+
+                    break;
+                }
+
+                case RequisitionStatus.Approved:
+                {
+                    var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+                    var approver = SeedUsers[rng.Next(SeedUsers.Length)];
+
+                    var submittedAtUtc = createdDate.AddHours(2);
+                    var approvedAtUtc = createdDate.AddDays(2);
+
+                    var poNumber = BuildSeedPoNumber(i);
+
+                    requisition.Submit(
+                        new AuditUser(
+                            submitter.Id,
+                            submitter.Name),
+                        submittedAtUtc,
+                        BuildSeedSnapshotJson(requisition));
+
+                    requisition.ApproveSubmission(
+                        new AuditUser(
+                            approver.Id,
+                            approver.Name),
+                        approvedAtUtc,
+                        poNumber);
+
+                    break;
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        message: "Unknown status attempted during seed",
+                        null);
+            }
+
+            requisitions.Add(requisition);
+        }
+
+        context.FeRequisitions.AddRange(requisitions);
+
+        await context.SaveChangesAsync();
+
+        logger?.LogInformation("Seeded {Count} requisitions.", count);
+    }
 
     private static RequisitionStatus GetRandomStatus(Random rng)
     {
@@ -492,7 +462,8 @@ public static class DevDataSeeder
         return statuses[rng.Next(statuses.Length)];
     }
 
-    private static List<FeGeneralTaskUpdateModel> BuildSeedTasks(Random rng, List<FeTaskType> taskTypes, DateOnly requisitionDate)
+    private static List<FeGeneralTaskUpdateModel> BuildSeedTasks(Random rng, List<FeTaskType> taskTypes,
+        DateOnly requisitionDate)
     {
         var taskCount = rng.Next(1, 4);
         var selectedTaskTypes = taskTypes
@@ -506,22 +477,22 @@ public static class DevDataSeeder
         foreach (var taskType in selectedTaskTypes)
         {
             tasks.Add(new FeGeneralTaskUpdateModel(
-                    null,
-                    taskType.Id,
-                    taskType.Name,
-                    taskType.Code,
-                    weekEndingDate,
-                    new WeeklyQuantities(
-                        rng.Next(0, 6),
-                        rng.Next(0, 6),
-                        rng.Next(0, 6),
-                        rng.Next(0, 6),
-                        rng.Next(0, 6),
-                        rng.Next(0, 6),
-                        rng.Next(0, 6)),
-                    Math.Round(
-                        (decimal)(rng.NextDouble() * 15 + 5),
-                        2)));
+                null,
+                taskType.Id,
+                taskType.Name,
+                taskType.Code,
+                weekEndingDate,
+                new WeeklyQuantities(
+                    rng.Next(0, 6),
+                    rng.Next(0, 6),
+                    rng.Next(0, 6),
+                    rng.Next(0, 6),
+                    rng.Next(0, 6),
+                    rng.Next(0, 6),
+                    rng.Next(0, 6)),
+                Math.Round(
+                    (decimal)(rng.NextDouble() * 15 + 5),
+                    2)));
         }
 
         return tasks;
