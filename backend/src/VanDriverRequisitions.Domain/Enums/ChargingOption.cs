@@ -2,6 +2,6 @@ namespace VanDriverRequisitions.Domain.Enums;
 
 public enum ChargingOption
 {
-    Job,
-    Mileage
+    Job = 0,
+    Mileage = 1
 }

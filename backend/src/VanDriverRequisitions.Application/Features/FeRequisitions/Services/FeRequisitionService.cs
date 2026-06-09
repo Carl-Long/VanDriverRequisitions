@@ -26,6 +26,8 @@ public class FeRequisitionService(
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
+        await validator.ValidateAsync(query, cancellationToken);
+        
         var dbQuery = context.FeRequisitions.ApplyFilters(query);
         var totalCount = await dbQuery.CountAsync(cancellationToken);
 

@@ -12,19 +12,16 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 
 public class SubmitWindowService(IApplicationDbContext context, IValidatorService validator) : ISubmitWindowService
 {
-    public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(
-        int page,
-        int pageSize,
-        SubmitWindowFilter filter,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(SubmitWindowQueryDto query, CancellationToken cancellationToken = default)
     {
-        var query = BuildFilteredQuery(filter, DateTime.UtcNow);
+        await validator.ValidateAsync(query, cancellationToken);
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var filteredQuery = BuildFilteredQuery(query.Filter, DateTime.UtcNow);
+        var totalCount = await filteredQuery.CountAsync(cancellationToken);
 
-        var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+        var items = await filteredQuery
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
             .Select(SubmitWindowProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
 
@@ -32,8 +29,8 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         {
             Items = items,
             TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize,
+            Page = query.Page,
+            PageSize = query.PageSize,
         };
     }
 
@@ -52,11 +49,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         await validator.ValidateAsync(createDto, cancellationToken);
         await CheckForOverlappingAsync(createDto.OpenFrom, createDto.OpenTo, cancellationToken);
 
-        var newWindow = new SubmitWindow
-        {
-            OpenFrom = createDto.OpenFrom,
-            OpenTo = createDto.OpenTo
-        };
+        var newWindow = SubmitWindow.Create(createDto.OpenFrom, createDto.OpenTo);
 
         context.SubmitWindows.Add(newWindow);
         await context.SaveChangesAsync(cancellationToken);
@@ -68,16 +61,11 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
     {
         await validator.ValidateAsync(updateDto, cancellationToken);
 
-        var existingWindow = await context.SubmitWindows
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        
-        if (existingWindow is null)
-            throw new NotFoundException($"Submit window with ID '{id}' was not found.");
-        
+        var existingWindow = await LoadForUpdateAsync(id, cancellationToken);
+
         await CheckForOverlappingAsync(updateDto.OpenFrom, updateDto.OpenTo, cancellationToken, id);
-        
-        existingWindow.OpenFrom = updateDto.OpenFrom;
-        existingWindow.OpenTo = updateDto.OpenTo;
+
+        existingWindow.Update(updateDto.OpenFrom, updateDto.OpenTo);
 
         await context.SaveChangesAsync(cancellationToken);
 
@@ -119,6 +107,12 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             HasUpcoming = nextWindow is not null,
         };
     }
+    
+    private async Task<SubmitWindow> LoadForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.SubmitWindows.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+               ?? throw new NotFoundException($"Submit window with ID '{id}' was not found.");
+    }
 
     private async Task CheckForOverlappingAsync(DateTime openFrom, DateTime openTo, CancellationToken cancellationToken, Guid? id = null)
     {
@@ -129,11 +123,9 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             throw new ValidationException("This window overlaps with an upcoming or completed submit window.");
     }
 
-    private IQueryable<SubmitWindow> BuildFilteredQuery(
-        SubmitWindowFilter filter,
-        DateTime now)
+    private IQueryable<SubmitWindow> BuildFilteredQuery(SubmitWindowFilter filter, DateTime now)
     {
-        IQueryable<SubmitWindow> query = context.SubmitWindows;
+        var query = context.SubmitWindows.AsNoTracking();
 
         return filter switch
         {
@@ -153,6 +145,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
 
             SubmitWindowFilter.Deleted => query
                 .IgnoreQueryFilters()
+                .AsNoTracking()
                 .Where(x => x.DeletedAtUtc != null)
                 .OrderByDescending(x => x.DeletedAtUtc)
                 .ThenByDescending(x => x.Id),

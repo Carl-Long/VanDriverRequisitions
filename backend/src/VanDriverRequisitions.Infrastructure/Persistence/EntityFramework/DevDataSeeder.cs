@@ -70,107 +70,107 @@ public static class DevDataSeeder
         // ─────────────────────────────────────────────
         // 2. LIMIT RULES
         // ─────────────────────────────────────────────
-
-        if (!hasRules)
-        {
-            context.RequisitionLimitRules.AddRange(
-
-                // ─── General Task rules ─────────────────────
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.GeneralTask,
-                    FeTaskTypeId = CollectionsTaskTypeId,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 30,
-                    MaxRate = 15.00m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.GeneralTask,
-                    FeTaskTypeId = DeliveriesTaskTypeId,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 25,
-                    MaxRate = 20.00m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.GeneralTask,
-                    FeTaskTypeId = WasteTaskTypeId,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 10,
-                    MaxRate = 25.00m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.GeneralTask,
-                    FeTaskTypeId = LoadingTaskTypeId,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 15,
-                    MaxRate = 12.50m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-
-                // ─── Mileage ────────────────────────────────
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.Mileage,
-                    FeTaskTypeId = null,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 500,
-                    MaxRate = 0.45m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-
-                // ─── Transfers ──────────────────────────────
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.Transfer,
-                    FeTaskTypeId = null,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 20,
-                    MaxRate = 18.00m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                },
-
-                // ─── Additional Costs (now REQUIRED values) ─
-                new RequisitionLimitRule
-                {
-                    Id = Guid.NewGuid(),
-                    Category = RequisitionRowCategory.AdditionalCost,
-                    FeTaskTypeId = null,
-                    Fascia = Fascia.Fe,
-                    MaxQuantity = 1,
-                    MaxRate = 50.00m,
-                    CreatedAtUtc = now,
-                    CreatedById = SystemUserId,
-                    CreatedByNameSnapshot = SystemUserName
-                }
-            );
-
-            await context.SaveChangesAsync();
-            logger?.LogInformation("Seeded RequisitionLimitRules");
-        }
+        //
+        // if (!hasRules)
+        // {
+        //     context.RequisitionLimitRules.AddRange(
+        //
+        //         // ─── General Task rules ─────────────────────
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.GeneralTask,
+        //             FeTaskTypeId = CollectionsTaskTypeId,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 30,
+        //             MaxRate = 15.00m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.GeneralTask,
+        //             FeTaskTypeId = DeliveriesTaskTypeId,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 25,
+        //             MaxRate = 20.00m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.GeneralTask,
+        //             FeTaskTypeId = WasteTaskTypeId,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 10,
+        //             MaxRate = 25.00m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.GeneralTask,
+        //             FeTaskTypeId = LoadingTaskTypeId,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 15,
+        //             MaxRate = 12.50m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //
+        //         // ─── Mileage ────────────────────────────────
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.Mileage,
+        //             FeTaskTypeId = null,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 500,
+        //             MaxRate = 0.45m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //
+        //         // ─── Transfers ──────────────────────────────
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.Transfer,
+        //             FeTaskTypeId = null,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 20,
+        //             MaxRate = 18.00m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         },
+        //
+        //         // ─── Additional Costs (now REQUIRED values) ─
+        //         new RequisitionLimitRule
+        //         {
+        //             Id = Guid.NewGuid(),
+        //             Category = RequisitionRowCategory.AdditionalCost,
+        //             FeTaskTypeId = null,
+        //             Fascia = Fascia.Fe,
+        //             MaxQuantity = 1,
+        //             MaxRate = 50.00m,
+        //             CreatedAtUtc = now,
+        //             CreatedById = SystemUserId,
+        //             CreatedByNameSnapshot = SystemUserName
+        //         }
+        //     );
+        //
+        //     await context.SaveChangesAsync();
+        //     logger?.LogInformation("Seeded RequisitionLimitRules");
+        // }
 
         // ─────────────────────────────────────────────
         // 3. Shops

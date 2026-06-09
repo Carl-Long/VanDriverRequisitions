@@ -3,24 +3,32 @@ using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Features.Users.Dtos;
-using VanDriverRequisitions.Application.Features.Users.Mappings;
 
 namespace VanDriverRequisitions.Application.Features.Users.Services;
 
-public class FeRequisitionUserService(IApplicationDbContext context, ICurrentUserService currentUserService ) : IFeRequisitionUserService
+public class FeRequisitionUserService(IApplicationDbContext context, ICurrentUserService currentUserService, IValidatorService validator ) : IFeRequisitionUserService
 {
     public async Task<PagedResult<RequisitionUserLookupDto>> SearchAsync(RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default)
     {
-        var userId = currentUserService.User?.Id 
-                     ?? throw new UnauthorizedAccessException();
+        await validator.ValidateAsync(query, cancellationToken);
+        
+        var userId = currentUserService.User?.Id ?? throw new UnauthorizedAccessException();
         
         var usersQuery = context.FeRequisitions
+            .AsNoTracking()
             .Where(x => x.CreatedById != userId)
-            .Select(RequisitionUserProjections.AsLookupDto)
-            .Distinct();
+            .GroupBy(x => new
+            {
+                x.CreatedById,
+                x.CreatedByNameSnapshot
+            })
+            .Select(x => new RequisitionUserLookupDto
+            {
+                Id = x.Key.CreatedById,
+                Name = x.Key.CreatedByNameSnapshot
+            });
 
-        if (!string.IsNullOrWhiteSpace(
-                query.Search))
+        if (!string.IsNullOrWhiteSpace(query.Search))
         {
             var term = query.Search.Trim();
             usersQuery = usersQuery.Where(x =>
@@ -35,8 +43,7 @@ public class FeRequisitionUserService(IApplicationDbContext context, ICurrentUse
             .Take(query.PageSize)
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<
-            RequisitionUserLookupDto>
+        return new PagedResult<RequisitionUserLookupDto>
         {
             Items = items,
             TotalCount = totalCount,

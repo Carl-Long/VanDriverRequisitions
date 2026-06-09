@@ -4,32 +4,34 @@ using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
-using VanDriverRequisitions.Domain.Entities.Common;
 
 namespace VanDriverRequisitions.Application.Features.VanDrivers.Services;
 
-public class VanDriverService(IApplicationDbContext context) : IVanDriverService
+public class VanDriverService(IApplicationDbContext context, IValidatorService validator) : IVanDriverService
 {
-    public async Task<PagedResult<VanDriverLookupDto>> SearchAsync(
-        string? search,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default)
+    public async Task<PagedResult<VanDriverLookupDto>> SearchAsync(VanDriverSearchQueryDto queryDto, CancellationToken cancellationToken = default)
     {
-        var query = context.VanDrivers.Where(x => x.IsActive);
+        await validator.ValidateAsync(queryDto, cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(search))
+        var query = context.VanDrivers
+            .AsNoTracking()
+            .Where(x => x.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(queryDto.Search))
         {
-            var term = search.Trim();
-            query = query.Where(x => x.Code.Contains(term) || x.TradersName.Contains(term));
+            var term = queryDto.Search.Trim();
+
+            query = query.Where(x =>
+                x.Code.Contains(term) ||
+                x.TradersName.Contains(term));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
             .OrderBy(x => x.Code)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((queryDto.Page - 1) * queryDto.PageSize)
+            .Take(queryDto.PageSize)
             .Select(VanDriverProjections.AsLookupDto)
             .ToListAsync(cancellationToken);
 
@@ -37,14 +39,15 @@ public class VanDriverService(IApplicationDbContext context) : IVanDriverService
         {
             Items = items,
             TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize,
+            Page = queryDto.Page,
+            PageSize = queryDto.PageSize,
         };
     }
 
     public async Task<VanDriverLookupDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var driver = await context.VanDrivers
+            .AsNoTracking()
             .Where(x => x.Id == id)
             .Select(VanDriverProjections.AsLookupDto)
             .FirstOrDefaultAsync(cancellationToken);

@@ -11,8 +11,7 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 [ApiController]
 [Route("api/v{version:apiVersion}/requisition-limit-rules")]
 [Authorize]
-public class RequisitionLimitRulesController(
-    IRequisitionLimitRuleService requisitionLimitRuleService) : ControllerBase
+public class RequisitionLimitRulesController(IRequisitionLimitRuleService requisitionLimitRuleService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(List<RequisitionLimitRuleSummaryDto>), StatusCodes.Status200OK)]

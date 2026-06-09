@@ -6,7 +6,14 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 
 public static class FeRequisitionSnapshotFactory
 {
-    public static FeRequisitionSnapshot Create(FeRequisition requisition)
+        
+    public static string CreateJson(FeRequisition requisition)
+    {
+        var snapshot = Create(requisition);
+        return JsonSerializer.Serialize(snapshot);
+    }
+    
+    private static FeRequisitionSnapshot Create(FeRequisition requisition)
     {
         return new FeRequisitionSnapshot
         {
@@ -28,12 +35,6 @@ public static class FeRequisitionSnapshotFactory
             Transfers = [],
             AdditionalCosts = []
         };
-    }
-    
-    public static string CreateJson(FeRequisition requisition)
-    {
-        var snapshot = Create(requisition);
-        return JsonSerializer.Serialize(snapshot);
     }
     
     private static FeGeneralTaskSnapshot CreateGeneralTaskSnapshot(FeGeneralTask task)
