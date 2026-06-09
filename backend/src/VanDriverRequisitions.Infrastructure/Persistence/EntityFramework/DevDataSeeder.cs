@@ -190,10 +190,10 @@ public static class DevDataSeeder
             await SeedVanDriversAsync(context, logger);
         }
 
-        if (!hasRequisitions)
-        {
-            await SeedRequisitionsAsync(context, logger);
-        }
+        // if (!hasRequisitions)
+        // {
+        //     await SeedRequisitionsAsync(context, logger);
+        // }
 
         logger?.LogInformation("Development seeding complete.");
     }
@@ -334,150 +334,150 @@ public static class DevDataSeeder
         (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
     ];
 
-    private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
-    {
-        const int count = 100;
-        var rng = new Random(123);
-
-        var taskTypes = await context.FeTaskTypes.ToListAsync();
-
-        var shops = await context.Shops
-            .Where(x => x.IsActive)
-            .Take(200)
-            .ToListAsync();
-
-        var drivers = await context.VanDrivers
-            .Where(x => x.IsActive)
-            .Take(200)
-            .ToListAsync();
-
-        var requisitions = new List<FeRequisition>();
-
-        for (var i = 1; i <= count; i++)
-        {
-            var shop = shops[rng.Next(shops.Count)];
-            var driver = drivers[rng.Next(drivers.Count)];
-            var user = SeedUsers[rng.Next(SeedUsers.Length)];
-
-            var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
-
-            var status = GetRandomStatus(rng);
-
-            var hasVat = rng.Next(0, 2) == 1;
-
-            var details = new RequisitionDetails(
-                DateOnly.FromDateTime(createdDate),
-                new VanDriverSnapshot(
-                    driver.Id,
-                    driver.Code,
-                    driver.TradersName,
-                    driver.TradersName,
-                    hasVat),
-                new ShopSnapshot(
-                    shop.Id,
-                    shop.Code,
-                    shop.Name));
-
-            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
-
-            var requisitionNumber = $"F{i:D9}";
-
-            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
-            requisition.CreatedAtUtc = createdDate;
-            requisition.CreatedById = user.Id;
-            requisition.CreatedByNameSnapshot = user.Name;
-
-            switch (status)
-            {
-                case RequisitionStatus.Draft:
-                    break;
-
-                case RequisitionStatus.Submitted:
-                    {
-                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-                        var submittedAtUtc = createdDate.AddHours(2);
-
-                        var submission = FeRequisitionSubmission.Create(
-                            requisition.NextSubmissionNumber,
-                            submitter.Id,
-                            submitter.Name,
-                            submittedAtUtc,
-                            BuildSeedSnapshotJson(requisition));
-
-                        requisition.AddSubmission(submission);
-                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-
-                        break;
-                    }
-
-                case RequisitionStatus.Rejected:
-                    {
-                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-                        var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
-                        var submittedAtUtc = createdDate.AddHours(2);
-                        var rejectedAtUtc = createdDate.AddDays(1);
-                        var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
-
-                        var submission = FeRequisitionSubmission.Create(
-                            requisition.NextSubmissionNumber,
-                            submitter.Id,
-                            submitter.Name,
-                            submittedAtUtc,
-                            BuildSeedSnapshotJson(requisition));
-
-                        requisition.AddSubmission(submission);
-                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-
-                        requisition.RejectSubmission(
-                            rejecter.Id,
-                            rejecter.Name,
-                            rejectedReason,
-                            rejectedAtUtc);
-
-                        break;
-                    }
-
-                case RequisitionStatus.Approved:
-                    {
-                        var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
-                        var approver = SeedUsers[rng.Next(SeedUsers.Length)];
-                        var submittedAtUtc = createdDate.AddHours(2);
-                        var approvedAtUtc = createdDate.AddDays(2);
-                        var poNumber = BuildSeedPoNumber(i);
-
-                        var submission = FeRequisitionSubmission.Create(
-                            requisition.NextSubmissionNumber,
-                            submitter.Id,
-                            submitter.Name,
-                            submittedAtUtc,
-                            BuildSeedSnapshotJson(requisition));
-
-                        requisition.AddSubmission(submission);
-                        requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
-
-                        requisition.ApproveSubmission(
-                            approver.Id,
-                            approver.Name,
-                            approvedAtUtc,
-                            poNumber);
-
-                        break;
-                    }
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        message: "Unknown status attempted during seed",
-                        null);
-            }
-            requisitions.Add(requisition);
-        }
-
-        context.FeRequisitions.AddRange(requisitions);
-
-        await context.SaveChangesAsync();
-
-        logger?.LogInformation("Seeded {Count} requisitions.", count);
-    }
+    // private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
+    // {
+    //     const int count = 100;
+    //     var rng = new Random(123);
+    //
+    //     var taskTypes = await context.FeTaskTypes.ToListAsync();
+    //
+    //     var shops = await context.Shops
+    //         .Where(x => x.IsActive)
+    //         .Take(200)
+    //         .ToListAsync();
+    //
+    //     var drivers = await context.VanDrivers
+    //         .Where(x => x.IsActive)
+    //         .Take(200)
+    //         .ToListAsync();
+    //
+    //     var requisitions = new List<FeRequisition>();
+    //
+    //     for (var i = 1; i <= count; i++)
+    //     {
+    //         var shop = shops[rng.Next(shops.Count)];
+    //         var driver = drivers[rng.Next(drivers.Count)];
+    //         var user = SeedUsers[rng.Next(SeedUsers.Length)];
+    //
+    //         var createdDate = DateTime.UtcNow.AddDays(-rng.Next(0, 120));
+    //
+    //         var status = GetRandomStatus(rng);
+    //
+    //         var hasVat = rng.Next(0, 2) == 1;
+    //
+    //         var details = new RequisitionDetails(
+    //             DateOnly.FromDateTime(createdDate),
+    //             new VanDriverSnapshot(
+    //                 driver.Id,
+    //                 driver.Code,
+    //                 driver.TradersName,
+    //                 driver.TradersName,
+    //                 hasVat),
+    //             new ShopSnapshot(
+    //                 shop.Id,
+    //                 shop.Code,
+    //                 shop.Name));
+    //
+    //         var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+    //
+    //         var requisitionNumber = $"F{i:D9}";
+    //
+    //         var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+    //         requisition.CreatedAtUtc = createdDate;
+    //         requisition.CreatedById = user.Id;
+    //         requisition.CreatedByNameSnapshot = user.Name;
+    //
+    //         switch (status)
+    //         {
+    //             case RequisitionStatus.Draft:
+    //                 break;
+    //
+    //             case RequisitionStatus.Submitted:
+    //                 {
+    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+    //                     var submittedAtUtc = createdDate.AddHours(2);
+    //
+    //                     var submission = FeRequisitionSubmission.Create(
+    //                         requisition.NextSubmissionNumber,
+    //                         submitter.Id,
+    //                         submitter.Name,
+    //                         submittedAtUtc,
+    //                         BuildSeedSnapshotJson(requisition));
+    //
+    //                     requisition.AddSubmission(submission);
+    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+    //
+    //                     break;
+    //                 }
+    //
+    //             case RequisitionStatus.Rejected:
+    //                 {
+    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+    //                     var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
+    //                     var submittedAtUtc = createdDate.AddHours(2);
+    //                     var rejectedAtUtc = createdDate.AddDays(1);
+    //                     var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
+    //
+    //                     var submission = FeRequisitionSubmission.Create(
+    //                         requisition.NextSubmissionNumber,
+    //                         submitter.Id,
+    //                         submitter.Name,
+    //                         submittedAtUtc,
+    //                         BuildSeedSnapshotJson(requisition));
+    //
+    //                     requisition.AddSubmission(submission);
+    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+    //
+    //                     requisition.RejectSubmission(
+    //                         rejecter.Id,
+    //                         rejecter.Name,
+    //                         rejectedReason,
+    //                         rejectedAtUtc);
+    //
+    //                     break;
+    //                 }
+    //
+    //             case RequisitionStatus.Approved:
+    //                 {
+    //                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
+    //                     var approver = SeedUsers[rng.Next(SeedUsers.Length)];
+    //                     var submittedAtUtc = createdDate.AddHours(2);
+    //                     var approvedAtUtc = createdDate.AddDays(2);
+    //                     var poNumber = BuildSeedPoNumber(i);
+    //
+    //                     var submission = FeRequisitionSubmission.Create(
+    //                         requisition.NextSubmissionNumber,
+    //                         submitter.Id,
+    //                         submitter.Name,
+    //                         submittedAtUtc,
+    //                         BuildSeedSnapshotJson(requisition));
+    //
+    //                     requisition.AddSubmission(submission);
+    //                     requisition.Submit(submitter.Id, submitter.Name, submittedAtUtc);
+    //
+    //                     requisition.ApproveSubmission(
+    //                         approver.Id,
+    //                         approver.Name,
+    //                         approvedAtUtc,
+    //                         poNumber);
+    //
+    //                     break;
+    //                 }
+    //
+    //             default:
+    //                 throw new ArgumentOutOfRangeException(
+    //                     message: "Unknown status attempted during seed",
+    //                     null);
+    //         }
+    //         requisitions.Add(requisition);
+    //     }
+    //
+    //     context.FeRequisitions.AddRange(requisitions);
+    //
+    //     await context.SaveChangesAsync();
+    //
+    //     logger?.LogInformation("Seeded {Count} requisitions.", count);
+    // }
 
     private static RequisitionStatus GetRandomStatus(Random rng)
     {
