@@ -1,73 +1,93 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public sealed class FeRequisitionSubmission : AuditableEntity
 {
-    private FeRequisitionSubmission() { }
+    private FeRequisitionSubmission() { } // EF
 
     public Guid FeRequisitionId { get; private set; }
     public int SubmissionNumber { get; private set; }
     public SubmissionStatus Status { get; private set; }
+
     public Guid SubmittedById { get; private set; }
     public string SubmittedByNameSnapshot { get; private set; } = string.Empty;
     public DateTime SubmittedAtUtc { get; private set; }
+
     public Guid? ReviewedById { get; private set; }
     public string? ReviewedByNameSnapshot { get; private set; }
     public DateTime? ReviewedAtUtc { get; private set; }
+
     public string? PoNumber { get; private set; }
     public string? RejectionNotes { get; private set; }
+
     public string SnapshotJson { get; private set; } = string.Empty;
-    
-    public static FeRequisitionSubmission Create(
-        int submissionNumber,
-        Guid submittedById,
-        string submittedByName,
+
+    public static FeRequisitionSubmission Create(int submissionNumber,
+        AuditUser submittedBy,
         DateTime submittedAtUtc,
         string snapshotJson)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(submittedByName);
+        if (submissionNumber <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(submissionNumber),
+                "Submission number must be greater than zero.");
+        }
+
+        ArgumentNullException.ThrowIfNull(submittedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(snapshotJson);
-        
+
         return new FeRequisitionSubmission
         {
             SubmissionNumber = submissionNumber,
             Status = SubmissionStatus.Pending,
-            SubmittedById = submittedById,
-            SubmittedByNameSnapshot = submittedByName,
+            SubmittedById = submittedBy.Id,
+            SubmittedByNameSnapshot = submittedBy.NameSnapshot,
             SubmittedAtUtc = submittedAtUtc,
             SnapshotJson = snapshotJson
         };
     }
-    public void Approve(Guid reviewedById, string reviewedByName, DateTime reviewedAtUtc, string poNumber)
-    {
-        if (Status != SubmissionStatus.Pending)
-        {
-            throw new InvalidOperationException("Only pending submissions can be approved.");
-        }
 
+    public void Approve(AuditUser reviewedBy, DateTime reviewedAtUtc, string poNumber)
+    {
+        EnsurePending();
+
+        ArgumentNullException.ThrowIfNull(reviewedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
 
         Status = SubmissionStatus.Approved;
-        ReviewedById = reviewedById;
-        ReviewedByNameSnapshot = reviewedByName;
+        ReviewedById = reviewedBy.Id;
+        ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
         ReviewedAtUtc = reviewedAtUtc;
-        RejectionNotes = null;
+
         PoNumber = poNumber;
+        RejectionNotes = null;
     }
-    
-    public void Reject(Guid reviewedById, string reviewedByName, string rejectionNotes, DateTime reviewedAtUtc)
+
+    public void Reject(AuditUser reviewedBy, DateTime reviewedAtUtc, string rejectionNotes)
+    {
+        EnsurePending();
+
+        ArgumentNullException.ThrowIfNull(reviewedBy);
+        ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
+
+        Status = SubmissionStatus.Rejected;
+        ReviewedById = reviewedBy.Id;
+        ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
+        ReviewedAtUtc = reviewedAtUtc;
+
+        RejectionNotes = rejectionNotes;
+        PoNumber = null;
+    }
+
+    private void EnsurePending()
     {
         if (Status != SubmissionStatus.Pending)
         {
-            throw new InvalidOperationException("Only pending submissions can be rejected.");
+            throw new InvalidOperationException("Only pending submissions can be reviewed.");
         }
-
-        Status = SubmissionStatus.Rejected;
-        ReviewedById = reviewedById;
-        ReviewedByNameSnapshot = reviewedByName;
-        ReviewedAtUtc = reviewedAtUtc;
-        RejectionNotes = rejectionNotes;
     }
 }

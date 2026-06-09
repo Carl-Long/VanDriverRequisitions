@@ -42,18 +42,13 @@ public class FeReasonService(IApplicationDbContext context, IValidatorService va
     {
         await validator.ValidateAsync(createFeReasonDto, cancellationToken);
         
-        var newReason = new FeReason { Reason = createFeReasonDto.Reason.Trim() };
+        var newReason = new FeReason
+        {
+            Reason = createFeReasonDto.Reason.Trim()
+        };
 
         context.FeReasons.Add(newReason);
-        
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException([new ValidationFailure("Reason", $"This reason '{createFeReasonDto.Reason}' already exists.")]);
-        }
+        await SaveWithUniqueConstraintHandlingAsync(createFeReasonDto.Reason, cancellationToken);
 
         return FeReasonMapper.ToSummaryDto(newReason);
     }
@@ -62,51 +57,48 @@ public class FeReasonService(IApplicationDbContext context, IValidatorService va
     {
         await validator.ValidateAsync(updateFeReasonDto, cancellationToken);
 
-        var existingReason = await context.FeReasons
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var reason = await LoadForUpdateAsync(id, cancellationToken);
+        reason.Reason = updateFeReasonDto.Reason.Trim();
 
-        if (existingReason is null)
-            throw new NotFoundException($"FE Reason with ID '{id}' was not found.");
-        
-        existingReason.Reason = updateFeReasonDto.Reason.Trim();
-        
+        await SaveWithUniqueConstraintHandlingAsync(updateFeReasonDto.Reason, cancellationToken);
+
+        return FeReasonMapper.ToSummaryDto(reason);
+    }
+
+    public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var reason = await LoadForUpdateAsync(id, cancellationToken);
+        reason.IsActive = true;
+        await context.SaveChangesAsync(cancellationToken);
+    }
+    
+    public async Task DeactivateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var reason = await LoadForUpdateAsync(id, cancellationToken);
+        reason.IsActive = false;
+        await context.SaveChangesAsync(cancellationToken);
+    }
+    
+    private async Task<FeReason> LoadForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.FeReasons
+                   .IgnoreQueryFilters()
+                   .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+               ?? throw new NotFoundException($"FE Reason with ID '{id}' was not found.");
+    }
+    
+    private async Task SaveWithUniqueConstraintHandlingAsync(string reason, CancellationToken cancellationToken)
+    {
         try
         {
             await context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
         {
-            throw new ValidationException([new ValidationFailure("Reason", $"This reason '{updateFeReasonDto.Reason}' already exists.")]);
+            throw new ValidationException(
+            [
+                new ValidationFailure("Reason", $"This reason '{reason}' already exists.")
+            ]);
         }
-        
-        return FeReasonMapper.ToSummaryDto(existingReason);
-    }
-
-    public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var existingReason = await context.FeReasons
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingReason is null)
-            throw new NotFoundException($"FE Reason with ID '{id}' was not found.");
-        
-        existingReason.IsActive = true;
-        
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeactivateAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var existingReason = await context.FeReasons
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingReason is null)
-            throw new NotFoundException($"FE Reason with ID '{id}' was not found.");
-
-        existingReason.IsActive = false;
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

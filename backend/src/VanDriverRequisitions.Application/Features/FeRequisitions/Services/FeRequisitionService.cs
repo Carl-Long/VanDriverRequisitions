@@ -8,9 +8,9 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
-using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -26,6 +26,8 @@ public class FeRequisitionService(
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
+        await validator.ValidateAsync(query, cancellationToken);
+        
         var dbQuery = context.FeRequisitions.ApplyFilters(query);
         var totalCount = await dbQuery.CountAsync(cancellationToken);
 
@@ -46,20 +48,33 @@ public class FeRequisitionService(
             PageSize = query.PageSize,
         };
     }
-
-    public async Task<FeRequisitionDetailDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    
+    public async Task<FeRequisitionDetailDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) 
     {
-        var existingRequisition = await LoadFullAsync(id, cancellationToken)
+        var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        var driverSummary = await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == existingRequisition.VanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
+        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
         
-        return await MapToDetailDtoAsync(existingRequisition, driverSummary, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
+    }
+    
+    public async Task<FeRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
+    {
+        var submission = await context.FeRequisitionSubmissions
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == submissionId, cancellationToken);
+
+        if (submission is null)
+        {
+            throw new NotFoundException($"Submission '{submissionId}' was not found.");
+        }
+
+        var snapshot = JsonSerializer.Deserialize<FeRequisitionSnapshotDto>(submission.SnapshotJson);
+
+        return snapshot is not null 
+            ? FeRequisitionSubmissionMapper.MapFeSubmissionToDetailDto(submission, snapshot)
+            : throw new InvalidOperationException($"Submission '{submissionId}' contains an invalid snapshot.");
     }
 
     public async Task<FeRequisitionDetailDto> CreateAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
@@ -76,68 +91,51 @@ public class FeRequisitionService(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> UpdateAsync(Guid id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        var existingRequisition = await LoadFullAsync(id, cancellationToken)
+        var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        context.Entry(existingRequisition)
-            .Property(nameof(FeRequisition.RowVersion))
-            .OriginalValue = saveFeRequisitionDto.RowVersion;
+        SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
 
         var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
-        existingRequisition.UpdateDetails(requisitionData.Details);
-        existingRequisition.SyncGeneralTasks(requisitionData.TaskModels);
+        ApplySaveData(requisition, requisitionData);
 
-        await limitValidator.ValidateAsync(existingRequisition, cancellationToken);
+        await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(
-                "This requisition has been updated by another user since you opened it. " +
-                "Refresh the page to load the latest version. " +
-                "Any changes you have made since opening the requisition will need to be re-entered."
-            );
-        }
+        await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        return await MapToDetailDtoAsync(existingRequisition, requisitionData.DriverSummary, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        if (currentUser.User is null) throw new NotFoundException("Submissions must be done via a user.");
+        var auditUser = GetAuditUser("Submission");
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        FeRequisition requisition;
-
         var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
+
+        FeRequisition requisition;
 
         if (id.HasValue)
         {
             requisition = await LoadFullAsync(id.Value, cancellationToken)
-                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+                ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-            context.Entry(requisition)
-                .Property(nameof(FeRequisition.RowVersion))
-                .OriginalValue = saveFeRequisitionDto.RowVersion;
-
-            requisition.UpdateDetails(requisitionData.Details);
-            requisition.SyncGeneralTasks(requisitionData.TaskModels);
+            SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+            ApplySaveData(requisition, requisitionData);
         }
         else
         {
             var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
             requisition = FeRequisition.Create(requisitionNumber, requisitionData.Details, requisitionData.TaskModels);
+            
             context.FeRequisitions.Add(requisition);
         }
 
@@ -146,134 +144,59 @@ public class FeRequisitionService(
         var now = DateTime.UtcNow;
         var snapshotJson = FeRequisitionSnapshotFactory.CreateJson(requisition);
 
-        var submission = FeRequisitionSubmission.Create(
-                requisition.NextSubmissionNumber,
-                currentUser.User.Id,
-                currentUser.User.Name,
-                now,
-                snapshotJson);
+        requisition.Submit(auditUser, now, snapshotJson);
 
-        requisition.AddSubmission(submission);
-        requisition.Submit(currentUser.User.Id, currentUser.User.Name, now);
+        await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        await context.SaveChangesAsync(cancellationToken);
-
-        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        if (currentUser.User is null)
-        {
-            throw new NotFoundException("Approval must be performed by a user.");
-        }
+        var auditUser = GetAuditUser("Approval");
 
         await validator.ValidateAsync(approveFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
-                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+            ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        context.Entry(requisition)
-            .Property(nameof(FeRequisition.RowVersion))
-            .OriginalValue = approveFeRequisitionDto.RowVersion;
+        SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
-        requisition.ApproveSubmission(currentUser.User.Id, currentUser.User.Name, DateTime.UtcNow, poNumber);
+        requisition.ApproveSubmission(auditUser, DateTime.UtcNow, poNumber);
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException("This requisition has been updated by another user.");
-        }
+        await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        var driverSummary = await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == requisition.VanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
+        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
 
-        return await MapToDetailDtoAsync(requisition, driverSummary, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        if (currentUser.User is null)
-        {
-            throw new NotFoundException("Rejection must be performed by a user.");
-        }
+        var auditUser = GetAuditUser("Rejection");
 
         await validator.ValidateAsync(rejectFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
-                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
+            ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        context.Entry(requisition)
-            .Property(nameof(FeRequisition.RowVersion))
-            .OriginalValue = rejectFeRequisitionDto.RowVersion;
+        SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
 
-        requisition.RejectSubmission(currentUser.User.Id, currentUser.User.Name, rejectFeRequisitionDto.RejectionNotes, DateTime.UtcNow);
+        requisition.RejectSubmission(auditUser, DateTime.UtcNow, rejectFeRequisitionDto.RejectionNotes);
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException("This requisition has been updated by another user.");
-        }
+        await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        var driverSummary = await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == requisition.VanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
-        
-        return await MapToDetailDtoAsync(requisition, driverSummary, cancellationToken);
+        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+
+        return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
-
-    public async Task<FeRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
-    {
-        var submission = await context.FeRequisitionSubmissions
-            .AsNoTracking()
-            .SingleOrDefaultAsync(
-                x => x.Id == submissionId,
-                cancellationToken);
-
-        if (submission is null)
-        {
-            throw new NotFoundException($"Submission '{submissionId}' was not found.");
-        }
-
-        var snapshot = JsonSerializer.Deserialize<FeRequisitionSnapshotDto>(submission.SnapshotJson);
-        if (snapshot is null)
-        {
-            throw new InvalidOperationException($"Submission '{submissionId}' contains an invalid snapshot.");
-        }
-
-        return new FeRequisitionSubmissionDetailDto
-        {
-            Id = submission.Id,
-            SubmissionNumber = submission.SubmissionNumber,
-            Status = submission.Status.ToString(),
-            SubmittedByName = submission.SubmittedByNameSnapshot,
-            SubmittedAtUtc = submission.SubmittedAtUtc,
-            PoNumber = submission.PoNumber,
-            ReviewedByName = submission.ReviewedByNameSnapshot,
-            ReviewedAtUtc = submission.ReviewedAtUtc,
-            RejectionNotes = submission.RejectionNotes,
-            Snapshot = snapshot
-        };
-    }
-
+    
     private async Task<FeRequisition?> LoadFullAsync(Guid id, CancellationToken cancellationToken)
     {
         return await context.FeRequisitions
+            .AsSplitQuery()
             .Include(x => x.FeGeneralTasks)
             .Include(x => x.FeMileages)
             .Include(x => x.FeTransfers)
@@ -282,74 +205,15 @@ public class FeRequisitionService(
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
-    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(
-        IEnumerable<SaveFeGeneralTaskDto> tasks,
-        IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
+    private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
     {
-        return tasks
-            .Select(dto =>
-            {
-                var taskType = taskTypeMap[dto.FeTaskTypeId];
-
-                return new FeGeneralTaskUpdateModel(
-                    dto.Id,
-                    dto.FeTaskTypeId,
-                    taskType.Name,
-                    taskType.Code,
-                    dto.WeekEndingDate,
-                    new WeeklyQuantities(
-                        dto.Week.Sunday,
-                        dto.Week.Monday,
-                        dto.Week.Tuesday,
-                        dto.Week.Wednesday,
-                        dto.Week.Thursday,
-                        dto.Week.Friday,
-                        dto.Week.Saturday),
-                    dto.RatePerJob);
-            })
-            .ToList();
-    }
-
-    private async Task<RequisitionBuildData> BuildRequisitionDataAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
-    {
-        var driverSummary = await context.VanDrivers
+        return await context.VanDrivers
+            .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
+            .Where(x => x.Id == vanDriverId)
             .Select(VanDriverProjections.AsLookupDto)
             .SingleAsync(cancellationToken);
-
-        var shop = await context.Shops
-            .AsNoTracking()
-            .SingleAsync(x => x.Id == saveFeRequisitionDto.ShopId, cancellationToken);
-
-        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
-            .Select(x => x.FeTaskTypeId)
-            .Distinct()
-            .ToList();
-
-        var taskTypeMap = await context.FeTaskTypes
-            .Where(x => taskTypeIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-
-        var details = new RequisitionDetails(
-            saveFeRequisitionDto.RequisitionDate,
-            new VanDriverSnapshot(
-                driverSummary.Id,
-                driverSummary.Code,
-                saveFeRequisitionDto.VanDriverName.Trim(),
-                driverSummary.TradersName,
-                driverSummary.HasVat),
-            new ShopSnapshot(
-                shop.Id,
-                shop.Code,
-                shop.Name));
-
-        var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
-
-        return new RequisitionBuildData(driverSummary, details, taskModels);
     }
-
-    private sealed record RequisitionBuildData(VanDriverLookupDto DriverSummary, RequisitionDetails Details, List<FeGeneralTaskUpdateModel> TaskModels);
     
     private async Task<bool> IsShopActiveAsync(Guid shopId, CancellationToken cancellationToken)
     {
@@ -361,21 +225,91 @@ public class FeRequisitionService(
             .SingleAsync(cancellationToken);
     }
     
-    private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
-        FeRequisition requisition,
-        VanDriverLookupDto? driverSummary,
-        CancellationToken cancellationToken)
-    {
-        driverSummary ??= await context.VanDrivers
-            .IgnoreQueryFilters()
+    private async Task<RequisitionBuildData> BuildRequisitionDataAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken) {
+        var driverSummary = await context.VanDrivers
             .AsNoTracking()
-            .Where(x => x.Id == requisition.VanDriverId)
+            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
             .Select(VanDriverProjections.AsLookupDto)
             .SingleAsync(cancellationToken);
 
-        var isShopActive = await IsShopActiveAsync(requisition.ShopId, cancellationToken);
+        var shop = await context.Shops
+            .AsNoTracking()
+            .Where(x => x.Id == saveFeRequisitionDto.ShopId)
+            .Select(ShopProjections.AsRequisitionSnapshotDto)
+            .SingleAsync(cancellationToken);
 
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, isShopActive);
+        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
+            .Select(x => x.FeTaskTypeId)
+            .Distinct()
+            .ToList();
+
+        var taskTypeMap = await context.FeTaskTypes
+            .Where(x => taskTypeIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+        var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
+        var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
+
+        return new RequisitionBuildData(driverSummary, details, taskModels, shop.IsActive);
     }
     
+    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks, IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
+    {
+        return tasks
+            .Select(dto =>
+            {
+                var taskType = taskTypeMap[dto.FeTaskTypeId];
+                return FeGeneralTaskModelMapper.ToUpdateModel(dto, taskType);
+            })
+            .ToList();
+    }
+
+    private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
+        FeRequisition requisition,
+        VanDriverLookupDto? driverSummary,
+        bool? isShopActive,
+        CancellationToken cancellationToken)
+    {
+        driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
+        
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
+    }
+    
+    private static void ApplySaveData(FeRequisition requisition, RequisitionBuildData requisitionData)
+    {
+        requisition.UpdateDetails(requisitionData.Details);
+        requisition.SyncGeneralTasks(requisitionData.TaskModels);
+    }
+
+    private AuditUser GetAuditUser(string actionName)
+    {
+        return currentUser.User is not null
+            ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
+            : throw new NotFoundException($"{actionName} must be performed by a user.");
+    }
+
+    private void SetOriginalRowVersion(FeRequisition requisition, byte[]? rowVersion)
+    {
+        if (rowVersion is null) return;
+        
+        context.Entry(requisition).Property(nameof(FeRequisition.RowVersion)).OriginalValue = rowVersion;
+    }
+
+    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException(
+                "This requisition has been updated by another user since you opened it. " +
+                "Refresh the page to load the latest version. " +
+                "Any changes you have made since opening the requisition will need to be re-entered.");
+        }
+    }
+    
+    private sealed record RequisitionBuildData(VanDriverLookupDto DriverSummary, RequisitionDetails Details, List<FeGeneralTaskUpdateModel> TaskModels, bool IsShopActive);
 }

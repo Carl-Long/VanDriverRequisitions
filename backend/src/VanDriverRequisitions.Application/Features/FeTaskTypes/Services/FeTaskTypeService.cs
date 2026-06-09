@@ -50,15 +50,8 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
 
         context.FeTaskTypes.Add(newTaskType);
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException([new ValidationFailure("Code", $"This code '{createFeTaskTypeDto.Code}' already exists.")]);
-        }
-        
+        await SaveWithUniqueConstraintHandlingAsync(createFeTaskTypeDto.Code, cancellationToken);
+
         return FeTaskTypeMapper.ToSummaryDto(newTaskType);
     }
 
@@ -66,51 +59,50 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
     {
         await validator.ValidateAsync(updateFeTaskTypeDto, cancellationToken);
 
-        var existingTaskType = await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingTaskType is null)
-            throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
+        var existingTaskType = await LoadForUpdateAsync(id, cancellationToken);
 
         existingTaskType.Name = updateFeTaskTypeDto.Name.Trim();
         existingTaskType.Code = updateFeTaskTypeDto.Code.Trim();
 
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException([new("Code", $"This code '{updateFeTaskTypeDto.Code}' already exists.")]);
-        }
+        await SaveWithUniqueConstraintHandlingAsync(updateFeTaskTypeDto.Code, cancellationToken);
 
         return FeTaskTypeMapper.ToSummaryDto(existingTaskType);
     }
 
     public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var existingTaskType = await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingTaskType is null)
-            throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
-
+        var existingTaskType = await LoadForUpdateAsync(id, cancellationToken);
         existingTaskType.IsActive = true;
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeactivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var existingTaskType = await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingTaskType is null)
-            throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
-
+        var existingTaskType = await LoadForUpdateAsync(id, cancellationToken);
         existingTaskType.IsActive = false;
         await context.SaveChangesAsync(cancellationToken);
+    }
+    
+    private async Task<FeTaskType> LoadForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.FeTaskTypes
+                   .IgnoreQueryFilters()
+                   .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+               ?? throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
+    }
+    
+    private async Task SaveWithUniqueConstraintHandlingAsync(string code, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+        {
+            throw new ValidationException(
+            [
+                new ValidationFailure("Code", $"This code '{code}' already exists.")
+            ]);
+        }
     }
 }

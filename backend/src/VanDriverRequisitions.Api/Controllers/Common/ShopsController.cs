@@ -11,14 +11,10 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 [Authorize]
 public class ShopsController(IShopService shopService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> Search(
-        [FromQuery] string? search = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    [HttpGet("lookups")]
+    public async Task<IActionResult> GetActiveLookups(CancellationToken cancellationToken = default)
     {
-        var result = await shopService.SearchAsync(search, page, pageSize, cancellationToken);
+        var result = await shopService.GetActiveLookupsAsync(cancellationToken);
         return Ok(result);
     }
 }

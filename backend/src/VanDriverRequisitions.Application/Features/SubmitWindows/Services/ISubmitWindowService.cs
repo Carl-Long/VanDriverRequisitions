@@ -6,7 +6,7 @@ namespace VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 
 public interface ISubmitWindowService
 {
-    Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(int page, int pageSize, SubmitWindowFilter submitWindowFilter, CancellationToken cancellationToken = default);
+    Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(SubmitWindowQueryDto query, CancellationToken cancellationToken = default);
     Task<SubmitWindowSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<SubmitWindowSummaryDto> CreateAsync(CreateSubmitWindowDto dto, CancellationToken cancellationToken = default);
     Task<SubmitWindowSummaryDto> UpdateAsync(Guid id, UpdateSubmitWindowDto dto, CancellationToken cancellationToken = default);

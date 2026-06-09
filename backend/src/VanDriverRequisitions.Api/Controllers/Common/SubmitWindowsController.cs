@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Api.Controllers.Common;
 
@@ -12,17 +11,12 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 [ApiController]
 [Route("api/v{version:apiVersion}/submit-windows")]
 [Authorize]
-public class SubmitWindowsController(
-    ISubmitWindowService submitWindowService) : ControllerBase
+public class SubmitWindowsController(ISubmitWindowService submitWindowService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 1,
-        [FromQuery] SubmitWindowFilter filter = SubmitWindowFilter.Active,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAll([FromQuery] SubmitWindowQueryDto query, CancellationToken cancellationToken = default)
     {
-        var result = await submitWindowService.GetAllAsync(page, pageSize, filter, cancellationToken);
+        var result = await submitWindowService.GetAllAsync(query, cancellationToken);
         return Ok(result);
     }
 
@@ -54,8 +48,7 @@ public class SubmitWindowsController(
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<SubmitWindowSummaryDto>> Update(
-        [FromRoute] Guid id,
+    public async Task<ActionResult<SubmitWindowSummaryDto>> Update([FromRoute] Guid id,
         [FromBody] UpdateSubmitWindowDto updateDto,
         CancellationToken cancellationToken)
     {

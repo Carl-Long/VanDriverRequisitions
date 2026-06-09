@@ -5,5 +5,5 @@ namespace VanDriverRequisitions.Application.Features.Shops.Services;
 
 public interface IShopService
 {
-    Task<PagedResult<ShopLookupDto>> SearchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<List<ShopLookupDto>> GetActiveLookupsAsync(CancellationToken cancellationToken = default);
 }

@@ -13,13 +13,9 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 public class VanDriversController(IVanDriverService vanDriverService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> Search(
-        [FromQuery] string? search = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Search([FromQuery] VanDriverSearchQueryDto queryDto, CancellationToken cancellationToken = default)
     {
-        var result = await vanDriverService.SearchAsync(search, page, pageSize, cancellationToken);
+        var result = await vanDriverService.SearchAsync(queryDto, cancellationToken);
         return Ok(result);
     }
 

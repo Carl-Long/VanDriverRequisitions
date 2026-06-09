@@ -9,35 +9,13 @@ namespace VanDriverRequisitions.Application.Features.Shops.Services;
 
 public class ShopService(IApplicationDbContext context) : IShopService
 {
-    public async Task<PagedResult<ShopLookupDto>> SearchAsync(
-        string? search,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default)
+    public async Task<List<ShopLookupDto>> GetActiveLookupsAsync(CancellationToken cancellationToken = default)
     {
-        IQueryable<Shop> query = context.Shops.Where(x => x.IsActive);
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim();
-            query = query.Where(x => x.Code.Contains(term) || x.Name.Contains(term));
-        }
-
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
+        return await context.Shops
+            .AsNoTracking()
+            .Where(x => x.IsActive)
             .OrderBy(x => x.Code)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
             .Select(ShopProjections.AsLookupDto)
             .ToListAsync(cancellationToken);
-
-        return new PagedResult<ShopLookupDto>
-        {
-            Items = items,
-            TotalCount = totalCount,
-            Page = page,
-            PageSize = pageSize,
-        };
     }
 }

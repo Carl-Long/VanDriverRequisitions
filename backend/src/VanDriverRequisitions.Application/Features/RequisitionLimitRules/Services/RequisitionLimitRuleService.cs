@@ -10,102 +10,77 @@ using VanDriverRequisitions.Domain.Entities.Common;
 
 namespace VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
 
-public class RequisitionLimitRuleService(
-    IApplicationDbContext context,
-    IValidatorService validator) : IRequisitionLimitRuleService
+public class RequisitionLimitRuleService(IApplicationDbContext context, IValidatorService validator) : IRequisitionLimitRuleService
 {
-    public async Task<List<RequisitionLimitRuleSummaryDto>> GetAllAsync(
-        CancellationToken cancellationToken = default)
+    public async Task<List<RequisitionLimitRuleSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var requisitionLimitRules = await context.RequisitionLimitRules
+        return await context.RequisitionLimitRules
             .AsNoTracking()
-            .Include(x => x.FeTaskType)
             .OrderBy(x => x.Category)
+            .ThenBy(x => x.Fascia)
+            .Select(RequisitionLimitRuleProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
-
-        return requisitionLimitRules
-            .Select(RequisitionLimitRuleMapper.ToSummaryDto)
-            .ToList();
     }
 
-    public async Task<RequisitionLimitRuleSummaryDto> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    public async Task<RequisitionLimitRuleSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var requisitionLimitRule = await context.RequisitionLimitRules
+        var rule = await context.RequisitionLimitRules
             .AsNoTracking()
-            .Include(x => x.FeTaskType)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .Where(x => x.Id == id)
+            .Select(RequisitionLimitRuleProjections.AsSummaryDto)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (requisitionLimitRule is null)
-            throw new NotFoundException(
-                $"Requisition Limit Rule with ID '{id}' was not found.");
-
-        return RequisitionLimitRuleMapper.ToSummaryDto(requisitionLimitRule);
+        return rule ?? throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
     }
 
-    public async Task<RequisitionLimitRuleSummaryDto> CreateAsync(CreateRequisitionLimitRuleDto createRequisitionLimitRuleDto, CancellationToken cancellationToken = default)
+    public async Task<RequisitionLimitRuleSummaryDto> CreateAsync(CreateRequisitionLimitRuleDto createRequisitionLimitRuleDtodto, CancellationToken cancellationToken = default)
     {
-        await validator.ValidateAsync(createRequisitionLimitRuleDto, cancellationToken);
+        await validator.ValidateAsync(createRequisitionLimitRuleDtodto, cancellationToken);
 
-        var newRequisitionLimitRule = new RequisitionLimitRule
-        {
-            Category = createRequisitionLimitRuleDto.Category,
-            FeTaskTypeId = createRequisitionLimitRuleDto.FeTaskTypeId,
-            Fascia = createRequisitionLimitRuleDto.Fascia,
-            MaxQuantity = createRequisitionLimitRuleDto.MaxQuantity,
-            MaxRate = createRequisitionLimitRuleDto.MaxRate
-        };
+        var details = RequisitionLimitRuleMapper.MapCreateDtoToDetails(createRequisitionLimitRuleDtodto);
+        var rule = RequisitionLimitRule.Create(details);
 
-        context.RequisitionLimitRules.Add(newRequisitionLimitRule);
+        context.RequisitionLimitRules.Add(rule);
 
+        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
+
+        return await GetByIdAsync(rule.Id, cancellationToken);
+    }
+
+    public async Task<RequisitionLimitRuleSummaryDto> UpdateAsync(Guid id, UpdateRequisitionLimitRuleDto updateRequisitionLimitRuleDtodto, CancellationToken cancellationToken = default)
+    {
+        await validator.ValidateAsync(updateRequisitionLimitRuleDtodto, cancellationToken);
+
+        var rule = await LoadForUpdateAsync(id, cancellationToken);
+        var details = RequisitionLimitRuleMapper.MapUpdateDtoToDetails(updateRequisitionLimitRuleDtodto);
+
+        rule.Update(details);
+
+        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
+
+        return await GetByIdAsync(rule.Id, cancellationToken);
+    }
+    
+    private async Task<RequisitionLimitRule> LoadForUpdateAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.RequisitionLimitRules.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+               ?? throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
+    }
+    
+    private async Task SaveWithUniqueConstraintHandlingAsync(CancellationToken cancellationToken)
+    {
         try
         {
             await context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
         {
-            throw new ValidationException([
-                new ValidationFailure( "Form", "A limit rule already exists for this category, task type, and fascia.")
-                ]);
+            throw new ValidationException(
+            [
+                new ValidationFailure(
+                    "Form",
+                    "A limit rule already exists for this category, task type, and fascia combination.")
+            ]);
         }
-
-        return RequisitionLimitRuleMapper.ToSummaryDto(newRequisitionLimitRule);
     }
-
-    public async Task<RequisitionLimitRuleSummaryDto> UpdateAsync(
-        Guid id,
-        UpdateRequisitionLimitRuleDto updateRequisitionLimitRuleDto,
-        CancellationToken cancellationToken = default)
-    {
-        await validator.ValidateAsync(updateRequisitionLimitRuleDto, cancellationToken);
-
-        var existingRequisitionLimitRule = await context.RequisitionLimitRules
-            .IgnoreQueryFilters()
-            .Include(x => x.FeTaskType)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-        if (existingRequisitionLimitRule is null)
-            throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
-
-        existingRequisitionLimitRule.Category = updateRequisitionLimitRuleDto.Category;
-        existingRequisitionLimitRule.FeTaskTypeId = updateRequisitionLimitRuleDto.FeTaskTypeId;
-        existingRequisitionLimitRule.Fascia = updateRequisitionLimitRuleDto.Fascia;
-        existingRequisitionLimitRule.MaxQuantity = updateRequisitionLimitRuleDto.MaxQuantity;
-        existingRequisitionLimitRule.MaxRate = updateRequisitionLimitRuleDto.MaxRate;
-
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException([
-                new ValidationFailure( "Form","A limit rule already exists for this category, task type, and fascia.")
-                ]);
-        }
-
-        return RequisitionLimitRuleMapper.ToSummaryDto(existingRequisitionLimitRule);
-    }
-
 }

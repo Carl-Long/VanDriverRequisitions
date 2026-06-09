@@ -7,7 +7,7 @@ public static class FeReasonMapper
 {
     public static FeReasonSummaryDto ToSummaryDto(FeReason entity)
     {
-        return new FeReasonSummaryDto()
+        return new FeReasonSummaryDto
         {
             Id = entity.Id,
             Reason = entity.Reason,

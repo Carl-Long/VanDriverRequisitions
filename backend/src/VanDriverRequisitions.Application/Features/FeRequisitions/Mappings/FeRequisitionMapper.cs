@@ -1,8 +1,9 @@
 using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
 
@@ -10,9 +11,6 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 
 public static class FeRequisitionMapper
 {
-    // =========================
-    // DETAIL DTO
-    // =========================
 
     public static FeRequisitionDetailDto MapRequisitionToDetailDto(
         FeRequisition requisition,
@@ -36,13 +34,13 @@ public static class FeRequisitionMapper
             PoNumber = requisition.PoNumber,
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
-            IsEditable = requisition.Status == RequisitionStatus.Draft || requisition.Status == RequisitionStatus.Rejected,
+            IsEditable = requisition.Status is RequisitionStatus.Draft or RequisitionStatus.Rejected,
             ApprovedAtUtc = requisition.ApprovedAtUtc,
             ApprovedByNameSnapshot = requisition.ApprovedByNameSnapshot,
             RejectedAtUtc = requisition.RejectedAtUtc,
             RejectedByNameSnapshot = requisition.RejectedByNameSnapshot,
             SubmittedAtUtc = requisition.SubmittedAtUtc,
-            SubmittedByNameSnapshot =requisition.SubmittedByNameSnapshot,
+            SubmittedByNameSnapshot = requisition.SubmittedByNameSnapshot,
             
             FeGeneralTasks = requisition.FeGeneralTasks
                     .Select(MapGeneralTaskDetail)
@@ -52,12 +50,25 @@ public static class FeRequisitionMapper
         };
     }
     
-    // =========================
-    // GENERAL TASK DETAIL
-    // =========================
-
-    private static FeGeneralTaskDetailDto MapGeneralTaskDetail(
-        FeGeneralTask task)
+    public static RequisitionDetails MapToRequisitionDetails(
+        SaveFeRequisitionDto saveFeRequisitionDto, 
+        VanDriverLookupDto driverSummary, 
+        ShopRequisitionSnapshotDto shop)
+    {
+        return new RequisitionDetails(saveFeRequisitionDto.RequisitionDate,
+            new VanDriverSnapshot(
+                driverSummary.Id,
+                driverSummary.Code,
+                saveFeRequisitionDto.VanDriverName.Trim(),
+                driverSummary.TradersName,
+                driverSummary.HasVat),
+            new ShopSnapshot(
+                shop.Id,
+                shop.Code,
+                shop.Name));
+    }
+    
+    private static FeGeneralTaskDetailDto MapGeneralTaskDetail(FeGeneralTask task)
     {
         return new FeGeneralTaskDetailDto
         {
@@ -73,12 +84,7 @@ public static class FeRequisitionMapper
         };
     }
     
-    // =========================
-    // VALUE OBJECT -> DTO
-    // =========================
-
-    private static WeeklyQuantitiesDto MapWeekToDto(
-        WeeklyQuantities week)
+    private static WeeklyQuantitiesDto MapWeekToDto(WeeklyQuantities week)
     {
         return new WeeklyQuantitiesDto
         {
