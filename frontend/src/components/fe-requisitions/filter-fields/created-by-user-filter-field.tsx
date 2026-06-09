@@ -9,7 +9,7 @@ import {
 
 import { requisitionUsersApi } from "@/lib/api/requisition-users";
 
-import type { CreatedByFilter } from "../types";
+import type { CreatedByFilter } from "../../../features/fe-requisitions/types/fe-requisiton-filters.types";
 
 const STATIC_OPTIONS: ComboboxOption[] = [
     {

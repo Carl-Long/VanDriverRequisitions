@@ -1,4 +1,4 @@
-import { statusVariants } from "../constants";
+import { statusVariants } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 
 export const SUBMISSION_STATUSES = [
     "Pending",

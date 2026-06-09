@@ -7,11 +7,6 @@ import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 
 import {
-    feRequisitionsApi,
-    type FeRequisitionDetail,
-} from "@/lib/api/fe-requisitions";
-
-import {
     getApiErrorMessage,
     ApiError,
 } from "@/lib/api/client";
@@ -25,6 +20,7 @@ import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submi
 import NotFound from "@/app/not-found";
 import { useAuth } from "@/providers/auth-provider";
 import { canCreateRequisitions } from "@/lib/auth/roles";
+import { FeRequisitionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 export default function Page() {
     const params = useParams<{ id: string }>();

@@ -4,10 +4,10 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { EmptyState } from "@/components/ui/empty-state";
-import type { FeRequisitionSubmissionHistory } from "@/lib/api/fe-requisitions";
 
 import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
+import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 type Props = {
     submissions: FeRequisitionSubmissionHistory[];

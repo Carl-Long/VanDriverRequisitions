@@ -1,6 +1,6 @@
-import { FeRequisitionDetail } from "@/lib/api/fe-requisitions";
+import { FeRequisitionDetail } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
-import { RequisitionStatus } from "../../constants";
 
 export function mapFeRequisitionDetailToDraft(
     detail: FeRequisitionDetail,

@@ -9,17 +9,17 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 
-import { feRequisitionsApi, type FeRequisitionSummary } from "@/lib/api/fe-requisitions";
 
 import type { PagedResult } from "@/lib/types";
 import { getApiErrorMessage } from "@/lib/api/client";
 
-import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
-import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
-import { pageFromSearchParams } from "@/components/fe-requisitions/url-state";
+import { FeRequisitionTable } from "@/features/fe-requisitions/components/fe-requisition-table";
+import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/components/fe-requisition-table-skeleton";
+import { pageFromSearchParams } from "@/features/fe-requisitions/lib/url-state";
 import NotFound from "@/app/not-found";
 import { canApproveRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
+import { feRequisitionsApi, FeRequisitionSummary } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();

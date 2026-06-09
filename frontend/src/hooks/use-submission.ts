@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { feRequisitionsApi, FeRequisitionSubmissionDetail } from "@/lib/api/fe-requisitions";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
+import { FeRequisitionSubmissionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 type UseSubmissionResult = {
     data: FeRequisitionSubmissionDetail | null;

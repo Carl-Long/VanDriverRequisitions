@@ -11,7 +11,6 @@ import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
 import { useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
-import { feRequisitionsApi, FeRequisitionDetail } from "@/lib/api/fe-requisitions";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
 import { mapZodErrors } from "../lib/map-zod-errors";
 import { useRouter } from "next/navigation";
@@ -26,6 +25,7 @@ import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-mo
 import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
+import { FeRequisitionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 type Props = {
     mode: FeRequisitionPageMode;

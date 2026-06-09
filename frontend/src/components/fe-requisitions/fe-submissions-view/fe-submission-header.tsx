@@ -1,11 +1,11 @@
 "use client";
 
-import { FeRequisitionSubmissionDetail } from "@/lib/api/fe-requisitions";
 import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 import { Button } from "@/components/ui/button/button";
 import { Printer } from "lucide-react";
+import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/api/fe-requisitions-api";
 
 type Props = {
     submission: FeRequisitionSubmissionDetail;

@@ -1,7 +1,7 @@
 "use client";
 
 import { SummaryField } from "@/components/ui/field/summary-field";
-import { FeRequisitionSnapshot } from "@/lib/api/fe-requisitions";
+import { FeRequisitionSnapshot } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 

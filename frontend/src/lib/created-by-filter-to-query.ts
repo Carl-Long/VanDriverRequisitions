@@ -1,5 +1,5 @@
-import { CreatedByFilter } from "@/components/fe-requisitions/types";
-import { FeRequisitionQuery } from "./api/fe-requisitions";
+import { FeRequisitionQuery } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { CreatedByFilter } from "@/features/fe-requisitions/types/fe-requisiton-filters.types";
 
 export function mapCreatedByFilterToQuery(
     filter: CreatedByFilter,

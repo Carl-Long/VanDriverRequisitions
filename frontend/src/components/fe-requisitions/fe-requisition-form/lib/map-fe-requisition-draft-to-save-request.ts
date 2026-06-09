@@ -1,7 +1,4 @@
-import {
-    SaveFeRequisition,
-} from "@/lib/api/fe-requisitions";
-
+import { SaveFeRequisition } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { toDateOnlyString } from "@/lib/format/date";
 

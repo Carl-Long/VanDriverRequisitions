@@ -1,17 +1,9 @@
-import type { RequisitionStatus } from "./constants";
+import { RequisitionStatus } from "../constants/fe-requisition-status.constants";
 
 export type CreatedByFilter =
-    | {
-          type: "any";
-      }
-    | {
-          type: "me";
-      }
-    | {
-          type: "user";
-          userId: string;
-          label: string;
-      };
+    | { type: "any"; }
+    | { type: "me"; }
+    | { type: "user"; userId: string; label: string; };
 
 export type FeRequisitionFilters = {
     requisitionNumber: string;

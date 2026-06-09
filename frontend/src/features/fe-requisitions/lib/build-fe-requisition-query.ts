@@ -1,6 +1,7 @@
-import type { FeRequisitionQuery } from "@/lib/api/fe-requisitions";
-import type { FeRequisitionFilters } from "./types";
-import { PAGE_SIZE } from "./constants";
+import { FeRequisitionQuery } from "../api/fe-requisitions-api";
+import { PAGE_SIZE } from "../constants/fe-requisition-status.constants";
+import { FeRequisitionFilters } from "../types/fe-requisiton-filters.types";
+
 
 export function buildFeRequisitionQuery(
     page: number,

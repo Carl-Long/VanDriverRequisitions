@@ -1,7 +1,7 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
-import { VanDriverLookup } from "./van-drivers";
 import { SubmissionStatus } from "@/components/fe-requisitions/fe-submissions-view/submission-status";
+import { VanDriverLookup } from "@/lib/api/van-drivers";
 
 const BASE = "/api/v1/fe-requisitions";
 

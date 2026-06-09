@@ -2,12 +2,7 @@
 
 import { Field } from "@/components/ui/field/field";
 import { Combobox, type ComboboxOption, } from "@/components/ui/field/combobox";
-
-import {
-    REQUISITION_STATUSES,
-    requisitionStatusConfig,
-    type RequisitionStatus,
-} from "../constants";
+import { REQUISITION_STATUSES, requisitionStatusConfig, RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 
 const options: ComboboxOption[] =
     REQUISITION_STATUSES.map((x) => ({

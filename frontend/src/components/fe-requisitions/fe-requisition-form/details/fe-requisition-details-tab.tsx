@@ -10,7 +10,7 @@ import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
-import { StatusPill } from "../../status-pill";
+import { StatusPill } from "../../../../features/fe-requisitions/components/status-pill";
 import { Alert } from "@/components/ui/alert";
 
 type Props = {

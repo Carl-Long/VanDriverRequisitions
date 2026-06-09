@@ -1,10 +1,9 @@
 "use client";
 
 import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell, Table, TableFooter } from "@/components/ui/table/table";
-import { FeGeneralTaskSnapshot } from "@/lib/api/fe-requisitions";
+import { FeGeneralTaskSnapshot } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
-
 
 type Props = {
     tasks: FeGeneralTaskSnapshot[];
