@@ -60,7 +60,6 @@ export function DateTimePicker({
               : "09:00"
           }
           onChange={handleTimeChange}
-          state={state}
         />
       </div>
     </div>

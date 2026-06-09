@@ -56,31 +56,31 @@ export function Combobox({
     onChange,
 }: Readonly<Props>) {
     const [open, setOpen] = useState(false);
-
     const [search, setSearch] = useState("");
-
-    const [asyncOptions, setAsyncOptions] = useState<
-        ComboboxOption[]
-    >([]);
-
+    const [asyncOptions, setAsyncOptions] = useState<ComboboxOption[]>([]);
     const [loading, setLoading] = useState(false);
-
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    const maxVisibleOptions = 50;
 
     const finalOptions = useMemo(() => {
         if (onSearch) {
-            return asyncOptions;
+            return asyncOptions.slice(0, maxVisibleOptions);
         }
 
         if (!search) {
-            return options;
+            return options.slice(0, maxVisibleOptions);
         }
 
-        return options.filter((x) =>
-            x.label
-                .toLowerCase()
-                .includes(search.toLowerCase()),
-        );
+        const normalisedSearch = search.toLowerCase();
+
+        return options
+            .filter((x) =>
+                x.label
+                    .toLowerCase()
+                    .includes(normalisedSearch),
+            )
+            .slice(0, maxVisibleOptions);
     }, [
         options,
         search,

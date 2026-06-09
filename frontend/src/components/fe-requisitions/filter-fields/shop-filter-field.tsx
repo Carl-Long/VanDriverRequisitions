@@ -1,7 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { Field } from "@/components/ui/field/field";
-import { Combobox } from "@/components/ui/field/combobox";
+import {
+    Combobox,
+    type ComboboxOption,
+} from "@/components/ui/field/combobox";
 import { shopsApi } from "@/lib/api/shops";
 
 type Props = {
@@ -37,9 +42,38 @@ export function ShopFilterField({
     prefixLabel = false,
     onChange,
 }: Readonly<Props>) {
+    const [options, setOptions] = useState<ComboboxOption[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadOptions() {
+            setLoading(true);
+
+            try {
+                const result = await shopsApi.getCachedOptions();
+
+                if (!cancelled) {
+                    setOptions(result);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadOptions();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const combobox = (
         <Combobox
-            disabled={disabled}
+            disabled={disabled || loading}
             state={error ? "error" : "default"}
             value={value}
             label={
@@ -51,29 +85,26 @@ export function ShopFilterField({
                         ? "Shop: All shops"
                         : null
             }
+            options={options}
+            emptyStateText={
+                loading
+                    ? "Loading shops..."
+                    : "No shops available"
+            }
             noMatchesText="No matching shops found"
             pinnedOptions={
                 includeAllOption
                     ? STATIC_OPTIONS
                     : []
             }
-            placeholder="Shop: All shops"
-            onSearch={async (search) => {
-                const res =
-                    await shopsApi.search({
-                        search,
-                        pageSize: 20,
-                    });
-
-                return res.items.map((x) => ({
-                    value: x.id,
-                    label: `${x.code} - ${x.name}`,
-                }));
-            }}
+            placeholder={
+                loading
+                    ? "Loading shops..."
+                    : "Shop: All shops"
+            }
             onChange={(value, option) => {
                 if (value === "__ALL__") {
                     onChange(null, null);
-
                     return;
                 }
 
@@ -91,7 +122,7 @@ export function ShopFilterField({
 
     return (
         <Field
-            required
+            required={required}
             label="Shop"
             error={error}
         >

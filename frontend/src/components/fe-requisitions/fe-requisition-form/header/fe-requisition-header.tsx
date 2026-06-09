@@ -58,9 +58,8 @@ export function FeRequisitionHeader({
 
     const title = TITLES[mode];
 
-    const canApproveOrReject =
-        mode === "approval" &&
-        status === "Submitted";
+    const canApproveOrReject = mode === "approval" && status === "Submitted";
+    const showSubmittedBy = (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
 
     return (
         <div className="pb-2">
@@ -112,7 +111,7 @@ export function FeRequisitionHeader({
                             </div>
                         </div>
 
-                        {submittedByNameSnapshot && (
+                        {showSubmittedBy && (
                             <div className="flex items-center gap-2 text-sm">
                                 <User className="h-4 w-4 text-muted-foreground" />
 
