@@ -1,7 +1,14 @@
 import Link from "next/link";
+import type { ComponentType } from "react";
+import { ArrowRight, type LucideProps } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
-import { LaunchCardProps } from "@/lib/types";
+
+export type LaunchCardProps = {
+    title: string;
+    description: string;
+    href: string;
+    icon: ComponentType<LucideProps>;
+};
 
 export function LaunchCard({
     title,
@@ -20,7 +27,6 @@ export function LaunchCard({
             )}
         >
             <div className="flex flex-1 flex-col p-6">
-                {/* Icon */}
                 <div
                     className={cn(
                         "mb-5 flex h-12 w-12 flex-shrink-0 items-center justify-center",
@@ -31,15 +37,14 @@ export function LaunchCard({
                     <Icon size={22} strokeWidth={1.75} />
                 </div>
 
-                {/* Text */}
                 <h2 className="text-base font-semibold tracking-tight text-foreground">
                     {title}
                 </h2>
+
                 <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
                     {description}
                 </p>
 
-                {/* CTA */}
                 <div className="mt-5 flex items-center gap-1 text-sm font-medium text-primary">
                     <span>Open workspace</span>
                     <ArrowRight
