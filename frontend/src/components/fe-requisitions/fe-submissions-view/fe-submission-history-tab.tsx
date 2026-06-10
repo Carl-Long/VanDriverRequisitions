@@ -2,20 +2,15 @@
 
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-
 import { EmptyState } from "@/components/ui/empty-state";
-
 import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
-import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
-type Props = {
-    submissions: FeRequisitionSubmissionHistory[];
-};
+type Props = { submissions: FeRequisitionSubmissionHistory[]; };
 
-export function FeSubmissionHistoryTab({
-    submissions,
-}: Readonly<Props>) {
+export function FeSubmissionHistoryTab({ submissions }: Readonly<Props>) {
+
     const orderedSubmissions = [...submissions].sort(
         (a, b) =>
             b.submissionNumber -
@@ -38,13 +33,10 @@ export function FeSubmissionHistoryTab({
     );
 }
 
-type SubmissionCardProps = {
-    submission: FeRequisitionSubmissionHistory;
-};
+type SubmissionCardProps = { submission: FeRequisitionSubmissionHistory; };
 
-function SubmissionCard({
-    submission,
-}: Readonly<SubmissionCardProps>) {
+function SubmissionCard({ submission }: Readonly<SubmissionCardProps>) {
+    
     return (
         <Link
             href={`/home-van-drivers/submissions/${submission.id}`}

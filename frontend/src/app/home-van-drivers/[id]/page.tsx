@@ -2,25 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
-
-import {
-    getApiErrorMessage,
-    ApiError,
-} from "@/lib/api/client";
-
+import { getApiErrorMessage, ApiError } from "@/lib/api/client";
 import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
-
 import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
 import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import NotFound from "@/app/not-found";
 import { useAuth } from "@/providers/auth-provider";
 import { canCreateRequisitions } from "@/lib/auth/roles";
-import { FeRequisitionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 
 export default function Page() {
     const params = useParams<{ id: string }>();

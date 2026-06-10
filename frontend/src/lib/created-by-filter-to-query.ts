@@ -1,4 +1,4 @@
-import { FeRequisitionQuery } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionQuery } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { CreatedByFilter } from "@/features/fe-requisitions/types/fe-requisiton-filters.types";
 
 export function mapCreatedByFilterToQuery(

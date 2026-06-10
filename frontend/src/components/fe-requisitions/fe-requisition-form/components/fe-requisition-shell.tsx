@@ -25,7 +25,8 @@ import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-mo
 import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
-import { FeRequisitionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 
 type Props = {
     mode: FeRequisitionPageMode;

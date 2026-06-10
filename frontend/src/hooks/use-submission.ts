@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
-import { FeRequisitionSubmissionDetail, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
 type UseSubmissionResult = {
     data: FeRequisitionSubmissionDetail | null;

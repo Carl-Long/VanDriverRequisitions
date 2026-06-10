@@ -5,15 +5,12 @@ import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 import { Button } from "@/components/ui/button/button";
 import { Printer } from "lucide-react";
-import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
-type Props = {
-    submission: FeRequisitionSubmissionDetail;
-};
+type Props = { submission: FeRequisitionSubmissionDetail; };
 
-export function FeSubmissionHeader({
-    submission,
-}: Readonly<Props>) {
+export function FeSubmissionHeader({ submission }: Readonly<Props>) {
+    
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card">
             <div className="flex items-start justify-between print-header-row">

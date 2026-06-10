@@ -1,13 +1,11 @@
 "use client";
 
 import { SummaryField } from "@/components/ui/field/summary-field";
-import { FeRequisitionSnapshot } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSnapshot } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 
-type Props = {
-    snapshot: FeRequisitionSnapshot;
-};
+type Props = { snapshot: FeRequisitionSnapshot; };
 
 export function FeSubmissionSnapshotSummary({
     snapshot,

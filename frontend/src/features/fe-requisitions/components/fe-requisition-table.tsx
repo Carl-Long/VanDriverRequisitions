@@ -2,9 +2,9 @@ import { Surface } from "@/components/ui/surface";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { TableCell, TableHeader, TableHeaderCell, TableHeaderRow, TableRow } from "../../../components/ui/table/table";
 import { formatDateGB, formatDateTime } from "@/lib/format/date";
-import { FeRequisitionSummary } from "../api/fe-requisitions-api";
 import { RequisitionStatus } from "../constants/fe-requisition-status.constants";
 import { StatusPill } from "./status-pill";
+import { FeRequisitionSummary } from "../types/fe-requisition.types";
 
 type Props = {
     items: FeRequisitionSummary[];

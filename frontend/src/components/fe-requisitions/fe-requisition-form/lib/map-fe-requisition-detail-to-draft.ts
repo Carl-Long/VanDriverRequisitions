@@ -1,6 +1,6 @@
-import { FeRequisitionDetail } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
+import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 
 export function mapFeRequisitionDetailToDraft(
     detail: FeRequisitionDetail,
@@ -33,50 +33,29 @@ export function mapFeRequisitionDetailToDraft(
                 (task) => ({
                     id: task.id,
 
-                    clientId:
-                        crypto.randomUUID(),
-                    taskTypeId:
-                        task.feTaskTypeId,
+                    clientId: crypto.randomUUID(),
 
-                    taskTypeLabel:
-                        task.taskTypeName,
+                    taskTypeId: task.feTaskTypeId,
 
-                    weekEndingDate:
-                        new Date(
-                            task.weekEndingDate,
-                        ),
+                    taskTypeLabel: task.taskTypeName,
+
+                    weekEndingDate: new Date(task.weekEndingDate),
 
                     quantities: {
-                        sunday:
-                            task.week.sunday,
-
-                        monday:
-                            task.week.monday,
-
-                        tuesday:
-                            task.week.tuesday,
-
-                        wednesday:
-                            task.week.wednesday,
-
-                        thursday:
-                            task.week.thursday,
-
-                        friday:
-                            task.week.friday,
-
-                        saturday:
-                            task.week.saturday,
+                        sunday: task.week.sunday,
+                        monday: task.week.monday,
+                        tuesday: task.week.tuesday,
+                        wednesday: task.week.wednesday,
+                        thursday: task.week.thursday,
+                        friday: task.week.friday,
+                        saturday: task.week.saturday,
                     },
 
-                    totalNumber:
-                        task.totalNumber,
+                    totalNumber: task.totalNumber,
 
-                    ratePerJob:
-                        task.ratePerJob,
+                    ratePerJob: task.ratePerJob,
 
-                    totalValue:
-                        task.totalValue ?? 0,
+                    totalValue: task.totalValue ?? 0,
                 }),
             ),
 

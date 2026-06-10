@@ -1,5 +1,5 @@
-import { FeRequisitionQuery } from "../api/fe-requisitions-api";
 import { PAGE_SIZE } from "../constants/fe-requisition-status.constants";
+import { FeRequisitionQuery } from "../types/fe-requisition.types";
 import { FeRequisitionFilters } from "../types/fe-requisiton-filters.types";
 
 

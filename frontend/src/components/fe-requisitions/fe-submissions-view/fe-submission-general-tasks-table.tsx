@@ -1,20 +1,17 @@
 "use client";
 
 import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell, Table, TableFooter } from "@/components/ui/table/table";
-import { FeGeneralTaskSnapshot } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeGeneralTaskSnapshot } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 
-type Props = {
-    tasks: FeGeneralTaskSnapshot[];
-};
+type Props = { tasks: FeGeneralTaskSnapshot[] };
 
-export function FeSubmissionGeneralTasksTable({
-    tasks,
-}: Readonly<Props>) {
+export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
     if (tasks.length === 0) {
         return null;
     }
+
     const orderedTasks = [...tasks].sort(
         (a, b) =>
             a.taskTypeName.localeCompare(b.taskTypeName) ||
@@ -24,41 +21,15 @@ export function FeSubmissionGeneralTasksTable({
 
     const totals = orderedTasks.reduce(
         (acc, task) => ({
-            sunday:
-                acc.sunday +
-                (task.week.sunday ?? 0),
-
-            monday:
-                acc.monday +
-                (task.week.monday ?? 0),
-
-            tuesday:
-                acc.tuesday +
-                (task.week.tuesday ?? 0),
-
-            wednesday:
-                acc.wednesday +
-                (task.week.wednesday ?? 0),
-
-            thursday:
-                acc.thursday +
-                (task.week.thursday ?? 0),
-
-            friday:
-                acc.friday +
-                (task.week.friday ?? 0),
-
-            saturday:
-                acc.saturday +
-                (task.week.saturday ?? 0),
-
-            totalJobs:
-                acc.totalJobs +
-                task.totalNumber,
-
-            subtotal:
-                acc.subtotal +
-                task.totalValue,
+            sunday: acc.sunday + (task.week.sunday ?? 0),
+            monday: acc.monday + (task.week.monday ?? 0),
+            tuesday: acc.tuesday + (task.week.tuesday ?? 0),
+            wednesday: acc.wednesday + (task.week.wednesday ?? 0),
+            thursday: acc.thursday + (task.week.thursday ?? 0),
+            friday: acc.friday + (task.week.friday ?? 0),
+            saturday: acc.saturday + (task.week.saturday ?? 0),
+            totalJobs: acc.totalJobs + task.totalNumber,
+            subtotal: acc.subtotal + task.totalValue,
         }),
         {
             sunday: 0,
@@ -72,6 +43,7 @@ export function FeSubmissionGeneralTasksTable({
             subtotal: 0,
         },
     );
+    
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
             <div className="mb-6 print-section-heading">
@@ -215,7 +187,7 @@ export function FeSubmissionGeneralTasksTable({
                                     Totals
                                 </TableCell>
 
-                                <TableCell className="print-col-week"/>
+                                <TableCell className="print-col-week" />
 
                                 <TableCell align="center" className="print-col-day">
                                     {totals.sunday}
@@ -249,7 +221,7 @@ export function FeSubmissionGeneralTasksTable({
                                     {totals.totalJobs}
                                 </TableCell>
 
-                                <TableCell className="print-col-rate"/>
+                                <TableCell className="print-col-rate" />
 
                                 <TableCell
                                     align="right"

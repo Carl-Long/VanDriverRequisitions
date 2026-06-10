@@ -21,7 +21,8 @@ import { Alert } from "@/components/ui/alert";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams } from "@/features/fe-requisitions/lib/url-state";
 import { canCreateRequisitions } from "@/lib/auth/roles";
 import NotFound from "../not-found";
-import { FeRequisitionSummary, feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
 
 
 export default function HomeVanDriversPage() {
