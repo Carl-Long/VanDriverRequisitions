@@ -3,7 +3,7 @@ import { CreatedByFilter } from "@/features/fe-requisitions/types/fe-requisiton-
 
 export function mapCreatedByFilterToQuery(
     filter: CreatedByFilter,
-    currentUserId: string
+    currentUserId: string,
 ): Pick<FeRequisitionQuery, "createdByUserId"> {
     if (filter.type === "me") {
         return {

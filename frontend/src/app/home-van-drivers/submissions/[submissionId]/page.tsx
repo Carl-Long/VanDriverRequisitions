@@ -34,9 +34,7 @@ export default function SubmissionPage() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>

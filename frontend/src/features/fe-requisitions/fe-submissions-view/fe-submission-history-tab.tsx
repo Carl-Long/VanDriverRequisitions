@@ -7,14 +7,11 @@ import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
-type Props = { submissions: FeRequisitionSubmissionHistory[]; };
+type Props = { submissions: FeRequisitionSubmissionHistory[] };
 
 export function FeSubmissionHistoryTab({ submissions }: Readonly<Props>) {
-
     const orderedSubmissions = [...submissions].sort(
-        (a, b) =>
-            b.submissionNumber -
-            a.submissionNumber,
+        (a, b) => b.submissionNumber - a.submissionNumber,
     );
 
     if (orderedSubmissions.length === 0) {
@@ -24,19 +21,15 @@ export function FeSubmissionHistoryTab({ submissions }: Readonly<Props>) {
     return (
         <div className="space-y-4">
             {orderedSubmissions.map((submission) => (
-                <SubmissionCard
-                    key={submission.id}
-                    submission={submission}
-                />
+                <SubmissionCard key={submission.id} submission={submission} />
             ))}
         </div>
     );
 }
 
-type SubmissionCardProps = { submission: FeRequisitionSubmissionHistory; };
+type SubmissionCardProps = { submission: FeRequisitionSubmissionHistory };
 
 function SubmissionCard({ submission }: Readonly<SubmissionCardProps>) {
-    
     return (
         <Link
             href={`/home-van-drivers/submissions/${submission.id}`}
@@ -58,13 +51,9 @@ function SubmissionCard({ submission }: Readonly<SubmissionCardProps>) {
         >
             <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                    <h3 className="font-semibold">
-                        Submission #{submission.submissionNumber}
-                    </h3>
+                    <h3 className="font-semibold">Submission #{submission.submissionNumber}</h3>
 
-                    <SubmissionStatusPill
-                        status={submission.status}
-                    />
+                    <SubmissionStatusPill status={submission.status} />
                 </div>
 
                 <div

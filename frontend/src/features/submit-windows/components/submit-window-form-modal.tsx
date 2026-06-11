@@ -13,7 +13,6 @@ import { Field } from "@/components/ui/field/field";
 import { setTime, addDays } from "@/lib/format/date";
 import { SubmitWindow } from "../types/submit-window.types";
 
-
 const submitWindowSchema = z
     .object({
         openFrom: z.date({
@@ -28,23 +27,17 @@ const submitWindowSchema = z
         path: ["openTo"],
     });
 
-const createSubmitWindowSchema = submitWindowSchema.refine(
-    (data) => data.openFrom > new Date(),
-    {
-        message: "Open from date must be in the future.",
-        path: ["openFrom"],
-    }
-);
+const createSubmitWindowSchema = submitWindowSchema.refine((data) => data.openFrom > new Date(), {
+    message: "Open from date must be in the future.",
+    path: ["openFrom"],
+});
 
 type SubmitWindowFormData = z.infer<typeof submitWindowSchema>;
 
 type SubmitWindowFormModalProps = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (data: {
-        openFrom: string;
-        openTo: string;
-    }) => Promise<void>;
+    onSubmit: (data: { openFrom: string; openTo: string }) => Promise<void>;
     initial?: SubmitWindow | null;
 };
 
@@ -60,9 +53,7 @@ export function SubmitWindowFormModal({
     const [openFromTouched, setOpenFromTouched] = useState(false);
     const [openToTouched, setOpenToTouched] = useState(false);
 
-    const schema = isEditing
-        ? submitWindowSchema
-        : createSubmitWindowSchema;
+    const schema = isEditing ? submitWindowSchema : createSubmitWindowSchema;
 
     const {
         control,
@@ -74,12 +65,8 @@ export function SubmitWindowFormModal({
     } = useForm<SubmitWindowFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            openFrom: initial
-                ? new Date(initial.openFrom)
-                : undefined,
-            openTo: initial
-                ? new Date(initial.openTo)
-                : undefined,
+            openFrom: initial ? new Date(initial.openFrom) : undefined,
+            openTo: initial ? new Date(initial.openTo) : undefined,
         },
     });
 
@@ -87,12 +74,8 @@ export function SubmitWindowFormModal({
         if (!open) return;
 
         reset({
-            openFrom: initial
-                ? new Date(initial.openFrom)
-                : undefined,
-            openTo: initial
-                ? new Date(initial.openTo)
-                : undefined,
+            openFrom: initial ? new Date(initial.openFrom) : undefined,
+            openTo: initial ? new Date(initial.openTo) : undefined,
         });
 
         // Only reset auto-behavior flags in CREATE mode
@@ -112,10 +95,7 @@ export function SubmitWindowFormModal({
         onClose();
     }
 
-    function mapServerErrors(apiErr: {
-        detail?: string;
-        errors?: Record<string, string[]>;
-    }) {
+    function mapServerErrors(apiErr: { detail?: string; errors?: Record<string, string[]> }) {
         if (apiErr.errors) {
             for (const [key, msgs] of Object.entries(apiErr.errors)) {
                 const field = key.toLowerCase();
@@ -133,10 +113,7 @@ export function SubmitWindowFormModal({
                 }
             }
         } else {
-            setServerError(
-                apiErr.detail ??
-                "Something went wrong. Please try again."
-            );
+            setServerError(apiErr.detail ?? "Something went wrong. Please try again.");
         }
     }
 
@@ -155,7 +132,7 @@ export function SubmitWindowFormModal({
                 err as {
                     detail?: string;
                     errors?: Record<string, string[]>;
-                }
+                },
             );
         }
     }
@@ -164,37 +141,21 @@ export function SubmitWindowFormModal({
         <Modal
             open={open}
             onClose={handleClose}
-            title={
-                isEditing
-                    ? "Edit Submit Window"
-                    : "Create Submit Window"
-            }
+            title={isEditing ? "Edit Submit Window" : "Create Submit Window"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-                {serverError && (
-                    <Alert tone="danger">
-                        {serverError}
-                    </Alert>
-                )}
+                {serverError && <Alert tone="danger">{serverError}</Alert>}
 
                 {/* OPEN FROM */}
                 <div>
-                    <Field
-                        label="Open From"
-                        error={errors.openFrom?.message}
-                        required
-                    >
+                    <Field label="Open From" error={errors.openFrom?.message} required>
                         <Controller
                             control={control}
                             name="openFrom"
                             render={({ field }) => (
                                 <DateTimePicker
                                     value={field.value}
-                                    state={
-                                        errors.openFrom
-                                            ? "error"
-                                            : "default"
-                                    }
+                                    state={errors.openFrom ? "error" : "default"}
                                     onChange={(date) => {
                                         if (!date) {
                                             field.onChange(date);
@@ -216,11 +177,7 @@ export function SubmitWindowFormModal({
                                         field.onChange(nextDate);
 
                                         if (!openToTouched) {
-                                            const auto = setTime(
-                                                addDays(nextDate, 7),
-                                                17,
-                                                0
-                                            );
+                                            const auto = setTime(addDays(nextDate, 7), 17, 0);
 
                                             setValue("openTo", auto);
                                         }
@@ -233,22 +190,14 @@ export function SubmitWindowFormModal({
 
                 {/* OPEN TO */}
                 <div>
-                    <Field
-                        label="Open To"
-                        error={errors.openTo?.message}
-                        required
-                    >
+                    <Field label="Open To" error={errors.openTo?.message} required>
                         <Controller
                             control={control}
                             name="openTo"
                             render={({ field }) => (
                                 <DateTimePicker
                                     value={field.value}
-                                    state={
-                                        errors.openTo
-                                            ? "error"
-                                            : "default"
-                                    }
+                                    state={errors.openTo ? "error" : "default"}
                                     onChange={(date) => {
                                         setOpenToTouched(true);
                                         field.onChange(date);
@@ -270,12 +219,7 @@ export function SubmitWindowFormModal({
                         Cancel
                     </Button>
 
-                    <Button
-                        type="submit"
-                        variant="solid"
-                        tone="primary"
-                        loading={isSubmitting}
-                    >
+                    <Button type="submit" variant="solid" tone="primary" loading={isSubmitting}>
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

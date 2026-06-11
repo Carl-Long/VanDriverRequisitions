@@ -18,11 +18,7 @@ export default function NewRequisitionPage() {
         error: limitRulesError,
     } = useRequisitionLimitRules();
 
-    const {
-        taskTypes,
-        loading: taskTypesLoading,
-        error: taskTypesError,
-    } = useFeTaskTypes();
+    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
 
     const {
         status: submitStatus,
@@ -30,21 +26,14 @@ export default function NewRequisitionPage() {
         error: submitWindowStatusError,
     } = useSubmitWindowStatus();
 
-    const errors = [
-        limitRulesError,
-        taskTypesError,
-        submitWindowStatusError,
-    ].filter(Boolean);
+    const errors = [limitRulesError, taskTypesError, submitWindowStatusError].filter(Boolean);
 
     const { user, loading: authLoading } = useAuth();
 
     const canCreate = canCreateRequisitions(user);
 
     const loading =
-        authLoading ||
-        limitRulesLoading ||
-        taskTypesLoading ||
-        submitWindowStatusLoading;
+        authLoading || limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
 
     if (loading) {
         return (
@@ -63,9 +52,7 @@ export default function NewRequisitionPage() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>

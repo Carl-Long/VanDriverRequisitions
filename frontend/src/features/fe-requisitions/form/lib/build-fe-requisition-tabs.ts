@@ -5,7 +5,6 @@ export function buildFeRequisitionTabs(
     taskTypes: FeTaskType[],
     submissionHistoryCount: number,
 ): FeRequisitionTab[] {
-
     const tabs: FeRequisitionTab[] = [
         {
             type: "details",
@@ -13,14 +12,12 @@ export function buildFeRequisitionTabs(
             label: "Details",
         },
 
-        ...taskTypes.map<FeRequisitionTab>(
-            (taskType) => ({
-                type: "general-task",
-                key: `task-type-${taskType.id}`,
-                taskTypeId: taskType.id,
-                label: taskType.name,
-            }),
-        ),
+        ...taskTypes.map<FeRequisitionTab>((taskType) => ({
+            type: "general-task",
+            key: `task-type-${taskType.id}`,
+            taskTypeId: taskType.id,
+            label: taskType.name,
+        })),
 
         {
             type: "mileage",

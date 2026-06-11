@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FeRequisitionDraft, } from "../types/fe-requisition-draft";
+import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculations";
 
@@ -11,44 +11,33 @@ import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisitio
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
+    const [draft, setDraft] = useState<FeRequisitionDraft>(
+        initialDraft ?? createEmptyFeRequisitionDraft(),
+    );
 
-    const [draft, setDraft] =
-        useState<FeRequisitionDraft>(
-            initialDraft ??
-            createEmptyFeRequisitionDraft(),
-        );
-
-    function setRowVersion(
-        rowVersion: string | null,
-    ) {
-        setDraft(x => ({
+    function setRowVersion(rowVersion: string | null) {
+        setDraft((x) => ({
             ...x,
             rowVersion,
         }));
     }
 
     const subtotal = useMemo(() => {
-        return calculateGeneralTasksSubtotal(
-            draft.feGeneralTasks,
-        );
+        return calculateGeneralTasksSubtotal(draft.feGeneralTasks);
     }, [draft.feGeneralTasks]);
 
-    function setRequisitionDate(
-        requisitionDate: Date | null,
-    ) {
+    function setRequisitionDate(requisitionDate: Date | null) {
         setDraft((x) => ({
             ...x,
             requisitionDate,
         }));
     }
 
-    function setVanDriver(
-        params: {
-            id: string | null;
-            label: string | null;
-            summary: VanDriverLookup | null;
-        },
-    ) {
+    function setVanDriver(params: {
+        id: string | null;
+        label: string | null;
+        summary: VanDriverLookup | null;
+    }) {
         setDraft((x) => ({
             ...x,
 
@@ -59,19 +48,14 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         }));
     }
 
-    function setVanDriverName(
-        vanDriverName: string,
-    ) {
+    function setVanDriverName(vanDriverName: string) {
         setDraft((x) => ({
             ...x,
             vanDriverName,
         }));
     }
 
-    function setShop(params: {
-        id: string | null;
-        label: string | null;
-    }) {
+    function setShop(params: { id: string | null; label: string | null }) {
         setDraft((x) => ({
             ...x,
 
@@ -81,91 +65,57 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         }));
     }
 
-    function addGeneralTask(
-        taskTypeId: string,
-        taskTypeLabel: string,
-        form: FeGeneralTaskForm,
-    ) {
-        const task =
-            createFeGeneralTaskDraftFromForm(
-                {
-                    taskTypeId,
+    function addGeneralTask(taskTypeId: string, taskTypeLabel: string, form: FeGeneralTaskForm) {
+        const task = createFeGeneralTaskDraftFromForm({
+            taskTypeId,
 
-                    taskTypeLabel,
+            taskTypeLabel,
 
-                    form,
-                },
-            );
+            form,
+        });
 
         setDraft((prev) => ({
             ...prev,
 
-            feGeneralTasks: [
-                ...prev.feGeneralTasks,
-
-                task,
-            ],
+            feGeneralTasks: [...prev.feGeneralTasks, task],
         }));
     }
 
-    function updateGeneralTask(
-        clientId: string,
-        form: FeGeneralTaskForm,
-    ) {
-        const totals =
-            calculateFeGeneralTaskFormTotals(
-                form,
-            );
+    function updateGeneralTask(clientId: string, form: FeGeneralTaskForm) {
+        const totals = calculateFeGeneralTaskFormTotals(form);
 
         setDraft((prev) => ({
             ...prev,
 
-            feGeneralTasks:
-                prev.feGeneralTasks.map(
-                    (task) => {
-                        if (
-                            task.clientId !==
-                            clientId
-                        ) {
-                            return task;
-                        }
+            feGeneralTasks: prev.feGeneralTasks.map((task) => {
+                if (task.clientId !== clientId) {
+                    return task;
+                }
 
-                        return {
-                            ...task,
+                return {
+                    ...task,
 
-                            weekEndingDate:
-                                form.weekEndingDate,
+                    weekEndingDate: form.weekEndingDate,
 
-                            quantities: {
-                                ...form.quantities,
-                            },
-
-                            ratePerJob:
-                                form.ratePerJob,
-
-                            totalNumber:
-                                totals.totalJobs,
-
-                            totalValue:
-                                totals.totalValue,
-                        };
+                    quantities: {
+                        ...form.quantities,
                     },
-                ),
+
+                    ratePerJob: form.ratePerJob,
+
+                    totalNumber: totals.totalJobs,
+
+                    totalValue: totals.totalValue,
+                };
+            }),
         }));
     }
 
-    function removeGeneralTask(
-        clientId: string,
-    ) {
+    function removeGeneralTask(clientId: string) {
         setDraft((prev) => ({
             ...prev,
 
-            feGeneralTasks:
-                prev.feGeneralTasks.filter(
-                    (x) =>
-                        x.clientId !==
-                        clientId,
-                ),
+            feGeneralTasks: prev.feGeneralTasks.filter((x) => x.clientId !== clientId),
         }));
     }
 
@@ -179,6 +129,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         addGeneralTask,
         updateGeneralTask,
         removeGeneralTask,
-        setRowVersion
+        setRowVersion,
     };
 }

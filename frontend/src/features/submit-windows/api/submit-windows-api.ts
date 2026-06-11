@@ -1,16 +1,17 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
-import { SubmitWindowFilter, SubmitWindow, SubmitWindowStatus, CreateSubmitWindow, UpdateSubmitWindow } from "../types/submit-window.types";
+import {
+    SubmitWindowFilter,
+    SubmitWindow,
+    SubmitWindowStatus,
+    CreateSubmitWindow,
+    UpdateSubmitWindow,
+} from "../types/submit-window.types";
 
 const BASE = "/api/v1/submit-windows";
 
-
 export const submitWindowsApi = {
-    getAll: (
-        page = 1,
-        pageSize = 10,
-        filter: SubmitWindowFilter = "active",
-    ) =>
+    getAll: (page = 1, pageSize = 10, filter: SubmitWindowFilter = "active") =>
         apiFetch<PagedResult<SubmitWindow>>(
             `${BASE}?page=${page}&pageSize=${pageSize}&filter=${filter}`,
         ),
@@ -22,16 +23,14 @@ export const submitWindowsApi = {
     create: (data: CreateSubmitWindow) =>
         apiFetch<SubmitWindow>(BASE, {
             method: "POST",
-            body: data
+            body: data,
         }),
 
     update: (id: string, data: UpdateSubmitWindow) =>
         apiFetch<SubmitWindow>(`${BASE}/${id}`, {
             method: "PUT",
-            body: data
+            body: data,
         }),
 
-    delete: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" }),
-
+    delete: (id: string) => apiFetch<void>(`${BASE}/${id}`, { method: "DELETE" }),
 };

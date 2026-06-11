@@ -1,14 +1,9 @@
 import { Button } from "@/components/ui/button/button";
-import {
-    ArrowRightCircle,
-    LogOut,
-    Save,
-    Send,
-} from "lucide-react";
+import { ArrowRightCircle, LogOut, Save, Send } from "lucide-react";
 import { SaveAction } from "../components/fe-requisition-shell";
 
 type Props = {
-    activeAction: SaveAction
+    activeAction: SaveAction;
     canSubmit: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
@@ -33,7 +28,6 @@ export function FeRequisitionActions({
             >
                 <Save size={14} />
                 <ArrowRightCircle size={14} />
-
                 Save & Continue
             </Button>
 
@@ -45,7 +39,6 @@ export function FeRequisitionActions({
             >
                 <Save size={14} />
                 <LogOut size={14} />
-
                 Save & Close
             </Button>
 
@@ -57,7 +50,6 @@ export function FeRequisitionActions({
                     onClick={onSubmit}
                 >
                     <Send size={14} />
-
                     Submit
                 </Button>
             )}

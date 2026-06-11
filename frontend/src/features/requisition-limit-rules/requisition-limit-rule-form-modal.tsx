@@ -17,7 +17,6 @@ import { Alert } from "@/components/ui/alert";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { categoryOptions, fasciaOptions } from "./requisition-limit-rule-options";
 
-
 /* ---------------- FORM TYPES (STRING-FIRST) ---------------- */
 
 type FormValues = {
@@ -28,43 +27,47 @@ type FormValues = {
     maxRate: number;
 };
 
-const schema = z.object({
-    categoryId: z.string()
-        .min(1, "Category is required and must be valid."),
+const schema = z
+    .object({
+        categoryId: z.string().min(1, "Category is required and must be valid."),
 
-    fasciaId: z.string()
-        .min(1, "Fascia is required and must be valid."),
+        fasciaId: z.string().min(1, "Fascia is required and must be valid."),
 
-    feTaskTypeId: z.string().nullable(),
+        feTaskTypeId: z.string().nullable(),
 
-    maxQuantity: z.number({
-        error: "Max Quantity must be greater than 0.",
-    }).gt(0, "Max Quantity must be greater than 0."),
+        maxQuantity: z
+            .number({
+                error: "Max Quantity must be greater than 0.",
+            })
+            .gt(0, "Max Quantity must be greater than 0."),
 
-    maxRate: z.number({
-        error: "Max Rate must be greater than 0.",
-    }).gt(0, "Max Rate must be greater than 0."),
-}).superRefine((data, ctx) => {
-    const isGeneralTask = data.categoryId === "0";
+        maxRate: z
+            .number({
+                error: "Max Rate must be greater than 0.",
+            })
+            .gt(0, "Max Rate must be greater than 0."),
+    })
+    .superRefine((data, ctx) => {
+        const isGeneralTask = data.categoryId === "0";
 
-    if (isGeneralTask && !data.feTaskTypeId) {
-        ctx.addIssue({
-            code: "custom",
-            path: ["feTaskTypeId"],
-            message:
-                "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
-        });
-    }
+        if (isGeneralTask && !data.feTaskTypeId) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["feTaskTypeId"],
+                message:
+                    "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+            });
+        }
 
-    if (!isGeneralTask && data.feTaskTypeId) {
-        ctx.addIssue({
-            code: "custom",
-            path: ["feTaskTypeId"],
-            message:
-                "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
-        });
-    }
-});
+        if (!isGeneralTask && data.feTaskTypeId) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["feTaskTypeId"],
+                message:
+                    "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+            });
+        }
+    });
 
 type Props = {
     open: boolean;
@@ -89,7 +92,6 @@ export function RequisitionLimitRuleFormModal({
 }: Readonly<Props>) {
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
-
 
     const {
         register,
@@ -143,20 +145,12 @@ export function RequisitionLimitRuleFormModal({
             await onSubmit({
                 category,
                 fascia: Number(data.fasciaId),
-                feTaskTypeId:
-                    category === 0
-                        ? data.feTaskTypeId || null
-                        : null,
+                feTaskTypeId: category === 0 ? data.feTaskTypeId || null : null,
                 maxQuantity: data.maxQuantity,
                 maxRate: data.maxRate,
             });
         } catch (err) {
-            setServerError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to save requisition limit rule.",
-                ),
-            );
+            setServerError(getApiErrorMessage(err, "Failed to save requisition limit rule."));
         }
     }
 
@@ -167,22 +161,13 @@ export function RequisitionLimitRuleFormModal({
             title={isEditing ? "Edit Limit Rule" : "Create Limit Rule"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-
-                {serverError && (
-                    <Alert tone="danger">
-                        {serverError}
-                    </Alert>
-                )}
+                {serverError && <Alert tone="danger">{serverError}</Alert>}
 
                 {/* CATEGORY */}
-                <Field
-                    label="Category"
-                    required
-                    error={errors.categoryId?.message}
-                >
+                <Field label="Category" required error={errors.categoryId?.message}>
                     <select className={fieldBase} {...register("categoryId")}>
                         <option value="">Select category</option>
-                        {categoryOptions.map(opt => (
+                        {categoryOptions.map((opt) => (
                             <option key={opt.value} value={String(opt.value)}>
                                 {opt.label}
                             </option>
@@ -194,7 +179,7 @@ export function RequisitionLimitRuleFormModal({
                 <Field label="Fascia" required error={errors.fasciaId?.message}>
                     <select className={fieldBase} {...register("fasciaId")}>
                         <option value="">Select fascia</option>
-                        {fasciaOptions.map(opt => (
+                        {fasciaOptions.map((opt) => (
                             <option key={opt.value} value={String(opt.value)}>
                                 {opt.label}
                             </option>
@@ -207,7 +192,7 @@ export function RequisitionLimitRuleFormModal({
                     <Field label="Task Type" error={errors.feTaskTypeId?.message}>
                         <select className={fieldBase} {...register("feTaskTypeId")}>
                             <option value="">None</option>
-                            {taskTypes.map(t => (
+                            {taskTypes.map((t) => (
                                 <option key={t.id} value={t.id}>
                                     {t.name}
                                 </option>
@@ -249,10 +234,7 @@ export function RequisitionLimitRuleFormModal({
                         Cancel
                     </Button>
 
-                    <Button
-                        type="submit"
-                        loading={isSubmitting}
-                    >
+                    <Button type="submit" loading={isSubmitting}>
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

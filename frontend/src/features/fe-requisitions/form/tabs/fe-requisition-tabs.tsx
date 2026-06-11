@@ -9,14 +9,10 @@ type Props = {
     mode: FeRequisitionPageMode;
     taskTypes: FeTaskType[];
     activeKey: string;
-    onActiveKeyChange: (
-        key: string,
-    ) => void;
+    onActiveKeyChange: (key: string) => void;
 
     details: React.ReactNode;
-    renderTaskTypeTab: (
-        taskTypeId: string,
-    ) => React.ReactNode;
+    renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
     getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
@@ -32,19 +28,12 @@ export function FeRequisitionTabs({
     submissionHistoryCount,
     getTaskTypeTabHasWarning,
 }: Readonly<Props>) {
-
     const tabs = useMemo(
-        () =>
-            buildFeRequisitionTabs(
-                taskTypes,
-                submissionHistoryCount,
-            ),
+        () => buildFeRequisitionTabs(taskTypes, submissionHistoryCount),
         [taskTypes, submissionHistoryCount],
     );
 
-    const activeTab = tabs.find(
-        (x) => x.key === activeKey,
-    );
+    const activeTab = tabs.find((x) => x.key === activeKey);
 
     return (
         <div className="space-y-6">
@@ -53,15 +42,8 @@ export function FeRequisitionTabs({
                     {tabs.map((tab) => (
                         <TabButton
                             key={tab.key}
-                            active={
-                                tab.key ===
-                                activeKey
-                            }
-                            onClick={() =>
-                                onActiveKeyChange(
-                                    tab.key,
-                                )
-                            }
+                            active={tab.key === activeKey}
+                            onClick={() => onActiveKeyChange(tab.key)}
                         >
                             <span className="inline-flex items-center gap-2">
                                 {tab.label}
@@ -94,11 +76,7 @@ type TabButtonProps = {
     children: React.ReactNode;
 };
 
-function TabButton({
-    active,
-    onClick,
-    children,
-}: Readonly<TabButtonProps>) {
+function TabButton({ active, onClick, children }: Readonly<TabButtonProps>) {
     return (
         <button
             type="button"
@@ -106,16 +84,10 @@ function TabButton({
             className={[
                 "cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200",
                 active
-                    ? [
-                        "bg-accent",
-                        "text-accent-foreground",
-                        "shadow-sm",
-                    ].join(" ")
-                    : [
-                        "text-muted-foreground",
-                        "hover:text-foreground",
-                        "hover:bg-accent/20",
-                    ].join(" "),
+                    ? ["bg-accent", "text-accent-foreground", "shadow-sm"].join(" ")
+                    : ["text-muted-foreground", "hover:text-foreground", "hover:bg-accent/20"].join(
+                          " ",
+                      ),
             ].join(" ")}
         >
             {children}

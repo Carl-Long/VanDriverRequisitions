@@ -1,20 +1,18 @@
-import { REQUISITION_STATUSES, INITIAL_FILTERS, RequisitionStatus } from "../../constants/fe-requisition-status.constants";
+import {
+    REQUISITION_STATUSES,
+    INITIAL_FILTERS,
+    RequisitionStatus,
+} from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionFilters, CreatedByFilter } from "../../types/fe-requisiton-filters.types";
 
 function isValidStatus(value: string | null) {
-    return (
-        value !== null &&
-        REQUISITION_STATUSES.includes(
-            value as any,
-        )
-    );
+    return value !== null && REQUISITION_STATUSES.includes(value as any);
 }
 
 export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequisitionFilters {
     const createdBy = searchParams.get("createdBy");
 
-    let createdByFilter: CreatedByFilter =
-    {
+    let createdByFilter: CreatedByFilter = {
         type: "me",
     };
 

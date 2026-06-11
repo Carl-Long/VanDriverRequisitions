@@ -1,22 +1,10 @@
 "use client";
 
-import {
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-    type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 const STORAGE_KEY = "text-size";
 
-export const TEXT_SIZES = [
-    "default",
-    "large",
-    "extra-large",
-    "largest",
-] as const;
+export const TEXT_SIZES = ["default", "large", "extra-large", "largest"] as const;
 
 export type TextSize = (typeof TEXT_SIZES)[number];
 
@@ -50,25 +38,19 @@ export function TextSizeProvider({
 }: Readonly<{
     children: ReactNode;
 }>) {
-    const [textSize, setTextSize] =
-        useState<TextSize>(getInitialTextSize);
+    const [textSize, setTextSize] = useState<TextSize>(getInitialTextSize);
 
     useEffect(() => {
         document.documentElement.classList.remove(
             "text-size-default",
             "text-size-large",
             "text-size-extra-large",
-            "text-size-largest"
+            "text-size-largest",
         );
 
-        document.documentElement.classList.add(
-            `text-size-${textSize}`
-        );
+        document.documentElement.classList.add(`text-size-${textSize}`);
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            textSize
-        );
+        localStorage.setItem(STORAGE_KEY, textSize);
     }, [textSize]);
 
     const value = useMemo(
@@ -76,23 +58,17 @@ export function TextSizeProvider({
             textSize,
             setTextSize,
         }),
-        [textSize]
+        [textSize],
     );
 
-    return (
-        <TextSizeContext.Provider value={value}>
-            {children}
-        </TextSizeContext.Provider>
-    );
+    return <TextSizeContext.Provider value={value}>{children}</TextSizeContext.Provider>;
 }
 
 export function useTextSize() {
     const context = useContext(TextSizeContext);
 
     if (!context) {
-        throw new Error(
-            "useTextSize must be used within TextSizeProvider"
-        );
+        throw new Error("useTextSize must be used within TextSizeProvider");
     }
 
     return context;

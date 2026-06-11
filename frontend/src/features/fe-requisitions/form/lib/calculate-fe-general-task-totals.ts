@@ -1,44 +1,26 @@
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 import { FeGeneralTaskTotals } from "../types/fe-general-task-totals";
 
-export function calculateFeGeneralTaskTotals(
-    tasks: FeGeneralTaskDraft[],
-): FeGeneralTaskTotals {
+export function calculateFeGeneralTaskTotals(tasks: FeGeneralTaskDraft[]): FeGeneralTaskTotals {
     return tasks.reduce<FeGeneralTaskTotals>(
         (acc, task) => {
-            acc.sunday +=
-                task.quantities
-                    .sunday ?? 0;
+            acc.sunday += task.quantities.sunday ?? 0;
 
-            acc.monday +=
-                task.quantities
-                    .monday ?? 0;
+            acc.monday += task.quantities.monday ?? 0;
 
-            acc.tuesday +=
-                task.quantities
-                    .tuesday ?? 0;
+            acc.tuesday += task.quantities.tuesday ?? 0;
 
-            acc.wednesday +=
-                task.quantities
-                    .wednesday ?? 0;
+            acc.wednesday += task.quantities.wednesday ?? 0;
 
-            acc.thursday +=
-                task.quantities
-                    .thursday ?? 0;
+            acc.thursday += task.quantities.thursday ?? 0;
 
-            acc.friday +=
-                task.quantities
-                    .friday ?? 0;
+            acc.friday += task.quantities.friday ?? 0;
 
-            acc.saturday +=
-                task.quantities
-                    .saturday ?? 0;
+            acc.saturday += task.quantities.saturday ?? 0;
 
-            acc.totalJobs +=
-                task.totalNumber;
+            acc.totalJobs += task.totalNumber;
 
-            acc.subtotal +=
-                task.totalValue;
+            acc.subtotal += task.totalValue;
 
             return acc;
         },

@@ -2,9 +2,7 @@ import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requi
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 
-export function mapFeRequisitionDetailToDraft(
-    detail: FeRequisitionDetail,
-): FeRequisitionDraft {
+export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRequisitionDraft {
     return {
         requisitionId: detail.id,
         rowVersion: detail.rowVersion,
@@ -28,36 +26,33 @@ export function mapFeRequisitionDetailToDraft(
         rejectionNotes: detail.rejectionNotes,
         submissionHistory: detail.submissionHistory,
 
-        feGeneralTasks:
-            detail.feGeneralTasks.map(
-                (task) => ({
-                    id: task.id,
+        feGeneralTasks: detail.feGeneralTasks.map((task) => ({
+            id: task.id,
 
-                    clientId: crypto.randomUUID(),
+            clientId: crypto.randomUUID(),
 
-                    taskTypeId: task.feTaskTypeId,
+            taskTypeId: task.feTaskTypeId,
 
-                    taskTypeLabel: task.taskTypeName,
+            taskTypeLabel: task.taskTypeName,
 
-                    weekEndingDate: new Date(task.weekEndingDate),
+            weekEndingDate: new Date(task.weekEndingDate),
 
-                    quantities: {
-                        sunday: task.week.sunday,
-                        monday: task.week.monday,
-                        tuesday: task.week.tuesday,
-                        wednesday: task.week.wednesday,
-                        thursday: task.week.thursday,
-                        friday: task.week.friday,
-                        saturday: task.week.saturday,
-                    },
+            quantities: {
+                sunday: task.week.sunday,
+                monday: task.week.monday,
+                tuesday: task.week.tuesday,
+                wednesday: task.week.wednesday,
+                thursday: task.week.thursday,
+                friday: task.week.friday,
+                saturday: task.week.saturday,
+            },
 
-                    totalNumber: task.totalNumber,
+            totalNumber: task.totalNumber,
 
-                    ratePerJob: task.ratePerJob,
+            ratePerJob: task.ratePerJob,
 
-                    totalValue: task.totalValue ?? 0,
-                }),
-            ),
+            totalValue: task.totalValue ?? 0,
+        })),
 
         mileageRows: [],
         transferRows: [],

@@ -25,11 +25,7 @@ export function Pagination({
         const delta = 1;
 
         for (let i = 1; i <= totalPages; i++) {
-            if (
-                i === 1 ||
-                i === totalPages ||
-                (i >= page - delta && i <= page + delta)
-            ) {
+            if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
                 pages.push(i);
             } else if (pages[pages.length - 1] !== "ellipsis") {
                 pages.push("ellipsis");

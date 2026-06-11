@@ -52,7 +52,8 @@ export function HomePage() {
                 <WelcomeHeading userName={user?.name} />
 
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                    Manage van driver requisitions, across Home (FE) stores, Standard stores and volunteer claims.
+                    Manage van driver requisitions, across Home (FE) stores, Standard stores and
+                    volunteer claims.
                 </p>
 
                 <div className="mx-auto mt-6 max-w-xl">

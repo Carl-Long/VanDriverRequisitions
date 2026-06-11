@@ -26,11 +26,7 @@ export default function Page() {
         error: limitRulesError,
     } = useRequisitionLimitRules();
 
-    const {
-        taskTypes,
-        loading: taskTypesLoading,
-        error: taskTypesError,
-    } = useFeTaskTypes();
+    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
 
     const {
         status: submitWindowStatus,
@@ -55,19 +51,11 @@ export default function Page() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    if (
-                        err instanceof ApiError &&
-                        err.status === 404
-                    ) {
+                    if (err instanceof ApiError && err.status === 404) {
                         setNotFound(true);
                         return;
                     } else {
-                        setError(
-                            getApiErrorMessage(
-                                err,
-                                "Failed to load requisition.",
-                            ),
-                        );
+                        setError(getApiErrorMessage(err, "Failed to load requisition."));
                     }
                 }
             } finally {
@@ -85,20 +73,11 @@ export default function Page() {
     }, [params.id]);
 
     const pageLoading =
-        loading ||
-        limitRulesLoading ||
-        taskTypesLoading ||
-        submitWindowStatusLoading;
+        loading || limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
 
-    const errors = [
-        error,
-        limitRulesError,
-        taskTypesError,
-        submitWindowStatusError,
-    ].filter(
+    const errors = [error, limitRulesError, taskTypesError, submitWindowStatusError].filter(
         (e): e is string => Boolean(e),
     );
-
 
     if (!canCreateRequisitions(user)) {
         return <NotFound />;
@@ -125,9 +104,7 @@ export default function Page() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>
@@ -137,18 +114,12 @@ export default function Page() {
     return (
         <PageContainer>
             <FeRequisitionShell
-                mode={
-                    requisition.isEditable
-                        ? "edit"
-                        : "readonly"
-                }
+                mode={requisition.isEditable ? "edit" : "readonly"}
                 feRequisition={requisition}
                 limitRules={limitRules}
                 taskTypes={taskTypes}
                 submitWindowStatus={submitWindowStatus}
-                submitWindowStatusLoading={
-                    submitWindowStatusLoading
-                }
+                submitWindowStatusLoading={submitWindowStatusLoading}
             />
         </PageContainer>
     );

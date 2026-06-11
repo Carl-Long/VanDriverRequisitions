@@ -39,12 +39,7 @@ export default function FeReasonsPage() {
             const data = await feReasonsApi.getAll(showInactive);
             setReasons(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load reasons.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load reasons."));
         } finally {
             setLoading(false);
         }
@@ -59,9 +54,7 @@ export default function FeReasonsPage() {
 
         const query = search.toLowerCase();
 
-        return reasons.filter((r) =>
-            r.reason.toLowerCase().includes(query),
-        );
+        return reasons.filter((r) => r.reason.toLowerCase().includes(query));
     }, [reasons, search]);
 
     function openCreate() {
@@ -81,9 +74,7 @@ export default function FeReasonsPage() {
         }
 
         toast.success(
-            editing
-                ? `Reason "${data.reason}" updated`
-                : `Reason "${data.reason}" created`,
+            editing ? `Reason "${data.reason}" updated` : `Reason "${data.reason}" created`,
         );
 
         setModalOpen(false);
@@ -99,33 +90,27 @@ export default function FeReasonsPage() {
                 await feReasonsApi.activate(reason.id);
             }
 
-            toast.success(reason.isActive
-                ? `${reason.reason} deactivated`
-                : `${reason.reason} activated`,
+            toast.success(
+                reason.isActive ? `${reason.reason} deactivated` : `${reason.reason} activated`,
             );
 
             await load();
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to upadte reason.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to upadte reason."));
         }
     }
 
     const emptyState = search.trim()
         ? {
-            icon: Search,
-            title: "No reasons found",
-            description: "Try adjusting your search terms.",
-        }
+              icon: Search,
+              title: "No reasons found",
+              description: "Try adjusting your search terms.",
+          }
         : {
-            icon: MessageSquare,
-            title: "No reasons yet",
-            description: "Create your first reason to get started.",
-        };
+              icon: MessageSquare,
+              title: "No reasons yet",
+              description: "Create your first reason to get started.",
+          };
 
     return (
         <PageContainer>
@@ -148,32 +133,19 @@ export default function FeReasonsPage() {
                 />
 
                 <Surface className="flex w-fit self-end items-center gap-3 px-4 py-2 lg:ml-auto lg:self-auto">
-                    <span className="text-sm text-muted-foreground">
-                        Include inactive
-                    </span>
+                    <span className="text-sm text-muted-foreground">Include inactive</span>
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() =>
-                            setShowInactive((active) => !active)
-                        }
+                        onChange={() => setShowInactive((active) => !active)}
                         ariaLabel="Toggle inactive reasons"
                     />
                 </Surface>
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={4}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={4} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState

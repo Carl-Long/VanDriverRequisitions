@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { getApiErrorMessage, } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 
 import {
     requisitionLimitRulesApi,
@@ -21,12 +21,7 @@ export function useRequisitionLimitRules() {
                 const rules = await requisitionLimitRulesApi.getAll();
                 setLimitRules(rules);
             } catch (err) {
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load requisition limit rules.",
-                    ),
-                );
+                setError(getApiErrorMessage(err, "Failed to load requisition limit rules."));
             } finally {
                 setLoading(false);
             }

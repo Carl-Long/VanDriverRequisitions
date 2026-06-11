@@ -35,7 +35,6 @@ export const approvalNavigation = [
     },
 ];
 
-
 export const adminNavigation = [
     {
         label: "Administration",

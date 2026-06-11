@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Field } from "@/components/ui/field/field";
-import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
+import { Combobox } from "@/components/ui/field/combobox";
 import { shopsApi } from "@/lib/api/shops";
-import { toShopOptions } from "@/lib/options/shop-options";
+import { toShopOptions, type ShopOption } from "@/lib/options/shop-options";
 
 type Props = {
     required?: boolean;
@@ -15,13 +15,10 @@ type Props = {
     hideLabel?: boolean;
     includeAllOption?: boolean;
     prefixLabel?: boolean;
-    onChange: (
-        value: string | null,
-        label: string | null,
-    ) => void;
+    onChange: (value: string | null, label: string | null) => void;
 };
 
-const STATIC_OPTIONS = [
+const STATIC_OPTIONS: ShopOption[] = [
     {
         value: "__ALL__",
         label: "All shops",
@@ -39,7 +36,7 @@ export function ShopFilterField({
     prefixLabel = false,
     onChange,
 }: Readonly<Props>) {
-    const [options, setOptions] = useState<ComboboxOption[]>([]);
+    const [options, setOptions] = useState<ShopOption[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -79,36 +76,21 @@ export function ShopFilterField({
                         ? `Shop: ${label}`
                         : label
                     : prefixLabel
-                        ? "Shop: All shops"
-                        : null
+                      ? "Shop: All shops"
+                      : null
             }
             options={options}
-            emptyStateText={
-                loading
-                    ? "Loading shops..."
-                    : "No shops available"
-            }
+            emptyStateText={loading ? "Loading shops..." : "No shops available"}
             noMatchesText="No matching shops found"
-            pinnedOptions={
-                includeAllOption
-                    ? STATIC_OPTIONS
-                    : []
-            }
-            placeholder={
-                loading
-                    ? "Loading shops..."
-                    : "Shop: All shops"
-            }
+            pinnedOptions={includeAllOption ? STATIC_OPTIONS : []}
+            placeholder={loading ? "Loading shops..." : "Shop: All shops"}
             onChange={(value, option) => {
                 if (value === "__ALL__") {
                     onChange(null, null);
                     return;
                 }
 
-                onChange(
-                    value,
-                    option?.label ?? null,
-                );
+                onChange(value, option?.label ?? null);
             }}
         />
     );
@@ -118,11 +100,7 @@ export function ShopFilterField({
     }
 
     return (
-        <Field
-            required={required}
-            label="Shop"
-            error={error}
-        >
+        <Field required={required} label="Shop" error={error}>
             {combobox}
         </Field>
     );

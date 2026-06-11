@@ -4,7 +4,6 @@
 
 import { LucideIcon } from "lucide-react";
 
-
 export type UserData = {
     name: string;
     email: string;

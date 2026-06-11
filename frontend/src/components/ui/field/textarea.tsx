@@ -7,19 +7,10 @@ type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
     state?: FieldState;
 };
 
-export function Textarea({
-    state = "default",
-    className,
-    ...props
-}: TextareaProps) {
+export function Textarea({ state = "default", className, ...props }: TextareaProps) {
     return (
         <textarea
-            className={cn(
-                fieldBase,
-                fieldStateMap[state],
-                "min-h-28 resize-y py-2",
-                className,
-            )}
+            className={cn(fieldBase, fieldStateMap[state], "min-h-28 resize-y py-2", className)}
             {...props}
         />
     );

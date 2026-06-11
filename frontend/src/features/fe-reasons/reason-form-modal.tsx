@@ -103,23 +103,12 @@ export function ReasonFormModal({
             onClose={handleClose}
             title={isEditing ? "Edit Reason" : "Create Reason"}
         >
-            <form
-                onSubmit={handleSubmit(onValid)}
-                className="space-y-5"
-            >
+            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
                 {/* Server error */}
-                {serverError && (
-                    <Alert tone="danger">
-                        {serverError}
-                    </Alert>
-                )}
+                {serverError && <Alert tone="danger">{serverError}</Alert>}
 
                 {/* Reason */}
-                <Field
-                    label="Reason"
-                    error={errors.reason?.message}
-                    required
-                >
+                <Field label="Reason" error={errors.reason?.message} required>
                     <Input
                         {...register("reason")}
                         maxLength={100}
@@ -140,11 +129,7 @@ export function ReasonFormModal({
                         Cancel
                     </Button>
 
-                    <Button
-                        type="submit"
-                        loading={isSubmitting}
-                        tone="primary"
-                    >
+                    <Button type="submit" loading={isSubmitting} tone="primary">
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

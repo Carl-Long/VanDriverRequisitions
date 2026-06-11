@@ -12,9 +12,7 @@ export function SummaryField({ label, value }: Readonly<SummaryFieldProps>) {
                 {label}
             </div>
 
-            <div className="mt-1 text-sm font-medium">
-                {value}
-            </div>
+            <div className="mt-1 text-sm font-medium">{value}</div>
         </div>
     );
 }

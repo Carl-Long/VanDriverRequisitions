@@ -1,11 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
-import {
-    AlertCircle,
-    AlertTriangle,
-    CheckCircle2,
-    Info,
-} from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { Tone } from "./theme";
 
 type AlertProps = {
@@ -32,15 +27,8 @@ const iconMap = {
     danger: AlertCircle,
 } as const;
 
-export function Alert({
-    tone = "danger",
-    children,
-    className,
-}: Readonly<AlertProps>) {
-    const Icon =
-        tone in iconMap
-            ? iconMap[tone as keyof typeof iconMap]
-            : null;
+export function Alert({ tone = "danger", children, className }: Readonly<AlertProps>) {
+    const Icon = tone in iconMap ? iconMap[tone as keyof typeof iconMap] : null;
 
     return (
         <div
@@ -50,9 +38,7 @@ export function Alert({
                 className,
             )}
         >
-            {Icon && (
-                <Icon className="mt-0.5 h-4 w-4 shrink-0" />
-            )}
+            {Icon && <Icon className="mt-0.5 h-4 w-4 shrink-0" />}
 
             <div>{children}</div>
         </div>

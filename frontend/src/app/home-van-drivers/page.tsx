@@ -21,9 +21,12 @@ import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/list/com
 import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
 import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
-import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
+import {
+    filtersFromSearchParams,
+    pageFromSearchParams,
+    buildSearchParams,
+} from "@/features/fe-requisitions/list/lib/url-state";
 import { getApiErrorMessage } from "@/lib/api/client";
-
 
 export default function HomeVanDriversPage() {
     const { user } = useAuth();
@@ -54,7 +57,7 @@ export default function HomeVanDriversPage() {
                             ...filters,
                             requisitionNumber: debouncedReqNumber,
                         },
-                        user!.id
+                        user!.id,
                     ),
                 );
 
@@ -63,12 +66,7 @@ export default function HomeVanDriversPage() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    setError(
-                        getApiErrorMessage(
-                            err,
-                            "Failed to load requisitions.",
-                        ),
-                    );
+                    setError(getApiErrorMessage(err, "Failed to load requisitions."));
                 }
             } finally {
                 if (!cancelled) {
@@ -87,21 +85,15 @@ export default function HomeVanDriversPage() {
         filters.status,
         filters.shopId,
         filters.createdBy.type,
-        filters.createdBy.type ===
-            "user"
-            ? filters.createdBy.userId
-            : "",
+        filters.createdBy.type === "user" ? filters.createdBy.userId : "",
         debouncedReqNumber,
     ]);
 
     const items = data?.items ?? [];
 
-    function handleFiltersChange(
-        next: FeRequisitionFilters,
-    ) {
+    function handleFiltersChange(next: FeRequisitionFilters) {
         const params = buildSearchParams(next, 1);
-        router.replace(`${pathname}?${params.toString()}`
-        );
+        router.replace(`${pathname}?${params.toString()}`);
     }
 
     function resetFilters() {
@@ -118,21 +110,10 @@ export default function HomeVanDriversPage() {
 
     return (
         <PageContainer>
-            <PageHeader
-                title="Home Van Drivers"
-                description="View and manage FE requisitions."
-            >
-                <Button
-                    onClick={() =>
-                        router.push(
-                            "/home-van-drivers/new",
-                        )
-                    }
-                >
+            <PageHeader title="Home Van Drivers" description="View and manage FE requisitions.">
+                <Button onClick={() => router.push("/home-van-drivers/new")}>
                     <Plus size={16} />
-                    <span>
-                        New Requisition
-                    </span>
+                    <span>New Requisition</span>
                 </Button>
             </PageHeader>
 
@@ -140,19 +121,13 @@ export default function HomeVanDriversPage() {
 
             <FeRequisitionFiltersToolbar
                 filters={filters}
-                onFiltersChange={
-                    handleFiltersChange
-                }
+                onFiltersChange={handleFiltersChange}
                 onReset={resetFilters}
             />
 
             {/* Error */}
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
             {/* Loading */}
 
@@ -160,28 +135,22 @@ export default function HomeVanDriversPage() {
 
             {/* Empty */}
 
-            {!loading &&
-                items.length === 0 && (
-                    <EmptyState
-                        icon={Inbox}
-                        title="No requisitions found"
-                        description="Try adjusting your filters."
-                    />
-                )}
+            {!loading && items.length === 0 && (
+                <EmptyState
+                    icon={Inbox}
+                    title="No requisitions found"
+                    description="Try adjusting your filters."
+                />
+            )}
 
             {/* Table */}
 
-            {!loading &&
-                items.length > 0 && (
-                    <FeRequisitionTable
-                        items={items}
-                        onRowClick={(req) =>
-                            router.push(
-                                `/home-van-drivers/${req.id}`,
-                            )
-                        }
-                    />
-                )}
+            {!loading && items.length > 0 && (
+                <FeRequisitionTable
+                    items={items}
+                    onRowClick={(req) => router.push(`/home-van-drivers/${req.id}`)}
+                />
+            )}
 
             {/* Pagination */}
             {data && data.totalPages > 1 && (

@@ -9,9 +9,16 @@ export function configureAuth(getToken: () => string | null, onUnauthorized: () 
 }
 
 export class ApiError extends Error {
-    status: number; detail?: string; errors?: Record<string, string[]>;
+    status: number;
+    detail?: string;
+    errors?: Record<string, string[]>;
 
-    constructor({ title, status, detail, errors }: {
+    constructor({
+        title,
+        status,
+        detail,
+        errors,
+    }: {
         title: string;
         status: number;
         detail?: string;
@@ -87,19 +94,14 @@ async function buildApiError(response: Response): Promise<ApiError> {
 
     return new ApiError({
         title:
-            problem?.title ||
-            problem?.message ||
-            `Request failed with status ${response.status}`,
+            problem?.title || problem?.message || `Request failed with status ${response.status}`,
         status: response.status,
         detail: problem?.detail,
         errors: problem?.errors,
     });
 }
 
-export function getApiErrorMessage(
-    error: unknown,
-    fallback: string,
-): string {
+export function getApiErrorMessage(error: unknown, fallback: string): string {
     if (error instanceof ApiError) {
         const validationMessages = error.errors
             ? Object.values(error.errors).flat().filter(Boolean)
@@ -115,16 +117,8 @@ export function getApiErrorMessage(
     return fallback;
 }
 
-export async function apiFetch<T>(
-    path: string,
-    options: ApiFetchOptions = {},
-): Promise<T> {
-    const {
-        json = true,
-        headers: incomingHeaders,
-        body,
-        ...rest
-    } = options;
+export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+    const { json = true, headers: incomingHeaders, body, ...rest } = options;
 
     const headers = new Headers(incomingHeaders);
 

@@ -5,7 +5,7 @@ import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 export function buildFeRequisitionQuery(
     page: number,
     filters: FeRequisitionFilters,
-    currentUserId: string
+    currentUserId: string,
 ): FeRequisitionQuery {
     return {
         page,
@@ -27,7 +27,7 @@ export function buildFeRequisitionQuery(
             filters.createdBy.type === "me"
                 ? currentUserId
                 : filters.createdBy.type === "user"
-                    ? filters.createdBy.userId
-                    : undefined,
+                  ? filters.createdBy.userId
+                  : undefined,
     };
 }

@@ -2,10 +2,7 @@
 
 import { Field } from "@/components/ui/field/field";
 
-import {
-    Combobox,
-    type ComboboxOption,
-} from "@/components/ui/field/combobox";
+import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 
 import { requisitionUsersApi } from "@/features/fe-requisitions/list/lib/requisition-users-api";
 import { CreatedByFilter } from "../../types/fe-requisiton-filters.types";
@@ -25,29 +22,19 @@ type Props = {
     value: CreatedByFilter;
     hideLabel?: boolean;
 
-    onChange: (
-        value: CreatedByFilter,
-    ) => void;
+    onChange: (value: CreatedByFilter) => void;
 };
 
-export function CreatedByUserFilterField({
-    value,
-    onChange,
-    hideLabel = false,
-}: Readonly<Props>) {
+export function CreatedByUserFilterField({ value, onChange, hideLabel = false }: Readonly<Props>) {
     const selectedValue =
-        value.type === "any"
-            ? "__ANY__"
-            : value.type === "me"
-                ? "__ME__"
-                : value.userId;
+        value.type === "any" ? "__ANY__" : value.type === "me" ? "__ME__" : value.userId;
 
     const selectedLabel =
         value.type === "me"
             ? "Created By: Me"
             : value.type === "any"
-                ? "Created By: Anyone"
-                : `Created By: ${value.label}`;
+              ? "Created By: Anyone"
+              : `Created By: ${value.label}`;
 
     const combobox = (
         <Combobox
@@ -57,11 +44,10 @@ export function CreatedByUserFilterField({
             noMatchesText="No matching users found"
             pinnedOptions={STATIC_OPTIONS}
             onSearch={async (search) => {
-                const res =
-                    await requisitionUsersApi.search({
-                        search,
-                        pageSize: 20,
-                    });
+                const res = await requisitionUsersApi.search({
+                    search,
+                    pageSize: 20,
+                });
 
                 return res.items.map((x) => ({
                     value: x.id,
@@ -100,9 +86,5 @@ export function CreatedByUserFilterField({
         return combobox;
     }
 
-    return (
-        <Field label="Created By">
-            {combobox}
-        </Field>
-    )
+    return <Field label="Created By">{combobox}</Field>;
 }

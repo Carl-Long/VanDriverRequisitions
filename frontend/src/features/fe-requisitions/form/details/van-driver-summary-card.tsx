@@ -4,21 +4,16 @@ type Props = {
     vanDriver: VanDriverLookup | null;
 };
 
-export function VanDriverSummaryCard({
-    vanDriver,
-}: Readonly<Props>) {
+export function VanDriverSummaryCard({ vanDriver }: Readonly<Props>) {
     if (!vanDriver) {
         return (
             <div className="rounded-2xl border border-border bg-surface-elevated p-6 card-shadow">
                 <div>
-                    <h3 className="font-semibold">
-                        Driver Information
-                    </h3>
+                    <h3 className="font-semibold">Driver Information</h3>
 
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Select a van driver to view
-                        trader details, VAT status
-                        and address information.
+                        Select a van driver to view trader details, VAT status and address
+                        information.
                     </p>
                 </div>
             </div>
@@ -29,13 +24,9 @@ export function VanDriverSummaryCard({
         <div className="rounded-2xl border border-border bg-surface-elevated p-6 card-shadow">
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="font-semibold">
-                        {vanDriver.tradersName}
-                    </h3>
+                    <h3 className="font-semibold">{vanDriver.tradersName}</h3>
 
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {vanDriver.code}
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{vanDriver.code}</p>
                 </div>
 
                 {!vanDriver.isActive && (
@@ -46,22 +37,12 @@ export function VanDriverSummaryCard({
             </div>
 
             <div className="mt-6 space-y-4">
-                <InfoRow
-                    label="Driver Code"
-                    value={vanDriver.code}
-                />
+                <InfoRow label="Driver Code" value={vanDriver.code} />
 
-                <InfoRow
-                    label="Phone"
-                    value={
-                        vanDriver.phone ?? "-"
-                    }
-                />
+                <InfoRow label="Phone" value={vanDriver.phone ?? "-"} />
 
                 <div className="grid grid-cols-[110px_1fr] gap-3">
-                    <span className="text-sm text-muted-foreground">
-                        VAT
-                    </span>
+                    <span className="text-sm text-muted-foreground">VAT</span>
 
                     <div>
                         {vanDriver.hasVat ? (
@@ -78,36 +59,18 @@ export function VanDriverSummaryCard({
             </div>
 
             <div className="mt-6 border-t border-border pt-6">
-                <div className="mb-3 text-sm font-medium">
-                    Address
-                </div>
+                <div className="mb-3 text-sm font-medium">Address</div>
 
                 <div className="space-y-1 text-sm text-muted-foreground">
-                    <div>
-                        {vanDriver.address1}
-                    </div>
+                    <div>{vanDriver.address1}</div>
 
-                    {vanDriver.address2 && (
-                        <div>
-                            {vanDriver.address2}
-                        </div>
-                    )}
+                    {vanDriver.address2 && <div>{vanDriver.address2}</div>}
 
-                    {vanDriver.town && (
-                        <div>
-                            {vanDriver.town}
-                        </div>
-                    )}
+                    {vanDriver.town && <div>{vanDriver.town}</div>}
 
-                    {vanDriver.county && (
-                        <div>
-                            {vanDriver.county}
-                        </div>
-                    )}
+                    {vanDriver.county && <div>{vanDriver.county}</div>}
 
-                    <div>
-                        {vanDriver.postcode}
-                    </div>
+                    <div>{vanDriver.postcode}</div>
                 </div>
             </div>
         </div>
@@ -119,19 +82,12 @@ type InfoRowProps = {
     value: string;
 };
 
-function InfoRow({
-    label,
-    value,
-}: Readonly<InfoRowProps>) {
+function InfoRow({ label, value }: Readonly<InfoRowProps>) {
     return (
         <div className="grid grid-cols-[110px_1fr] gap-3">
-            <span className="text-sm text-muted-foreground">
-                {label}
-            </span>
+            <span className="text-sm text-muted-foreground">{label}</span>
 
-            <span className="text-sm font-medium">
-                {value}
-            </span>
+            <span className="text-sm font-medium">{value}</span>
         </div>
     );
 }

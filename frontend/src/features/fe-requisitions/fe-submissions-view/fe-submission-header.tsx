@@ -7,17 +7,14 @@ import { Button } from "@/components/ui/button/button";
 import { Printer } from "lucide-react";
 import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
-type Props = { submission: FeRequisitionSubmissionDetail; };
+type Props = { submission: FeRequisitionSubmissionDetail };
 
 export function FeSubmissionHeader({ submission }: Readonly<Props>) {
-    
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card">
             <div className="flex items-start justify-between print-header-row">
                 <div>
-                    <h1 className="text-xl font-bold">
-                        Submission #{submission.submissionNumber}
-                    </h1>
+                    <h1 className="text-xl font-bold">Submission #{submission.submissionNumber}</h1>
 
                     <p className="mt-2 text-sm text-muted-foreground">
                         Historical submission snapshot
@@ -25,9 +22,7 @@ export function FeSubmissionHeader({ submission }: Readonly<Props>) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <SubmissionStatusPill
-                        status={submission.status}
-                    />
+                    <SubmissionStatusPill status={submission.status} />
 
                     <Button
                         type="button"
@@ -63,11 +58,7 @@ export function FeSubmissionHeader({ submission }: Readonly<Props>) {
                 <div className="mt-6 border-t border-border pt-4 print-notes-block">
                     <SummaryField
                         label="Purchase Order Number"
-                        value={
-                            <div className="whitespace-pre-wrap">
-                                {submission.poNumber}
-                            </div>
-                        }
+                        value={<div className="whitespace-pre-wrap">{submission.poNumber}</div>}
                     />
                 </div>
             )}

@@ -16,7 +16,7 @@ export type FeRequisitionSummary = {
     createdById: string;
     createdByNameSnapshot: string;
     updatedAtUtc: string | null;
-    updatedByNameSnapshot: string | null
+    updatedByNameSnapshot: string | null;
 };
 
 export type FeRequisitionQuery = {
@@ -121,4 +121,3 @@ export type FeAdditionalCost = {
     ratePerMile: number | null;
     totalValue: number | null;
 };
-

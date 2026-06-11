@@ -6,17 +6,21 @@ import { Surface } from "@/components/ui/surface";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
+import {
+    TableHeader,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableBody,
+    TableRow,
+    TableCell,
+} from "@/components/ui/table/table";
 
 type Props = {
     items: RequisitionLimitRuleSummary[];
     onEdit: (item: RequisitionLimitRuleSummary) => void;
 };
 
-export function RequisitionLimitRuleTable({
-    items,
-    onEdit,
-}: Readonly<Props>) {
+export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -28,10 +32,7 @@ export function RequisitionLimitRuleTable({
                         <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
                         <TableHeaderCell align="right">Max Rate</TableHeaderCell>
                         <TableHeaderCell align="center">Last Activity</TableHeaderCell>
-                        <TableHeaderCell
-                            align="right"
-                            nowrap
-                        >
+                        <TableHeaderCell align="right" nowrap>
                             Actions
                         </TableHeaderCell>
                     </TableHeaderRow>
@@ -39,19 +40,13 @@ export function RequisitionLimitRuleTable({
 
                 <TableBody>
                     {items.map((item) => {
-                        const lastDate =
-                            item.updatedAtUtc ?? item.createdAtUtc;
+                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
 
                         const lastUser =
-                            item.updatedByNameSnapshot ??
-                            item.createdByNameSnapshot ??
-                            "System";
+                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
 
                         return (
-                            <TableRow
-                                key={item.id}
-                                className="hover:bg-surface-hover"
-                            >
+                            <TableRow key={item.id} className="hover:bg-surface-hover">
                                 {/* Category */}
                                 <TableCell>
                                     <div className="font-medium text-foreground">
@@ -70,18 +65,12 @@ export function RequisitionLimitRuleTable({
                                 </TableCell>
 
                                 {/* Max Quantity */}
-                                <TableCell
-                                    align="right"
-                                    className="tabular-nums text-foreground"
-                                >
+                                <TableCell align="right" className="tabular-nums text-foreground">
                                     {item.maxQuantity}
                                 </TableCell>
 
                                 {/* Max Rate */}
-                                <TableCell
-                                    align="right"
-                                    className="tabular-nums text-foreground"
-                                >
+                                <TableCell align="right" className="tabular-nums text-foreground">
                                     {formatCurrencyGB(item.maxRate)}
                                 </TableCell>
 
@@ -99,10 +88,7 @@ export function RequisitionLimitRuleTable({
                                 </TableCell>
 
                                 {/* Actions */}
-                                <TableCell
-                                    align="right"
-                                    nowrap
-                                >
+                                <TableCell align="right" nowrap>
                                     <div className="flex justify-end">
                                         <IconButton
                                             variant="ghost"

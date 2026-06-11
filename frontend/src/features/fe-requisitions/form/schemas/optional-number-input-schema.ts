@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-export const optionalNumberInputSchema =
-    z.preprocess(
+export const optionalNumberInputSchema = z
+    .preprocess(
         (value) => {
-            if (
-                value === "" ||
-                value == null
-            ) {
+            if (value === "" || value == null) {
                 return undefined;
             }
 
@@ -15,19 +12,15 @@ export const optionalNumberInputSchema =
 
         z.number({
             error: () => ({
-                message:
-                    "Must be a number",
+                message: "Must be a number",
             }),
         }),
     )
-        .refine(
-            (value) =>
-                !Number.isNaN(value),
+    .refine(
+        (value) => !Number.isNaN(value),
 
-            {
-                message:
-                    "Must be a number",
-            },
-        )
-        .optional();
-
+        {
+            message: "Must be a number",
+        },
+    )
+    .optional();

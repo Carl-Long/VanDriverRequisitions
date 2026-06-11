@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { getApiErrorMessage, } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 
-import {
-    feTaskTypesApi,
-    type FeTaskType,
-} from "@/features/fe-task-types/fe-task-types-api";
+import { feTaskTypesApi, type FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 
 export function useFeTaskTypes() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -19,15 +16,9 @@ export function useFeTaskTypes() {
             try {
                 setError(null);
                 const result = await feTaskTypesApi.getAll();
-                setTaskTypes(result.filter(x => x.isActive),
-                );
+                setTaskTypes(result.filter((x) => x.isActive));
             } catch (err) {
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load task types.",
-                    ),
-                );
+                setError(getApiErrorMessage(err, "Failed to load task types."));
             } finally {
                 setLoading(false);
             }

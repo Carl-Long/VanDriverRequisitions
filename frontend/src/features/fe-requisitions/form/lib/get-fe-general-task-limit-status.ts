@@ -13,9 +13,7 @@ export function getGeneralTaskLimitStatus(
     if (!limitRule) {
         return {
             state: "missing-limit",
-            messages: [
-                "No limit rule is configured for this item.",
-            ],
+            messages: ["No limit rule is configured for this item."],
         };
     }
 
@@ -33,19 +31,12 @@ export function getGeneralTaskLimitStatus(
 
     for (const [day, value] of dayValues) {
         if ((value ?? 0) > limitRule.maxQuantity) {
-            messages.push(
-                `${day} exceeds max quantity of ${limitRule.maxQuantity}.`,
-            );
+            messages.push(`${day} exceeds max quantity of ${limitRule.maxQuantity}.`);
         }
     }
 
-    if (
-        task.ratePerJob !== null &&
-        task.ratePerJob > limitRule.maxRate
-    ) {
-        messages.push(
-            `Rate exceeds max rate of £${limitRule.maxRate}.`,
-        );
+    if (task.ratePerJob !== null && task.ratePerJob > limitRule.maxRate) {
+        messages.push(`Rate exceeds max rate of £${limitRule.maxRate}.`);
     }
 
     if (messages.length > 0) {

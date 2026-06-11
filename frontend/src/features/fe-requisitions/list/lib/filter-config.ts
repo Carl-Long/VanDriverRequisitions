@@ -1,6 +1,9 @@
-import { REQUISITION_STATUSES, requisitionStatusConfig } from "../../constants/fe-requisition-status.constants";
+import {
+    REQUISITION_STATUSES,
+    requisitionStatusConfig,
+} from "../../constants/fe-requisition-status.constants";
 
-export type FilterFieldName = | "shop" | "status";
+export type FilterFieldName = "shop" | "status";
 
 export const filterConfig: Record<FilterFieldName, any> = {
     shop: {

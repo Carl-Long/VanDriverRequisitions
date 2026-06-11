@@ -5,8 +5,14 @@ import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
 import { formatDateGB } from "@/lib/format/date";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
-
+import {
+    TableHeader,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableBody,
+    TableRow,
+    TableCell,
+} from "@/components/ui/table/table";
 
 type Props = {
     items: FeReason[];
@@ -14,11 +20,7 @@ type Props = {
     onToggleActive: (item: FeReason) => void;
 };
 
-export function FeReasonsTable({
-    items,
-    onEdit,
-    onToggleActive,
-}: Readonly<Props>) {
+export function FeReasonsTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -27,10 +29,7 @@ export function FeReasonsTable({
                         <TableHeaderCell>Reason</TableHeaderCell>
                         <TableHeaderCell align="center">Active</TableHeaderCell>
                         <TableHeaderCell>Last Activity</TableHeaderCell>
-                        <TableHeaderCell
-                            align="right"
-                            nowrap
-                        >
+                        <TableHeaderCell align="right" nowrap>
                             Actions
                         </TableHeaderCell>
                     </TableHeaderRow>
@@ -38,13 +37,10 @@ export function FeReasonsTable({
 
                 <TableBody>
                     {items.map((item) => {
-                        const lastDate =
-                            item.updatedAtUtc ?? item.createdAtUtc;
+                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
 
                         const lastUser =
-                            item.updatedByNameSnapshot ??
-                            item.createdByNameSnapshot ??
-                            "System";
+                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
 
                         return (
                             <TableRow key={item.id}>
@@ -78,10 +74,7 @@ export function FeReasonsTable({
                                 </TableCell>
 
                                 {/* Actions */}
-                                <TableCell
-                                    align="right"
-                                    nowrap
-                                >
+                                <TableCell align="right" nowrap>
                                     <div className="flex justify-end">
                                         <IconButton
                                             variant="ghost"

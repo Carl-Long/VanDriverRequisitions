@@ -1,21 +1,23 @@
 import { Surface } from "@/components/ui/surface";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableRow, TableCell } from "@/components/ui/table/table";
+import {
+    TableHeader,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableRow,
+    TableCell,
+} from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB, formatDateTime } from "@/lib/format/date";
 import { RequisitionStatus } from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionSummary } from "../../types/fe-requisition.types";
 import { StatusPill } from "./status-pill";
 
-
 type Props = {
     items: FeRequisitionSummary[];
     onRowClick: (item: FeRequisitionSummary) => void;
 };
 
-export function FeRequisitionTable({
-    items,
-    onRowClick,
-}: Readonly<Props>) {
+export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -23,8 +25,12 @@ export function FeRequisitionTable({
                     <TableHeaderRow>
                         <TableHeaderCell>Requisition</TableHeaderCell>
                         <TableHeaderCell>Company</TableHeaderCell>
-                        <TableHeaderCell align="center"nowrap>Status</TableHeaderCell>
-                        <TableHeaderCell align="right" nowrap>Amount</TableHeaderCell>
+                        <TableHeaderCell align="center" nowrap>
+                            Status
+                        </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Amount
+                        </TableHeaderCell>
                         <TableHeaderCell>Shop</TableHeaderCell>
                         <TableHeaderCell>Last Activity</TableHeaderCell>
                     </TableHeaderRow>
@@ -32,13 +38,10 @@ export function FeRequisitionTable({
 
                 <tbody className="divide-y divide-border-subtle">
                     {items.map((req) => {
-                        const lastDate =
-                            req.updatedAtUtc ?? req.createdAtUtc;
+                        const lastDate = req.updatedAtUtc ?? req.createdAtUtc;
 
                         const lastUser =
-                            req.updatedByNameSnapshot ??
-                            req.createdByNameSnapshot ??
-                            "System";
+                            req.updatedByNameSnapshot ?? req.createdByNameSnapshot ?? "System";
 
                         return (
                             <TableRow
@@ -78,14 +81,9 @@ export function FeRequisitionTable({
                                 </TableCell>
 
                                 {/* Status */}
-                                <TableCell
-                                    align="center"
-                                    nowrap
-                                >
+                                <TableCell align="center" nowrap>
                                     <div className="flex justify-center">
-                                        <StatusPill
-                                            status={req.status as RequisitionStatus}
-                                        />
+                                        <StatusPill status={req.status as RequisitionStatus} />
                                     </div>
                                 </TableCell>
 

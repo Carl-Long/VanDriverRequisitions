@@ -26,7 +26,7 @@ export function UserMenu() {
                     "flex h-9 w-9 items-center justify-center",
                     "rounded-full bg-primary text-primary-foreground",
                     "font-semibold text-sm",
-                    "hover:opacity-90 transition cursor-pointer"
+                    "hover:opacity-90 transition cursor-pointer",
                 )}
                 title="User profile"
             >
@@ -48,27 +48,22 @@ export function UserMenu() {
 
             {/* DROPDOWN MENU */}
             {open && (
-                <div className={cn(
-                    "absolute top-full mt-2 right-0 w-56",
-                    "rounded-lg border border-border bg-surface",
-                    "shadow-lg z-50"
-                )}>
+                <div
+                    className={cn(
+                        "absolute top-full mt-2 right-0 w-56",
+                        "rounded-lg border border-border bg-surface",
+                        "shadow-lg z-50",
+                    )}
+                >
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-border/50">
                         <div className="flex items-center gap-2">
-                            <User
-                                size={14}
-                                className="text-muted-foreground"
-                            />
+                            <User size={14} className="text-muted-foreground" />
 
-                            <p className="text-sm font-medium">
-                                {user.name}
-                            </p>
+                            <p className="text-sm font-medium">{user.name}</p>
                         </div>
 
-                        <p className="mt-1 truncate text-xs text-muted-foreground">
-                            {user.email}
-                        </p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{user.email}</p>
 
                         <div className="mt-2 flex flex-wrap gap-1.5">
                             {user.roles.map((role) => (
@@ -77,7 +72,7 @@ export function UserMenu() {
                                     className={cn(
                                         "rounded-full border border-border",
                                         "bg-muted px-2 py-0.5",
-                                        "text-xs text-muted-foreground"
+                                        "text-xs text-muted-foreground",
                                     )}
                                 >
                                     {role}
@@ -89,12 +84,10 @@ export function UserMenu() {
                     {submenu === null && (
                         <div className="py-1">
                             <button
-                                onClick={() =>
-                                    setSubmenu("theme")
-                                }
+                                onClick={() => setSubmenu("theme")}
                                 className={cn(
                                     "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left"
+                                    "hover:bg-muted transition text-left",
                                 )}
                             >
                                 <Palette size={16} />
@@ -105,7 +98,7 @@ export function UserMenu() {
                                 onClick={() => setSubmenu("text-size")}
                                 className={cn(
                                     "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left"
+                                    "hover:bg-muted transition text-left",
                                 )}
                             >
                                 <Type size={16} />
@@ -119,26 +112,22 @@ export function UserMenu() {
                                 }}
                                 className={cn(
                                     "w-full flex items-center gap-3 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left text-danger"
+                                    "hover:bg-muted transition text-left text-danger",
                                 )}
                             >
                                 <LogOut size={16} />
                                 Sign out
                             </button>
-
                         </div>
                     )}
 
                     {submenu === "theme" && (
                         <div className="py-1">
-
                             <button
-                                onClick={() =>
-                                    setSubmenu(null)
-                                }
+                                onClick={() => setSubmenu(null)}
                                 className={cn(
                                     "w-full flex items-center gap-2 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left"
+                                    "hover:bg-muted transition text-left",
                                 )}
                             >
                                 <ChevronLeft size={16} />
@@ -157,23 +146,19 @@ export function UserMenu() {
                                 >
                                     <span>{t.label}</span>
 
-                                    {theme === t.value && (
-                                        <Check size={16} />
-                                    )}
+                                    {theme === t.value && <Check size={16} />}
                                 </button>
                             ))}
-
                         </div>
                     )}
 
                     {submenu === "text-size" && (
                         <div className="py-1">
-
                             <button
                                 onClick={() => setSubmenu(null)}
                                 className={cn(
                                     "w-full flex items-center gap-2 px-4 py-2 text-sm",
-                                    "hover:bg-muted transition text-left"
+                                    "hover:bg-muted transition text-left",
                                 )}
                             >
                                 <ChevronLeft size={16} />
@@ -199,19 +184,16 @@ export function UserMenu() {
                                                 size.value === "default" && "text-sm",
                                                 size.value === "large" && "text-base",
                                                 size.value === "extra-large" && "text-lg",
-                                                size.value === "largest" && "text-xl"
+                                                size.value === "largest" && "text-xl",
                                             )}
                                         >
                                             Aa
                                         </span>
 
-                                        {textSize === size.value && (
-                                            <Check size={16} />
-                                        )}
+                                        {textSize === size.value && <Check size={16} />}
                                     </div>
                                 </button>
                             ))}
-
                         </div>
                     )}
                 </div>

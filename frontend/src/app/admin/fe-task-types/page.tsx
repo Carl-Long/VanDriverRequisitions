@@ -39,12 +39,7 @@ export default function FeTaskTypesPage() {
             const data = await feTaskTypesApi.getAll(showInactive);
             setTaskTypes(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load task types limit rules.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load task types limit rules."));
         } finally {
             setLoading(false);
         }
@@ -74,7 +69,7 @@ export default function FeTaskTypesPage() {
         setModalOpen(true);
     }
 
-    async function handleSubmit(data: { name: string; code: string; }) {
+    async function handleSubmit(data: { name: string; code: string }) {
         if (editing) {
             await feTaskTypesApi.update(editing.id, data);
         } else {
@@ -82,9 +77,7 @@ export default function FeTaskTypesPage() {
         }
 
         toast.success(
-            editing
-                ? `Task type "${data.name}" updated`
-                : `Task type "${data.name}" created`
+            editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`,
         );
 
         setModalOpen(false);
@@ -99,37 +92,30 @@ export default function FeTaskTypesPage() {
             } else {
                 await feTaskTypesApi.activate(taskType.id);
             }
-            toast.success(taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`);
+            toast.success(
+                taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`,
+            );
             await load();
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed update task type",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed update task type"));
         }
     }
 
-    const emptyState =
-        search.trim()
-            ? {
-                icon: Search,
-                title: "No task types found",
-                description: "Try adjusting your search terms.",
-            }
-            : {
-                icon: Plus,
-                title: "No task types yet",
-                description: "Create your first task type to get started.",
-            };
+    const emptyState = search.trim()
+        ? {
+              icon: Search,
+              title: "No task types found",
+              description: "Try adjusting your search terms.",
+          }
+        : {
+              icon: Plus,
+              title: "No task types yet",
+              description: "Create your first task type to get started.",
+          };
 
     return (
         <PageContainer>
-            <PageHeader
-                title="FE Task Types"
-                description="Manage FE task type codes."
-            >
+            <PageHeader title="FE Task Types" description="Manage FE task type codes.">
                 <Button onClick={openCreate}>
                     <Plus size={16} />
                     New Task Type
@@ -145,32 +131,19 @@ export default function FeTaskTypesPage() {
                 />
 
                 <Surface className="flex w-fit self-end items-center gap-3 px-4 py-2 lg:ml-auto lg:self-auto">
-                    <span className="text-sm text-muted-foreground">
-                        Include inactive
-                    </span>
+                    <span className="text-sm text-muted-foreground">Include inactive</span>
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() =>
-                            setShowInactive((active) => !active)
-                        }
+                        onChange={() => setShowInactive((active) => !active)}
                         ariaLabel="Toggle inactive task types"
                     />
                 </Surface>
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={5}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={5} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState

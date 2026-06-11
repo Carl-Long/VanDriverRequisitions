@@ -6,18 +6,9 @@ export const Roles = {
     Approver: "approver",
 } as const;
 
-export function hasRole(
-    user: AuthUser | null | undefined,
-    role: string,
-): boolean {
-    return (
-        user?.roles
-            ?.map((x) => x.toLowerCase())
-            .includes(role.toLowerCase()) ?? false
-    );
+export function hasRole(user: AuthUser | null | undefined, role: string): boolean {
+    return user?.roles?.map((x) => x.toLowerCase()).includes(role.toLowerCase()) ?? false;
 }
-
-
 
 export function isAdmin(user?: AuthUser | null): boolean {
     return hasRole(user, Roles.Admin);
@@ -30,7 +21,6 @@ export function isUser(user?: AuthUser | null): boolean {
 export function isApprover(user?: AuthUser | null): boolean {
     return hasRole(user, Roles.Approver);
 }
-
 
 export function canCreateRequisitions(user?: AuthUser | null): boolean {
     return isUser(user) || isAdmin(user);

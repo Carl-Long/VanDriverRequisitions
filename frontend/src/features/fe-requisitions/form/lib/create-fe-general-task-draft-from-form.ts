@@ -17,53 +17,39 @@ export function createFeGeneralTaskDraftFromForm({
     taskTypeLabel,
     form,
 }: Params): FeGeneralTaskDraft {
-    const totals =
-        calculateFeGeneralTaskFormTotals(
-            form,
-        );
+    const totals = calculateFeGeneralTaskFormTotals(form);
 
     return {
         id: null,
-        
+
         clientId: crypto.randomUUID(),
 
         taskTypeId,
 
         taskTypeLabel,
 
-        weekEndingDate:
-            form.weekEndingDate,
+        weekEndingDate: form.weekEndingDate,
 
         quantities: {
-            sunday:
-                form.quantities.sunday,
+            sunday: form.quantities.sunday,
 
-            monday:
-                form.quantities.monday,
+            monday: form.quantities.monday,
 
-            tuesday:
-                form.quantities.tuesday,
+            tuesday: form.quantities.tuesday,
 
-            wednesday:
-                form.quantities.wednesday,
+            wednesday: form.quantities.wednesday,
 
-            thursday:
-                form.quantities.thursday,
+            thursday: form.quantities.thursday,
 
-            friday:
-                form.quantities.friday,
+            friday: form.quantities.friday,
 
-            saturday:
-                form.quantities.saturday,
+            saturday: form.quantities.saturday,
         },
 
-        ratePerJob:
-            form.ratePerJob,
+        ratePerJob: form.ratePerJob,
 
-        totalNumber:
-            totals.totalJobs,
+        totalNumber: totals.totalJobs,
 
-        totalValue:
-            totals.totalValue,
+        totalValue: totals.totalValue,
     };
 }

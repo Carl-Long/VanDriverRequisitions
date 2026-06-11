@@ -5,15 +5,21 @@ import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-t
 import { useState } from "react";
 import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
-import type {
-    RequisitionLimitRuleSummary,
-} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
-import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow } from "@/components/ui/table/table";
+import {
+    TableHeader,
+    TableHeaderCell,
+    TableBody,
+    TableCell,
+    TableFooter,
+    TableRow,
+    TableHeaderRow,
+} from "@/components/ui/table/table";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 
 type Props = {
@@ -22,19 +28,10 @@ type Props = {
     code?: string | null;
     limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
-    onAdd: (
-        form: FeGeneralTaskForm,
-    ) => void;
-    onUpdate: (
-        clientId: string,
-        form: FeGeneralTaskForm,
-    ) => void;
-    onDelete: (
-        clientId: string,
-    ) => void;
+    onAdd: (form: FeGeneralTaskForm) => void;
+    onUpdate: (clientId: string, form: FeGeneralTaskForm) => void;
+    onDelete: (clientId: string) => void;
 };
-
-
 
 export function FeGeneralTaskWorkspace({
     readonly,
@@ -46,7 +43,6 @@ export function FeGeneralTaskWorkspace({
     onUpdate,
     onDelete,
 }: Readonly<Props>) {
-
     const [open, setOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<FeGeneralTaskDraft | null>(null);
     const totals = calculateFeGeneralTaskTotals(tasks);
@@ -62,9 +58,8 @@ export function FeGeneralTaskWorkspace({
                         Manage {title.toLowerCase()} entries
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} •{" "}
-                        {totals.totalJobs} quantity •{" "}
-                        {formatCurrencyGB(totals.subtotal)}
+                        {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} • {totals.totalJobs}{" "}
+                        quantity • {formatCurrencyGB(totals.subtotal)}
                     </p>
                 </div>
 
@@ -83,9 +78,7 @@ export function FeGeneralTaskWorkspace({
             </div>
 
             {tasks.length === 0 ? (
-                <EmptyState
-                    title={`No ${title}`}
-                />
+                <EmptyState title={`No ${title}`} />
             ) : (
                 <TasksTable
                     readonly={readonly}
@@ -99,35 +92,18 @@ export function FeGeneralTaskWorkspace({
                 />
             )}
             <FeGeneralTaskDrawer
-                key={
-                    editingTask
-                        ? editingTask.clientId
-                        : "new"
-                }
+                key={editingTask ? editingTask.clientId : "new"}
                 open={open}
-                title={
-                    editingTask
-                        ? `Edit ${title}`
-                        : `Add ${title}`
-                }
+                title={editingTask ? `Edit ${title}` : `Add ${title}`}
                 limitRule={limitRule}
-                initialValues={
-                    editingTask
-                        ? mapFeGeneralTaskDraftToForm(
-                            editingTask,
-                        )
-                        : undefined
-                }
+                initialValues={editingTask ? mapFeGeneralTaskDraftToForm(editingTask) : undefined}
                 onClose={() => {
                     setOpen(false);
                     setEditingTask(null);
                 }}
                 onSave={(form) => {
                     if (editingTask) {
-                        onUpdate(
-                            editingTask.clientId,
-                            form,
-                        );
+                        onUpdate(editingTask.clientId, form);
                     } else {
                         onAdd(form);
                     }
@@ -141,21 +117,11 @@ type TableProps = {
     readonly: boolean;
     limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
-    onEdit: (
-        task: FeGeneralTaskDraft,
-    ) => void;
-    onDelete: (
-        clientId: string,
-    ) => void;
+    onEdit: (task: FeGeneralTaskDraft) => void;
+    onDelete: (clientId: string) => void;
 };
 
-function TasksTable({
-    readonly,
-    limitRule,
-    tasks,
-    onEdit,
-    onDelete,
-}: Readonly<TableProps>) {
+function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<TableProps>) {
     const totals = calculateFeGeneralTaskTotals(tasks);
 
     return (
@@ -164,20 +130,76 @@ function TasksTable({
                 <table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">Week Ending</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Sun</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Mon</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Tue</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Wed</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Thu</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Fri</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="center">Sat</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Total Qty</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Rate</TableHeaderCell>
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">Total</TableHeaderCell>
+                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
+                                Week Ending
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Sun
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Mon
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Tue
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Wed
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Thu
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Fri
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                Sat
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Total Qty
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Rate
+                            </TableHeaderCell>
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Total
+                            </TableHeaderCell>
 
                             {!readonly && (
-                                <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right" nowrap>
+                                <TableHeaderCell
+                                    className="sticky top-0 z-20 bg-surface-elevated"
+                                    align="right"
+                                    nowrap
+                                >
                                     Actions
                                 </TableHeaderCell>
                             )}
@@ -187,7 +209,7 @@ function TasksTable({
                     <TableBody>
                         {tasks.map((task) => {
                             const limitStatus = getGeneralTaskLimitStatus(task, limitRule);
-                            const hasLimitIssue =!readonly && limitStatus.state !== "ok";
+                            const hasLimitIssue = !readonly && limitStatus.state !== "ok";
 
                             return (
                                 <TableRow
@@ -212,9 +234,7 @@ function TasksTable({
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
                                                         {limitStatus.messages.map((message) => (
-                                                            <li key={message}>
-                                                                {message}
-                                                            </li>
+                                                            <li key={message}>{message}</li>
                                                         ))}
                                                     </ul>
                                                 </div>
@@ -250,21 +270,13 @@ function TasksTable({
                                         {task.quantities.saturday ?? "-"}
                                     </TableCell>
 
-                                    <TableCell align="right">
-                                        {task.totalNumber}
-                                    </TableCell>
+                                    <TableCell align="right">{task.totalNumber}</TableCell>
 
-                                    <TableCell
-                                        align="right"
-                                        className="tabular-nums"
-                                    >
+                                    <TableCell align="right" className="tabular-nums">
                                         {formatCurrencyGB(task.ratePerJob ?? 0)}
                                     </TableCell>
 
-                                    <TableCell
-                                        align="right"
-                                        className="font-semibold tabular-nums"
-                                    >
+                                    <TableCell align="right" className="font-semibold tabular-nums">
                                         {formatCurrencyGB(task.totalValue)}
                                     </TableCell>
 
@@ -282,9 +294,7 @@ function TasksTable({
                                                 <IconButton
                                                     tone="danger"
                                                     variant="ghost"
-                                                    onClick={() =>
-                                                        onDelete(task.clientId)
-                                                    }
+                                                    onClick={() => onDelete(task.clientId)}
                                                 >
                                                     <Trash2 size={14} />
                                                 </IconButton>
@@ -298,17 +308,62 @@ function TasksTable({
 
                     <TableFooter>
                         <TableRow>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated">Totals</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.sunday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.monday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.tuesday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.wednesday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.thursday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.friday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="center">{totals.saturday}</TableCell>
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" align="right">{totals.totalJobs}</TableCell>
+                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated">
+                                Totals
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.sunday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.monday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.tuesday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.wednesday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.thursday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.friday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="center"
+                            >
+                                {totals.saturday}
+                            </TableCell>
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                {totals.totalJobs}
+                            </TableCell>
                             <TableCell className="sticky bottom-0 z-20 bg-surface-elevated" />
-                            <TableCell className="sticky bottom-0 z-20 bg-surface-elevated tabular-nums" align="right">
+                            <TableCell
+                                className="sticky bottom-0 z-20 bg-surface-elevated tabular-nums"
+                                align="right"
+                            >
                                 {formatCurrencyGB(totals.subtotal)}
                             </TableCell>
 

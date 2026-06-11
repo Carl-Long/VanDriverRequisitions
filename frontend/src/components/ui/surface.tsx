@@ -6,17 +6,13 @@ type Props = PropsWithChildren<{
     elevated?: boolean;
 }>;
 
-export function Surface({
-    children,
-    className,
-    elevated = false,
-}: Props) {
+export function Surface({ children, className, elevated = false }: Props) {
     return (
         <div
             className={cn(
                 "rounded-xl border border-border",
                 elevated ? "bg-surface-elevated" : "bg-surface",
-                className
+                className,
             )}
         >
             {children}

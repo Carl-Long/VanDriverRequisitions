@@ -4,16 +4,7 @@ import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submi
 import { SubmitWindowHero } from "./submit-window-hero";
 
 export function SubmitWindowHeroCompact() {
-  const {
-    status,
-    loading,
-  } = useSubmitWindowStatus();
+    const { status, loading } = useSubmitWindowStatus();
 
-  return (
-    <SubmitWindowHero
-      status={status}
-      loading={loading}
-      variant="compact"
-    />
-  );
+    return <SubmitWindowHero status={status} loading={loading} variant="compact" />;
 }

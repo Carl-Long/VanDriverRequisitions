@@ -30,8 +30,8 @@ const taskTypeSchema = z.object({
                 .string()
                 .regex(
                     /^[A-Z0-9_-]+$/,
-                    "Code must contain only uppercase letters, numbers, hyphens, and underscores."
-                )
+                    "Code must contain only uppercase letters, numbers, hyphens, and underscores.",
+                ),
         ),
 });
 
@@ -44,12 +44,7 @@ type Props = {
     initial?: FeTaskType | null;
 };
 
-export function TaskTypeFormModal({
-    open,
-    onClose,
-    onSubmit,
-    initial,
-}: Readonly<Props>) {
+export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly<Props>) {
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
 
@@ -122,18 +117,9 @@ export function TaskTypeFormModal({
             title={isEditing ? "Edit Task Type" : "Create Task Type"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
+                {serverError && <Alert tone="danger">{serverError}</Alert>}
 
-                {serverError && (
-                    <Alert tone="danger">
-                        {serverError}
-                    </Alert>
-                )}
-
-                <Field
-                    label="Name"
-                    error={errors.name?.message}
-                    required
-                >
+                <Field label="Name" error={errors.name?.message} required>
                     <Input
                         {...register("name")}
                         state={errors.name ? "error" : "default"}
@@ -151,14 +137,10 @@ export function TaskTypeFormModal({
                     <Input
                         {...register("code")}
                         onChange={(e) => {
-                            setValue(
-                                "code",
-                                e.target.value.toUpperCase(),
-                                {
-                                    shouldValidate: true,
-                                    shouldDirty: true,
-                                }
-                            );
+                            setValue("code", e.target.value.toUpperCase(), {
+                                shouldValidate: true,
+                                shouldDirty: true,
+                            });
                         }}
                         state={errors.code ? "error" : "default"}
                         placeholder="e.g. COLLECTIONS"
@@ -177,11 +159,7 @@ export function TaskTypeFormModal({
                         Cancel
                     </Button>
 
-                    <Button
-                        type="submit"
-                        loading={isSubmitting}
-                        tone="primary"
-                    >
+                    <Button type="submit" loading={isSubmitting} tone="primary">
                         {isEditing ? "Save Changes" : "Create"}
                     </Button>
                 </div>

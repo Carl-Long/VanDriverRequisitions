@@ -1,10 +1,6 @@
 "use client";
 
-import {
-    RotateCcw,
-    Search,
-    SlidersHorizontal,
-} from "lucide-react";
+import { RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
 import { Surface } from "@/components/ui/surface";
@@ -19,9 +15,7 @@ import { StatusFilterField } from "../filter-fields/status-filter-field";
 type Props = {
     filters: FeRequisitionFilters;
 
-    onFiltersChange: (
-        filters: FeRequisitionFilters,
-    ) => void;
+    onFiltersChange: (filters: FeRequisitionFilters) => void;
 
     onReset: () => void;
 };
@@ -33,21 +27,14 @@ export function FeRequisitionFiltersToolbar({
 }: Readonly<Props>) {
     return (
         <Surface className="mb-5 p-5">
-
             <div className="flex flex-col gap-5">
-
                 {/* Header */}
 
                 <div>
                     <div className="flex items-center gap-2">
-                        <SlidersHorizontal
-                            size={16}
-                            className="text-muted-foreground"
-                        />
+                        <SlidersHorizontal size={16} className="text-muted-foreground" />
 
-                        <h2 className="text-sm font-semibold text-foreground">
-                            Find Requisitions
-                        </h2>
+                        <h2 className="text-sm font-semibold text-foreground">Find Requisitions</h2>
                     </div>
 
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -58,7 +45,6 @@ export function FeRequisitionFiltersToolbar({
                 {/* Search row */}
 
                 <div className="flex flex-wrap items-center gap-3">
-
                     <div className="relative w-full max-w-md">
                         <Search
                             size={16}
@@ -66,57 +52,40 @@ export function FeRequisitionFiltersToolbar({
                         />
 
                         <Input
-                            value={
-                                filters.requisitionNumber
-                            }
+                            value={filters.requisitionNumber}
                             onChange={(e) => {
                                 onFiltersChange({
                                     ...filters,
 
-                                    requisitionNumber:
-                                        e.target.value,
+                                    requisitionNumber: e.target.value,
                                 });
                             }}
                             placeholder="Search by requisition number..."
-                            className={cn(
-                                fieldBase,
-                                "pl-9",
-                            )}
+                            className={cn(fieldBase, "pl-9")}
                         />
                     </div>
 
-                    <Button
-                        tone="accent"
-                        variant="solid"
-                        size="sm"
-                        onClick={onReset}
-                    >
+                    <Button tone="accent" variant="solid" size="sm" onClick={onReset}>
                         <RotateCcw size={16} />
 
-                        <span>
-                            Reset Filters
-                        </span>
+                        <span>Reset Filters</span>
                     </Button>
                 </div>
 
                 {/* Filter row */}
 
                 <div className="flex flex-wrap items-center gap-3">
-
                     {/* Created By */}
 
                     <div className="min-w-[260px] flex-1">
                         <CreatedByUserFilterField
                             hideLabel
-                            value={
-                                filters.createdBy
-                            }
+                            value={filters.createdBy}
                             onChange={(value) => {
                                 onFiltersChange({
                                     ...filters,
 
-                                    createdBy:
-                                        value,
+                                    createdBy: value,
                                 });
                             }}
                         />
@@ -132,8 +101,7 @@ export function FeRequisitionFiltersToolbar({
                                 onFiltersChange({
                                     ...filters,
 
-                                    status:
-                                        value,
+                                    status: value,
                                 });
                             }}
                         />
@@ -145,23 +113,16 @@ export function FeRequisitionFiltersToolbar({
                         <ShopFilterField
                             hideLabel
                             value={filters.shopId}
-                            label={
-                                filters.shopLabel
-                            }
+                            label={filters.shopLabel}
                             includeAllOption={true}
                             prefixLabel={true}
-                            onChange={(
-                                value,
-                                label,
-                            ) => {
+                            onChange={(value, label) => {
                                 onFiltersChange({
                                     ...filters,
 
-                                    shopId:
-                                        value,
+                                    shopId: value,
 
-                                    shopLabel:
-                                        label,
+                                    shopLabel: label,
                                 });
                             }}
                         />

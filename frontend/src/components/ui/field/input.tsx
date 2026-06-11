@@ -8,10 +8,5 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 };
 
 export function Input({ state = "default", className, ...props }: InputProps) {
-    return (
-        <input
-            className={cn(fieldBase, fieldStateMap[state], className)}
-            {...props}
-        />
-    );
+    return <input className={cn(fieldBase, fieldStateMap[state], className)} {...props} />;
 }

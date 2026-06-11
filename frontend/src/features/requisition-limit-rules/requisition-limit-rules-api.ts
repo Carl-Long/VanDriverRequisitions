@@ -40,9 +40,7 @@ export const requisitionLimitRulesApi = {
     },
 
     getById(id: string) {
-        return apiFetch<RequisitionLimitRuleSummary>(
-            `${BASE}/${id}`,
-        );
+        return apiFetch<RequisitionLimitRuleSummary>(`${BASE}/${id}`);
     },
 
     create(data: CreateRequisitionLimitRule) {
@@ -53,12 +51,9 @@ export const requisitionLimitRulesApi = {
     },
 
     update(id: string, data: UpdateRequisitionLimitRule) {
-        return apiFetch<RequisitionLimitRuleSummary>(
-            `${BASE}/${id}`,
-            {
-                method: "PUT",
-                body: data,
-            },
-        );
+        return apiFetch<RequisitionLimitRuleSummary>(`${BASE}/${id}`, {
+            method: "PUT",
+            body: data,
+        });
     },
 };

@@ -1,14 +1,15 @@
 import type { ComboboxOption } from "@/components/ui/field/combobox";
 import type { ShopLookup } from "@/lib/api/shops";
 
-export function toShopOption(shop: ShopLookup): ComboboxOption {
+export type ShopOption = ComboboxOption;
+
+export function toShopOption(shop: ShopLookup): ShopOption {
     return {
         value: shop.id,
         label: `${shop.code} - ${shop.name}`,
-        data: shop,
     };
 }
 
-export function toShopOptions(shops: ShopLookup[]): ComboboxOption[] {
+export function toShopOptions(shops: ShopLookup[]): ShopOption[] {
     return shops.map(toShopOption);
 }

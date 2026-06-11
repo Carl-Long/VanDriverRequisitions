@@ -23,12 +23,7 @@ type Props = {
     onConfirm: (rejectionNotes: string) => void;
 };
 
-export function FeRequisitionRejectModal({
-    open,
-    loading,
-    onClose,
-    onConfirm,
-}: Readonly<Props>) {
+export function FeRequisitionRejectModal({ open, loading, onClose, onConfirm }: Readonly<Props>) {
     const [rejectionNotes, setRejectionNotes] = useState("");
     const [error, setError] = useState<string | undefined>();
 
@@ -48,10 +43,7 @@ export function FeRequisitionRejectModal({
         });
 
         if (!result.success) {
-            setError(
-                result.error.issues[0]?.message ??
-                "Rejection notes are invalid.",
-            );
+            setError(result.error.issues[0]?.message ?? "Rejection notes are invalid.");
 
             return;
         }
@@ -69,10 +61,7 @@ export function FeRequisitionRejectModal({
         >
             <div className="space-y-5">
                 <div className="flex items-start gap-3 rounded-lg border border-danger-border bg-danger-surface p-4">
-                    <XCircle
-                        size={18}
-                        className="mt-0.5 shrink-0 text-danger"
-                    />
+                    <XCircle size={18} className="mt-0.5 shrink-0 text-danger" />
 
                     <div>
                         <p className="font-medium text-danger">
@@ -80,8 +69,8 @@ export function FeRequisitionRejectModal({
                         </p>
 
                         <p className="mt-1 text-sm text-foreground">
-                            The requester will need to review the rejection
-                            notes, make changes, and resubmit.
+                            The requester will need to review the rejection notes, make changes, and
+                            resubmit.
                         </p>
                     </div>
                 </div>
@@ -115,12 +104,7 @@ export function FeRequisitionRejectModal({
                         No, Go Back
                     </Button>
 
-                    <Button
-                        type="button"
-                        tone="danger"
-                        loading={loading}
-                        onClick={handleConfirm}
-                    >
+                    <Button type="button" tone="danger" loading={loading} onClick={handleConfirm}>
                         Reject Requisition
                     </Button>
                 </div>

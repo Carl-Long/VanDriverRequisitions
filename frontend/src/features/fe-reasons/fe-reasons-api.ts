@@ -38,9 +38,7 @@ export const feReasonsApi = {
             body: data,
         }),
 
-    activate: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}/activate`, { method: "POST" }),
+    activate: (id: string) => apiFetch<void>(`${BASE}/${id}/activate`, { method: "POST" }),
 
-    deactivate: (id: string) =>
-        apiFetch<void>(`${BASE}/${id}/deactivate`, { method: "POST" }),
+    deactivate: (id: string) => apiFetch<void>(`${BASE}/${id}/deactivate`, { method: "POST" }),
 };

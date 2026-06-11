@@ -3,7 +3,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function FeRequisitionShellSkeleton() {
     return (
         <div className="space-y-6">
-
             {/* Header */}
             <div className="space-y-4">
                 <div className="flex justify-between">
@@ -40,7 +39,6 @@ export function FeRequisitionShellSkeleton() {
             {/* Content */}
             {/* Content */}
             <div className="space-y-6">
-
                 {/* Details tab heading */}
                 <div>
                     <Skeleton className="h-7 w-48" />
@@ -48,7 +46,6 @@ export function FeRequisitionShellSkeleton() {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-
                     {/* Details card */}
                     <div className="rounded-2xl border border-border p-6">
                         <div className="grid gap-6 xl:grid-cols-2">

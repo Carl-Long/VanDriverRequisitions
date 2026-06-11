@@ -1,6 +1,15 @@
 "use client";
 
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell, Table, TableFooter } from "@/components/ui/table/table";
+import {
+    TableHeader,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableBody,
+    TableRow,
+    TableCell,
+    Table,
+    TableFooter,
+} from "@/components/ui/table/table";
 import { FeGeneralTaskSnapshot } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
@@ -15,8 +24,7 @@ export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
     const orderedTasks = [...tasks].sort(
         (a, b) =>
             a.taskTypeName.localeCompare(b.taskTypeName) ||
-            new Date(a.weekEndingDate).getTime() -
-            new Date(b.weekEndingDate).getTime()
+            new Date(a.weekEndingDate).getTime() - new Date(b.weekEndingDate).getTime(),
     );
 
     const totals = orderedTasks.reduce(
@@ -43,22 +51,19 @@ export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
             subtotal: 0,
         },
     );
-    
+
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
             <div className="mb-6 print-section-heading">
-                <h2 className="text-lg font-semibold">
-                    General Tasks
-                </h2>
+                <h2 className="text-lg font-semibold">General Tasks</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                     Submitted task quantities and values
                 </p>
 
                 <p className="text-sm text-muted-foreground">
-                    {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} •{" "}
-                    {totals.totalJobs} quantity •{" "}
-                    {formatCurrencyGB(totals.subtotal)}
+                    {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} • {totals.totalJobs}{" "}
+                    quantity • {formatCurrencyGB(totals.subtotal)}
                 </p>
             </div>
 
@@ -119,13 +124,9 @@ export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
 
                         <TableBody>
                             {orderedTasks.map((task, index) => (
-                                <TableRow
-                                    key={`${task.taskTypeCode}-${index}`}
-                                >
+                                <TableRow key={`${task.taskTypeCode}-${index}`}>
                                     <TableCell className="print-col-task">
-                                        <div className="font-medium">
-                                            {task.taskTypeName}
-                                        </div>
+                                        <div className="font-medium">{task.taskTypeName}</div>
 
                                         <div className="text-xs text-muted-foreground">
                                             {task.taskTypeCode}
@@ -179,13 +180,10 @@ export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
                                     </TableCell>
                                 </TableRow>
                             ))}
-
                         </TableBody>
                         <TableFooter>
                             <TableRow>
-                                <TableCell className="print-col-task">
-                                    Totals
-                                </TableCell>
+                                <TableCell className="print-col-task">Totals</TableCell>
 
                                 <TableCell className="print-col-week" />
 
@@ -227,9 +225,7 @@ export function FeSubmissionGeneralTasksTable({ tasks }: Readonly<Props>) {
                                     align="right"
                                     className="font-semibold tabular-nums print-col-value"
                                 >
-                                    {formatCurrencyGB(
-                                        totals.subtotal,
-                                    )}
+                                    {formatCurrencyGB(totals.subtotal)}
                                 </TableCell>
                             </TableRow>
                         </TableFooter>

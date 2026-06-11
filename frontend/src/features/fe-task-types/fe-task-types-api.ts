@@ -31,9 +31,7 @@ export const feTaskTypesApi = {
             includeInactive: String(includeInactive),
         });
 
-        return apiFetch<FeTaskType[]>(
-            `${BASE}?${params.toString()}`,
-        );
+        return apiFetch<FeTaskType[]>(`${BASE}?${params.toString()}`);
     },
 
     getById(id: string) {

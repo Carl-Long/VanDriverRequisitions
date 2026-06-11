@@ -4,7 +4,7 @@ import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants
 import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
-import { useFeRequisitionDraft, } from "../hooks/use-fe-requisition-draft";
+import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
@@ -45,11 +45,15 @@ export type SaveAction =
     | "reject"
     | null;
 
-export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition, submitWindowStatus, submitWindowStatusLoading }: Readonly<Props>) {
-
-    const initialDraft = feRequisition
-        ? mapFeRequisitionDetailToDraft(feRequisition)
-        : undefined;
+export function FeRequisitionShell({
+    mode,
+    limitRules,
+    taskTypes,
+    feRequisition,
+    submitWindowStatus,
+    submitWindowStatusLoading,
+}: Readonly<Props>) {
+    const initialDraft = feRequisition ? mapFeRequisitionDetailToDraft(feRequisition) : undefined;
 
     const {
         draft,
@@ -67,9 +71,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     const [activeAction, setActiveAction] = useState<SaveAction>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    function clearError(
-        field: string,
-    ) {
+    function clearError(field: string) {
         setErrors((prev) => {
             if (!prev[field]) {
                 return prev;
@@ -89,32 +91,23 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const isReadonly =
-        mode === "readonly" ||
-        mode === "approval";
+    const isReadonly = mode === "readonly" || mode === "approval";
 
     const router = useRouter();
     const toast = useToast();
 
     const canSubmitStatus =
-        draft.status === null ||
-        draft.status === "Draft" ||
-        draft.status === "Rejected";
+        draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
 
-    async function saveRequisition(continueEditing: boolean = false): Promise<FeRequisitionDetail | undefined> {
-        const result =
-            feRequisitionSchema.safeParse(
-                draft,
-            );
+    async function saveRequisition(
+        continueEditing: boolean = false,
+    ): Promise<FeRequisitionDetail | undefined> {
+        const result = feRequisitionSchema.safeParse(draft);
 
         if (!result.success) {
-            setErrors(
-                mapZodErrors(
-                    result.error,
-                ),
-            );
+            setErrors(mapZodErrors(result.error));
 
             setActiveTab("details");
 
@@ -146,18 +139,14 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(
-                        err,
-                        "Failed to save requisition",
-                    ),
+                    form: getApiErrorMessage(err, "Failed to save requisition"),
                 });
 
                 return;
             }
 
             setErrors({
-                form:
-                    "Failed to save requisition",
+                form: "Failed to save requisition",
             });
         } finally {
             setIsSaving(false);
@@ -168,11 +157,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
         const result = feRequisitionSchema.safeParse(draft);
 
         if (!result.success) {
-            setErrors(
-                mapZodErrors(
-                    result.error,
-                ),
-            );
+            setErrors(mapZodErrors(result.error));
 
             setActiveTab("details");
             return;
@@ -185,32 +170,22 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
             const submitted = draft.requisitionId
-                ? await feRequisitionsApi.submitExisting(
-                    draft.requisitionId,
-                    request,
-                )
-                : await feRequisitionsApi.submitNew(
-                    request,
-                );
+                ? await feRequisitionsApi.submitExisting(draft.requisitionId, request)
+                : await feRequisitionsApi.submitNew(request);
 
             toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
             router.push("/home-van-drivers");
-
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(
-                        err,
-                        "Failed to save requisition",
-                    ),
+                    form: getApiErrorMessage(err, "Failed to save requisition"),
                 });
 
                 return;
             }
 
             setErrors({
-                form:
-                    "Failed to submit requisition",
+                form: "Failed to submit requisition",
             });
         } finally {
             setIsSaving(false);
@@ -222,7 +197,7 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             return false;
         }
 
-        const tasks = draft.feGeneralTasks.filter(task => task.taskTypeId === taskTypeId);
+        const tasks = draft.feGeneralTasks.filter((task) => task.taskTypeId === taskTypeId);
 
         const limitRule = resolveFeRequisitionLimitRule({
             rules: limitRules,
@@ -230,9 +205,8 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             taskTypeId,
         });
 
-        return tasks.some(task => getGeneralTaskLimitStatus(task, limitRule).state !== "ok");
+        return tasks.some((task) => getGeneralTaskLimitStatus(task, limitRule).state !== "ok");
     }
-
 
     async function handleSaveDraft() {
         setActiveAction("saveAndClose");
@@ -297,22 +271,16 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             setErrors({});
             setIsSaving(true);
 
-            const approved = await feRequisitionsApi.approve(
-                draft.requisitionId,
-                {
-                    rowVersion: draft.rowVersion,
-                },
-            );
+            const approved = await feRequisitionsApi.approve(draft.requisitionId, {
+                rowVersion: draft.rowVersion,
+            });
 
             toast.success(`Requisition #${approved.requisitionNumber} approved`);
             router.push("/home-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(
-                        err,
-                        "Failed to save requisition",
-                    ),
+                    form: getApiErrorMessage(err, "Failed to save requisition"),
                 });
 
                 return;
@@ -339,22 +307,17 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
             setErrors({});
             setIsSaving(true);
 
-            const rejected = await feRequisitionsApi.reject(draft.requisitionId,
-                {
-                    rowVersion: draft.rowVersion,
-                    rejectionNotes,
-                },
-            );
+            const rejected = await feRequisitionsApi.reject(draft.requisitionId, {
+                rowVersion: draft.rowVersion,
+                rejectionNotes,
+            });
 
             toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
             router.push("/home-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(
-                        err,
-                        "Failed to save requisition",
-                    ),
+                    form: getApiErrorMessage(err, "Failed to save requisition"),
                 });
 
                 return;
@@ -418,79 +381,39 @@ export function FeRequisitionShell({ mode, limitRules, taskTypes, feRequisition,
                         clearError={clearError}
                     />
                 }
-                submissionHistory={
-                    <FeSubmissionHistoryTab
-                        submissions={
-                            draft.submissionHistory
-                        }
-                    />
-                }
-                renderTaskTypeTab={(
-                    taskTypeId,
-                ) => {
-                    const taskType =
-                        taskTypes.find(
-                            (x) =>
-                                x.id ===
-                                taskTypeId,
-                        );
+                submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
+                renderTaskTypeTab={(taskTypeId) => {
+                    const taskType = taskTypes.find((x) => x.id === taskTypeId);
 
                     if (!taskType) {
                         return null;
                     }
 
-                    const tasks =
-                        draft.feGeneralTasks.filter(
-                            (x) =>
-                                x.taskTypeId ===
-                                taskTypeId,
-                        );
+                    const tasks = draft.feGeneralTasks.filter((x) => x.taskTypeId === taskTypeId);
 
                     return (
                         <FeGeneralTaskWorkspace
-                            limitRule={
-                                resolveFeRequisitionLimitRule({
-                                    rules: limitRules,
-                                    categoryId:
-                                        REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
-                                    taskTypeId:
-                                        taskType.id,
-                                })
-                            }
-                            readonly={
-                                isReadonly
-                            }
-                            title={
-                                taskType.name
-                            }
-                            code={
-                                taskType.code
-                            }
+                            limitRule={resolveFeRequisitionLimitRule({
+                                rules: limitRules,
+                                categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+                                taskTypeId: taskType.id,
+                            })}
+                            readonly={isReadonly}
+                            title={taskType.name}
+                            code={taskType.code}
                             tasks={tasks}
                             onAdd={(form) => {
-                                addGeneralTask(
-                                    taskType.id,
-                                    taskType.name,
-                                    form,
-                                );
+                                addGeneralTask(taskType.id, taskType.name, form);
                                 clearError("generalTasks");
                                 clearError("form");
                             }}
-                            onUpdate={(
-                                clientId,
-                                form,
-                            ) => {
-                                updateGeneralTask(
-                                    clientId,
-                                    form,
-                                );
+                            onUpdate={(clientId, form) => {
+                                updateGeneralTask(clientId, form);
 
                                 clearError("generalTasks");
                                 clearError("form");
                             }}
-                            onDelete={
-                                removeGeneralTask
-                            }
+                            onDelete={removeGeneralTask}
                         />
                     );
                 }}

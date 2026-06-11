@@ -25,14 +25,9 @@ export default function Page() {
         error: limitRulesError,
     } = useRequisitionLimitRules();
 
-    const {
-        taskTypes,
-        loading: taskTypesLoading,
-        error: taskTypesError,
-    } = useFeTaskTypes();
+    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
 
-    const [requisition, setRequisition] =
-        useState<FeRequisitionDetail | null>(null);
+    const [requisition, setRequisition] = useState<FeRequisitionDetail | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,29 +43,19 @@ export default function Page() {
             try {
                 setError(null);
 
-                const result = await feRequisitionsApi.getById(
-                    params.id,
-                );
+                const result = await feRequisitionsApi.getById(params.id);
 
                 if (!cancelled) {
                     setRequisition(result);
                 }
             } catch (err) {
                 if (!cancelled) {
-                    if (
-                        err instanceof ApiError &&
-                        err.status === 404
-                    ) {
+                    if (err instanceof ApiError && err.status === 404) {
                         setNotFound(true);
                         return;
                     }
 
-                    setError(
-                        getApiErrorMessage(
-                            err,
-                            "Failed to load requisition.",
-                        ),
-                    );
+                    setError(getApiErrorMessage(err, "Failed to load requisition."));
                 }
             } finally {
                 if (!cancelled) {
@@ -86,16 +71,9 @@ export default function Page() {
         };
     }, [params.id, authLoading, canApprove]);
 
-    const pageLoading =
-        loading ||
-        limitRulesLoading ||
-        taskTypesLoading;
+    const pageLoading = loading || limitRulesLoading || taskTypesLoading;
 
-    const errors = [
-        error,
-        limitRulesError,
-        taskTypesError,
-    ].filter((e): e is string => Boolean(e));
+    const errors = [error, limitRulesError, taskTypesError].filter((e): e is string => Boolean(e));
 
     if (authLoading || pageLoading) {
         return (
@@ -118,9 +96,7 @@ export default function Page() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>

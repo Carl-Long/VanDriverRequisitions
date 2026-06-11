@@ -2,10 +2,16 @@ import { Pencil } from "lucide-react";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
+import {
+    TableHeader,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableBody,
+    TableRow,
+    TableCell,
+} from "@/components/ui/table/table";
 import { Toggle } from "@/components/ui/toggle";
 import { formatDateGB } from "@/lib/format/date";
-
 
 type Props = {
     items: FeTaskType[];
@@ -13,11 +19,7 @@ type Props = {
     onToggleActive: (item: FeTaskType) => void;
 };
 
-export function TaskTypeTable({
-    items,
-    onEdit,
-    onToggleActive,
-}: Readonly<Props>) {
+export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -27,30 +29,24 @@ export function TaskTypeTable({
                         <TableHeaderCell>Code</TableHeaderCell>
                         <TableHeaderCell>Active</TableHeaderCell>
                         <TableHeaderCell>Last Activity</TableHeaderCell>
-                        <TableHeaderCell align="right" nowrap>Actions</TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Actions
+                        </TableHeaderCell>
                     </TableHeaderRow>
                 </TableHeader>
 
                 <TableBody>
                     {items.map((item) => {
-                        const lastDate =
-                            item.updatedAtUtc ?? item.createdAtUtc;
+                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
 
                         const lastUser =
-                            item.updatedByNameSnapshot ??
-                            item.createdByNameSnapshot ??
-                            "System";
+                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
 
                         return (
-                            <TableRow
-                                key={item.id}
-                                className="hover:bg-surface-hover"
-                            >
+                            <TableRow key={item.id} className="hover:bg-surface-hover">
                                 {/* Name */}
                                 <TableCell>
-                                    <div className="font-medium text-foreground">
-                                        {item.name}
-                                    </div>
+                                    <div className="font-medium text-foreground">{item.name}</div>
                                 </TableCell>
 
                                 {/* Code */}
@@ -81,10 +77,7 @@ export function TaskTypeTable({
                                 </TableCell>
 
                                 {/* Actions */}
-                                <TableCell
-                                    align="right"
-                                    nowrap
-                                >
+                                <TableCell align="right" nowrap>
                                     <div className="flex justify-end">
                                         <IconButton
                                             variant="ghost"

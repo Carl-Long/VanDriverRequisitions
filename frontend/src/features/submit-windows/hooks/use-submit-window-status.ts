@@ -18,12 +18,7 @@ export function useSubmitWindowStatus() {
                 const data = await submitWindowsApi.getStatus();
                 setStatus(data);
             } catch (err) {
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load submit window status.",
-                    ),
-                );
+                setError(getApiErrorMessage(err, "Failed to load submit window status."));
             } finally {
                 setLoading(false);
             }
@@ -43,22 +38,12 @@ export function useSubmitWindowStatus() {
 
             setStatus(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to refresh submit window status.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to refresh submit window status."));
         } finally {
             const elapsed = Date.now() - started;
 
             if (elapsed < 400) {
-                await new Promise(resolve =>
-                    setTimeout(
-                        resolve,
-                        400 - elapsed,
-                    ),
-                );
+                await new Promise((resolve) => setTimeout(resolve, 400 - elapsed));
             }
 
             setRefreshing(false);

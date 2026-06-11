@@ -15,7 +15,10 @@ import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
 import { RequisitionLimitRuleFormModal } from "@/features/requisition-limit-rules/requisition-limit-rule-form-modal";
 import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/requisition-limit-rule-table";
-import { RequisitionLimitRuleSummary, requisitionLimitRulesApi } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import {
+    RequisitionLimitRuleSummary,
+    requisitionLimitRulesApi,
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -27,8 +30,7 @@ export default function RequisitionLimitRulesPage() {
     const [search, setSearch] = useState("");
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] =
-        useState<RequisitionLimitRuleSummary | null>(null);
+    const [editing, setEditing] = useState<RequisitionLimitRuleSummary | null>(null);
 
     const toast = useToast();
 
@@ -42,12 +44,7 @@ export default function RequisitionLimitRulesPage() {
             const data = await requisitionLimitRulesApi.getAll();
             setRules(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load submit windows.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load submit windows."));
         } finally {
             setLoading(false);
         }
@@ -57,7 +54,6 @@ export default function RequisitionLimitRulesPage() {
         load();
     }, [load]);
 
-
     useEffect(() => {
         async function loadTaskTypes() {
             try {
@@ -65,12 +61,7 @@ export default function RequisitionLimitRulesPage() {
                 const data = await feTaskTypesApi.getAll(false);
                 setTaskTypes(data);
             } catch (err) {
-                setTaskTypeError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load task types.",
-                    ),
-                );
+                setTaskTypeError(getApiErrorMessage(err, "Failed to load task types."));
             }
         }
         loadTaskTypes();
@@ -84,7 +75,7 @@ export default function RequisitionLimitRulesPage() {
         const q = search.toLowerCase();
 
         return rules.filter(
-            r =>
+            (r) =>
                 r.categoryName.toLowerCase().includes(q) ||
                 r.fasciaName.toLowerCase().includes(q) ||
                 (r.feTaskTypeName?.toLowerCase().includes(q) ?? false),
@@ -119,9 +110,7 @@ export default function RequisitionLimitRulesPage() {
         }
 
         toast.success(
-            editing
-                ? "Requisition limit rule updated"
-                : "Requisition limit rule created",
+            editing ? "Requisition limit rule updated" : "Requisition limit rule created",
         );
 
         setModalOpen(false);
@@ -130,19 +119,17 @@ export default function RequisitionLimitRulesPage() {
         await load();
     }
 
-    const emptyState =
-        search.trim()
-            ? {
-                icon: Search,
-                title: "No rules found",
-                description: "Try adjusting your search terms.",
-            }
-            : {
-                icon: SlidersHorizontal,
-                title: "No requisition limit rules yet",
-                description:
-                    "Create your first rule to define limits for requisitions.",
-            };
+    const emptyState = search.trim()
+        ? {
+              icon: Search,
+              title: "No rules found",
+              description: "Try adjusting your search terms.",
+          }
+        : {
+              icon: SlidersHorizontal,
+              title: "No requisition limit rules yet",
+              description: "Create your first rule to define limits for requisitions.",
+          };
 
     /* ---------------- UI ---------------- */
 
@@ -167,24 +154,11 @@ export default function RequisitionLimitRulesPage() {
                 />
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {taskTypeError && (
-                <Alert>
-                    {taskTypeError}
-                </Alert>
-            )}
+            {taskTypeError && <Alert>{taskTypeError}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={7}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={7} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState
@@ -195,10 +169,7 @@ export default function RequisitionLimitRulesPage() {
             )}
 
             {!loading && filtered.length > 0 && (
-                <RequisitionLimitRuleTable
-                    items={filtered}
-                    onEdit={openEdit}
-                />
+                <RequisitionLimitRuleTable items={filtered} onEdit={openEdit} />
             )}
 
             <RequisitionLimitRuleFormModal
@@ -208,7 +179,9 @@ export default function RequisitionLimitRulesPage() {
                     setEditing(null);
                 }}
                 onSubmit={handleSubmit}
-                initial={editing} taskTypes={taskTypes} />
+                initial={editing}
+                taskTypes={taskTypes}
+            />
         </PageContainer>
     );
 }

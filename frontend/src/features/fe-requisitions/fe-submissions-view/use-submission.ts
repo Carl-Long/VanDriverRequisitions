@@ -40,12 +40,7 @@ export function useSubmission(submissionId: string): UseSubmissionResult {
                     return;
                 }
 
-                setError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load submission."
-                    )
-                );
+                setError(getApiErrorMessage(err, "Failed to load submission."));
             } finally {
                 if (!cancelled) {
                     setLoading(false);

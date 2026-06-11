@@ -1,15 +1,8 @@
 "use client";
 
-import {
-    CalendarCheck,
-    CalendarClock,
-    CalendarX,
-} from "lucide-react";
+import { CalendarCheck, CalendarClock, CalendarX } from "lucide-react";
 
-import {
-    formatDateTime,
-    timeUntil,
-} from "@/lib/format/date";
+import { formatDateTime, timeUntil } from "@/lib/format/date";
 
 type Props = {
     loading: boolean;
@@ -23,10 +16,7 @@ type Props = {
     } | null;
 };
 
-export function FeRequisitionSubmitStatus({
-    status,
-    loading,
-}: Readonly<Props>) {
+export function FeRequisitionSubmitStatus({ status, loading }: Readonly<Props>) {
     if (loading || !status) {
         return null;
     }
@@ -37,10 +27,7 @@ export function FeRequisitionSubmitStatus({
                 <CalendarCheck size={14} className="text-success" />
 
                 <span>
-                    Submission window open until{" "}
-                    {formatDateTime(
-                        status.currentWindow.openTo,
-                    )}
+                    Submission window open until {formatDateTime(status.currentWindow.openTo)}
                 </span>
             </span>
         );
@@ -51,23 +38,16 @@ export function FeRequisitionSubmitStatus({
             <span className="inline-flex items-center gap-1.5 text-xs rounded-xl border border-info-border bg-info-surface p-2 ">
                 <CalendarClock size={14} className="text-info" />
 
-                <span>
-                    Submission window opens in{" "}
-                    {timeUntil(
-                        status.nextWindow.openFrom,
-                    )}
-                </span>
+                <span>Submission window opens in {timeUntil(status.nextWindow.openFrom)}</span>
             </span>
         );
     }
 
     return (
-            <span className="inline-flex items-center gap-1.5 text-xs rounded-xl border border-warning-border bg-warning-surface p-2 ">
+        <span className="inline-flex items-center gap-1.5 text-xs rounded-xl border border-warning-border bg-warning-surface p-2 ">
             <CalendarX size={14} className="text-warning" />
 
-            <span>
-                No submission window scheduled
-            </span>
+            <span>No submission window scheduled</span>
         </span>
     );
 }

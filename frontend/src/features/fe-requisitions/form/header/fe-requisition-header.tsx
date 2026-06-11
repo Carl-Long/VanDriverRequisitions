@@ -12,7 +12,6 @@ import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-windo
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { StatusPill } from "../../list/components/status-pill";
 
-
 type Props = {
     mode: FeRequisitionPageMode;
     requisitionNumber?: string | null;
@@ -48,7 +47,6 @@ export function FeRequisitionHeader({
     onApprove,
     onReject,
 }: Readonly<Props>) {
-
     const TITLES: Record<FeRequisitionPageMode, string> = {
         create: "Create New Requisition",
         edit: "Editing Requisition",
@@ -59,7 +57,8 @@ export function FeRequisitionHeader({
     const title = TITLES[mode];
 
     const canApproveOrReject = mode === "approval" && status === "Submitted";
-    const showSubmittedBy = (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
+    const showSubmittedBy =
+        (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
 
     return (
         <div className="pb-2">
@@ -67,14 +66,10 @@ export function FeRequisitionHeader({
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
                         <h1 className="flex flex-wrap items-center gap-3 font-semibold text-lg leading-none tracking-tight">
-                            <span>
-                                {title}
-                            </span>
+                            <span>{title}</span>
 
                             {mode !== "create" && requisitionNumber && (
-                                <span className="font-mono">
-                                    {requisitionNumber}
-                                </span>
+                                <span className="font-mono">{requisitionNumber}</span>
                             )}
                         </h1>
                     </div>
@@ -101,9 +96,7 @@ export function FeRequisitionHeader({
                             <div className="h-4 w-px bg-border" />
 
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">
-                                    Subtotal
-                                </span>
+                                <span className="text-sm text-muted-foreground">Subtotal</span>
 
                                 <span className="font-medium tabular-nums">
                                     {formatCurrencyGB(subtotal)}
@@ -121,16 +114,12 @@ export function FeRequisitionHeader({
 
                                 {submittedAtUtc && (
                                     <>
-                                        <span className="text-muted-foreground">
-                                            •
-                                        </span>
+                                        <span className="text-muted-foreground">•</span>
 
                                         <span className="flex items-center gap-1 text-muted-foreground">
                                             <Calendar className="h-3.5 w-3.5" />
 
-                                            <span>
-                                                {formatDateTime(submittedAtUtc)}
-                                            </span>
+                                            <span>{formatDateTime(submittedAtUtc)}</span>
                                         </span>
                                     </>
                                 )}

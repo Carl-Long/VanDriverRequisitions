@@ -13,7 +13,6 @@ export type NavItemProps = {
     showBadge?: boolean;
 };
 
-
 export function NavItem({
     href,
     label,
@@ -32,7 +31,7 @@ export function NavItem({
                     collapsed ? "justify-center" : "justify-start",
                     active
                         ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted text-foreground"
+                        : "hover:bg-muted text-foreground",
                 )}
             >
                 <div className="relative">
@@ -57,7 +56,7 @@ export function NavItem({
                         "pointer-events-none",
                         "transition-opacity duration-200",
                         "whitespace-nowrap",
-                        "z-50"
+                        "z-50",
                     )}
                 >
                     {label}

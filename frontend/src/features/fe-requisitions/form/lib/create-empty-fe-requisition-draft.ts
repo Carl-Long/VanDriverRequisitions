@@ -27,6 +27,5 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         transferRows: [],
         additionalCostRows: [],
         submissionHistory: [],
-
     };
 }

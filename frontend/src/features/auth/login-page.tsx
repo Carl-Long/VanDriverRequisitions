@@ -8,7 +8,6 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
 import { getApiErrorMessage } from "@/lib/api/client";
 
-
 const DEV_ACCOUNTS = [
     { label: "Admin User", email: "admin@test.com" },
     { label: "Standard User", email: "user@test.com" },
@@ -33,12 +32,7 @@ export function LoginPage() {
         try {
             await login(email.trim());
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to reach API. Is it running?",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to reach API. Is it running?"));
         } finally {
             setLoading(false);
         }
@@ -60,16 +54,14 @@ export function LoginPage() {
                     <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                         Sign in
                     </h1>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Van Driver Requisitions
-                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">Van Driver Requisitions</p>
                 </div>
 
                 {/* Login card */}
                 <div className="rounded-2xl border border-border bg-surface p-6 card-shadow">
                     <Alert tone="info">
-                        This development version uses mock sign-in accounts.
-                        Production users will be redirected to Microsoft Entra ID.
+                        This development version uses mock sign-in accounts. Production users will
+                        be redirected to Microsoft Entra ID.
                     </Alert>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
@@ -95,17 +87,9 @@ export function LoginPage() {
                             />
                         </div>
 
-                        {error && (
-                            <Alert>
-                                {error}
-                            </Alert>
-                        )}
+                        {error && <Alert>{error}</Alert>}
 
-                        <Button
-                            type="submit"
-                            loading={loading}
-                            className="w-full"
-                        >
+                        <Button type="submit" loading={loading} className="w-full">
                             <LogIn size={16} />
                             Sign in
                         </Button>
@@ -121,9 +105,7 @@ export function LoginPage() {
                                 <button
                                     key={account.email}
                                     type="button"
-                                    onClick={() =>
-                                        handleQuickLogin(account.email)
-                                    }
+                                    onClick={() => handleQuickLogin(account.email)}
                                     className={cn(
                                         "flex items-center justify-between rounded-lg border border-border px-3 py-2",
                                         "text-sm text-foreground transition hover:bg-muted cursor-pointer",

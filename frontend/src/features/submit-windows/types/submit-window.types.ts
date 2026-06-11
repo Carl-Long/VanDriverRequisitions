@@ -27,7 +27,4 @@ export type SubmitWindowStatus = {
     hasUpcoming: boolean;
 };
 
-export type SubmitWindowFilter =
-    | "active"
-    | "past"
-    | "deleted";
+export type SubmitWindowFilter = "active" | "past" | "deleted";

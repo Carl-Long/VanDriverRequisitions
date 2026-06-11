@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { fieldBase } from "../field/fieldstyles";
 import { FieldState, fieldStateMap } from "../theme/state";
 
-
 type Props = {
     disabled?: boolean;
     value?: Date;
@@ -45,16 +44,12 @@ export function DatePicker({
                         fieldBase,
                         fieldStateMap[state],
                         "flex cursor-pointer items-center justify-between",
-                        open &&
-                        "border-primary ring-2 ring-primary/20",
+                        open && "border-primary ring-2 ring-primary/20",
                         !open && "hover:bg-muted",
-                        disabled &&
-                        "cursor-not-allowed opacity-60",
+                        disabled && "cursor-not-allowed opacity-60",
                     )}
                 >
-                    {value
-                        ? formatDateGB(value)
-                        : "Select date"}
+                    {value ? formatDateGB(value) : "Select date"}
                 </button>
             </Popover.Trigger>
 
@@ -78,9 +73,7 @@ export function DatePicker({
                     }}
                     fixedWeeks
                     components={{
-                        Chevron: ({
-                            orientation,
-                        }) =>
+                        Chevron: ({ orientation }) =>
                             orientation === "left" ? (
                                 <ChevronLeft className="h-4 w-4 text-primary" />
                             ) : (
@@ -88,11 +81,9 @@ export function DatePicker({
                             ),
                     }}
                     classNames={{
-                        selected:
-                            "rounded-xl bg-primary text-primary-foreground hover:bg-primary",
+                        selected: "rounded-xl bg-primary text-primary-foreground hover:bg-primary",
 
-                        today:
-                            "text-primary",
+                        today: "text-primary",
                     }}
                 />
             </Popover.Content>

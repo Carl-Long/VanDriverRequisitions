@@ -15,43 +15,27 @@ type Props = {
     rows?: number;
 };
 
-export function FeRequisitionTableSkeleton({
-    rows = 8,
-}: Readonly<Props>) {
+export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <Table>
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>
-                            Requisition
-                        </TableHeaderCell>
+                        <TableHeaderCell>Requisition</TableHeaderCell>
 
-                        <TableHeaderCell>
-                            Company
-                        </TableHeaderCell>
+                        <TableHeaderCell>Company</TableHeaderCell>
 
-                        <TableHeaderCell
-                            align="center"
-                            nowrap
-                        >
+                        <TableHeaderCell align="center" nowrap>
                             Status
                         </TableHeaderCell>
 
-                        <TableHeaderCell
-                            align="right"
-                            nowrap
-                        >
+                        <TableHeaderCell align="right" nowrap>
                             Amount
                         </TableHeaderCell>
 
-                        <TableHeaderCell>
-                            Shop
-                        </TableHeaderCell>
+                        <TableHeaderCell>Shop</TableHeaderCell>
 
-                        <TableHeaderCell>
-                            Last Activity
-                        </TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
                     </TableHeaderRow>
                 </TableHeader>
 
@@ -77,20 +61,14 @@ export function FeRequisitionTableSkeleton({
                             </TableCell>
 
                             {/* Status */}
-                            <TableCell
-                                align="center"
-                                nowrap
-                            >
+                            <TableCell align="center" nowrap>
                                 <div className="flex justify-center">
                                     <Skeleton className="h-6 w-24 rounded-full" />
                                 </div>
                             </TableCell>
 
                             {/* Amount */}
-                            <TableCell
-                                align="right"
-                                nowrap
-                            >
+                            <TableCell align="right" nowrap>
                                 <Skeleton className="ml-auto h-4 w-20" />
                             </TableCell>
 

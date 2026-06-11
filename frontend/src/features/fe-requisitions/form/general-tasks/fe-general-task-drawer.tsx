@@ -23,9 +23,7 @@ type Props = {
     limitRule?: RequisitionLimitRuleSummary;
     initialValues?: FeGeneralTaskForm;
     onClose: () => void;
-    onSave: (
-        form: FeGeneralTaskForm,
-    ) => void;
+    onSave: (form: FeGeneralTaskForm) => void;
 };
 
 export function FeGeneralTaskDrawer({
@@ -36,7 +34,6 @@ export function FeGeneralTaskDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-
     const [form, setForm] = useState<FeGeneralTaskForm>(createEmptyFeGeneralTaskForm());
     const [errors, setErrors] = useState<Record<string, string>>({});
     const schema = createFeGeneralTaskFormSchema(limitRule);
@@ -56,9 +53,7 @@ export function FeGeneralTaskDrawer({
         const result = schema.safeParse(form);
 
         if (!result.success) {
-            setErrors(
-                mapZodErrors(result.error),
-            );
+            setErrors(mapZodErrors(result.error));
 
             return;
         }
@@ -76,14 +71,11 @@ export function FeGeneralTaskDrawer({
         });
     }
 
-
     function handleSaveAndAddAnother() {
         const result = schema.safeParse(form);
 
         if (!result.success) {
-            setErrors(
-                mapZodErrors(result.error),
-            );
+            setErrors(mapZodErrors(result.error));
             console.log(result.error.issues);
 
             return;
@@ -93,8 +85,7 @@ export function FeGeneralTaskDrawer({
 
         onSave(result.data);
 
-        setForm(createEmptyFeGeneralTaskForm(result.data.weekEndingDate),
-        );
+        setForm(createEmptyFeGeneralTaskForm(result.data.weekEndingDate));
     }
 
     if (!open) {
@@ -103,14 +94,12 @@ export function FeGeneralTaskDrawer({
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
-
             <div
                 className="
                     flex h-full w-full max-w-2xl
                     flex-col bg-surface shadow-2xl
                 "
             >
-
                 <div
                     className="
                         flex items-center justify-between
@@ -118,45 +107,30 @@ export function FeGeneralTaskDrawer({
                         px-6 py-4
                     "
                 >
-                    <h2 className="text-lg font-semibold">
-                        {title}
-                    </h2>
+                    <h2 className="text-lg font-semibold">{title}</h2>
 
-                    <IconButton
-                        variant="ghost"
-                        tone="accent"
-                        size="sm"
-                        onClick={onClose}
-                    >
+                    <IconButton variant="ghost" tone="accent" size="sm" onClick={onClose}>
                         <X size={18} />
                     </IconButton>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {limitRule && (
-                        <div
-                            className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4"
-                        >
-                            <Info
-                                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
-                            />
+                        <div className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4">
+                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
                             <div className="text-sm">
-                                <div className="font-medium">
-                                    Requisiton Item Limits
-                                </div>
+                                <div className="font-medium">Requisiton Item Limits</div>
 
                                 <div className="mt-1 text-muted-foreground">
-                                    Maximum quantity per day:
-                                    {" "}
+                                    Maximum quantity per day:{" "}
                                     <strong className="text-foreground">
                                         {limitRule.maxQuantity}
                                     </strong>
                                 </div>
 
                                 <div className="text-muted-foreground">
-                                    Maximum rate per job:
-                                    {" "}
+                                    Maximum rate per job:{" "}
                                     <strong className="text-foreground">
                                         {formatCurrencyGB(limitRule.maxRate)}
                                     </strong>
@@ -165,39 +139,24 @@ export function FeGeneralTaskDrawer({
                         </div>
                     )}
 
-                    <Field
-                        label="Week Ending"
-                        required
-                        error={
-                            errors["weekEndingDate"]
-                        }
-                    >
+                    <Field label="Week Ending" required error={errors["weekEndingDate"]}>
                         <DatePicker
-                            value={
-                                form.weekEndingDate ??
-                                undefined
-                            }
+                            value={form.weekEndingDate ?? undefined}
                             onChange={(date) =>
                                 setForm((prev) => ({
                                     ...prev,
 
-                                    weekEndingDate:
-                                        date ?? null,
+                                    weekEndingDate: date ?? null,
                                 }))
                             }
                         />
                     </Field>
 
                     <div className="grid grid-cols-7 gap-3">
-
                         <DayInput
                             label="Sun"
-                            error={
-                                errors["quantities.sunday"]
-                            }
-                            value={
-                                form.quantities.sunday
-                            }
+                            error={errors["quantities.sunday"]}
+                            value={form.quantities.sunday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -205,13 +164,11 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        sunday:
-                                            value ?? null,
+                                        sunday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.sunday");
                                 clearError("form");
-
                             }}
                         />
                         <DayInput
@@ -235,12 +192,8 @@ export function FeGeneralTaskDrawer({
                         />
                         <DayInput
                             label="Tue"
-                            error={
-                                errors["quantities.tuesday"]
-                            }
-                            value={
-                                form.quantities.tuesday
-                            }
+                            error={errors["quantities.tuesday"]}
+                            value={form.quantities.tuesday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -248,8 +201,7 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        tuesday:
-                                            value ?? null,
+                                        tuesday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.tuesday");
@@ -259,12 +211,8 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Wed"
-                            error={
-                                errors["quantities.wednesday"]
-                            }
-                            value={
-                                form.quantities.wednesday
-                            }
+                            error={errors["quantities.wednesday"]}
+                            value={form.quantities.wednesday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -272,8 +220,7 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        wednesday:
-                                            value ?? null,
+                                        wednesday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.wednesday");
@@ -283,12 +230,8 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Thu"
-                            error={
-                                errors["quantities.thursday"]
-                            }
-                            value={
-                                form.quantities.thursday
-                            }
+                            error={errors["quantities.thursday"]}
+                            value={form.quantities.thursday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -296,8 +239,7 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        thursday:
-                                            value ?? null,
+                                        thursday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.thursday");
@@ -307,12 +249,8 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Fri"
-                            error={
-                                errors["quantities.friday"]
-                            }
-                            value={
-                                form.quantities.friday
-                            }
+                            error={errors["quantities.friday"]}
+                            value={form.quantities.friday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -320,8 +258,7 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        friday:
-                                            value ?? null,
+                                        friday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.friday");
@@ -331,12 +268,8 @@ export function FeGeneralTaskDrawer({
 
                         <DayInput
                             label="Sat"
-                            error={
-                                errors["quantities.saturday"]
-                            }
-                            value={
-                                form.quantities.saturday
-                            }
+                            error={errors["quantities.saturday"]}
+                            value={form.quantities.saturday}
                             onChange={(value) => {
                                 setForm((prev) => ({
                                     ...prev,
@@ -344,8 +277,7 @@ export function FeGeneralTaskDrawer({
                                     quantities: {
                                         ...prev.quantities,
 
-                                        saturday:
-                                            value ?? null,
+                                        saturday: value ?? null,
                                     },
                                 }));
                                 clearError("quantities.saturday");
@@ -353,34 +285,18 @@ export function FeGeneralTaskDrawer({
                             }}
                         />
                     </div>
-                    {errors.form && (
-                        <Alert>
-                            {errors.form}
-                        </Alert>
-                    )}
+                    {errors.form && <Alert>{errors.form}</Alert>}
 
-                    <Field
-                        label="Rate Per Job (£)"
-                        required
-                        error={
-                            errors["ratePerJob"]
-                        }
-                    >
+                    <Field label="Rate Per Job (£)" required error={errors["ratePerJob"]}>
                         <div className="max-w-[200px]">
                             <Input
                                 type="number"
                                 value={form.ratePerJob ?? ""}
-                                state={
-                                    errors["ratePerJob"]
-                                        ? "error"
-                                        : "default"
-                                }
+                                state={errors["ratePerJob"] ? "error" : "default"}
                                 onChange={(e) => {
                                     setForm((prev) => ({
                                         ...prev,
-                                        ratePerJob: e.target.value
-                                            ? Number(e.target.value)
-                                            : null,
+                                        ratePerJob: e.target.value ? Number(e.target.value) : null,
                                     }));
 
                                     clearError("ratePerJob");
@@ -396,19 +312,13 @@ export function FeGeneralTaskDrawer({
                         "
                     >
                         <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                                Total Jobs
-                            </span>
+                            <span className="text-muted-foreground">Total Jobs</span>
 
-                            <span className="font-medium">
-                                {totals.totalJobs}
-                            </span>
+                            <span className="font-medium">{totals.totalJobs}</span>
                         </div>
 
                         <div className="mt-3 flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                                Total Value
-                            </span>
+                            <span className="text-muted-foreground">Total Value</span>
 
                             <span className="font-medium">
                                 {formatCurrencyGB(totals.totalValue)}
@@ -417,38 +327,25 @@ export function FeGeneralTaskDrawer({
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-
-                        <Button
-                            tone="accent"
-                            onClick={onClose}
-                        >
+                        <Button tone="accent" onClick={onClose}>
                             Cancel
                         </Button>
 
                         <div className="flex items-center gap-4">
-
                             <Button
                                 className="min-w-[160px]"
                                 variant="outline"
                                 onClick={handleSave}
                             >
-                                {isEditMode
-                                    ? "Update & Close"
-                                    : "Add & Close"}
+                                {isEditMode ? "Update & Close" : "Add & Close"}
                             </Button>
 
                             {!isEditMode && (
-                                <Button
-                                    className="min-w-[160px]"
-                                    onClick={
-                                        handleSaveAndAddAnother
-                                    }
-                                >
+                                <Button className="min-w-[160px]" onClick={handleSaveAndAddAnother}>
                                     <Plus className="h-4 w-4" />
                                     Add & Create Another
                                 </Button>
                             )}
-
                         </div>
                     </div>
                 </div>
@@ -464,37 +361,18 @@ type DayInputProps = {
 
     error?: string;
 
-    onChange: (
-        value?: number,
-    ) => void;
+    onChange: (value?: number) => void;
 };
 
-function DayInput({
-    label,
-    value,
-    error,
-    onChange,
-}: Readonly<DayInputProps>) {
-
+function DayInput({ label, value, error, onChange }: Readonly<DayInputProps>) {
     return (
-        <Field
-            label={label}
-            error={error}
-        >
+        <Field label={label} error={error}>
             <Input
                 type="number"
                 min={0}
                 value={value ?? ""}
                 state={error ? "error" : "default"}
-                onChange={(e) =>
-                    onChange(
-                        e.target.value
-                            ? Number(
-                                e.target.value,
-                            )
-                            : undefined,
-                    )
-                }
+                onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
             />
         </Field>
     );

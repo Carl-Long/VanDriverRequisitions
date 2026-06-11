@@ -15,27 +15,17 @@ export type RequisitionUserSearchQuery = {
 };
 
 export const requisitionUsersApi = {
-    search: (
-        query: RequisitionUserSearchQuery = {},
-    ) => {
+    search: (query: RequisitionUserSearchQuery = {}) => {
         const params = new URLSearchParams();
 
         if (query.search) {
             params.set("search", query.search);
         }
 
-        params.set(
-            "page",
-            String(query.page ?? 1),
-        );
+        params.set("page", String(query.page ?? 1));
 
-        params.set(
-            "pageSize",
-            String(query.pageSize ?? 20),
-        );
+        params.set("pageSize", String(query.pageSize ?? 20));
 
-        return apiFetch<
-            PagedResult<RequisitionUserLookup>
-        >(`${BASE}?${params}`);
+        return apiFetch<PagedResult<RequisitionUserLookup>>(`${BASE}?${params}`);
     },
 };

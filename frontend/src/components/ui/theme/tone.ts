@@ -10,14 +10,11 @@ export type Tone =
 
 export type Variant = "solid" | "outline" | "ghost";
 
-
-export const toneMap: Record<
-    Tone,
-    Record<Variant, string>
-> = {
+export const toneMap: Record<Tone, Record<Variant, string>> = {
     primary: {
         solid: "bg-primary text-primary-foreground hover:opacity-90",
-        outline: "border border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+        outline:
+            "border border-primary text-primary hover:bg-primary hover:text-primary-foreground",
         ghost: "text-primary hover:bg-primary-surface-hover",
     },
 

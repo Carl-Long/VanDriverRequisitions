@@ -7,8 +7,7 @@ export function WelcomeHeading({ userName }: Readonly<WelcomeHeadingProps>) {
 
     return (
         <h1 className="font-semibold tracking-tight text-foreground sm:text-3xl">
-            Welcome back,{" "}
-            <span className="text-primary">{firstName}</span>
+            Welcome back, <span className="text-primary">{firstName}</span>
         </h1>
     );
 }

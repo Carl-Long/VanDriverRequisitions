@@ -9,29 +9,19 @@ type Props = {
     value: string | null;
     label: string | null;
     error?: string;
-    onChange: (
-        params: {
-            id: string | null;
-            label: string | null;
-            summary: VanDriverLookup | null;
-        },
-    ) => void;
+    onChange: (params: {
+        id: string | null;
+        label: string | null;
+        summary: VanDriverLookup | null;
+    }) => void;
 };
 
-export function FeVanDriverField({
-    disabled,
-    value,
-    label,
-    error,
-    onChange,
-}: Readonly<Props>) {
+type VanDriverOption = ComboboxOption<VanDriverLookup>;
+
+export function FeVanDriverField({ disabled, value, label, error, onChange }: Readonly<Props>) {
     return (
-        <Field
-            label="Van Driver"
-            error={error}
-            required
-        >
-            <Combobox
+        <Field label="Van Driver" error={error} required>
+            <Combobox<VanDriverLookup>
                 disabled={disabled}
                 state={error ? "error" : "default"}
                 value={value}
@@ -39,44 +29,26 @@ export function FeVanDriverField({
                 placeholder="Search van drivers..."
                 noMatchesText="No matching van drivers found"
                 onSearch={async (search) => {
-                    const response =
-                        await vanDriversApi.search({
-                            search,
-                            pageSize: 20,
-                        });
+                    const response = await vanDriversApi.search({
+                        search,
+                        pageSize: 20,
+                    });
 
                     return response.items.map(
-                        (
-                            x,
-                        ): ComboboxOption => ({
+                        (x): VanDriverOption => ({
                             value: x.id,
                             label: `${x.code} - ${x.tradersName}`,
-                            data: x
+                            data: x,
                         }),
                     );
                 }}
-                onChange={(
-                    value,
-                    option,
-                ) => {
-                    if (
-                        !value ||
-                        !option
-                    ) {
-                        onChange({
-                            id: null,
-                            label: null,
-                            summary: null,
-                        });
-
+                onChange={(value, option) => {
+                    if (!value || !option) {
+                        onChange({ id: null, label: null, summary: null });
                         return;
                     }
 
-                    onChange({
-                        id: value,
-                        label: option.label,
-                        summary: option.data as VanDriverLookup,
-                    });
+                    onChange({ id: value, label: option.label, summary: option.data ?? null });
                 }}
             />
         </Field>

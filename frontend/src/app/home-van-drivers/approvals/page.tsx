@@ -27,8 +27,7 @@ export default function FeRequisitionApprovalsPage() {
 
     const page = pageFromSearchParams(searchParams);
 
-    const [data, setData] =
-        useState<PagedResult<FeRequisitionSummary> | null>(null);
+    const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -56,12 +55,7 @@ export default function FeRequisitionApprovalsPage() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    setError(
-                        getApiErrorMessage(
-                            err,
-                            "Failed to load approvals.",
-                        ),
-                    );
+                    setError(getApiErrorMessage(err, "Failed to load approvals."));
                 }
             } finally {
                 if (!cancelled) {
@@ -113,11 +107,7 @@ export default function FeRequisitionApprovalsPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
-                    onRowClick={(req) =>
-                        router.push(
-                            `/home-van-drivers/approvals/${req.id}`,
-                        )
-                    }
+                    onRowClick={(req) => router.push(`/home-van-drivers/approvals/${req.id}`)}
                 />
             )}
 

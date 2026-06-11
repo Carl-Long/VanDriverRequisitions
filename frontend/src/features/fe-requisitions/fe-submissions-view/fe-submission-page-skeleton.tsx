@@ -2,7 +2,6 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 function SubmissionHeaderSkeleton() {
     return (
         <div className="rounded-2xl border border-border bg-surface p-6">
@@ -46,14 +45,12 @@ function SnapshotSummarySkeleton() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                {Array.from({ length: 8 }).map(
-                    (_, index) => (
-                        <div key={index}>
-                            <Skeleton className="h-3 w-24" />
-                            <Skeleton className="mt-2 h-5 w-32" />
-                        </div>
-                    ),
-                )}
+                {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index}>
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="mt-2 h-5 w-32" />
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -70,20 +67,14 @@ function GeneralTasksSkeleton() {
 
             <div className="overflow-hidden rounded-2xl border border-border">
                 <div className="space-y-3 p-4">
-                    {Array.from({ length: 6 }).map(
-                        (_, index) => (
-                            <Skeleton
-                                key={index}
-                                className="h-12 w-full"
-                            />
-                        ),
-                    )}
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <Skeleton key={index} className="h-12 w-full" />
+                    ))}
                 </div>
             </div>
         </div>
     );
 }
-
 
 export function FeSubmissionPageSkeleton() {
     return (

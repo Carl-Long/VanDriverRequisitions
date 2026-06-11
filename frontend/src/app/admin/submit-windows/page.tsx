@@ -10,7 +10,6 @@ import { Pagination } from "@/components/ui/pagination";
 
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 
-
 import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/providers/toast-provider";
@@ -22,13 +21,15 @@ import { submitWindowsApi } from "@/features/submit-windows/api/submit-windows-a
 import { SubmitWindowFormModal } from "@/features/submit-windows/components/submit-window-form-modal";
 import { SubmitWindowHero } from "@/features/submit-windows/components/submit-window-hero";
 import { SubmitWindowTable } from "@/features/submit-windows/components/submit-window-table";
-import { SubmitWindow, SubmitWindowFilter } from "@/features/submit-windows/types/submit-window.types";
+import {
+    SubmitWindow,
+    SubmitWindowFilter,
+} from "@/features/submit-windows/types/submit-window.types";
 
 const PAGE_SIZE = 10;
 
 export default function SubmitWindowsPage() {
-    const [data, setData] =
-        useState<PagedResult<SubmitWindow> | null>(null);
+    const [data, setData] = useState<PagedResult<SubmitWindow> | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,8 +39,7 @@ export default function SubmitWindowsPage() {
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] =
-        useState<SubmitWindow | null>(null);
+    const [editing, setEditing] = useState<SubmitWindow | null>(null);
 
     // Hero status
     const {
@@ -63,16 +63,14 @@ export default function SubmitWindowsPage() {
                 return {
                     icon: CalendarX,
                     title: "No past submit windows",
-                    description:
-                        "Once submit windows close, they will appear here.",
+                    description: "Once submit windows close, they will appear here.",
                 };
 
             case "deleted":
                 return {
                     icon: CalendarX,
                     title: "No deleted submit windows",
-                    description:
-                        "Deleted submit windows will appear here.",
+                    description: "Deleted submit windows will appear here.",
                 };
 
             default:
@@ -89,21 +87,11 @@ export default function SubmitWindowsPage() {
         setError(null);
 
         try {
-            const result =
-                await submitWindowsApi.getAll(
-                    page,
-                    PAGE_SIZE,
-                    filter,
-                );
+            const result = await submitWindowsApi.getAll(page, PAGE_SIZE, filter);
 
             setData(result);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load submit windows.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load submit windows."));
         } finally {
             setLoading(false);
         }
@@ -130,11 +118,7 @@ export default function SubmitWindowsPage() {
         setModalOpen(true);
     }
 
-    async function handleSubmit(data: {
-        openFrom: string;
-        openTo: string;
-    }) {
-
+    async function handleSubmit(data: { openFrom: string; openTo: string }) {
         if (editing) {
             await submitWindowsApi.update(editing.id, data);
             toast.success(`Submit window updated`);
@@ -146,27 +130,16 @@ export default function SubmitWindowsPage() {
         setModalOpen(false);
         setEditing(null);
 
-        await Promise.all([
-            load(),
-            refreshStatus(),
-        ]);
+        await Promise.all([load(), refreshStatus()]);
     }
 
     async function handleDelete(window: SubmitWindow) {
         try {
             await submitWindowsApi.delete(window.id);
             toast.success("Submit window deleted");
-            await Promise.all([
-                load(),
-                refreshStatus(),
-            ]);
+            await Promise.all([load(), refreshStatus()]);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to delete submit window.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to delete submit window."));
         }
     }
 
@@ -235,19 +208,9 @@ export default function SubmitWindowsPage() {
                 </div>
             </div>
 
+            {error && <Alert>{error}</Alert>}
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
-
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={5}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={5} />}
 
             {/* Empty state */}
             {!loading && data?.items.length === 0 && (
@@ -259,30 +222,24 @@ export default function SubmitWindowsPage() {
             )}
 
             {/* Table */}
-            {
-                !loading &&
-                data &&
-                data.items.length > 0 && (
-                    <SubmitWindowTable
-                        items={data.items}
-                        filter={filter}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
-                    />
-                )
-            }
+            {!loading && data && data.items.length > 0 && (
+                <SubmitWindowTable
+                    items={data.items}
+                    filter={filter}
+                    onEdit={openEdit}
+                    onDelete={handleDelete}
+                />
+            )}
 
             {/* Pagination */}
-            {
-                data && data.totalPages > 1 && (
-                    <Pagination
-                        page={data.page}
-                        totalPages={data.totalPages}
-                        onPageChange={handlePageChange}
-                        className="mt-6"
-                    />
-                )
-            }
+            {data && data.totalPages > 1 && (
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    onPageChange={handlePageChange}
+                    className="mt-6"
+                />
+            )}
 
             {/* Modal */}
             <SubmitWindowFormModal
@@ -295,6 +252,6 @@ export default function SubmitWindowsPage() {
                 onSubmit={handleSubmit}
                 initial={editing}
             />
-        </PageContainer >
+        </PageContainer>
     );
 }

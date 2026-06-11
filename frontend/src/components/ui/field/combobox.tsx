@@ -1,48 +1,33 @@
 "use client";
 
-import {
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-    Check,
-    ChevronDown,
-    Loader2,
-    Search,
-} from "lucide-react";
+import { Check, ChevronDown, Loader2, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { fieldBase } from "./fieldstyles";
 
-export type ComboboxOption = {
+export type ComboboxOption<TData = unknown> = {
     value: string;
     label: string;
-    data?: unknown;
+    data?: TData;
 };
 
-type Props = {
+type Props<TData = unknown> = {
     disabled?: boolean;
     state?: "default" | "error";
     value: string | null;
     label?: string | null;
     placeholder?: string;
-    options?: ComboboxOption[];
-    pinnedOptions?: ComboboxOption[];
     noMatchesText?: string;
     emptyStateText?: string;
-    onSearch?: (
-        search: string,
-    ) => Promise<ComboboxOption[]>;
-    onChange: (
-        value: string | null,
-        option: ComboboxOption | null,
-    ) => void;
+    options?: ComboboxOption<TData>[];
+    pinnedOptions?: ComboboxOption<TData>[];
+    onSearch?: (search: string) => Promise<ComboboxOption<TData>[]>;
+    onChange: (value: string | null, option: ComboboxOption<TData> | null) => void;
 };
 
-export function Combobox({
+export function Combobox<TData = unknown>({
     disabled = false,
     state = "default",
     value,
@@ -54,10 +39,10 @@ export function Combobox({
     noMatchesText = "No matching results",
     onSearch,
     onChange,
-}: Readonly<Props>) {
+}: Readonly<Props<TData>>) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
-    const [asyncOptions, setAsyncOptions] = useState<ComboboxOption[]>([]);
+    const [asyncOptions, setAsyncOptions] = useState<ComboboxOption<TData>[]>([]);
     const [loading, setLoading] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -75,18 +60,9 @@ export function Combobox({
         const normalisedSearch = search.toLowerCase();
 
         return options
-            .filter((x) =>
-                x.label
-                    .toLowerCase()
-                    .includes(normalisedSearch),
-            )
+            .filter((x) => x.label.toLowerCase().includes(normalisedSearch))
             .slice(0, maxVisibleOptions);
-    }, [
-        options,
-        search,
-        asyncOptions,
-        onSearch,
-    ]);
+    }, [options, search, asyncOptions, onSearch]);
 
     useEffect(() => {
         if (!open) return;
@@ -122,33 +98,20 @@ export function Combobox({
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
-            if (
-                !wrapperRef.current?.contains(
-                    e.target as Node,
-                )
-            ) {
+            if (!wrapperRef.current?.contains(e.target as Node)) {
                 setOpen(false);
             }
         }
 
-        document.addEventListener(
-            "mousedown",
-            handleClick,
-        );
+        document.addEventListener("mousedown", handleClick);
 
         return () => {
-            document.removeEventListener(
-                "mousedown",
-                handleClick,
-            );
+            document.removeEventListener("mousedown", handleClick);
         };
     }, []);
 
     return (
-        <div
-            ref={wrapperRef}
-            className="relative"
-        >
+        <div ref={wrapperRef} className="relative">
             <button
                 type="button"
                 onClick={() => {
@@ -162,20 +125,12 @@ export function Combobox({
                     fieldBase,
                     "cursor-pointer flex items-center justify-between",
 
-                    state === "error" &&
-                    "border-danger ring-1 ring-danger/30",
+                    state === "error" && "border-danger ring-1 ring-danger/30",
 
-                    disabled &&
-                    "cursor-not-allowed opacity-60",
+                    disabled && "cursor-not-allowed opacity-60",
                 )}
             >
-                <span
-                    className={cn(
-                        "truncate",
-                        !label &&
-                        "text-muted-foreground",
-                    )}
-                >
+                <span className={cn("truncate", !label && "text-muted-foreground")}>
                     {label ?? placeholder}
                 </span>
 
@@ -199,21 +154,16 @@ export function Combobox({
                     </div>
 
                     <div className="max-h-64 overflow-y-auto py-1">
-
                         {/* Pinned options */}
                         {pinnedOptions.map((option) => {
-                            const selected =
-                                option.value === value;
+                            const selected = option.value === value;
 
                             return (
                                 <button
                                     key={option.value}
                                     type="button"
                                     onClick={() => {
-                                        onChange(
-                                            option.value,
-                                            option,
-                                        );
+                                        onChange(option.value, option);
 
                                         setOpen(false);
                                     }}
@@ -223,52 +173,37 @@ export function Combobox({
                                 >
                                     <Check
                                         size={14}
-                                        className={cn(
-                                            selected
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                        )}
+                                        className={cn(selected ? "opacity-100" : "opacity-0")}
                                     />
 
-                                    <span className="truncate">
-                                        {option.label}
-                                    </span>
+                                    <span className="truncate">{option.label}</span>
                                 </button>
                             );
                         })}
 
                         {/* Divider */}
-                        {pinnedOptions.length > 0 &&
-                            finalOptions.length > 0 && (
-                                <div className="my-1 border-t border-border" />
-                            )}
+                        {pinnedOptions.length > 0 && finalOptions.length > 0 && (
+                            <div className="my-1 border-t border-border" />
+                        )}
 
                         {/* Async / normal options */}
                         {loading && (
                             <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-muted-foreground">
-                                <Loader2
-                                    size={14}
-                                    className="animate-spin"
-                                />
-
+                                <Loader2 size={14} className="animate-spin" />
                                 Loading...
                             </div>
                         )}
 
                         {!loading &&
                             finalOptions.map((option) => {
-                                const selected =
-                                    option.value === value;
+                                const selected = option.value === value;
 
                                 return (
                                     <button
                                         key={option.value}
                                         type="button"
                                         onClick={() => {
-                                            onChange(
-                                                option.value,
-                                                option,
-                                            );
+                                            onChange(option.value, option);
 
                                             setOpen(false);
                                         }}
@@ -278,35 +213,25 @@ export function Combobox({
                                     >
                                         <Check
                                             size={14}
-                                            className={cn(
-                                                selected
-                                                    ? "opacity-100"
-                                                    : "opacity-0",
-                                            )}
+                                            className={cn(selected ? "opacity-100" : "opacity-0")}
                                         />
 
-                                        <span className="truncate">
-                                            {option.label}
-                                        </span>
+                                        <span className="truncate">{option.label}</span>
                                     </button>
                                 );
                             })}
 
-                        {!loading &&
-                            pinnedOptions.length === 0 &&
-                            finalOptions.length === 0 && (
-                                <div className="px-3 py-4 text-sm text-muted-foreground">
-                                    {emptyStateText}
-                                </div>
-                            )}
+                        {!loading && pinnedOptions.length === 0 && finalOptions.length === 0 && (
+                            <div className="px-3 py-4 text-sm text-muted-foreground">
+                                {emptyStateText}
+                            </div>
+                        )}
 
-                        {!loading &&
-                            pinnedOptions.length > 0 &&
-                            finalOptions.length === 0 && (
-                                <div className="px-3 py-2 text-xs text-muted-foreground">
-                                    {noMatchesText}
-                                </div>
-                            )}
+                        {!loading && pinnedOptions.length > 0 && finalOptions.length === 0 && (
+                            <div className="px-3 py-2 text-xs text-muted-foreground">
+                                {noMatchesText}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
