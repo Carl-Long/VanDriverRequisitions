@@ -17,7 +17,7 @@ import {
     type FeReason,
 } from "@/lib/api/fe-reasons";
 
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
+import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";

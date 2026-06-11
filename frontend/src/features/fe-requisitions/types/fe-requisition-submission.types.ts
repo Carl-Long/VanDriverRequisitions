@@ -1,4 +1,4 @@
-import { SubmissionStatus } from "@/components/fe-requisitions/fe-submissions-view/submission-status";
+import { SubmissionStatus } from "../fe-submissions-view/submission-status";
 import { WeeklyQuantities } from "./fe-requisition.types";
 
 export type FeRequisitionSubmissionDetail = {

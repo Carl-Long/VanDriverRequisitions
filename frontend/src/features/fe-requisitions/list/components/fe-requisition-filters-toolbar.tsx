@@ -8,16 +8,13 @@ import {
 
 import { Button } from "@/components/ui/button/button";
 import { Surface } from "@/components/ui/surface";
-
 import { cn } from "@/lib/utils";
-
-import type { FeRequisitionFilters } from "../types/fe-requisiton-filters.types";
-
-import { CreatedByUserFilterField } from "../../../components/fe-requisitions/filter-fields/created-by-user-filter-field";
-import { StatusFilterField } from "../../../components/fe-requisitions/filter-fields/status-filter-field";
-import { ShopFilterField } from "../../../components/fe-requisitions/filter-fields/shop-filter-field";
-import { fieldBase } from "../../../components/ui/field/fieldstyles";
-import { Input } from "../../../components/ui/field/input";
+import { fieldBase } from "@/components/ui/field/fieldstyles";
+import { Input } from "@/components/ui/field/input";
+import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
+import { CreatedByUserFilterField } from "../filter-fields/created-by-user-filter-field";
+import { ShopFilterField } from "../filter-fields/shop-filter-field";
+import { StatusFilterField } from "../filter-fields/status-filter-field";
 
 type Props = {
     filters: FeRequisitionFilters;

@@ -12,17 +12,17 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/providers/auth-provider";
 import type { PagedResult } from "@/lib/types";
 import type { FeRequisitionFilters } from "@/features/fe-requisitions/types/fe-requisiton-filters.types";
-import { buildFeRequisitionQuery } from "@/features/fe-requisitions/lib/build-fe-requisition-query";
-import { FeRequisitionTable } from "@/features/fe-requisitions/components/fe-requisition-table";
-import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/components/fe-requisition-filters-toolbar";
-import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/components/fe-requisition-table-skeleton";
-import { getApiErrorMessage } from "@/lib/api/client";
-import { Alert } from "@/components/ui/alert";
-import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams } from "@/features/fe-requisitions/lib/url-state";
 import { canCreateRequisitions } from "@/lib/auth/roles";
 import NotFound from "../not-found";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { Alert } from "@/components/ui/alert";
+import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/list/components/fe-requisition-filters-toolbar";
+import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
+import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
+import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
+import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
+import { getApiErrorMessage } from "@/lib/api/client";
 
 
 export default function HomeVanDriversPage() {

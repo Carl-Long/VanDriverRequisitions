@@ -3,15 +3,16 @@
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
-import { ShopFilterField } from "../../filter-fields/shop-filter-field";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
 import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
-import { StatusPill } from "../../../../features/fe-requisitions/components/status-pill";
+
 import { Alert } from "@/components/ui/alert";
+import { StatusPill } from "../../list/components/status-pill";
+import { ShopFilterField } from "../../list/filter-fields/shop-filter-field";
 
 type Props = {
     readonly: boolean;

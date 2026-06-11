@@ -1,15 +1,15 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
-import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
-import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
-import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
-import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
 import { canCreateRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
+import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
+import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
+import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
+import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
 
 export default function NewRequisitionPage() {
     const {

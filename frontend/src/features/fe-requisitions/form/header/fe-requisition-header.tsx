@@ -1,7 +1,6 @@
 "use client";
 
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { StatusPill } from "../../../../features/fe-requisitions/components/status-pill";
 import { FeRequisitionActions } from "./fe-requisition-actions";
 import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
@@ -11,6 +10,7 @@ import { User, Calendar } from "lucide-react";
 import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
+import { StatusPill } from "../../list/components/status-pill";
 
 
 type Props = {

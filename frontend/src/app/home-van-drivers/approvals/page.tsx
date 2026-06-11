@@ -10,14 +10,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import type { PagedResult } from "@/lib/types";
 import { getApiErrorMessage } from "@/lib/api/client";
-import { FeRequisitionTable } from "@/features/fe-requisitions/components/fe-requisition-table";
-import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/components/fe-requisition-table-skeleton";
-import { pageFromSearchParams } from "@/features/fe-requisitions/lib/url-state";
 import NotFound from "@/app/not-found";
 import { canApproveRequisitions } from "@/lib/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
+import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
+import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
