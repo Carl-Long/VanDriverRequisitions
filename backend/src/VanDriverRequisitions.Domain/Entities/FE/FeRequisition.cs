@@ -68,11 +68,13 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public static FeRequisition Create(
         string requisitionNumber,
         RequisitionDetails details,
-        IEnumerable<FeGeneralTaskUpdateModel> taskModels)
+        IEnumerable<FeGeneralTaskUpdateModel> taskModels,
+        IEnumerable<FeMileageUpdateModel> mileageModels)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requisitionNumber);
         ArgumentNullException.ThrowIfNull(details);
         ArgumentNullException.ThrowIfNull(taskModels);
+        ArgumentNullException.ThrowIfNull(mileageModels);
 
         var requisition = new FeRequisition
         {
@@ -82,6 +84,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         requisition.UpdateDetails(details);
         requisition.SyncGeneralTasks(taskModels);
+        requisition.SyncMileages(mileageModels);
 
         return requisition;
     }
@@ -150,6 +153,48 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             }
         }
 
+        RecalculateSubtotal();
+    }
+    
+    public void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
+    {
+        ArgumentNullException.ThrowIfNull(incomingMileages);
+
+        var incomingList = incomingMileages.ToList();
+        var existingMileages = _feMileages.ToDictionary(x => x.Id);
+
+        var incomingIds = incomingList
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        var mileagesToRemove = _feMileages
+            .Where(x => !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var mileage in mileagesToRemove)
+        {
+            _feMileages.Remove(mileage);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (incoming.Id.HasValue)
+            {
+                if (!existingMileages.TryGetValue(incoming.Id.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Mileage '{incoming.Id}' not found.");
+                }
+                
+                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
+            }
+            else
+            {
+                var mileage = FeMileage.Create(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
+                _feMileages.Add(mileage);
+            }
+        }
+        
         RecalculateSubtotal();
     }
 

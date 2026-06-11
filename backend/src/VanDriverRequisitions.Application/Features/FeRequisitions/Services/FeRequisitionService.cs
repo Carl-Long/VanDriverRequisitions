@@ -83,7 +83,11 @@ public class FeRequisitionService(
 
         var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
         var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
-        var requisition = FeRequisition.Create(requisitionNumber, requisitionData.Details, requisitionData.TaskModels);
+        var requisition = FeRequisition.Create(
+            requisitionNumber,
+            requisitionData.Details,
+            requisitionData.TaskModels,
+            requisitionData.MileageModels);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
@@ -134,7 +138,11 @@ public class FeRequisitionService(
         else
         {
             var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
-            requisition = FeRequisition.Create(requisitionNumber, requisitionData.Details, requisitionData.TaskModels);
+            requisition = FeRequisition.Create(
+                requisitionNumber,
+                requisitionData.Details,
+                requisitionData.TaskModels,
+                requisitionData.MileageModels);
             
             context.FeRequisitions.Add(requisition);
         }
@@ -249,8 +257,14 @@ public class FeRequisitionService(
 
         var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
         var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
+        var mileageModels = BuildMileageModels(saveFeRequisitionDto.FeMileages);
 
-        return new RequisitionBuildData(driverSummary, details, taskModels, shop.IsActive);
+        return new RequisitionBuildData(
+            driverSummary,
+            details,
+            taskModels,
+            mileageModels,
+            shop.IsActive);
     }
     
     private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks, IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
@@ -262,6 +276,11 @@ public class FeRequisitionService(
                 return FeGeneralTaskModelMapper.ToUpdateModel(dto, taskType);
             })
             .ToList();
+    }
+    
+    private static List<FeMileageUpdateModel> BuildMileageModels(IEnumerable<SaveFeMileageDto> mileages)
+    {
+        return mileages.Select(FeMileageModelMapper.ToUpdateModel).ToList();
     }
 
     private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
@@ -280,6 +299,7 @@ public class FeRequisitionService(
     {
         requisition.UpdateDetails(requisitionData.Details);
         requisition.SyncGeneralTasks(requisitionData.TaskModels);
+        requisition.SyncMileages(requisitionData.MileageModels);
     }
 
     private AuditUser GetAuditUser(string actionName)
@@ -311,5 +331,10 @@ public class FeRequisitionService(
         }
     }
     
-    private sealed record RequisitionBuildData(VanDriverLookupDto DriverSummary, RequisitionDetails Details, List<FeGeneralTaskUpdateModel> TaskModels, bool IsShopActive);
+    private sealed record RequisitionBuildData(
+        VanDriverLookupDto DriverSummary,
+        RequisitionDetails Details,
+        List<FeGeneralTaskUpdateModel> TaskModels,
+        List<FeMileageUpdateModel> MileageModels,
+        bool IsShopActive);
 }

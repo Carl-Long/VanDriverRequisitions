@@ -31,7 +31,10 @@ public static class FeRequisitionSnapshotFactory
                 .Select(CreateGeneralTaskSnapshot)
                 .ToList(),
 
-            Mileages = [],
+            Mileages = requisition.FeMileages
+                .Select(CreateMileageSnapshot)
+                .ToList(),
+            
             Transfers = [],
             AdditionalCosts = []
         };
@@ -59,6 +62,29 @@ public static class FeRequisitionSnapshotFactory
             TotalNumber = task.TotalNumber,
             RatePerJob = task.RatePerJob,
             TotalValue = task.TotalValue
+        };
+    }
+    
+    private static FeMileageSnapshot CreateMileageSnapshot(FeMileage mileage)
+    {
+        return new FeMileageSnapshot
+        {
+            WeekEndingDate = mileage.WeekEndingDate,
+
+            Week = new WeeklyQuantitiesSnapshot
+            {
+                Saturday = mileage.Week.Saturday ?? 0,
+                Sunday = mileage.Week.Sunday ?? 0,
+                Monday = mileage.Week.Monday ?? 0,
+                Tuesday = mileage.Week.Tuesday ?? 0,
+                Wednesday = mileage.Week.Wednesday ?? 0,
+                Thursday = mileage.Week.Thursday ?? 0,
+                Friday = mileage.Week.Friday ?? 0
+            },
+
+            TotalMiles = mileage.TotalMiles ?? 0,
+            RatePerMile = mileage.RatePerMile ?? 0,
+            TotalValue = mileage.TotalValue ?? 0
         };
     }
 }

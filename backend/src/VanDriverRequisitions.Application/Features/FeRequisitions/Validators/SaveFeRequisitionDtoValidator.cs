@@ -26,12 +26,11 @@ public sealed class SaveFeRequisitionDtoValidator
             .SetValidator(new SaveFeGeneralTaskDtoValidator());
     }
 
-    private static bool HaveAtLeastOneRow(
-        SaveFeRequisitionDto saveFeRequisitionDto)
+    private static bool HaveAtLeastOneRow(SaveFeRequisitionDto saveFeRequisitionDto)
     {
-        return saveFeRequisitionDto.FeGeneralTasks.Any();
-        //       || dto.FeMileages.Any()
+        return saveFeRequisitionDto.FeGeneralTasks.Any()
+               || saveFeRequisitionDto.FeMileages.Any();
         //     || dto.FeTransfers.Any()
-        //   || dto.FeAdditionalCosts.Any();
+        //     || dto.FeAdditionalCosts.Any();
     }
 }

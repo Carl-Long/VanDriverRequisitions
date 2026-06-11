@@ -43,9 +43,13 @@ public static class FeRequisitionMapper
             SubmittedByNameSnapshot = requisition.SubmittedByNameSnapshot,
             
             FeGeneralTasks = requisition.FeGeneralTasks
-                    .Select(MapGeneralTaskDetail)
-                    .ToList(),
-            
+                .Select(MapGeneralTaskDetail)
+                .ToList(),
+
+            FeMileages = requisition.FeMileages
+                .Select(MapMileageDetail)
+                .ToList(),
+
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };
     }
@@ -81,6 +85,19 @@ public static class FeRequisitionMapper
             TotalNumber = task.TotalNumber,
             RatePerJob = task.RatePerJob,
             TotalValue = task.TotalValue
+        };
+    }
+    
+    private static FeMileageDetailDto MapMileageDetail(FeMileage mileage)
+    {
+        return new FeMileageDetailDto
+        {
+            Id = mileage.Id,
+            WeekEndingDate = mileage.WeekEndingDate,
+            Week = MapWeekToDto(mileage.Week),
+            TotalMiles = mileage.TotalMiles,
+            RatePerMile = mileage.RatePerMile,
+            TotalValue = mileage.TotalValue
         };
     }
     

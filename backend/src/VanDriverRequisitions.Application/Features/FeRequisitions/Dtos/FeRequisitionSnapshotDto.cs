@@ -12,4 +12,5 @@ public sealed class FeRequisitionSnapshotDto
     public bool IsVatApplicable { get; init; }
     public decimal Subtotal { get; init; }
     public List<FeGeneralTaskSnapshotDto> GeneralTasks { get; init; } = [];
+    public List<FeMileageSnapshotDto> Mileages { get; init; } = [];
 }

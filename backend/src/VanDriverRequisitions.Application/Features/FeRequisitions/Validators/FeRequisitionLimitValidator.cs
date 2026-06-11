@@ -9,12 +9,12 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 
 public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) : IFeRequisitionLimitValidator
 {
-    public async Task ValidateAsync(
-        FeRequisition requisition,
-        CancellationToken cancellationToken)
+    public async Task ValidateAsync(FeRequisition requisition, CancellationToken cancellationToken)
     {
         var rules = await context.RequisitionLimitRules
-            .Where(x => x.Category == RequisitionRowCategory.GeneralTask)
+            .Where(x =>
+                x.Category == RequisitionRowCategory.GeneralTask ||
+                x.Category == RequisitionRowCategory.Mileage)
             .ToListAsync(cancellationToken);
 
         var failures = new List<ValidationFailure>();
@@ -64,6 +64,54 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
                     new ValidationFailure(
                         nameof(task.RatePerJob),
                         $"{task.TaskTypeName} exceeds maximum rate of £{rule.MaxRate:0.00}."));
+            }
+        }
+        
+        var mileageRule = rules.FirstOrDefault(x =>
+            x.Category == RequisitionRowCategory.Mileage);
+
+        foreach (var mileage in requisition.FeMileages)
+        {
+            if (mileageRule is null)
+            {
+                failures.Add(
+                    new ValidationFailure(
+                        "Form",
+                        "No limit rule is configured for mileage."));
+
+                continue;
+            }
+
+            var dailyValues = new[]
+            {
+                mileage.Week.Sunday,
+                mileage.Week.Monday,
+                mileage.Week.Tuesday,
+                mileage.Week.Wednesday,
+                mileage.Week.Thursday,
+                mileage.Week.Friday,
+                mileage.Week.Saturday
+            };
+
+            for (var i = 0; i < dailyValues.Length; i++)
+            {
+                var value = dailyValues[i];
+
+                if (value > mileageRule.MaxQuantity)
+                {
+                    failures.Add(
+                        new ValidationFailure(
+                            nameof(mileage.TotalMiles),
+                            $"Mileage exceeds daily maximum of {mileageRule.MaxQuantity} on {GetDayName(i)}."));
+                }
+            }
+
+            if (mileage.RatePerMile > mileageRule.MaxRate)
+            {
+                failures.Add(
+                    new ValidationFailure(
+                        nameof(mileage.RatePerMile),
+                        $"Mileage exceeds maximum rate of £{mileageRule.MaxRate:0.00}."));
             }
         }
 

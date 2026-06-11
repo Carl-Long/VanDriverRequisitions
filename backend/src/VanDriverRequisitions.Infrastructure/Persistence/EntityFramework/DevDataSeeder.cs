@@ -40,7 +40,7 @@ public static class DevDataSeeder
         var hasDrivers = await context.VanDrivers.AnyAsync();
         var hasRequisitions = await context.FeRequisitions.AnyAsync();
 
-        if (hasTaskTypes && hasRules && hasShops && hasDrivers)
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasRequisitions)
         {
             logger?.LogInformation("Dev seed already exists — skipping.");
             return;
@@ -349,11 +349,18 @@ public static class DevDataSeeder
                     shop.Code,
                     shop.Name));
 
-            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+            var requisitionDate = DateOnly.FromDateTime(createdDate);
+
+            var taskModels = BuildSeedTasks(rng, taskTypes, requisitionDate);
+            var mileageModels = BuildSeedMileages(rng, requisitionDate);
 
             var requisitionNumber = $"F{i:D9}";
 
-            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+            var requisition = FeRequisition.Create(
+                requisitionNumber,
+                details,
+                taskModels,
+                mileageModels);
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
             requisition.CreatedByNameSnapshot = user.Name;
@@ -497,6 +504,38 @@ public static class DevDataSeeder
 
         return tasks;
     }
+    
+    private static List<FeMileageUpdateModel> BuildSeedMileages(
+        Random rng,
+        DateOnly requisitionDate)
+    {
+        // Not every seeded requisition needs mileage.
+        // This gives a decent spread of requisitions with and without mileage.
+        var includeMileage = rng.Next(0, 2) == 1;
+
+        if (!includeMileage)
+        {
+            return [];
+        }
+
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        return
+        [
+            new FeMileageUpdateModel(
+                null,
+                weekEndingDate,
+                new WeeklyQuantities(
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41)),
+                0.45m)
+        ];
+    }
 
     private static string Esc(string value) => value.Replace("'", "''");
 
@@ -540,6 +579,16 @@ public static class DevDataSeeder
                 x.WeekEndingDate,
                 x.Week,
                 x.RatePerJob,
+                x.TotalValue
+            }),
+
+            Mileages = requisition.FeMileages.Select(x => new
+            {
+                x.Id,
+                x.WeekEndingDate,
+                x.Week,
+                x.TotalMiles,
+                x.RatePerMile,
                 x.TotalValue
             })
         });
