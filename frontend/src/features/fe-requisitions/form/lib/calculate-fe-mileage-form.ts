@@ -1,7 +1,7 @@
-import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { FeMileageForm } from "../types/fe-mileage-form";
 
-export function calculateFeGeneralTaskFormTotals(form: FeGeneralTaskForm) {
-    const totalJobs =
+export function calculateFeMileageFormTotals(form: FeMileageForm) {
+    const totalMiles =
         (form.quantities.sunday ?? 0) +
         (form.quantities.monday ?? 0) +
         (form.quantities.tuesday ?? 0) +
@@ -10,7 +10,7 @@ export function calculateFeGeneralTaskFormTotals(form: FeGeneralTaskForm) {
         (form.quantities.friday ?? 0) +
         (form.quantities.saturday ?? 0);
 
-    const totalValue = totalJobs * (form.ratePerJob ?? 0);
+    const totalValue = totalMiles * (form.ratePerMile ?? 0);
 
-    return { totalJobs, totalValue };
+    return { totalMiles, totalValue };
 }

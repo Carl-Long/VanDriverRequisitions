@@ -1,5 +1,18 @@
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
+import { FeMileageDraft } from "../types/fe-mileage-draft";
+import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 
 export function calculateGeneralTasksSubtotal(tasks: FeGeneralTaskDraft[]): number {
     return tasks.reduce((sum, task) => sum + (task.totalValue ?? 0), 0);
+}
+
+export function calculateMileageSubtotal(tasks: FeMileageDraft[]): number {
+    return tasks.reduce((sum, task) => sum + (task.totalValue ?? 0), 0);
+}
+
+export function calculateFeRequisitionSubtotal(draft: FeRequisitionDraft) {
+    return (
+        calculateGeneralTasksSubtotal(draft.feGeneralTasks) +
+        calculateMileageSubtotal(draft.feMileages)
+    );
 }

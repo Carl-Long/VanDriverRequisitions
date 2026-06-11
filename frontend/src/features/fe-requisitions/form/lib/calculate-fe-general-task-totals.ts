@@ -5,21 +5,13 @@ export function calculateFeGeneralTaskTotals(tasks: FeGeneralTaskDraft[]): FeGen
     return tasks.reduce<FeGeneralTaskTotals>(
         (acc, task) => {
             acc.sunday += task.quantities.sunday ?? 0;
-
             acc.monday += task.quantities.monday ?? 0;
-
             acc.tuesday += task.quantities.tuesday ?? 0;
-
             acc.wednesday += task.quantities.wednesday ?? 0;
-
             acc.thursday += task.quantities.thursday ?? 0;
-
             acc.friday += task.quantities.friday ?? 0;
-
             acc.saturday += task.quantities.saturday ?? 0;
-
             acc.totalJobs += task.totalNumber;
-
             acc.subtotal += task.totalValue;
 
             return acc;

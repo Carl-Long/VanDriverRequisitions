@@ -3,6 +3,7 @@ import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 import { FeSubmissionHistoryDraft } from "./fe-submission-history-draft";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
+import { FeMileageDraft } from "./fe-mileage-draft";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;
@@ -29,8 +30,8 @@ export type FeRequisitionDraft = {
     rejectedAtUtc: string | null;
 
     feGeneralTasks: FeGeneralTaskDraft[];
-    mileageRows: [];
-    transferRows: [];
-    additionalCostRows: [];
+    feMileages: FeMileageDraft[];
+    feTransfers: [];
+    feAdditionalCosts: [];
     submissionHistory: FeSubmissionHistoryDraft[];
 };

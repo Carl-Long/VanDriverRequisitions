@@ -28,13 +28,9 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
 
         feGeneralTasks: detail.feGeneralTasks.map((task) => ({
             id: task.id,
-
             clientId: crypto.randomUUID(),
-
             taskTypeId: task.feTaskTypeId,
-
             taskTypeLabel: task.taskTypeName,
-
             weekEndingDate: new Date(task.weekEndingDate),
 
             quantities: {
@@ -48,14 +44,32 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             },
 
             totalNumber: task.totalNumber,
-
             ratePerJob: task.ratePerJob,
-
             totalValue: task.totalValue ?? 0,
         })),
 
-        mileageRows: [],
-        transferRows: [],
-        additionalCostRows: [],
+        feMileages: detail.feMileages.map((mileage) => ({
+            id: mileage.id,
+            clientId: crypto.randomUUID(),
+            weekEndingDate: new Date(mileage.weekEndingDate),
+
+            quantities: {
+                sunday: mileage.week.sunday,
+                monday: mileage.week.monday,
+                tuesday: mileage.week.tuesday,
+                wednesday: mileage.week.wednesday,
+                thursday: mileage.week.thursday,
+                friday: mileage.week.friday,
+                saturday: mileage.week.saturday,
+            },
+
+            totalMiles: mileage.totalMiles ?? 0,
+            ratePerMile: mileage.ratePerMile,
+            totalValue: mileage.totalValue ?? 0,
+        })),
+
+
+        feTransfers: [],
+        feAdditionalCosts: [],
     };
 }

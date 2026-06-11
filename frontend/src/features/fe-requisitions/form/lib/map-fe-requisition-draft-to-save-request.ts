@@ -12,9 +12,7 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
 
         feGeneralTasks: draft.feGeneralTasks.map((task) => ({
             id: task.id,
-
             feTaskTypeId: task.taskTypeId ?? "",
-
             weekEndingDate: toDateOnlyString(task.weekEndingDate) ?? "",
 
             week: {
@@ -30,7 +28,24 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
             ratePerJob: task.ratePerJob,
         })),
 
-        feMileages: [],
+        feMileages: draft.feMileages.map((mileage) => ({
+            id: mileage.id,
+            weekEndingDate: toDateOnlyString(mileage.weekEndingDate) ?? "",
+
+            week: {
+                sunday: mileage.quantities.sunday,
+                monday: mileage.quantities.monday,
+                tuesday: mileage.quantities.tuesday,
+                wednesday: mileage.quantities.wednesday,
+                thursday: mileage.quantities.thursday,
+                friday: mileage.quantities.friday,
+                saturday: mileage.quantities.saturday,
+            },
+
+            ratePerMile: mileage.ratePerMile,
+        })),
+
+
         feTransfers: [],
         feAdditionalCosts: [],
     };

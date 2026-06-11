@@ -23,9 +23,9 @@ export function createEmptyFeRequisitionDraft(): FeRequisitionDraft {
         rejectedAtUtc: null,
         rejectionNotes: null,
         feGeneralTasks: [],
-        mileageRows: [],
-        transferRows: [],
-        additionalCostRows: [],
+        feMileages: [],
+        feTransfers: [],
+        feAdditionalCosts: [],
         submissionHistory: [],
     };
 }

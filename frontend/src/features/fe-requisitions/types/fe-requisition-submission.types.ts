@@ -46,6 +46,7 @@ export type FeRequisitionSnapshot = {
     isVatApplicable: boolean;
     subtotal: number;
     generalTasks: FeGeneralTaskSnapshot[];
+    mileages: FeMileageSnapshot[];
 };
 
 export type FeGeneralTaskSnapshot = {
@@ -54,6 +55,14 @@ export type FeGeneralTaskSnapshot = {
     weekEndingDate: string;
     totalNumber: number;
     ratePerJob: number;
+    totalValue: number;
+    week: WeeklyQuantities;
+};
+
+export type FeMileageSnapshot = {
+    weekEndingDate: string;
+    totalMiles: number;
+    ratePerMile: number;
     totalValue: number;
     week: WeeklyQuantities;
 };

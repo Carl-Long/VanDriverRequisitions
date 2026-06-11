@@ -27,6 +27,7 @@ import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-stat
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -65,6 +66,9 @@ export function FeRequisitionShell({
         addGeneralTask,
         updateGeneralTask,
         removeGeneralTask,
+        addMileage,
+        updateMileage,
+        removeMileage,
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
@@ -379,6 +383,26 @@ export function FeRequisitionShell({
                         onShopChange={setShop}
                         errors={errors}
                         clearError={clearError}
+                    />
+                } mileage={
+                    <FeMileageWorkspace
+                        limitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                        })}
+                        readonly={isReadonly}
+                        rows={draft.feMileages}
+                        onAdd={(form) => {
+                            addMileage(form);
+                            clearError("feMileages");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateMileage(clientId, form);
+                            clearError("feMileages");
+                            clearError("form");
+                        }}
+                        onDelete={removeMileage}
                     />
                 }
                 submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}

@@ -1,0 +1,15 @@
+export type FeMileageQuantitiesForm = {
+    sunday: number | null;
+    monday: number | null;
+    tuesday: number | null;
+    wednesday: number | null;
+    thursday: number | null;
+    friday: number | null;
+    saturday: number | null;
+};
+
+export type FeMileageForm = {
+    weekEndingDate: Date | null;
+    quantities: FeMileageQuantitiesForm;
+    ratePerMile: number | null;
+};

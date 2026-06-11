@@ -1,19 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FeRequisitionDraft } from "../types/fe-requisition-draft";
-import { VanDriverLookup } from "@/lib/api/van-drivers";
-import { calculateGeneralTasksSubtotal } from "../utils/fe-requisition-calculations";
 
-import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
+import { VanDriverLookup } from "@/lib/api/van-drivers";
+import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
+import { FeMileageForm } from "../types/fe-mileage-form";
+
 import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisition-draft";
+import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
+import { createFeMileageDraftFromForm } from "../lib/create-fe-mileage-draft-from-form";
+
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
+import { calculateFeMileageFormTotals } from "../lib/calculate-fe-mileage-form";
+import { calculateFeRequisitionSubtotal } from "../utils/fe-requisition-calculations";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     const [draft, setDraft] = useState<FeRequisitionDraft>(
         initialDraft ?? createEmptyFeRequisitionDraft(),
     );
+
+    const subtotal = useMemo(() => calculateFeRequisitionSubtotal(draft), [draft]);
 
     function setRowVersion(rowVersion: string | null) {
         setDraft((x) => ({
@@ -21,10 +28,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
             rowVersion,
         }));
     }
-
-    const subtotal = useMemo(() => {
-        return calculateGeneralTasksSubtotal(draft.feGeneralTasks);
-    }, [draft.feGeneralTasks]);
 
     function setRequisitionDate(requisitionDate: Date | null) {
         setDraft((x) => ({
@@ -40,7 +43,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }) {
         setDraft((x) => ({
             ...x,
-
             vanDriverId: params.id,
             vanDriverLabel: params.label,
             vanDriverSummary: params.summary,
@@ -58,7 +60,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     function setShop(params: { id: string | null; label: string | null }) {
         setDraft((x) => ({
             ...x,
-
             shopId: params.id,
             shopLabel: params.label,
             isShopActive: true,
@@ -68,15 +69,12 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     function addGeneralTask(taskTypeId: string, taskTypeLabel: string, form: FeGeneralTaskForm) {
         const task = createFeGeneralTaskDraftFromForm({
             taskTypeId,
-
             taskTypeLabel,
-
             form,
         });
 
         setDraft((prev) => ({
             ...prev,
-
             feGeneralTasks: [...prev.feGeneralTasks, task],
         }));
     }
@@ -86,7 +84,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
         setDraft((prev) => ({
             ...prev,
-
             feGeneralTasks: prev.feGeneralTasks.map((task) => {
                 if (task.clientId !== clientId) {
                     return task;
@@ -94,17 +91,12 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
                 return {
                     ...task,
-
                     weekEndingDate: form.weekEndingDate,
-
                     quantities: {
                         ...form.quantities,
                     },
-
                     ratePerJob: form.ratePerJob,
-
                     totalNumber: totals.totalJobs,
-
                     totalValue: totals.totalValue,
                 };
             }),
@@ -114,21 +106,66 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     function removeGeneralTask(clientId: string) {
         setDraft((prev) => ({
             ...prev,
-
             feGeneralTasks: prev.feGeneralTasks.filter((x) => x.clientId !== clientId),
+        }));
+    }
+
+    function addMileage(form: FeMileageForm) {
+        const mileage = createFeMileageDraftFromForm({ form });
+
+        setDraft((prev) => ({
+            ...prev,
+            feMileages: [...prev.feMileages, mileage],
+        }));
+    }
+
+    function updateMileage(clientId: string, form: FeMileageForm) {
+        const totals = calculateFeMileageFormTotals(form);
+
+        setDraft((prev) => ({
+            ...prev,
+            feMileages: prev.feMileages.map((mileage) => {
+                if (mileage.clientId !== clientId) {
+                    return mileage;
+                }
+
+                return {
+                    ...mileage,
+                    weekEndingDate: form.weekEndingDate,
+                    quantities: {
+                        ...form.quantities,
+                    },
+                    ratePerMile: form.ratePerMile,
+                    totalMiles: totals.totalMiles,
+                    totalValue: totals.totalValue,
+                };
+            }),
+        }));
+    }
+
+    function removeMileage(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            feMileages: prev.feMileages.filter((x) => x.clientId !== clientId),
         }));
     }
 
     return {
         draft,
         subtotal,
+
         setRequisitionDate,
         setVanDriver,
         setVanDriverName,
         setShop,
+        setRowVersion,
+
         addGeneralTask,
         updateGeneralTask,
         removeGeneralTask,
-        setRowVersion,
+
+        addMileage,
+        updateMileage,
+        removeMileage,
     };
 }
