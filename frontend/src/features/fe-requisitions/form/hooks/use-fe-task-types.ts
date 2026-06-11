@@ -7,7 +7,7 @@ import { getApiErrorMessage, } from "@/lib/api/client";
 import {
     feTaskTypesApi,
     type FeTaskType,
-} from "@/lib/api/fe-task-types";
+} from "@/features/fe-task-types/fe-task-types-api";
 
 export function useFeTaskTypes() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);

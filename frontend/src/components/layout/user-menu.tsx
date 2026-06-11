@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Check, ChevronLeft, LogOut, Palette, Type, User } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "next-themes";
-import { TEXT_SIZES, THEMES } from "@/lib/constants";
+import { TEXT_SIZES, THEMES } from "@/lib/constants/constants";
 import { useTextSize } from "@/providers/text-size-provider";
 
 export function UserMenu() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
-import { canApproveRequisitions, canCreateRequisitions } from "@/lib/auth/roles";
+import { canApproveRequisitions, canCreateRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { HeartHandshake, Sofa, Shirt, ClipboardCheck } from "lucide-react";
 import { LaunchCard, type LaunchCardProps } from "./launch-card";

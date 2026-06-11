@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button/button";
 import { Input } from "@/components/ui/field/input";
 import { Field } from "@/components/ui/field/field";
 
-import type { FeTaskType } from "@/lib/api/fe-task-types";
+import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { ApiError } from "@/lib/api/client";
-import { Alert } from "../ui/alert";
+import { Alert } from "@/components/ui/alert";
 
 const taskTypeSchema = z.object({
     name: z
@@ -123,14 +123,12 @@ export function TaskTypeFormModal({
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
 
-                {/* Server error */}
                 {serverError && (
                     <Alert tone="danger">
                         {serverError}
                     </Alert>
                 )}
 
-                {/* Name */}
                 <Field
                     label="Name"
                     error={errors.name?.message}

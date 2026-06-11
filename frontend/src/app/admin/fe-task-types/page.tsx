@@ -9,20 +9,14 @@ import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
-
-import { TaskTypeTable } from "@/components/fe-task-types/task-type-table";
-import { TaskTypeFormModal } from "@/components/fe-task-types/task-type-form-modal";
-
-import {
-    feTaskTypesApi,
-    type FeTaskType,
-} from "@/lib/api/fe-task-types";
-
 import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
+import { FeTaskType, feTaskTypesApi } from "@/features/fe-task-types/fe-task-types-api";
+import { TaskTypeFormModal } from "@/features/fe-task-types/task-type-form-modal";
+import { TaskTypeTable } from "@/features/fe-task-types/task-type-table";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);

@@ -7,7 +7,7 @@ import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import type {
     RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Pencil, Plus, Trash2 } from "lucide-react";

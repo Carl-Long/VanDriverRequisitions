@@ -7,7 +7,7 @@ import {
     type ComboboxOption,
 } from "@/components/ui/field/combobox";
 
-import { requisitionUsersApi } from "@/lib/api/requisition-users";
+import { requisitionUsersApi } from "@/features/fe-requisitions/list/lib/requisition-users-api";
 import { CreatedByFilter } from "../../types/fe-requisiton-filters.types";
 
 const STATIC_OPTIONS: ComboboxOption[] = [

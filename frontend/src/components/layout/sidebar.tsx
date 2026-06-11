@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { HomeIcon, PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navigation, adminNavigation, approvalNavigation } from "@/lib/navigation";
-import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
+import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants/constants";
 import { NavItem } from "@/components/layout/nav-item";
 import { useAuth } from "@/providers/auth-provider";
-import { canApproveRequisitions, canCreateRequisitions, canManageConfiguration } from "@/lib/auth/roles";
+import { canApproveRequisitions, canCreateRequisitions, canManageConfiguration } from "@/features/auth/roles";
 import { IconButton } from "../ui/button/icon-button";
 
 export function Sidebar() {

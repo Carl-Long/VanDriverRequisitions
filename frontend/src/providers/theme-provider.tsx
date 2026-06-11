@@ -2,7 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ReactNode } from "react";
-import { THEME_OPTIONS, DEFAULT_THEME } from "@/lib/constants";
+import { THEME_OPTIONS, DEFAULT_THEME } from "@/lib/constants/constants";
 
 export function ThemeProvider({
   children,

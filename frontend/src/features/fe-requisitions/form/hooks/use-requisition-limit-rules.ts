@@ -7,7 +7,7 @@ import { getApiErrorMessage, } from "@/lib/api/client";
 import {
     requisitionLimitRulesApi,
     type RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 export function useRequisitionLimitRules() {
     const [limitRules, setLimitRules] = useState<RequisitionLimitRuleSummary[]>([]);

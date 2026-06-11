@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
-import { canCreateRequisitions } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";

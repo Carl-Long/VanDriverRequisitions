@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button/button";
 import { Input } from "@/components/ui/field/input";
 import { Field } from "@/components/ui/field/field";
 
-import type { FeReason } from "@/lib/api/fe-reasons";
+import type { FeReason } from "@/features/fe-reasons/fe-reasons-api";
 import { ApiError } from "@/lib/api/client";
-import { Alert } from "../ui/alert";
+import { Alert } from "@/components/ui/alert";
 
 const reasonSchema = z.object({
     reason: z

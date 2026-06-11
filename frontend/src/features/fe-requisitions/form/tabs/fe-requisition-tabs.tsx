@@ -1,7 +1,7 @@
 "use client";
 
 import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
-import { FeTaskType } from "@/lib/api/fe-task-types";
+import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { useMemo } from "react";
 

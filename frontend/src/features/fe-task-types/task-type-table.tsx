@@ -1,40 +1,33 @@
 import { Pencil } from "lucide-react";
-
+import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
-
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
+import { Toggle } from "@/components/ui/toggle";
 import { formatDateGB } from "@/lib/format/date";
-import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
-import { formatCurrencyGB } from "@/lib/format/currency";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "../ui/table/table";
 
 
 type Props = {
-    items: RequisitionLimitRuleSummary[];
-    onEdit: (item: RequisitionLimitRuleSummary) => void;
+    items: FeTaskType[];
+    onEdit: (item: FeTaskType) => void;
+    onToggleActive: (item: FeTaskType) => void;
 };
 
-export function RequisitionLimitRuleTable({
+export function TaskTypeTable({
     items,
     onEdit,
+    onToggleActive,
 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-sm">
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>Category</TableHeaderCell>
-                        <TableHeaderCell>Task Type</TableHeaderCell>
-                        <TableHeaderCell>Fascia</TableHeaderCell>
-                        <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
-                        <TableHeaderCell align="right">Max Rate</TableHeaderCell>
-                        <TableHeaderCell align="center">Last Activity</TableHeaderCell>
-                        <TableHeaderCell
-                            align="right"
-                            nowrap
-                        >
-                            Actions
-                        </TableHeaderCell>
+                        <TableHeaderCell>Name</TableHeaderCell>
+                        <TableHeaderCell>Code</TableHeaderCell>
+                        <TableHeaderCell>Active</TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>Actions</TableHeaderCell>
                     </TableHeaderRow>
                 </TableHeader>
 
@@ -53,41 +46,29 @@ export function RequisitionLimitRuleTable({
                                 key={item.id}
                                 className="hover:bg-surface-hover"
                             >
-                                {/* Category */}
+                                {/* Name */}
                                 <TableCell>
                                     <div className="font-medium text-foreground">
-                                        {item.categoryName}
+                                        {item.name}
                                     </div>
                                 </TableCell>
 
-                                {/* Task Type */}
+                                {/* Code */}
                                 <TableCell className="text-foreground-subtle">
-                                    {item.feTaskTypeName ?? ""}
+                                    {item.code}
                                 </TableCell>
 
-                                {/* Fascia */}
-                                <TableCell className="text-foreground-subtle">
-                                    {item.fasciaName}
-                                </TableCell>
-
-                                {/* Max Quantity */}
-                                <TableCell
-                                    align="right"
-                                    className="tabular-nums text-foreground"
-                                >
-                                    {item.maxQuantity}
-                                </TableCell>
-
-                                {/* Max Rate */}
-                                <TableCell
-                                    align="right"
-                                    className="tabular-nums text-foreground"
-                                >
-                                    {formatCurrencyGB(item.maxRate)}
+                                {/* Active */}
+                                <TableCell>
+                                    <Toggle
+                                        checked={item.isActive}
+                                        onChange={() => onToggleActive(item)}
+                                        ariaLabel={`Toggle active for ${item.name}`}
+                                    />
                                 </TableCell>
 
                                 {/* Last Modified */}
-                                <TableCell align="center">
+                                <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateGB(lastDate) ?? "—"}

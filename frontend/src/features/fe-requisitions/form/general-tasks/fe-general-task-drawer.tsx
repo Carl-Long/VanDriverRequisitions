@@ -8,7 +8,7 @@ import { IconButton } from "@/components/ui/button/icon-button";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 
-import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";

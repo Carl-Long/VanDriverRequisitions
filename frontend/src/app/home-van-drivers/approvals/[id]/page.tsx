@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
-import { canApproveRequisitions } from "@/lib/auth/roles";
+import { canApproveRequisitions } from "@/features/auth/roles";
 import NotFound from "@/app/not-found";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";

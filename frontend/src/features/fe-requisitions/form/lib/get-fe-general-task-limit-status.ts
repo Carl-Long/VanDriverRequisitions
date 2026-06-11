@@ -1,4 +1,4 @@
-import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import type { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 
 export type LimitStatus =

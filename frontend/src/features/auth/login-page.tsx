@@ -4,9 +4,10 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { LogIn } from "lucide-react";
-import { Alert } from "../ui/alert";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button/button";
 import { getApiErrorMessage } from "@/lib/api/client";
-import { Button } from "../ui/button/button";
+
 
 const DEV_ACCOUNTS = [
     { label: "Admin User", email: "admin@test.com" },

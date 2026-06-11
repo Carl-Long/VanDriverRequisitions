@@ -1,6 +1,6 @@
 "use client";
 
-import { REQUISITION_ROW_CATEGORIES } from "@/lib/constants/requisition-row-categories";
+import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants/requisition-row-categories";
 import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
@@ -8,7 +8,7 @@ import { useFeRequisitionDraft, } from "../hooks/use-fe-requisition-draft";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
-import { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
+import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
@@ -18,7 +18,7 @@ import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
-import { FeTaskType } from "@/lib/api/fe-task-types";
+import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";

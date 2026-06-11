@@ -8,7 +8,7 @@ import { getApiErrorMessage, ApiError } from "@/lib/api/client";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import NotFound from "@/app/not-found";
 import { useAuth } from "@/providers/auth-provider";
-import { canCreateRequisitions } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/features/auth/roles";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";

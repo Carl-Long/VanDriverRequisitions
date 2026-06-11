@@ -11,15 +11,12 @@ import { Button } from "@/components/ui/button/button";
 import { Input } from "@/components/ui/field/input";
 import { Field } from "@/components/ui/field/field";
 
-import type { FeTaskType } from "@/lib/api/fe-task-types";
-import type { RequisitionLimitRuleSummary } from "@/lib/api/requisition-limit-rules";
-
+import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { Alert } from "@/components/ui/alert";
 import { getApiErrorMessage } from "@/lib/api/client";
-import {
-    categoryOptions,
-    fasciaOptions,
-} from "./requisition-limit-rule-options";
-import { Alert } from "../ui/alert";
+import { categoryOptions, fasciaOptions } from "./requisition-limit-rule-options";
+
 
 /* ---------------- FORM TYPES (STRING-FIRST) ---------------- */
 

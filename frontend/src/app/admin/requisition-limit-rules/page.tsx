@@ -2,26 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal } from "lucide-react";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { useToast } from "@/providers/toast-provider";
 import { getApiErrorMessage } from "@/lib/api/client";
-import {
-    requisitionLimitRulesApi,
-    type RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
-
-import { feTaskTypesApi } from "@/lib/api/fe-task-types";
-import type { FeTaskType } from "@/lib/api/fe-task-types";
-
-import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/requisition-limit-rule-table";
-import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
+import { feTaskTypesApi } from "@/features/fe-task-types/fe-task-types-api";
+import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
+import { RequisitionLimitRuleFormModal } from "@/features/requisition-limit-rules/requisition-limit-rule-form-modal";
+import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/requisition-limit-rule-table";
+import { RequisitionLimitRuleSummary, requisitionLimitRulesApi } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);

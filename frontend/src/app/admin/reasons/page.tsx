@@ -9,20 +9,14 @@ import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
-
-import { ReasonFormModal } from "@/components/fe-reasons/reason-form-modal";
-
-import {
-    feReasonsApi,
-    type FeReason,
-} from "@/lib/api/fe-reasons";
-
-import { getApiErrorMessage } from "@/lib/api/client";
-import { useToast } from "@/providers/toast-provider";
-import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { FeReason, feReasonsApi } from "@/features/fe-reasons/fe-reasons-api";
+import { ReasonFormModal } from "@/features/fe-reasons/reason-form-modal";
+import { FeReasonsTable } from "@/features/fe-reasons/reason-table";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { useToast } from "@/providers/toast-provider";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);

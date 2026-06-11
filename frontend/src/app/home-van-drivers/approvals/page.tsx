@@ -11,7 +11,7 @@ import { Alert } from "@/components/ui/alert";
 import type { PagedResult } from "@/lib/types";
 import { getApiErrorMessage } from "@/lib/api/client";
 import NotFound from "@/app/not-found";
-import { canApproveRequisitions } from "@/lib/auth/roles";
+import { canApproveRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";

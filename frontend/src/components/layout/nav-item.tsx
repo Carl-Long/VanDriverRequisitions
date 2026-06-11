@@ -1,8 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { NavItemProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+
+export type NavItemProps = {
+    href: string;
+    label: string;
+    icon: LucideIcon;
+    active: boolean;
+    collapsed?: boolean;
+    showBadge?: boolean;
+};
+
 
 export function NavItem({
     href,

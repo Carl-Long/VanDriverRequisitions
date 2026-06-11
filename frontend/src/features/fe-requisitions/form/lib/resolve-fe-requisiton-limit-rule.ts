@@ -2,7 +2,7 @@ import { FASCIAS } from "@/lib/constants/fascias";
 
 import type {
     RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 type Params = {
     rules: RequisitionLimitRuleSummary[];

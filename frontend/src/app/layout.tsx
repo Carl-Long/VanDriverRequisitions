@@ -3,11 +3,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
-import { AuthGate } from "@/components/auth/auth-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { ToastProvider } from "@/providers/toast-provider";
 import { TextSizeProvider } from "@/providers/text-size-provider";
+import { AuthGate } from "@/features/auth/auth-gate";
 
 const inter = Inter({
     subsets: ["latin"],

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type {
     RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 
 export function createFeGeneralTaskFormSchema(

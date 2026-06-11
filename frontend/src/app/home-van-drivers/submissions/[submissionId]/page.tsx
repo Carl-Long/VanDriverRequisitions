@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
-import { useSubmission } from "@/hooks/use-submission";
+import { useSubmission } from "@/features/fe-requisitions/fe-submissions-view/use-submission";
 import { FeSubmissionGeneralTasksTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-general-tasks-table";
 import { FeSubmissionHeader } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-header";
 import { FeSubmissionPageSkeleton } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";

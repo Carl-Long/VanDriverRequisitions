@@ -12,7 +12,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useAuth } from "@/providers/auth-provider";
 import type { PagedResult } from "@/lib/types";
 import type { FeRequisitionFilters } from "@/features/fe-requisitions/types/fe-requisiton-filters.types";
-import { canCreateRequisitions } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/features/auth/roles";
 import NotFound from "../not-found";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";

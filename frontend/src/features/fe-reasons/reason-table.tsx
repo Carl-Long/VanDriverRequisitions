@@ -1,19 +1,20 @@
 import { Pencil } from "lucide-react";
-import { FeTaskType } from "@/lib/api/fe-task-types";
-import { IconButton } from "@/components/ui/button/icon-button";
-import { Surface } from "../ui/surface";
-import { Toggle } from "../ui/toggle";
 
+import { FeReason } from "@/features/fe-reasons/fe-reasons-api";
+import { IconButton } from "@/components/ui/button/icon-button";
+import { Surface } from "@/components/ui/surface";
+import { Toggle } from "@/components/ui/toggle";
 import { formatDateGB } from "@/lib/format/date";
-import { TableHeader, TableHeaderCell, TableBody, TableCell, TableHeaderRow, TableRow } from "../ui/table/table";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
+
 
 type Props = {
-    items: FeTaskType[];
-    onEdit: (item: FeTaskType) => void;
-    onToggleActive: (item: FeTaskType) => void;
+    items: FeReason[];
+    onEdit: (item: FeReason) => void;
+    onToggleActive: (item: FeReason) => void;
 };
 
-export function TaskTypeTable({
+export function FeReasonsTable({
     items,
     onEdit,
     onToggleActive,
@@ -23,11 +24,15 @@ export function TaskTypeTable({
             <table className="w-full text-sm">
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>Name</TableHeaderCell>
-                        <TableHeaderCell>Code</TableHeaderCell>
-                        <TableHeaderCell>Active</TableHeaderCell>
+                        <TableHeaderCell>Reason</TableHeaderCell>
+                        <TableHeaderCell align="center">Active</TableHeaderCell>
                         <TableHeaderCell>Last Activity</TableHeaderCell>
-                        <TableHeaderCell align="right" nowrap>Actions</TableHeaderCell>
+                        <TableHeaderCell
+                            align="right"
+                            nowrap
+                        >
+                            Actions
+                        </TableHeaderCell>
                     </TableHeaderRow>
                 </TableHeader>
 
@@ -42,29 +47,21 @@ export function TaskTypeTable({
                             "System";
 
                         return (
-                            <TableRow
-                                key={item.id}
-                                className="hover:bg-surface-hover"
-                            >
-                                {/* Name */}
-                                <TableCell>
-                                    <div className="font-medium text-foreground">
-                                        {item.name}
-                                    </div>
-                                </TableCell>
-
-                                {/* Code */}
-                                <TableCell className="text-foreground-subtle">
-                                    {item.code}
+                            <TableRow key={item.id}>
+                                {/* Reason */}
+                                <TableCell className="font-medium text-foreground">
+                                    {item.reason}
                                 </TableCell>
 
                                 {/* Active */}
-                                <TableCell>
-                                    <Toggle
-                                        checked={item.isActive}
-                                        onChange={() => onToggleActive(item)}
-                                        ariaLabel={`Toggle active for ${item.name}`}
-                                    />
+                                <TableCell align="center">
+                                    <div className="flex justify-center">
+                                        <Toggle
+                                            checked={item.isActive}
+                                            onChange={() => onToggleActive(item)}
+                                            ariaLabel={`Toggle active for ${item.reason}`}
+                                        />
+                                    </div>
                                 </TableCell>
 
                                 {/* Last Modified */}

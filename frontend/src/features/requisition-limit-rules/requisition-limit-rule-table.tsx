@@ -1,31 +1,33 @@
 import { Pencil } from "lucide-react";
 
-import { FeReason } from "@/lib/api/fe-reasons";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
-import { Toggle } from "@/components/ui/toggle";
+
 import { formatDateGB } from "@/lib/format/date";
-import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "../ui/table/table";
+import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { formatCurrencyGB } from "@/lib/format/currency";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell } from "@/components/ui/table/table";
 
 type Props = {
-    items: FeReason[];
-    onEdit: (item: FeReason) => void;
-    onToggleActive: (item: FeReason) => void;
+    items: RequisitionLimitRuleSummary[];
+    onEdit: (item: RequisitionLimitRuleSummary) => void;
 };
 
-export function FeReasonsTable({
+export function RequisitionLimitRuleTable({
     items,
     onEdit,
-    onToggleActive,
 }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-sm">
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>Reason</TableHeaderCell>
-                        <TableHeaderCell align="center">Active</TableHeaderCell>
-                        <TableHeaderCell>Last Activity</TableHeaderCell>
+                        <TableHeaderCell>Category</TableHeaderCell>
+                        <TableHeaderCell>Task Type</TableHeaderCell>
+                        <TableHeaderCell>Fascia</TableHeaderCell>
+                        <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
+                        <TableHeaderCell align="right">Max Rate</TableHeaderCell>
+                        <TableHeaderCell align="center">Last Activity</TableHeaderCell>
                         <TableHeaderCell
                             align="right"
                             nowrap
@@ -46,25 +48,45 @@ export function FeReasonsTable({
                             "System";
 
                         return (
-                            <TableRow key={item.id}>
-                                {/* Reason */}
-                                <TableCell className="font-medium text-foreground">
-                                    {item.reason}
-                                </TableCell>
-
-                                {/* Active */}
-                                <TableCell align="center">
-                                    <div className="flex justify-center">
-                                        <Toggle
-                                            checked={item.isActive}
-                                            onChange={() => onToggleActive(item)}
-                                            ariaLabel={`Toggle active for ${item.reason}`}
-                                        />
+                            <TableRow
+                                key={item.id}
+                                className="hover:bg-surface-hover"
+                            >
+                                {/* Category */}
+                                <TableCell>
+                                    <div className="font-medium text-foreground">
+                                        {item.categoryName}
                                     </div>
                                 </TableCell>
 
+                                {/* Task Type */}
+                                <TableCell className="text-foreground-subtle">
+                                    {item.feTaskTypeName ?? ""}
+                                </TableCell>
+
+                                {/* Fascia */}
+                                <TableCell className="text-foreground-subtle">
+                                    {item.fasciaName}
+                                </TableCell>
+
+                                {/* Max Quantity */}
+                                <TableCell
+                                    align="right"
+                                    className="tabular-nums text-foreground"
+                                >
+                                    {item.maxQuantity}
+                                </TableCell>
+
+                                {/* Max Rate */}
+                                <TableCell
+                                    align="right"
+                                    className="tabular-nums text-foreground"
+                                >
+                                    {formatCurrencyGB(item.maxRate)}
+                                </TableCell>
+
                                 {/* Last Modified */}
-                                <TableCell>
+                                <TableCell align="center">
                                     <div className="flex flex-col leading-tight">
                                         <span className="text-sm text-foreground">
                                             {formatDateGB(lastDate) ?? "—"}

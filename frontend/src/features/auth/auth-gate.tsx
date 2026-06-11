@@ -2,7 +2,7 @@
 
 import { type ReactNode } from "react";
 import { useAuth } from "@/providers/auth-provider";
-import { LoginPage } from "@/components/auth/login-page";
+import { LoginPage } from "./login-page";
 
 export function AuthGate({
     children,

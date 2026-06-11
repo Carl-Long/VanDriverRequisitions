@@ -1,4 +1,4 @@
-import { FeTaskType } from "@/lib/api/fe-task-types";
+import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { FeRequisitionTab } from "../types/fe-requisition-tab";
 
 export function buildFeRequisitionTabs(
