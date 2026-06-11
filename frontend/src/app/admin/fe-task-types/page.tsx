@@ -17,6 +17,7 @@ import { Alert } from "@/components/ui/alert";
 import { FeTaskType, feTaskTypesApi } from "@/features/fe-task-types/fe-task-types-api";
 import { TaskTypeFormModal } from "@/features/fe-task-types/task-type-form-modal";
 import { TaskTypeTable } from "@/features/fe-task-types/task-type-table";
+import { useCrudModal } from "@/hooks/use-crud-modal";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -25,9 +26,7 @@ export default function FeTaskTypesPage() {
 
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
-
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState<FeTaskType | null>(null);
+    const modal = useCrudModal<FeTaskType>();
 
     const toast = useToast();
 
@@ -59,32 +58,21 @@ export default function FeTaskTypesPage() {
         );
     }, [taskTypes, search]);
 
-    function openCreate() {
-        setEditing(null);
-        setModalOpen(true);
-    }
-
-    function openEdit(taskType: FeTaskType) {
-        setEditing(taskType);
-        setModalOpen(true);
-    }
-
     async function handleSubmit(data: { name: string; code: string }) {
-        if (editing) {
-            await feTaskTypesApi.update(editing.id, data);
+        if (modal.editing) {
+            await feTaskTypesApi.update(modal.editing.id, data);
         } else {
             await feTaskTypesApi.create(data);
         }
 
         toast.success(
-            editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`,
+            modal.editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`,
         );
 
-        setModalOpen(false);
-        setEditing(null);
-
-        load();
+        modal.close();
+        await load();
     }
+
     async function handleToggleActive(taskType: FeTaskType) {
         try {
             if (taskType.isActive) {
@@ -116,7 +104,7 @@ export default function FeTaskTypesPage() {
     return (
         <PageContainer>
             <PageHeader title="FE Task Types" description="Manage FE task type codes.">
-                <Button onClick={openCreate}>
+                <Button onClick={modal.openCreate}>
                     <Plus size={16} />
                     New Task Type
                 </Button>
@@ -156,20 +144,17 @@ export default function FeTaskTypesPage() {
             {!loading && filtered.length > 0 && (
                 <TaskTypeTable
                     items={filtered}
-                    onEdit={openEdit}
+                    onEdit={modal.openEdit}
                     onToggleActive={handleToggleActive}
                 />
             )}
 
             <TaskTypeFormModal
-                key={editing?.id ?? "new"}
-                open={modalOpen}
-                onClose={() => {
-                    setModalOpen(false);
-                    setEditing(null);
-                }}
+                key={modal.editing?.id ?? "new"}
+                open={modal.open}
+                onClose={modal.close}
                 onSubmit={handleSubmit}
-                initial={editing}
+                initial={modal.editing}
             />
         </PageContainer>
     );

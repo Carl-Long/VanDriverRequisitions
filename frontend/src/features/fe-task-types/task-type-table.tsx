@@ -1,6 +1,7 @@
 import { Pencil } from "lucide-react";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { IconButton } from "@/components/ui/button/icon-button";
+import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import { Surface } from "@/components/ui/surface";
 import {
     TableHeader,
@@ -11,7 +12,6 @@ import {
     TableCell,
 } from "@/components/ui/table/table";
 import { Toggle } from "@/components/ui/toggle";
-import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     items: FeTaskType[];
@@ -37,11 +37,6 @@ export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>
 
                 <TableBody>
                     {items.map((item) => {
-                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
-
-                        const lastUser =
-                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
-
                         return (
                             <TableRow key={item.id} className="hover:bg-surface-hover">
                                 {/* Name */}
@@ -65,15 +60,12 @@ export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>
 
                                 {/* Last Modified */}
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="text-sm text-foreground">
-                                            {formatDateGB(lastDate) ?? "—"}
-                                        </span>
-
-                                        <span className="text-xs text-muted-foreground">
-                                            {lastUser}
-                                        </span>
-                                    </div>
+                                    <ActivityMetaCell
+                                        date={item.updatedAtUtc ?? item.createdAtUtc}
+                                        user={
+                                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot
+                                        }
+                                    />
                                 </TableCell>
 
                                 {/* Actions */}

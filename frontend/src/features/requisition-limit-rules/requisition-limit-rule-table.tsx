@@ -3,8 +3,8 @@ import { Pencil } from "lucide-react";
 import { IconButton } from "@/components/ui/button/icon-button";
 import { Surface } from "@/components/ui/surface";
 
-import { formatDateGB } from "@/lib/format/date";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import {
     TableHeader,
@@ -31,7 +31,7 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
                         <TableHeaderCell>Fascia</TableHeaderCell>
                         <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
                         <TableHeaderCell align="right">Max Rate</TableHeaderCell>
-                        <TableHeaderCell align="center">Last Activity</TableHeaderCell>
+                        <TableHeaderCell align="right">Last Activity</TableHeaderCell>
                         <TableHeaderCell align="right" nowrap>
                             Actions
                         </TableHeaderCell>
@@ -40,11 +40,6 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
 
                 <TableBody>
                     {items.map((item) => {
-                        const lastDate = item.updatedAtUtc ?? item.createdAtUtc;
-
-                        const lastUser =
-                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot ?? "System";
-
                         return (
                             <TableRow key={item.id} className="hover:bg-surface-hover">
                                 {/* Category */}
@@ -75,16 +70,13 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
                                 </TableCell>
 
                                 {/* Last Modified */}
-                                <TableCell align="center">
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="text-sm text-foreground">
-                                            {formatDateGB(lastDate) ?? "—"}
-                                        </span>
-
-                                        <span className="text-xs text-muted-foreground">
-                                            {lastUser}
-                                        </span>
-                                    </div>
+                                <TableCell align="right">
+                                    <ActivityMetaCell
+                                        date={item.updatedAtUtc ?? item.createdAtUtc}
+                                        user={
+                                            item.updatedByNameSnapshot ?? item.createdByNameSnapshot
+                                        }
+                                    />
                                 </TableCell>
 
                                 {/* Actions */}

@@ -7,10 +7,11 @@ import {
     TableCell,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { formatDateGB, formatDateTime } from "@/lib/format/date";
+import { formatDateGB } from "@/lib/format/date";
 import { RequisitionStatus } from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionSummary } from "../../types/fe-requisition.types";
 import { StatusPill } from "./status-pill";
+import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -38,11 +39,6 @@ export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
 
                 <tbody className="divide-y divide-border-subtle">
                     {items.map((req) => {
-                        const lastDate = req.updatedAtUtc ?? req.createdAtUtc;
-
-                        const lastUser =
-                            req.updatedByNameSnapshot ?? req.createdByNameSnapshot ?? "System";
-
                         return (
                             <TableRow
                                 key={req.id}
@@ -115,15 +111,13 @@ export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
 
                                 {/* Last Modified */}
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="text-sm text-foreground">
-                                            {formatDateTime(lastDate) ?? "—"}
-                                        </span>
-
-                                        <span className="max-w-[160px] truncate text-xs text-muted-foreground">
-                                            {lastUser}
-                                        </span>
-                                    </div>
+                                    <ActivityMetaCell
+                                        date={req.updatedAtUtc ?? req.createdAtUtc}
+                                        user={
+                                            req.updatedByNameSnapshot ?? req.createdByNameSnapshot
+                                        }
+                                        userClassName="max-w-[160px] truncate"
+                                    />
                                 </TableCell>
                             </TableRow>
                         );

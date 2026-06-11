@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table/table";
 import { SubmitWindow, SubmitWindowFilter } from "../types/submit-window.types";
 import { getWindowStatus, WindowStatus } from "../utils/get-window-status";
+import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 
 type Props = {
     items: SubmitWindow[];
@@ -109,15 +110,7 @@ export function SubmitWindowTable({ items, filter, onEdit, onDelete }: Readonly<
                                 </TableCell>
 
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="text-sm text-foreground">
-                                            {formatDateTime(metaDate) ?? "—"}
-                                        </span>
-
-                                        <span className="text-xs text-muted-foreground">
-                                            {metaUser}
-                                        </span>
-                                    </div>
+                                    <ActivityMetaCell date={metaDate} user={metaUser} />
                                 </TableCell>
 
                                 <TableCell align="center" nowrap>

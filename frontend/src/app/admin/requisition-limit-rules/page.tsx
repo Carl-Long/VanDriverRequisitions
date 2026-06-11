@@ -26,15 +26,10 @@ export default function RequisitionLimitRulesPage() {
     const [error, setError] = useState<string | null>(null);
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
     const [taskTypeError, setTaskTypeError] = useState<string | null>(null);
-
     const [search, setSearch] = useState("");
-
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<RequisitionLimitRuleSummary | null>(null);
-
     const toast = useToast();
-
-    /* ---------------- load ---------------- */
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -67,22 +62,48 @@ export default function RequisitionLimitRulesPage() {
         loadTaskTypes();
     }, []);
 
-    /* ---------------- filter ---------------- */
+    const fasciaOrder: Record<string, number> = {
+        FE: 0,
+        STD: 1,
+    };
+
+    const categoryOrder: Record<string, number> = {
+        "General Task": 0,
+        Mileage: 1,
+        Transfer: 2,
+        "Additional Cost": 3,
+    };
 
     const filtered = useMemo(() => {
-        if (!search.trim()) return rules;
+        const query = search.trim().toLowerCase();
 
-        const q = search.toLowerCase();
+        const results = query
+            ? rules.filter(
+                  (rule) =>
+                      rule.categoryName.toLowerCase().includes(query) ||
+                      rule.fasciaName.toLowerCase().includes(query) ||
+                      (rule.feTaskTypeName?.toLowerCase().includes(query) ?? false),
+              )
+            : rules;
 
-        return rules.filter(
-            (r) =>
-                r.categoryName.toLowerCase().includes(q) ||
-                r.fasciaName.toLowerCase().includes(q) ||
-                (r.feTaskTypeName?.toLowerCase().includes(q) ?? false),
-        );
+        return [...results].sort((a, b) => {
+            const fasciaCompare =
+                (fasciaOrder[a.fasciaName] ?? 999) - (fasciaOrder[b.fasciaName] ?? 999);
+
+            if (fasciaCompare !== 0) {
+                return fasciaCompare;
+            }
+
+            const categoryCompare =
+                (categoryOrder[a.categoryName] ?? 999) - (categoryOrder[b.categoryName] ?? 999);
+
+            if (categoryCompare !== 0) {
+                return categoryCompare;
+            }
+
+            return (a.feTaskTypeName ?? "").localeCompare(b.feTaskTypeName ?? "");
+        });
     }, [rules, search]);
-
-    /* ---------------- modal handlers ---------------- */
 
     function openCreate() {
         setEditing(null);
@@ -93,8 +114,6 @@ export default function RequisitionLimitRulesPage() {
         setEditing(rule);
         setModalOpen(true);
     }
-
-    /* ---------------- submit ---------------- */
 
     async function handleSubmit(data: {
         category: number;
@@ -112,10 +131,8 @@ export default function RequisitionLimitRulesPage() {
         toast.success(
             editing ? "Requisition limit rule updated" : "Requisition limit rule created",
         );
-
         setModalOpen(false);
         setEditing(null);
-
         await load();
     }
 
@@ -130,8 +147,6 @@ export default function RequisitionLimitRulesPage() {
               title: "No requisition limit rules yet",
               description: "Create your first rule to define limits for requisitions.",
           };
-
-    /* ---------------- UI ---------------- */
 
     return (
         <PageContainer>

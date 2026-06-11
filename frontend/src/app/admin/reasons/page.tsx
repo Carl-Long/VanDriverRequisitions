@@ -14,9 +14,10 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { FeReason, feReasonsApi } from "@/features/fe-reasons/fe-reasons-api";
 import { ReasonFormModal } from "@/features/fe-reasons/reason-form-modal";
-import { FeReasonsTable } from "@/features/fe-reasons/reason-table";
+import { FeReasonsTable } from "@/features/fe-reasons/fe-reason-table";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
+import { useCrudModal } from "@/hooks/use-crud-modal";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
@@ -25,9 +26,7 @@ export default function FeReasonsPage() {
 
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
-
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState<FeReason | null>(null);
+    const modal = useCrudModal<FeReason>();
 
     const toast = useToast();
 
@@ -53,35 +52,24 @@ export default function FeReasonsPage() {
         if (!search.trim()) return reasons;
 
         const query = search.toLowerCase();
-
         return reasons.filter((r) => r.reason.toLowerCase().includes(query));
     }, [reasons, search]);
 
-    function openCreate() {
-        setEditing(null);
-        setModalOpen(true);
-    }
-
-    function openEdit(reason: FeReason) {
-        setEditing(reason);
-        setModalOpen(true);
-    }
     async function handleSubmit(data: { reason: string }) {
-        if (editing) {
-            await feReasonsApi.update(editing.id, data);
+        if (modal.editing) {
+            await feReasonsApi.update(modal.editing.id, data);
         } else {
             await feReasonsApi.create(data);
         }
 
         toast.success(
-            editing ? `Reason "${data.reason}" updated` : `Reason "${data.reason}" created`,
+            modal.editing ? `Reason "${data.reason}" updated` : `Reason "${data.reason}" created`,
         );
 
-        setModalOpen(false);
-        setEditing(null);
-
-        load();
+        modal.close();
+        await load();
     }
+
     async function handleToggleActive(reason: FeReason) {
         try {
             if (reason.isActive) {
@@ -93,10 +81,9 @@ export default function FeReasonsPage() {
             toast.success(
                 reason.isActive ? `${reason.reason} deactivated` : `${reason.reason} activated`,
             );
-
             await load();
         } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to upadte reason."));
+            setError(getApiErrorMessage(err, "Failed to upadate reason."));
         }
     }
 
@@ -118,7 +105,7 @@ export default function FeReasonsPage() {
                 title="FE Reasons"
                 description="Manage reason codes used across FE store requisitions."
             >
-                <Button onClick={openCreate}>
+                <Button onClick={modal.openCreate}>
                     <Plus size={16} />
                     New Reason
                 </Button>
@@ -154,23 +141,21 @@ export default function FeReasonsPage() {
                     description={emptyState.description}
                 />
             )}
+
             {!loading && filtered.length > 0 && (
                 <FeReasonsTable
                     items={filtered}
-                    onEdit={openEdit}
+                    onEdit={modal.openEdit}
                     onToggleActive={handleToggleActive}
                 />
             )}
 
             <ReasonFormModal
-                key={editing?.id ?? "new"}
-                open={modalOpen}
-                onClose={() => {
-                    setModalOpen(false);
-                    setEditing(null);
-                }}
+                key={modal.editing?.id ?? "new"}
+                open={modal.open}
+                onClose={modal.close}
                 onSubmit={handleSubmit}
-                initial={editing}
+                initial={modal.editing}
             />
         </PageContainer>
     );
