@@ -30,6 +30,10 @@ type AuthState = {
     logout: () => void;
 };
 
+type LoginResponse = {
+    access_token: string;
+};
+
 const AuthContext = createContext<AuthState | null>(null);
 
 const TOKEN_KEY = "dev-auth-token";
@@ -77,14 +81,24 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
 
     // Restore session from storage on mount
     useEffect(() => {
-        const savedToken = sessionStorage.getItem(TOKEN_KEY);
-        const savedUser = sessionStorage.getItem(USER_KEY);
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-            tokenRef.current = savedToken;
+        try {
+            const savedToken = sessionStorage.getItem(TOKEN_KEY);
+            const savedUser = sessionStorage.getItem(USER_KEY);
+
+            if (savedToken && savedUser) {
+                const parsedUser = JSON.parse(savedUser) as AuthUser;
+
+                setToken(savedToken);
+                setUser(parsedUser);
+                tokenRef.current = savedToken;
+            }
+        } catch {
+            sessionStorage.removeItem(TOKEN_KEY);
+            sessionStorage.removeItem(USER_KEY);
+            tokenRef.current = null;
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     const login = useCallback(async (email: string) => {
@@ -99,8 +113,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
             throw new Error(body?.detail ?? "Invalid credentials. Please try again.");
         }
 
-        const data = await res.json();
-        const accessToken: string = data.access_token;
+        const data = (await res.json()) as LoginResponse;
+        const accessToken = data.access_token;
         const authUser = userFromToken(accessToken);
 
         sessionStorage.setItem(TOKEN_KEY, accessToken);
