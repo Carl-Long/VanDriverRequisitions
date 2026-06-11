@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { Field } from "@/components/ui/field/field";
-import {
-    Combobox,
-    type ComboboxOption,
-} from "@/components/ui/field/combobox";
+import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { shopsApi } from "@/lib/api/shops";
+import { toShopOptions } from "@/lib/options/shop-options";
 
 type Props = {
     required?: boolean;
@@ -52,10 +49,10 @@ export function ShopFilterField({
             setLoading(true);
 
             try {
-                const result = await shopsApi.getCachedOptions();
+                const shops = await shopsApi.getCachedActiveLookups();
 
                 if (!cancelled) {
-                    setOptions(result);
+                    setOptions(toShopOptions(shops));
                 }
             } finally {
                 if (!cancelled) {

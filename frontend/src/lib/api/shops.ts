@@ -1,5 +1,4 @@
 import { apiFetch } from "@/lib/api/client";
-import type { ComboboxOption } from "@/components/ui/field/combobox";
 
 const BASE = "/api/v1/shops";
 
@@ -9,43 +8,38 @@ export type ShopLookup = {
     name: string;
 };
 
-let cachedShopOptions: ComboboxOption[] | null = null;
-let pendingShopOptionsRequest: Promise<ComboboxOption[]> | null = null;
+let cachedActiveLookups: ShopLookup[] | null = null;
+let pendingActiveLookupsRequest: Promise<ShopLookup[]> | null = null;
 
 export const shopsApi = {
     getActiveLookups: () => {
         return apiFetch<ShopLookup[]>(`${BASE}/lookups`);
     },
 
-    getCachedOptions: async () => {
-        if (cachedShopOptions) {
-            return cachedShopOptions;
+    getCachedActiveLookups: async () => {
+        if (cachedActiveLookups) {
+            return cachedActiveLookups;
         }
 
-        if (pendingShopOptionsRequest) {
-            return pendingShopOptionsRequest;
+        if (pendingActiveLookupsRequest) {
+            return pendingActiveLookupsRequest;
         }
 
-        pendingShopOptionsRequest = shopsApi
+        pendingActiveLookupsRequest = shopsApi
             .getActiveLookups()
             .then((shops) => {
-                cachedShopOptions = shops.map((x) => ({
-                    value: x.id,
-                    label: `${x.code} - ${x.name}`,
-                    data: x,
-                }));
-
-                return cachedShopOptions;
+                cachedActiveLookups = shops;
+                return shops;
             })
             .finally(() => {
-                pendingShopOptionsRequest = null;
+                pendingActiveLookupsRequest = null;
             });
 
-        return pendingShopOptionsRequest;
+        return pendingActiveLookupsRequest;
     },
 
-    clearCachedOptions: () => {
-        cachedShopOptions = null;
-        pendingShopOptionsRequest = null;
+    clearCache: () => {
+        cachedActiveLookups = null;
+        pendingActiveLookupsRequest = null;
     },
 };
