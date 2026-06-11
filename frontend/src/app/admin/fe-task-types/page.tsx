@@ -9,20 +9,15 @@ import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
-
-import { TaskTypeTable } from "@/components/fe-task-types/task-type-table";
-import { TaskTypeFormModal } from "@/components/fe-task-types/task-type-form-modal";
-
-import {
-    feTaskTypesApi,
-    type FeTaskType,
-} from "@/lib/api/fe-task-types";
-
 import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
+import { FeTaskType, feTaskTypesApi } from "@/features/fe-task-types/fe-task-types-api";
+import { TaskTypeFormModal } from "@/features/fe-task-types/task-type-form-modal";
+import { TaskTypeTable } from "@/features/fe-task-types/task-type-table";
+import { useCrudModal } from "@/hooks/use-crud-modal";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
@@ -31,9 +26,7 @@ export default function FeTaskTypesPage() {
 
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
-
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState<FeTaskType | null>(null);
+    const modal = useCrudModal<FeTaskType>();
 
     const toast = useToast();
 
@@ -45,12 +38,7 @@ export default function FeTaskTypesPage() {
             const data = await feTaskTypesApi.getAll(showInactive);
             setTaskTypes(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load task types limit rules.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load task types limit rules."));
         } finally {
             setLoading(false);
         }
@@ -70,34 +58,21 @@ export default function FeTaskTypesPage() {
         );
     }, [taskTypes, search]);
 
-    function openCreate() {
-        setEditing(null);
-        setModalOpen(true);
-    }
-
-    function openEdit(taskType: FeTaskType) {
-        setEditing(taskType);
-        setModalOpen(true);
-    }
-
-    async function handleSubmit(data: { name: string; code: string; }) {
-        if (editing) {
-            await feTaskTypesApi.update(editing.id, data);
+    async function handleSubmit(data: { name: string; code: string }) {
+        if (modal.editing) {
+            await feTaskTypesApi.update(modal.editing.id, data);
         } else {
             await feTaskTypesApi.create(data);
         }
 
         toast.success(
-            editing
-                ? `Task type "${data.name}" updated`
-                : `Task type "${data.name}" created`
+            modal.editing ? `Task type "${data.name}" updated` : `Task type "${data.name}" created`,
         );
 
-        setModalOpen(false);
-        setEditing(null);
-
-        load();
+        modal.close();
+        await load();
     }
+
     async function handleToggleActive(taskType: FeTaskType) {
         try {
             if (taskType.isActive) {
@@ -105,38 +80,31 @@ export default function FeTaskTypesPage() {
             } else {
                 await feTaskTypesApi.activate(taskType.id);
             }
-            toast.success(taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`);
+            toast.success(
+                taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`,
+            );
             await load();
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed update task type",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed update task type"));
         }
     }
 
-    const emptyState =
-        search.trim()
-            ? {
-                icon: Search,
-                title: "No task types found",
-                description: "Try adjusting your search terms.",
-            }
-            : {
-                icon: Plus,
-                title: "No task types yet",
-                description: "Create your first task type to get started.",
-            };
+    const emptyState = search.trim()
+        ? {
+              icon: Search,
+              title: "No task types found",
+              description: "Try adjusting your search terms.",
+          }
+        : {
+              icon: Plus,
+              title: "No task types yet",
+              description: "Create your first task type to get started.",
+          };
 
     return (
         <PageContainer>
-            <PageHeader
-                title="FE Task Types"
-                description="Manage FE task type codes."
-            >
-                <Button onClick={openCreate}>
+            <PageHeader title="FE Task Types" description="Manage FE task type codes.">
+                <Button onClick={modal.openCreate}>
                     <Plus size={16} />
                     New Task Type
                 </Button>
@@ -151,32 +119,19 @@ export default function FeTaskTypesPage() {
                 />
 
                 <Surface className="flex w-fit self-end items-center gap-3 px-4 py-2 lg:ml-auto lg:self-auto">
-                    <span className="text-sm text-muted-foreground">
-                        Include inactive
-                    </span>
+                    <span className="text-sm text-muted-foreground">Include inactive</span>
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() =>
-                            setShowInactive((active) => !active)
-                        }
+                        onChange={() => setShowInactive((active) => !active)}
                         ariaLabel="Toggle inactive task types"
                     />
                 </Surface>
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={5}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={5} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState
@@ -189,20 +144,17 @@ export default function FeTaskTypesPage() {
             {!loading && filtered.length > 0 && (
                 <TaskTypeTable
                     items={filtered}
-                    onEdit={openEdit}
+                    onEdit={modal.openEdit}
                     onToggleActive={handleToggleActive}
                 />
             )}
 
             <TaskTypeFormModal
-                key={editing?.id ?? "new"}
-                open={modalOpen}
-                onClose={() => {
-                    setModalOpen(false);
-                    setEditing(null);
-                }}
+                key={modal.editing?.id ?? "new"}
+                open={modal.open}
+                onClose={modal.close}
                 onSubmit={handleSubmit}
-                initial={editing}
+                initial={modal.editing}
             />
         </PageContainer>
     );

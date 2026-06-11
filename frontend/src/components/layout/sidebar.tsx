@@ -5,10 +5,14 @@ import { usePathname } from "next/navigation";
 import { HomeIcon, PanelLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navigation, adminNavigation, approvalNavigation } from "@/lib/navigation";
-import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants";
+import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants/constants";
 import { NavItem } from "@/components/layout/nav-item";
 import { useAuth } from "@/providers/auth-provider";
-import { canApproveRequisitions, canCreateRequisitions, canManageConfiguration } from "@/lib/auth/roles";
+import {
+    canApproveRequisitions,
+    canCreateRequisitions,
+    canManageConfiguration,
+} from "@/features/auth/roles";
 import { IconButton } from "../ui/button/icon-button";
 
 export function Sidebar() {
@@ -44,10 +48,7 @@ export function Sidebar() {
     // Persist desktop collapse state
     useEffect(() => {
         if (globalThis.matchMedia("(min-width: 1024px)").matches) {
-            localStorage.setItem(
-                SIDEBAR_COLLAPSE_KEY,
-                String(collapsed)
-            );
+            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, String(collapsed));
         }
     }, [collapsed]);
 
@@ -59,11 +60,10 @@ export function Sidebar() {
                 "flex flex-col h-[calc(100vh-64px)]",
                 "border-r border-border bg-surface",
                 "overflow-hidden transition-all duration-300 ease-in-out",
-                collapsed ? "w-16" : "w-60"
+                collapsed ? "w-16" : "w-60",
             )}
         >
             <div className="flex flex-col px-2 py-1.5">
-
                 {/* COLLAPSED HEADER */}
                 {collapsed && (
                     <div className="mb-2 flex justify-center">
@@ -73,10 +73,7 @@ export function Sidebar() {
                             onClick={() => setCollapsed(false)}
                             aria-label="Expand sidebar"
                         >
-                            <PanelLeft
-                                size={18}
-                                className="rotate-180"
-                            />
+                            <PanelLeft size={18} className="rotate-180" />
                         </IconButton>
                     </div>
                 )}
@@ -150,7 +147,6 @@ export function Sidebar() {
                 {/* ADMIN */}
                 {showAdmin && (
                     <div className="mt-4 border-t border-border pt-3">
-
                         {!collapsed && (
                             <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                                 Admin

@@ -2,29 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
-
-import {
-    feRequisitionsApi,
-    type FeRequisitionDetail,
-} from "@/lib/api/fe-requisitions";
-
-import {
-    getApiErrorMessage,
-    ApiError,
-} from "@/lib/api/client";
-
-import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
-import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
-
-import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
-import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { getApiErrorMessage, ApiError } from "@/lib/api/client";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import NotFound from "@/app/not-found";
 import { useAuth } from "@/providers/auth-provider";
-import { canCreateRequisitions } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/features/auth/roles";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
+import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
+import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
+import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
@@ -36,11 +26,7 @@ export default function Page() {
         error: limitRulesError,
     } = useRequisitionLimitRules();
 
-    const {
-        taskTypes,
-        loading: taskTypesLoading,
-        error: taskTypesError,
-    } = useFeTaskTypes();
+    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
 
     const {
         status: submitWindowStatus,
@@ -65,19 +51,11 @@ export default function Page() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    if (
-                        err instanceof ApiError &&
-                        err.status === 404
-                    ) {
+                    if (err instanceof ApiError && err.status === 404) {
                         setNotFound(true);
                         return;
                     } else {
-                        setError(
-                            getApiErrorMessage(
-                                err,
-                                "Failed to load requisition.",
-                            ),
-                        );
+                        setError(getApiErrorMessage(err, "Failed to load requisition."));
                     }
                 }
             } finally {
@@ -95,20 +73,11 @@ export default function Page() {
     }, [params.id]);
 
     const pageLoading =
-        loading ||
-        limitRulesLoading ||
-        taskTypesLoading ||
-        submitWindowStatusLoading;
+        loading || limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
 
-    const errors = [
-        error,
-        limitRulesError,
-        taskTypesError,
-        submitWindowStatusError,
-    ].filter(
+    const errors = [error, limitRulesError, taskTypesError, submitWindowStatusError].filter(
         (e): e is string => Boolean(e),
     );
-
 
     if (!canCreateRequisitions(user)) {
         return <NotFound />;
@@ -135,9 +104,7 @@ export default function Page() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>
@@ -147,18 +114,12 @@ export default function Page() {
     return (
         <PageContainer>
             <FeRequisitionShell
-                mode={
-                    requisition.isEditable
-                        ? "edit"
-                        : "readonly"
-                }
+                mode={requisition.isEditable ? "edit" : "readonly"}
                 feRequisition={requisition}
                 limitRules={limitRules}
                 taskTypes={taskTypes}
                 submitWindowStatus={submitWindowStatus}
-                submitWindowStatusLoading={
-                    submitWindowStatusLoading
-                }
+                submitWindowStatusLoading={submitWindowStatusLoading}
             />
         </PageContainer>
     );

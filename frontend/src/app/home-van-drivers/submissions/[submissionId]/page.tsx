@@ -4,11 +4,11 @@ import { useParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
-import { FeSubmissionHeader } from "@/components/fe-requisitions/fe-submissions-view/fe-submission-header";
-import { FeSubmissionSnapshotSummary } from "@/components/fe-requisitions/fe-submissions-view/fe-submission-snapshot-summary";
-import { FeSubmissionGeneralTasksTable } from "@/components/fe-requisitions/fe-submissions-view/fe-submission-general-tasks-table";
-import { FeSubmissionPageSkeleton } from "@/components/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";
-import { useSubmission } from "@/hooks/use-submission";
+import { useSubmission } from "@/features/fe-requisitions/fe-submissions-view/use-submission";
+import { FeSubmissionGeneralTasksTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-general-tasks-table";
+import { FeSubmissionHeader } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-header";
+import { FeSubmissionPageSkeleton } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";
+import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-snapshot-summary";
 
 export default function SubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -34,9 +34,7 @@ export default function SubmissionPage() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>

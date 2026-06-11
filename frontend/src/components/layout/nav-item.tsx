@@ -1,8 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { NavItemProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+
+export type NavItemProps = {
+    href: string;
+    label: string;
+    icon: LucideIcon;
+    active: boolean;
+    collapsed?: boolean;
+    showBadge?: boolean;
+};
 
 export function NavItem({
     href,
@@ -22,7 +31,7 @@ export function NavItem({
                     collapsed ? "justify-center" : "justify-start",
                     active
                         ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted text-foreground"
+                        : "hover:bg-muted text-foreground",
                 )}
             >
                 <div className="relative">
@@ -47,7 +56,7 @@ export function NavItem({
                         "pointer-events-none",
                         "transition-opacity duration-200",
                         "whitespace-nowrap",
-                        "z-50"
+                        "z-50",
                     )}
                 >
                     {label}

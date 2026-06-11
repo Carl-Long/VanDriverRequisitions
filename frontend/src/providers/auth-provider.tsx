@@ -12,9 +12,7 @@ import {
 } from "react";
 import { configureAuth } from "@/lib/api/client";
 
-
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:50815";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://localhost:50815";
 
 export type AuthUser = {
     id: string;
@@ -32,6 +30,10 @@ type AuthState = {
     logout: () => void;
 };
 
+type LoginResponse = {
+    access_token: string;
+};
+
 const AuthContext = createContext<AuthState | null>(null);
 
 const TOKEN_KEY = "dev-auth-token";
@@ -45,10 +47,7 @@ function parseJwt(token: string): Record<string, unknown> {
 
 function toStringArray(value: unknown): string[] {
     if (Array.isArray(value)) {
-        return value.filter(
-            (item): item is string =>
-                typeof item === "string",
-        );
+        return value.filter((item): item is string => typeof item === "string");
     }
 
     if (typeof value === "string") {
@@ -61,34 +60,20 @@ function toStringArray(value: unknown): string[] {
 function userFromToken(token: string): AuthUser {
     const claims = parseJwt(token);
 
-    const name =
-        typeof claims.name === "string"
-            ? claims.name
-            : "Unknown";
+    const name = typeof claims.name === "string" ? claims.name : "Unknown";
 
-    const roleClaim =
-        claims[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ];
+    const roleClaim = claims["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
     return {
-        id:
-            typeof claims.oid === "string"
-                ? claims.oid
-                : "",
+        id: typeof claims.oid === "string" ? claims.oid : "",
         name,
-        email:
-            typeof claims.preferred_username === "string"
-                ? claims.preferred_username
-                : "",
+        email: typeof claims.preferred_username === "string" ? claims.preferred_username : "",
         roles: toStringArray(roleClaim),
         initial: name.charAt(0).toUpperCase(),
     };
 }
 
-export function AuthProvider({
-    children,
-}: Readonly<{ children: ReactNode }>) {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     const [token, setToken] = useState<string | null>(null);
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -96,14 +81,24 @@ export function AuthProvider({
 
     // Restore session from storage on mount
     useEffect(() => {
-        const savedToken = sessionStorage.getItem(TOKEN_KEY);
-        const savedUser = sessionStorage.getItem(USER_KEY);
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-            tokenRef.current = savedToken;
+        try {
+            const savedToken = sessionStorage.getItem(TOKEN_KEY);
+            const savedUser = sessionStorage.getItem(USER_KEY);
+
+            if (savedToken && savedUser) {
+                const parsedUser = JSON.parse(savedUser) as AuthUser;
+
+                setToken(savedToken);
+                setUser(parsedUser);
+                tokenRef.current = savedToken;
+            }
+        } catch {
+            sessionStorage.removeItem(TOKEN_KEY);
+            sessionStorage.removeItem(USER_KEY);
+            tokenRef.current = null;
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     const login = useCallback(async (email: string) => {
@@ -115,13 +110,11 @@ export function AuthProvider({
 
         if (!res.ok) {
             const body = await res.json().catch(() => null);
-            throw new Error(
-                body?.detail ?? "Invalid credentials. Please try again.",
-            );
+            throw new Error(body?.detail ?? "Invalid credentials. Please try again.");
         }
 
-        const data = await res.json();
-        const accessToken: string = data.access_token;
+        const data = (await res.json()) as LoginResponse;
+        const accessToken = data.access_token;
         const authUser = userFromToken(accessToken);
 
         sessionStorage.setItem(TOKEN_KEY, accessToken);
@@ -150,9 +143,7 @@ export function AuthProvider({
         [user, token, loading, login, logout],
     );
 
-    return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthState {

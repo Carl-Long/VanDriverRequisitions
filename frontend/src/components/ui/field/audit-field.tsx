@@ -7,11 +7,7 @@ type AuditFieldProps = {
     dateTime: string | null;
 };
 
-export function AuditField({
-    label,
-    name,
-    dateTime,
-}: Readonly<AuditFieldProps>) {
+export function AuditField({ label, name, dateTime }: Readonly<AuditFieldProps>) {
     if (!name && !dateTime) {
         return null;
     }

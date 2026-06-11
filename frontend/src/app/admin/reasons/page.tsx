@@ -9,20 +9,15 @@ import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
 import { Toggle } from "@/components/ui/toggle";
-
-import { ReasonFormModal } from "@/components/fe-reasons/reason-form-modal";
-
-import {
-    feReasonsApi,
-    type FeReason,
-} from "@/lib/api/fe-reasons";
-
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
-import { useToast } from "@/providers/toast-provider";
-import { FeReasonsTable } from "@/components/fe-reasons/reason-table";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
+import { FeReason, feReasonsApi } from "@/features/fe-reasons/fe-reasons-api";
+import { ReasonFormModal } from "@/features/fe-reasons/reason-form-modal";
+import { FeReasonsTable } from "@/features/fe-reasons/fe-reason-table";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { useToast } from "@/providers/toast-provider";
+import { useCrudModal } from "@/hooks/use-crud-modal";
 
 export default function FeReasonsPage() {
     const [reasons, setReasons] = useState<FeReason[]>([]);
@@ -31,9 +26,7 @@ export default function FeReasonsPage() {
 
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
-
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState<FeReason | null>(null);
+    const modal = useCrudModal<FeReason>();
 
     const toast = useToast();
 
@@ -45,12 +38,7 @@ export default function FeReasonsPage() {
             const data = await feReasonsApi.getAll(showInactive);
             setReasons(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load reasons.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load reasons."));
         } finally {
             setLoading(false);
         }
@@ -64,39 +52,24 @@ export default function FeReasonsPage() {
         if (!search.trim()) return reasons;
 
         const query = search.toLowerCase();
-
-        return reasons.filter((r) =>
-            r.reason.toLowerCase().includes(query),
-        );
+        return reasons.filter((r) => r.reason.toLowerCase().includes(query));
     }, [reasons, search]);
 
-    function openCreate() {
-        setEditing(null);
-        setModalOpen(true);
-    }
-
-    function openEdit(reason: FeReason) {
-        setEditing(reason);
-        setModalOpen(true);
-    }
     async function handleSubmit(data: { reason: string }) {
-        if (editing) {
-            await feReasonsApi.update(editing.id, data);
+        if (modal.editing) {
+            await feReasonsApi.update(modal.editing.id, data);
         } else {
             await feReasonsApi.create(data);
         }
 
         toast.success(
-            editing
-                ? `Reason "${data.reason}" updated`
-                : `Reason "${data.reason}" created`,
+            modal.editing ? `Reason "${data.reason}" updated` : `Reason "${data.reason}" created`,
         );
 
-        setModalOpen(false);
-        setEditing(null);
-
-        load();
+        modal.close();
+        await load();
     }
+
     async function handleToggleActive(reason: FeReason) {
         try {
             if (reason.isActive) {
@@ -105,33 +78,26 @@ export default function FeReasonsPage() {
                 await feReasonsApi.activate(reason.id);
             }
 
-            toast.success(reason.isActive
-                ? `${reason.reason} deactivated`
-                : `${reason.reason} activated`,
+            toast.success(
+                reason.isActive ? `${reason.reason} deactivated` : `${reason.reason} activated`,
             );
-
             await load();
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to upadte reason.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to upadate reason."));
         }
     }
 
     const emptyState = search.trim()
         ? {
-            icon: Search,
-            title: "No reasons found",
-            description: "Try adjusting your search terms.",
-        }
+              icon: Search,
+              title: "No reasons found",
+              description: "Try adjusting your search terms.",
+          }
         : {
-            icon: MessageSquare,
-            title: "No reasons yet",
-            description: "Create your first reason to get started.",
-        };
+              icon: MessageSquare,
+              title: "No reasons yet",
+              description: "Create your first reason to get started.",
+          };
 
     return (
         <PageContainer>
@@ -139,7 +105,7 @@ export default function FeReasonsPage() {
                 title="FE Reasons"
                 description="Manage reason codes used across FE store requisitions."
             >
-                <Button onClick={openCreate}>
+                <Button onClick={modal.openCreate}>
                     <Plus size={16} />
                     New Reason
                 </Button>
@@ -154,32 +120,19 @@ export default function FeReasonsPage() {
                 />
 
                 <Surface className="flex w-fit self-end items-center gap-3 px-4 py-2 lg:ml-auto lg:self-auto">
-                    <span className="text-sm text-muted-foreground">
-                        Include inactive
-                    </span>
+                    <span className="text-sm text-muted-foreground">Include inactive</span>
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() =>
-                            setShowInactive((active) => !active)
-                        }
+                        onChange={() => setShowInactive((active) => !active)}
                         ariaLabel="Toggle inactive reasons"
                     />
                 </Surface>
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={4}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={4} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState
@@ -188,23 +141,21 @@ export default function FeReasonsPage() {
                     description={emptyState.description}
                 />
             )}
+
             {!loading && filtered.length > 0 && (
                 <FeReasonsTable
                     items={filtered}
-                    onEdit={openEdit}
+                    onEdit={modal.openEdit}
                     onToggleActive={handleToggleActive}
                 />
             )}
 
             <ReasonFormModal
-                key={editing?.id ?? "new"}
-                open={modalOpen}
-                onClose={() => {
-                    setModalOpen(false);
-                    setEditing(null);
-                }}
+                key={modal.editing?.id ?? "new"}
+                open={modal.open}
+                onClose={modal.close}
                 onSubmit={handleSubmit}
-                initial={editing}
+                initial={modal.editing}
             />
         </PageContainer>
     );

@@ -2,26 +2,23 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search, SlidersHorizontal } from "lucide-react";
-
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { useToast } from "@/providers/toast-provider";
 import { getApiErrorMessage } from "@/lib/api/client";
-import {
-    requisitionLimitRulesApi,
-    type RequisitionLimitRuleSummary,
-} from "@/lib/api/requisition-limit-rules";
-
-import { feTaskTypesApi } from "@/lib/api/fe-task-types";
-import type { FeTaskType } from "@/lib/api/fe-task-types";
-
-import { RequisitionLimitRuleTable } from "@/components/requisition-limit-rules/requisition-limit-rule-table";
-import { RequisitionLimitRuleFormModal } from "@/components/requisition-limit-rules/requisition-limit-rule-form-modal";
+import { feTaskTypesApi } from "@/features/fe-task-types/fe-task-types-api";
+import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
+import { RequisitionLimitRuleFormModal } from "@/features/requisition-limit-rules/requisition-limit-rule-form-modal";
+import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/requisition-limit-rule-table";
+import {
+    RequisitionLimitRuleSummary,
+    requisitionLimitRulesApi,
+} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -29,16 +26,10 @@ export default function RequisitionLimitRulesPage() {
     const [error, setError] = useState<string | null>(null);
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
     const [taskTypeError, setTaskTypeError] = useState<string | null>(null);
-
     const [search, setSearch] = useState("");
-
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] =
-        useState<RequisitionLimitRuleSummary | null>(null);
-
+    const [editing, setEditing] = useState<RequisitionLimitRuleSummary | null>(null);
     const toast = useToast();
-
-    /* ---------------- load ---------------- */
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -48,12 +39,7 @@ export default function RequisitionLimitRulesPage() {
             const data = await requisitionLimitRulesApi.getAll();
             setRules(data);
         } catch (err) {
-            setError(
-                getApiErrorMessage(
-                    err,
-                    "Failed to load submit windows.",
-                ),
-            );
+            setError(getApiErrorMessage(err, "Failed to load submit windows."));
         } finally {
             setLoading(false);
         }
@@ -63,7 +49,6 @@ export default function RequisitionLimitRulesPage() {
         load();
     }, [load]);
 
-
     useEffect(() => {
         async function loadTaskTypes() {
             try {
@@ -71,33 +56,54 @@ export default function RequisitionLimitRulesPage() {
                 const data = await feTaskTypesApi.getAll(false);
                 setTaskTypes(data);
             } catch (err) {
-                setTaskTypeError(
-                    getApiErrorMessage(
-                        err,
-                        "Failed to load task types.",
-                    ),
-                );
+                setTaskTypeError(getApiErrorMessage(err, "Failed to load task types."));
             }
         }
         loadTaskTypes();
     }, []);
 
-    /* ---------------- filter ---------------- */
+    const fasciaOrder: Record<string, number> = {
+        FE: 0,
+        STD: 1,
+    };
+
+    const categoryOrder: Record<string, number> = {
+        "General Task": 0,
+        Mileage: 1,
+        Transfer: 2,
+        "Additional Cost": 3,
+    };
 
     const filtered = useMemo(() => {
-        if (!search.trim()) return rules;
+        const query = search.trim().toLowerCase();
 
-        const q = search.toLowerCase();
+        const results = query
+            ? rules.filter(
+                  (rule) =>
+                      rule.categoryName.toLowerCase().includes(query) ||
+                      rule.fasciaName.toLowerCase().includes(query) ||
+                      (rule.feTaskTypeName?.toLowerCase().includes(query) ?? false),
+              )
+            : rules;
 
-        return rules.filter(
-            r =>
-                r.categoryName.toLowerCase().includes(q) ||
-                r.fasciaName.toLowerCase().includes(q) ||
-                (r.feTaskTypeName?.toLowerCase().includes(q) ?? false),
-        );
+        return [...results].sort((a, b) => {
+            const fasciaCompare =
+                (fasciaOrder[a.fasciaName] ?? 999) - (fasciaOrder[b.fasciaName] ?? 999);
+
+            if (fasciaCompare !== 0) {
+                return fasciaCompare;
+            }
+
+            const categoryCompare =
+                (categoryOrder[a.categoryName] ?? 999) - (categoryOrder[b.categoryName] ?? 999);
+
+            if (categoryCompare !== 0) {
+                return categoryCompare;
+            }
+
+            return (a.feTaskTypeName ?? "").localeCompare(b.feTaskTypeName ?? "");
+        });
     }, [rules, search]);
-
-    /* ---------------- modal handlers ---------------- */
 
     function openCreate() {
         setEditing(null);
@@ -108,8 +114,6 @@ export default function RequisitionLimitRulesPage() {
         setEditing(rule);
         setModalOpen(true);
     }
-
-    /* ---------------- submit ---------------- */
 
     async function handleSubmit(data: {
         category: number;
@@ -125,32 +129,24 @@ export default function RequisitionLimitRulesPage() {
         }
 
         toast.success(
-            editing
-                ? "Requisition limit rule updated"
-                : "Requisition limit rule created",
+            editing ? "Requisition limit rule updated" : "Requisition limit rule created",
         );
-
         setModalOpen(false);
         setEditing(null);
-
         await load();
     }
 
-    const emptyState =
-        search.trim()
-            ? {
-                icon: Search,
-                title: "No rules found",
-                description: "Try adjusting your search terms.",
-            }
-            : {
-                icon: SlidersHorizontal,
-                title: "No requisition limit rules yet",
-                description:
-                    "Create your first rule to define limits for requisitions.",
-            };
-
-    /* ---------------- UI ---------------- */
+    const emptyState = search.trim()
+        ? {
+              icon: Search,
+              title: "No rules found",
+              description: "Try adjusting your search terms.",
+          }
+        : {
+              icon: SlidersHorizontal,
+              title: "No requisition limit rules yet",
+              description: "Create your first rule to define limits for requisitions.",
+          };
 
     return (
         <PageContainer>
@@ -173,24 +169,11 @@ export default function RequisitionLimitRulesPage() {
                 />
             </div>
 
-            {error && (
-                <Alert>
-                    {error}
-                </Alert>
-            )}
+            {error && <Alert>{error}</Alert>}
 
-            {taskTypeError && (
-                <Alert>
-                    {taskTypeError}
-                </Alert>
-            )}
+            {taskTypeError && <Alert>{taskTypeError}</Alert>}
 
-            {loading && (
-                <TableSkeleton
-                    rows={6}
-                    columns={7}
-                />
-            )}
+            {loading && <TableSkeleton rows={6} columns={7} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState
@@ -201,10 +184,7 @@ export default function RequisitionLimitRulesPage() {
             )}
 
             {!loading && filtered.length > 0 && (
-                <RequisitionLimitRuleTable
-                    items={filtered}
-                    onEdit={openEdit}
-                />
+                <RequisitionLimitRuleTable items={filtered} onEdit={openEdit} />
             )}
 
             <RequisitionLimitRuleFormModal
@@ -214,7 +194,9 @@ export default function RequisitionLimitRulesPage() {
                     setEditing(null);
                 }}
                 onSubmit={handleSubmit}
-                initial={editing} taskTypes={taskTypes} />
+                initial={editing}
+                taskTypes={taskTypes}
+            />
         </PageContainer>
     );
 }

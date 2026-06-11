@@ -39,22 +39,15 @@ export function Button({
                 sizeMap[size],
                 toneMap[tone][variant],
                 loading && "cursor-wait",
-                className
+                className,
             )}
             disabled={disabled || loading}
             aria-busy={loading}
             {...props}
         >
-            {loading && (
-                <Spinner className="h-4 w-4 shrink-0" />
-            )}
+            {loading && <Spinner className="h-4 w-4 shrink-0" />}
 
-            <span
-                className={cn(
-                    "flex items-center gap-2",
-                    loading && "cursor-wait"
-                )}
-            >
+            <span className={cn("flex items-center gap-2", loading && "cursor-wait")}>
                 {children}
             </span>
         </button>

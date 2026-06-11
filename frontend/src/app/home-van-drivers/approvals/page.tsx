@@ -8,18 +8,16 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
-
-import { feRequisitionsApi, type FeRequisitionSummary } from "@/lib/api/fe-requisitions";
-
 import type { PagedResult } from "@/lib/types";
 import { getApiErrorMessage } from "@/lib/api/client";
-
-import { FeRequisitionTable } from "@/components/fe-requisitions/fe-requisition-table";
-import { FeRequisitionTableSkeleton } from "@/components/fe-requisitions/fe-requisition-table-skeleton";
-import { pageFromSearchParams } from "@/components/fe-requisitions/url-state";
 import NotFound from "@/app/not-found";
-import { canApproveRequisitions } from "@/lib/auth/roles";
+import { canApproveRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
+import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
+import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
+import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
+import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
@@ -29,8 +27,7 @@ export default function FeRequisitionApprovalsPage() {
 
     const page = pageFromSearchParams(searchParams);
 
-    const [data, setData] =
-        useState<PagedResult<FeRequisitionSummary> | null>(null);
+    const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -58,12 +55,7 @@ export default function FeRequisitionApprovalsPage() {
                 }
             } catch (err) {
                 if (!cancelled) {
-                    setError(
-                        getApiErrorMessage(
-                            err,
-                            "Failed to load approvals.",
-                        ),
-                    );
+                    setError(getApiErrorMessage(err, "Failed to load approvals."));
                 }
             } finally {
                 if (!cancelled) {
@@ -115,11 +107,7 @@ export default function FeRequisitionApprovalsPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
-                    onRowClick={(req) =>
-                        router.push(
-                            `/home-van-drivers/approvals/${req.id}`,
-                        )
-                    }
+                    onRowClick={(req) => router.push(`/home-van-drivers/approvals/${req.id}`)}
                 />
             )}
 

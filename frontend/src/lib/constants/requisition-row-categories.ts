@@ -1,6 +1,0 @@
-export const REQUISITION_ROW_CATEGORIES = {
-    GENERAL_TASK: 0,
-    MILEAGE: 1,
-    TRANSFER: 2,
-    ADDITIONAL_COST: 3,
-} as const;

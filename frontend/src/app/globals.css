@@ -191,7 +191,6 @@
     --info-surface-hover: 235 235 238;
     --info-border: 210 210 214;
 
-
     --warning: 120 120 120;
     --warning-foreground: 255 255 255;
     --warning-surface: 245 245 245;
@@ -361,7 +360,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-
 @theme {
     --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
@@ -391,7 +389,6 @@ body {
     --color-primary-surface: rgb(var(--primary-surface));
     --color-primary-surface-hover: rgb(var(--primary-surface-hover));
     --color-primary-border: rgb(var(--primary-border));
-
 
     --color-secondary: rgb(var(--secondary));
     --color-secondary-foreground: rgb(var(--secondary-foreground));
@@ -436,7 +433,6 @@ body {
     --radius-2xl: calc(var(--radius) + 12px);
 }
 
-
 button,
 a,
 input,
@@ -450,11 +446,9 @@ textarea {
         transform 0.2s ease;
 }
 
-
 ::selection {
     background: rgb(var(--primary) / 0.2);
 }
-
 
 *:focus-visible {
     outline: none;
@@ -464,11 +458,9 @@ textarea {
         0 0 0 4px rgb(var(--ring));
 }
 
-
 * {
     scrollbar-width: thin;
-    scrollbar-color:
-        rgb(var(--border)) transparent;
+    scrollbar-color: rgb(var(--border)) transparent;
 }
 
 ::-webkit-scrollbar {

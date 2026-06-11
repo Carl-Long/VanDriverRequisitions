@@ -13,13 +13,7 @@ type ModalProps = {
     children: ReactNode;
 };
 
-export function Modal({
-    open,
-    onClose,
-    title,
-    titleClassName,
-    children,
-}: Readonly<ModalProps>) {
+export function Modal({ open, onClose, title, titleClassName, children }: Readonly<ModalProps>) {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
@@ -52,12 +46,7 @@ export function Modal({
             )}
         >
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h2
-                    className={cn(
-                        "text-lg font-semibold text-foreground",
-                        titleClassName,
-                    )}
-                >
+                <h2 className={cn("text-lg font-semibold text-foreground", titleClassName)}>
                     {title}
                 </h2>
                 <IconButton

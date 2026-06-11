@@ -10,7 +10,6 @@ import {
     type ReactNode,
 } from "react";
 
-
 import { ToastHost } from "@/components/ui/toast/toast";
 import { ToastContextValue, Toast, ToastVariant } from "@/components/ui/toast/toast-types";
 
@@ -38,7 +37,7 @@ export function ToastProvider({ children }: Readonly<{ children: ReactNode }>) {
 
             setTimeout(() => dismiss(id), TOAST_DURATION_MS);
         },
-        [dismiss]
+        [dismiss],
     );
 
     const value = useMemo<ToastContextValue>(
@@ -48,7 +47,7 @@ export function ToastProvider({ children }: Readonly<{ children: ReactNode }>) {
             error: (m) => show(m, "error"),
             info: (m) => show(m, "info"),
         }),
-        [show]
+        [show],
     );
 
     return (
@@ -64,4 +63,3 @@ export function useToast(): ToastContextValue {
     if (!ctx) throw new Error("useToast must be used inside <ToastProvider>");
     return ctx;
 }
-

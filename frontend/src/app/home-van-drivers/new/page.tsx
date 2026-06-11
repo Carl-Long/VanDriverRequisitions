@@ -1,15 +1,15 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
-import { FeRequisitionShell } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell";
-import { useRequisitionLimitRules } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-requisition-limit-rules";
-import { FeRequisitionShellSkeleton } from "@/components/fe-requisitions/fe-requisition-form/components/fe-requisition-shell-skeleton";
-import { useFeTaskTypes } from "@/components/fe-requisitions/fe-requisition-form/hooks/use-fe-task-types";
-import { useSubmitWindowStatus } from "@/hooks/use-submit-window-status";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
-import { canCreateRequisitions } from "@/lib/auth/roles";
+import { canCreateRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
+import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
+import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
+import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
+import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
 
 export default function NewRequisitionPage() {
     const {
@@ -18,11 +18,7 @@ export default function NewRequisitionPage() {
         error: limitRulesError,
     } = useRequisitionLimitRules();
 
-    const {
-        taskTypes,
-        loading: taskTypesLoading,
-        error: taskTypesError,
-    } = useFeTaskTypes();
+    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
 
     const {
         status: submitStatus,
@@ -30,21 +26,14 @@ export default function NewRequisitionPage() {
         error: submitWindowStatusError,
     } = useSubmitWindowStatus();
 
-    const errors = [
-        limitRulesError,
-        taskTypesError,
-        submitWindowStatusError,
-    ].filter(Boolean);
+    const errors = [limitRulesError, taskTypesError, submitWindowStatusError].filter(Boolean);
 
     const { user, loading: authLoading } = useAuth();
 
     const canCreate = canCreateRequisitions(user);
 
     const loading =
-        authLoading ||
-        limitRulesLoading ||
-        taskTypesLoading ||
-        submitWindowStatusLoading;
+        authLoading || limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
 
     if (loading) {
         return (
@@ -63,9 +52,7 @@ export default function NewRequisitionPage() {
             <PageContainer>
                 <div className="space-y-4">
                     {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>
-                            {error}
-                        </Alert>
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
                     ))}
                 </div>
             </PageContainer>
