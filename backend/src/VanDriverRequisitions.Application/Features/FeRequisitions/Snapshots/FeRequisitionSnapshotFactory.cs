@@ -35,7 +35,10 @@ public static class FeRequisitionSnapshotFactory
                 .Select(CreateMileageSnapshot)
                 .ToList(),
             
-            Transfers = [],
+            Transfers = requisition.FeTransfers
+                .Select(CreateTransferSnapshot)
+                .ToList(),
+            
             AdditionalCosts = []
         };
     }
@@ -85,6 +88,37 @@ public static class FeRequisitionSnapshotFactory
             TotalMiles = mileage.TotalMiles ?? 0,
             RatePerMile = mileage.RatePerMile ?? 0,
             TotalValue = mileage.TotalValue ?? 0
+        };
+    }
+    
+    private static FeTransferSnapshot CreateTransferSnapshot(FeTransfer transfer)
+    {
+        return new FeTransferSnapshot
+        {
+            WeekEndingDate = transfer.WeekEndingDate,
+
+            ShopIdFrom = transfer.ShopIdFrom,
+            ShopCodeFrom = transfer.ShopCodeFrom,
+            ShopNameFrom = transfer.ShopNameFrom,
+
+            ShopIdTo = transfer.ShopIdTo,
+            ShopCodeTo = transfer.ShopCodeTo,
+            ShopNameTo = transfer.ShopNameTo,
+
+            Week = new WeeklyQuantitiesSnapshot
+            {
+                Saturday = transfer.Week.Saturday ?? 0,
+                Sunday = transfer.Week.Sunday ?? 0,
+                Monday = transfer.Week.Monday ?? 0,
+                Tuesday = transfer.Week.Tuesday ?? 0,
+                Wednesday = transfer.Week.Wednesday ?? 0,
+                Thursday = transfer.Week.Thursday ?? 0,
+                Friday = transfer.Week.Friday ?? 0
+            },
+
+            TotalNumber = transfer.TotalNumber,
+            RatePerJob = transfer.RatePerJob ?? 0,
+            TotalValue = transfer.TotalValue ?? 0
         };
     }
 }

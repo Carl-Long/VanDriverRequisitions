@@ -69,12 +69,14 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         string requisitionNumber,
         RequisitionDetails details,
         IEnumerable<FeGeneralTaskUpdateModel> taskModels,
-        IEnumerable<FeMileageUpdateModel> mileageModels)
+        IEnumerable<FeMileageUpdateModel> mileageModels,
+        IEnumerable<FeTransferUpdateModel> transferModels)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requisitionNumber);
         ArgumentNullException.ThrowIfNull(details);
         ArgumentNullException.ThrowIfNull(taskModels);
         ArgumentNullException.ThrowIfNull(mileageModels);
+        ArgumentNullException.ThrowIfNull(transferModels);
 
         var requisition = new FeRequisition
         {
@@ -85,6 +87,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         requisition.UpdateDetails(details);
         requisition.SyncGeneralTasks(taskModels);
         requisition.SyncMileages(mileageModels);
+        requisition.SyncTransfers(transferModels);
 
         return requisition;
     }
@@ -195,6 +198,59 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             }
         }
         
+        RecalculateSubtotal();
+    }
+    
+    public void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
+    {
+        ArgumentNullException.ThrowIfNull(incomingTransfers);
+
+        var incomingList = incomingTransfers.ToList();
+        var existingTransfers = _feTransfers.ToDictionary(x => x.Id);
+
+        var incomingIds = incomingList
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        var transfersToRemove = _feTransfers
+            .Where(x => !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var transfer in transfersToRemove)
+        {
+            _feTransfers.Remove(transfer);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (incoming.Id.HasValue)
+            {
+                if (!existingTransfers.TryGetValue(incoming.Id.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Transfer '{incoming.Id}' not found.");
+                }
+
+                existing.Update(
+                    incoming.FromShop,
+                    incoming.ToShop,
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+            }
+            else
+            {
+                var transfer = FeTransfer.Create(
+                    incoming.FromShop,
+                    incoming.ToShop,
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+
+                _feTransfers.Add(transfer);
+            }
+        }
+
         RecalculateSubtotal();
     }
 

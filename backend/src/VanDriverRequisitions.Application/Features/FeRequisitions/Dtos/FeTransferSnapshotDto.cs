@@ -1,6 +1,6 @@
-namespace VanDriverRequisitions.Domain.Entities.FE.Models;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
-public sealed class FeTransferSnapshot
+public sealed class FeTransferSnapshotDto
 {
     public DateOnly WeekEndingDate { get; init; }
 
@@ -12,8 +12,8 @@ public sealed class FeTransferSnapshot
     public string ShopCodeTo { get; init; } = string.Empty;
     public string ShopNameTo { get; init; } = string.Empty;
 
-    public WeeklyQuantitiesSnapshot Week { get; init; } = null!;
+    public WeeklyQuantitiesSnapshotDto Week { get; init; } = null!;
     public int TotalNumber { get; init; }
-    public decimal RatePerJob { get; init; }
-    public decimal TotalValue { get; init; }
+    public decimal? RatePerJob { get; init; }
+    public decimal? TotalValue { get; init; }
 }

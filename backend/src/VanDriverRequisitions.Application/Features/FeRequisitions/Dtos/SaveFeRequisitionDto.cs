@@ -9,4 +9,5 @@ public sealed class SaveFeRequisitionDto
     public Guid ShopId { get; init; }
     public required IReadOnlyCollection<SaveFeGeneralTaskDto> FeGeneralTasks { get; init; }
     public required IReadOnlyCollection<SaveFeMileageDto> FeMileages { get; init; }
+    public required IReadOnlyCollection<SaveFeTransferDto> FeTransfers { get; init; }
 }

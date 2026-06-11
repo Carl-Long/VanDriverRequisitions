@@ -24,13 +24,19 @@ public sealed class SaveFeRequisitionDtoValidator
 
         RuleForEach(x => x.FeGeneralTasks)
             .SetValidator(new SaveFeGeneralTaskDtoValidator());
+        
+        RuleForEach(x => x.FeMileages)
+            .SetValidator(new SaveFeMileageDtoValidator());
+        
+        RuleForEach(x => x.FeTransfers)
+            .SetValidator(new SaveFeTransferDtoValidator());
     }
 
     private static bool HaveAtLeastOneRow(SaveFeRequisitionDto saveFeRequisitionDto)
     {
         return saveFeRequisitionDto.FeGeneralTasks.Any()
-               || saveFeRequisitionDto.FeMileages.Any();
-        //     || dto.FeTransfers.Any()
+               || saveFeRequisitionDto.FeMileages.Any()
+               || saveFeRequisitionDto.FeTransfers.Any();
         //     || dto.FeAdditionalCosts.Any();
     }
 }

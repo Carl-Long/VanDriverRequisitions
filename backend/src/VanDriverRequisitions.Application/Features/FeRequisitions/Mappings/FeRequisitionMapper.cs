@@ -49,6 +49,10 @@ public static class FeRequisitionMapper
             FeMileages = requisition.FeMileages
                 .Select(MapMileageDetail)
                 .ToList(),
+            
+            FeTransfers = requisition.FeTransfers
+                .Select(MapTransferDetail)
+                .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };
@@ -98,6 +102,28 @@ public static class FeRequisitionMapper
             TotalMiles = mileage.TotalMiles,
             RatePerMile = mileage.RatePerMile,
             TotalValue = mileage.TotalValue
+        };
+    }
+    
+    private static FeTransferDetailDto MapTransferDetail(FeTransfer transfer)
+    {
+        return new FeTransferDetailDto
+        {
+            Id = transfer.Id,
+            WeekEndingDate = transfer.WeekEndingDate,
+
+            ShopIdFrom = transfer.ShopIdFrom,
+            ShopCodeFrom = transfer.ShopCodeFrom,
+            ShopNameFrom = transfer.ShopNameFrom,
+
+            ShopIdTo = transfer.ShopIdTo,
+            ShopCodeTo = transfer.ShopCodeTo,
+            ShopNameTo = transfer.ShopNameTo,
+
+            Week = MapWeekToDto(transfer.Week),
+            TotalNumber = transfer.TotalNumber,
+            RatePerJob = transfer.RatePerJob,
+            TotalValue = transfer.TotalValue
         };
     }
     

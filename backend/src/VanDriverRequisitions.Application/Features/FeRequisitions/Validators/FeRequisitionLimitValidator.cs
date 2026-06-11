@@ -14,7 +14,8 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
         var rules = await context.RequisitionLimitRules
             .Where(x =>
                 x.Category == RequisitionRowCategory.GeneralTask ||
-                x.Category == RequisitionRowCategory.Mileage)
+                x.Category == RequisitionRowCategory.Mileage ||
+                x.Category == RequisitionRowCategory.Transfer)
             .ToListAsync(cancellationToken);
 
         var failures = new List<ValidationFailure>();
@@ -112,6 +113,54 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
                     new ValidationFailure(
                         nameof(mileage.RatePerMile),
                         $"Mileage exceeds maximum rate of £{mileageRule.MaxRate:0.00}."));
+            }
+        }
+        
+        var transferRule = rules.FirstOrDefault(x =>
+            x.Category == RequisitionRowCategory.Transfer);
+
+        foreach (var transfer in requisition.FeTransfers)
+        {
+            if (transferRule is null)
+            {
+                failures.Add(
+                    new ValidationFailure(
+                        "Form",
+                        "No limit rule is configured for transfers."));
+
+                continue;
+            }
+
+            var dailyValues = new[]
+            {
+                transfer.Week.Sunday,
+                transfer.Week.Monday,
+                transfer.Week.Tuesday,
+                transfer.Week.Wednesday,
+                transfer.Week.Thursday,
+                transfer.Week.Friday,
+                transfer.Week.Saturday
+            };
+
+            for (var i = 0; i < dailyValues.Length; i++)
+            {
+                var value = dailyValues[i];
+
+                if (value > transferRule.MaxQuantity)
+                {
+                    failures.Add(
+                        new ValidationFailure(
+                            nameof(transfer.TotalNumber),
+                            $"Transfer exceeds daily maximum of {transferRule.MaxQuantity} on {GetDayName(i)}."));
+                }
+            }
+
+            if (transfer.RatePerJob > transferRule.MaxRate)
+            {
+                failures.Add(
+                    new ValidationFailure(
+                        nameof(transfer.RatePerJob),
+                        $"Transfer exceeds maximum rate of £{transferRule.MaxRate:0.00}."));
             }
         }
 

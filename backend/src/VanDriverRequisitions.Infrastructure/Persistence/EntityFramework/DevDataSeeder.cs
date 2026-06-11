@@ -353,6 +353,7 @@ public static class DevDataSeeder
 
             var taskModels = BuildSeedTasks(rng, taskTypes, requisitionDate);
             var mileageModels = BuildSeedMileages(rng, requisitionDate);
+            var transferModels = BuildSeedTransfers(rng, shops, requisitionDate);
 
             var requisitionNumber = $"F{i:D9}";
 
@@ -360,7 +361,9 @@ public static class DevDataSeeder
                 requisitionNumber,
                 details,
                 taskModels,
-                mileageModels);
+                mileageModels,
+                transferModels);
+            
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
             requisition.CreatedByNameSnapshot = user.Name;
@@ -536,6 +539,55 @@ public static class DevDataSeeder
                 0.45m)
         ];
     }
+    
+    private static List<FeTransferUpdateModel> BuildSeedTransfers(
+        Random rng,
+        List<Shop> shops,
+        DateOnly requisitionDate)
+    {
+        var includeTransfer = rng.Next(0, 2) == 1;
+
+        if (!includeTransfer)
+        {
+            return [];
+        }
+
+        var fromShop = shops[rng.Next(shops.Count)];
+        var toShop = shops[rng.Next(shops.Count)];
+
+        while (toShop.Id == fromShop.Id)
+        {
+            toShop = shops[rng.Next(shops.Count)];
+        }
+
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        return
+        [
+            new FeTransferUpdateModel(
+                null,
+                new ShopSnapshot(
+                    fromShop.Id,
+                    fromShop.Code,
+                    fromShop.Name),
+                new ShopSnapshot(
+                    toShop.Id,
+                    toShop.Code,
+                    toShop.Name),
+                weekEndingDate,
+                new WeeklyQuantities(
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11)),
+                Math.Round(
+                    (decimal)(rng.NextDouble() * 5 + 3),
+                    2))
+        ];
+    }
 
     private static string Esc(string value) => value.Replace("'", "''");
 
@@ -589,6 +641,22 @@ public static class DevDataSeeder
                 x.Week,
                 x.TotalMiles,
                 x.RatePerMile,
+                x.TotalValue
+            }),
+            
+            Transfers = requisition.FeTransfers.Select(x => new
+            {
+                x.Id,
+                x.WeekEndingDate,
+                x.ShopIdFrom,
+                x.ShopCodeFrom,
+                x.ShopNameFrom,
+                x.ShopIdTo,
+                x.ShopCodeTo,
+                x.ShopNameTo,
+                x.Week,
+                x.TotalNumber,
+                x.RatePerJob,
                 x.TotalValue
             })
         });

@@ -24,6 +24,14 @@ public class FeTransferConfiguration : IEntityTypeConfiguration<FeTransfer>
 
         builder.Property(x => x.ShopIdFrom)
             .IsRequired();
+        
+        builder.Property(x => x.ShopCodeFrom)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.ShopNameFrom)
+            .IsRequired()
+            .HasMaxLength(100);
 
         builder.HasOne<Shop>()
             .WithMany()
@@ -32,6 +40,14 @@ public class FeTransferConfiguration : IEntityTypeConfiguration<FeTransfer>
 
         builder.Property(x => x.ShopIdTo)
             .IsRequired();
+        
+        builder.Property(x => x.ShopCodeTo)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.ShopNameTo)
+            .IsRequired()
+            .HasMaxLength(100);
 
         builder.HasOne<Shop>()
             .WithMany()

@@ -11,6 +11,7 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -87,7 +88,8 @@ public class FeRequisitionService(
             requisitionNumber,
             requisitionData.Details,
             requisitionData.TaskModels,
-            requisitionData.MileageModels);
+            requisitionData.MileageModels,
+            requisitionData.TransferModels);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
@@ -142,7 +144,8 @@ public class FeRequisitionService(
                 requisitionNumber,
                 requisitionData.Details,
                 requisitionData.TaskModels,
-                requisitionData.MileageModels);
+                requisitionData.MileageModels,
+                requisitionData.TransferModels);
             
             context.FeRequisitions.Add(requisition);
         }
@@ -254,16 +257,30 @@ public class FeRequisitionService(
         var taskTypeMap = await context.FeTaskTypes
             .Where(x => taskTypeIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
+        
+        var transferShopIds = saveFeRequisitionDto.FeTransfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+
+        var transferShopMap = await context.Shops
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => transferShopIds.Contains(x.Id))
+            .Select(ShopProjections.AsRequisitionSnapshotDto)
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
 
         var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
         var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
         var mileageModels = BuildMileageModels(saveFeRequisitionDto.FeMileages);
+        var transferModels = BuildTransferModels(saveFeRequisitionDto.FeTransfers, transferShopMap);
 
         return new RequisitionBuildData(
             driverSummary,
             details,
             taskModels,
             mileageModels,
+            transferModels,
             shop.IsActive);
     }
     
@@ -295,11 +312,34 @@ public class FeRequisitionService(
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
     }
     
+    private static List<FeTransferUpdateModel> BuildTransferModels(
+        IEnumerable<SaveFeTransferDto> transfers,
+        IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
+    {
+        return transfers
+            .Select(dto =>
+            {
+                var fromShop = MapShopSnapshot(dto.ShopIdFrom, shopMap);
+                var toShop = MapShopSnapshot(dto.ShopIdTo, shopMap);
+
+                return FeTransferModelMapper.ToUpdateModel(dto, fromShop, toShop);
+            })
+            .ToList();
+    }
+
+    private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
+    {
+        return !shopMap.TryGetValue(shopId, out var shop) 
+            ? throw new NotFoundException($"Shop '{shopId}' was not found.") 
+            : new ShopSnapshot(shop.Id, shop.Code, shop.Name);
+    }
+    
     private static void ApplySaveData(FeRequisition requisition, RequisitionBuildData requisitionData)
     {
         requisition.UpdateDetails(requisitionData.Details);
         requisition.SyncGeneralTasks(requisitionData.TaskModels);
         requisition.SyncMileages(requisitionData.MileageModels);
+        requisition.SyncTransfers(requisitionData.TransferModels);
     }
 
     private AuditUser GetAuditUser(string actionName)
@@ -336,5 +376,6 @@ public class FeRequisitionService(
         RequisitionDetails Details,
         List<FeGeneralTaskUpdateModel> TaskModels,
         List<FeMileageUpdateModel> MileageModels,
+        List<FeTransferUpdateModel> TransferModels,
         bool IsShopActive);
 }
