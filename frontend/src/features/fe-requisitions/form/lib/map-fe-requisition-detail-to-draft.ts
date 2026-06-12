@@ -68,8 +68,33 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             totalValue: mileage.totalValue ?? 0,
         })),
 
+        feTransfers: detail.feTransfers.map((transfer) => ({
+            id: transfer.id,
+            clientId: crypto.randomUUID(),
 
-        feTransfers: [],
+            shopIdFrom: transfer.shopIdFrom,
+            shopLabelFrom: `${transfer.shopCodeFrom} - ${transfer.shopNameFrom}`,
+
+            shopIdTo: transfer.shopIdTo,
+            shopLabelTo: `${transfer.shopCodeTo} - ${transfer.shopNameTo}`,
+
+            weekEndingDate: new Date(transfer.weekEndingDate),
+
+            quantities: {
+                sunday: transfer.week.sunday,
+                monday: transfer.week.monday,
+                tuesday: transfer.week.tuesday,
+                wednesday: transfer.week.wednesday,
+                thursday: transfer.week.thursday,
+                friday: transfer.week.friday,
+                saturday: transfer.week.saturday,
+            },
+
+            totalNumber: transfer.totalNumber,
+            ratePerJob: transfer.ratePerJob,
+            totalValue: transfer.totalValue ?? 0,
+        })),
+        
         feAdditionalCosts: [],
     };
 }

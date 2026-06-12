@@ -14,6 +14,9 @@ import { createFeMileageDraftFromForm } from "../lib/create-fe-mileage-draft-fro
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { calculateFeMileageFormTotals } from "../lib/calculate-fe-mileage-form";
 import { calculateFeRequisitionSubtotal } from "../utils/fe-requisition-calculations";
+import { calculateFeTransferFormTotals } from "../lib/calculate-fe-transfer-form";
+import { createFeTransferDraftFromForm } from "../lib/create-fe-transfer-draft-from-form";
+import { FeTransferForm } from "../types/fe-transfer-form";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     const [draft, setDraft] = useState<FeRequisitionDraft>(
@@ -150,6 +153,56 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         }));
     }
 
+    function addTransfer(form: FeTransferForm) {
+        const transfer = createFeTransferDraftFromForm({ form });
+
+        setDraft((prev) => ({
+            ...prev,
+            feTransfers: [...prev.feTransfers, transfer],
+        }));
+    }
+
+    function updateTransfer(clientId: string, form: FeTransferForm) {
+        const totals = calculateFeTransferFormTotals(form);
+
+        setDraft((prev) => ({
+            ...prev,
+            feTransfers: prev.feTransfers.map((transfer) => {
+                if (transfer.clientId !== clientId) {
+                    return transfer;
+                }
+
+                return {
+                    ...transfer,
+
+                    shopIdFrom: form.shopIdFrom,
+                    shopLabelFrom: form.shopLabelFrom,
+
+                    shopIdTo: form.shopIdTo,
+                    shopLabelTo: form.shopLabelTo,
+
+                    weekEndingDate: form.weekEndingDate,
+
+                    quantities: {
+                        ...form.quantities,
+                    },
+
+                    ratePerJob: form.ratePerJob,
+
+                    totalNumber: totals.totalNumber,
+                    totalValue: totals.totalValue,
+                };
+            }),
+        }));
+    }
+
+    function removeTransfer(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            feTransfers: prev.feTransfers.filter((x) => x.clientId !== clientId),
+        }));
+    }
+
     return {
         draft,
         subtotal,
@@ -167,5 +220,9 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         addMileage,
         updateMileage,
         removeMileage,
+
+        addTransfer,
+        updateTransfer,
+        removeTransfer,
     };
 }

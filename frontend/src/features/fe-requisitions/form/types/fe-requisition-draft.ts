@@ -4,6 +4,7 @@ import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 import { FeSubmissionHistoryDraft } from "./fe-submission-history-draft";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeMileageDraft } from "./fe-mileage-draft";
+import { FeTransferDraft } from "./fe-transfer-draft";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;
@@ -31,7 +32,7 @@ export type FeRequisitionDraft = {
 
     feGeneralTasks: FeGeneralTaskDraft[];
     feMileages: FeMileageDraft[];
-    feTransfers: [];
+    feTransfers: FeTransferDraft[];
     feAdditionalCosts: [];
     submissionHistory: FeSubmissionHistoryDraft[];
 };

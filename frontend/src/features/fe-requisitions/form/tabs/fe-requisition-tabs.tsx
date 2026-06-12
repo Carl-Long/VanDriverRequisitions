@@ -14,6 +14,7 @@ type Props = {
     details: React.ReactNode;
     renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
     mileage: React.ReactNode;
+    transfers: React.ReactNode;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
     getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
@@ -26,6 +27,7 @@ export function FeRequisitionTabs({
     details,
     renderTaskTypeTab,
     mileage,
+    transfers,
     submissionHistory,
     submissionHistoryCount,
     getTaskTypeTabHasWarning,
@@ -67,6 +69,7 @@ export function FeRequisitionTabs({
                 {activeTab?.type === "details" && details}
                 {activeTab?.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
                 {activeTab?.type === "mileage" && mileage}
+                {activeTab?.type === "transfers" && transfers}
                 {activeTab?.type === "submission-history" && submissionHistory}
             </div>
         </div>

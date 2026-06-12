@@ -47,6 +47,7 @@ export type FeRequisitionSnapshot = {
     subtotal: number;
     generalTasks: FeGeneralTaskSnapshot[];
     mileages: FeMileageSnapshot[];
+    transfers: FeTransferSnapshot[];
 };
 
 export type FeGeneralTaskSnapshot = {
@@ -64,5 +65,19 @@ export type FeMileageSnapshot = {
     totalMiles: number;
     ratePerMile: number;
     totalValue: number;
+    week: WeeklyQuantities;
+};
+
+export type FeTransferSnapshot = {
+    weekEndingDate: string;
+    shopIdFrom: string;
+    shopCodeFrom: string;
+    shopNameFrom: string;
+    shopIdTo: string;
+    shopCodeTo: string;
+    shopNameTo: string;
+    totalNumber: number;
+    ratePerJob: number | null;
+    totalValue: number | null;
     week: WeeklyQuantities;
 };

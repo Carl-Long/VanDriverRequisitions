@@ -45,8 +45,27 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
             ratePerMile: mileage.ratePerMile,
         })),
 
+        feTransfers: draft.feTransfers.map((transfer) => ({
+            id: transfer.id,
 
-        feTransfers: [],
+            weekEndingDate: toDateOnlyString(transfer.weekEndingDate) ?? "",
+
+            shopIdFrom: transfer.shopIdFrom ?? "",
+            shopIdTo: transfer.shopIdTo ?? "",
+
+            week: {
+                sunday: transfer.quantities.sunday,
+                monday: transfer.quantities.monday,
+                tuesday: transfer.quantities.tuesday,
+                wednesday: transfer.quantities.wednesday,
+                thursday: transfer.quantities.thursday,
+                friday: transfer.quantities.friday,
+                saturday: transfer.quantities.saturday,
+            },
+
+            ratePerJob: transfer.ratePerJob,
+        })),
+        
         feAdditionalCosts: [],
     };
 }

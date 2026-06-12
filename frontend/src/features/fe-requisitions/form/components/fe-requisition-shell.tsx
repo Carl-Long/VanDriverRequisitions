@@ -28,6 +28,7 @@ import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-windo
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
+import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -69,6 +70,9 @@ export function FeRequisitionShell({
         addMileage,
         updateMileage,
         removeMileage,
+        addTransfer,
+        updateTransfer,
+        removeTransfer,
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
@@ -384,7 +388,8 @@ export function FeRequisitionShell({
                         errors={errors}
                         clearError={clearError}
                     />
-                } mileage={
+                }
+                mileage={
                     <FeMileageWorkspace
                         limitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
@@ -403,6 +408,27 @@ export function FeRequisitionShell({
                             clearError("form");
                         }}
                         onDelete={removeMileage}
+                    />
+                }
+                transfers={
+                    <FeTransferWorkspace
+                        limitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.TRANSFER,
+                        })}
+                        readonly={isReadonly}
+                        transfers={draft.feTransfers}
+                        onAdd={(form) => {
+                            addTransfer(form);
+                            clearError("feTransfers");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateTransfer(clientId, form);
+                            clearError("feTransfers");
+                            clearError("form");
+                        }}
+                        onDelete={removeTransfer}
                     />
                 }
                 submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
