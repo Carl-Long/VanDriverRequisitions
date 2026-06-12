@@ -1,9 +1,10 @@
 using VanDriverRequisitions.Domain.Enums;
 
-namespace VanDriverRequisitions.Domain.Entities.FE.Models;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
-public sealed class FeAdditionalCostSnapshot
+public sealed class FeAdditionalCostDetailDto
 {
+    public Guid Id { get; init; }
     public DateOnly WeekEndingDate { get; init; }
 
     public Guid ReasonId { get; init; }

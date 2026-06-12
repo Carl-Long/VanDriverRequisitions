@@ -22,21 +22,17 @@ public sealed class SaveFeRequisitionDtoValidator
             .Must(HaveAtLeastOneRow)
             .WithMessage("At least one requisition row is required.");
 
-        RuleForEach(x => x.FeGeneralTasks)
-            .SetValidator(new SaveFeGeneralTaskDtoValidator());
-        
-        RuleForEach(x => x.FeMileages)
-            .SetValidator(new SaveFeMileageDtoValidator());
-        
-        RuleForEach(x => x.FeTransfers)
-            .SetValidator(new SaveFeTransferDtoValidator());
+        RuleForEach(x => x.FeGeneralTasks).SetValidator(new SaveFeGeneralTaskDtoValidator());
+        RuleForEach(x => x.FeMileages).SetValidator(new SaveFeMileageDtoValidator());
+        RuleForEach(x => x.FeTransfers).SetValidator(new SaveFeTransferDtoValidator());
+        RuleForEach(x => x.FeAdditionalCosts).SetValidator(new SaveFeAdditionalCostDtoValidator());
     }
 
     private static bool HaveAtLeastOneRow(SaveFeRequisitionDto saveFeRequisitionDto)
     {
         return saveFeRequisitionDto.FeGeneralTasks.Any()
                || saveFeRequisitionDto.FeMileages.Any()
-               || saveFeRequisitionDto.FeTransfers.Any();
-        //     || dto.FeAdditionalCosts.Any();
+               || saveFeRequisitionDto.FeTransfers.Any()
+               || saveFeRequisitionDto.FeAdditionalCosts.Any();
     }
 }

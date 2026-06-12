@@ -21,6 +21,7 @@ public sealed class FeRequisitionDetailDto
     public required List<FeGeneralTaskDetailDto> FeGeneralTasks { get; init; }
     public required List<FeMileageDetailDto> FeMileages { get; init; }
     public required List<FeTransferDetailDto> FeTransfers { get; init; }
+    public required List<FeAdditionalCostDetailDto> FeAdditionalCosts { get; init; }
 
     public bool IsEditable { get; init; }
     public DateTime? SubmittedAtUtc { get; init; }

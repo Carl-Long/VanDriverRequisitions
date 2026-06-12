@@ -81,7 +81,8 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
 
             t.HasCheckConstraint(
                 "CK_FeAdditionalCosts_MutuallyExclusive",
-                "([ChargingOption] = 0 AND [Miles] IS NOT NULL AND [TotalNumber] IS NULL) OR ([ChargingOption] = 1 AND [TotalNumber] IS NOT NULL AND [Miles] IS NULL)"
+                "([ChargingOption] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [TotalNumber] IS NULL AND [RatePerJob] IS NULL) OR " +
+                "([ChargingOption] = 1 AND [TotalNumber] IS NOT NULL AND [RatePerJob] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)"
             );
         });
 

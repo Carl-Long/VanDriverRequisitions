@@ -17,13 +17,18 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 public static class DevDataSeeder
 {
     // ─────────────────────────────────────────────
-    // Task Types (lookup only)
+    // Task Types / Reasons (lookup only)
     // ─────────────────────────────────────────────
 
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
     private static readonly Guid DeliveriesTaskTypeId = new("c0000001-0001-0001-0001-000000000002");
     private static readonly Guid WasteTaskTypeId = new("c0000001-0001-0001-0001-000000000003");
     private static readonly Guid LoadingTaskTypeId = new("c0000001-0001-0001-0001-000000000004");
+    
+    private static readonly Guid ParkingReasonId = new("f0000001-0001-0001-0001-000000000001");
+    private static readonly Guid TollReasonId = new("f0000001-0001-0001-0001-000000000002");
+    private static readonly Guid WaitingTimeReasonId = new("f0000001-0001-0001-0001-000000000003");
+    private static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
 
     // ─────────────────────────────────────────────
     // System user (audit fallback)
@@ -35,12 +40,13 @@ public static class DevDataSeeder
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
+        var hasReasons = await context.FeReasons.AnyAsync();
         var hasRules = await context.RequisitionLimitRules.AnyAsync();
         var hasShops = await context.Shops.AnyAsync();
         var hasDrivers = await context.VanDrivers.AnyAsync();
         var hasRequisitions = await context.FeRequisitions.AnyAsync();
 
-        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasRequisitions)
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasReasons && hasRequisitions)
         {
             logger?.LogInformation("Dev seed already exists — skipping.");
             return;
@@ -51,7 +57,7 @@ public static class DevDataSeeder
         var now = DateTime.UtcNow;
 
         // ─────────────────────────────────────────────
-        // 1. TASK TYPES (pure lookup only)
+        // 1. TASK TYPES AND REASONS
         // ─────────────────────────────────────────────
 
         if (!hasTaskTypes)
@@ -65,6 +71,19 @@ public static class DevDataSeeder
 
             await context.SaveChangesAsync();
             logger?.LogInformation("Seeded FeTaskTypes");
+        }
+        
+        if (!hasReasons)
+        {
+            context.FeReasons.AddRange(
+                new FeReason { Id = ParkingReasonId, Reason = "Parking" },
+                new FeReason { Id = TollReasonId, Reason = "Toll charge" },
+                new FeReason { Id = WaitingTimeReasonId, Reason = "Waiting time" },
+                new FeReason { Id = ExtraMileageReasonId, Reason = "Extra mileage" }
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded FeReasons");
         }
 
         // ─────────────────────────────────────────────
@@ -311,6 +330,7 @@ public static class DevDataSeeder
         var rng = new Random(123);
 
         var taskTypes = await context.FeTaskTypes.ToListAsync();
+        var reasons = await context.FeReasons.ToListAsync();
 
         var shops = await context.Shops
             .Where(x => x.IsActive)
@@ -354,7 +374,8 @@ public static class DevDataSeeder
             var taskModels = BuildSeedTasks(rng, taskTypes, requisitionDate);
             var mileageModels = BuildSeedMileages(rng, requisitionDate);
             var transferModels = BuildSeedTransfers(rng, shops, requisitionDate);
-
+            var additionalCostModels = BuildSeedAdditionalCosts(rng, reasons, requisitionDate);
+            
             var requisitionNumber = $"F{i:D9}";
 
             var requisition = FeRequisition.Create(
@@ -362,7 +383,8 @@ public static class DevDataSeeder
                 details,
                 taskModels,
                 mileageModels,
-                transferModels);
+                transferModels,
+                additionalCostModels);
             
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
@@ -508,9 +530,7 @@ public static class DevDataSeeder
         return tasks;
     }
     
-    private static List<FeMileageUpdateModel> BuildSeedMileages(
-        Random rng,
-        DateOnly requisitionDate)
+    private static List<FeMileageUpdateModel> BuildSeedMileages(Random rng, DateOnly requisitionDate)
     {
         // Not every seeded requisition needs mileage.
         // This gives a decent spread of requisitions with and without mileage.
@@ -540,10 +560,7 @@ public static class DevDataSeeder
         ];
     }
     
-    private static List<FeTransferUpdateModel> BuildSeedTransfers(
-        Random rng,
-        List<Shop> shops,
-        DateOnly requisitionDate)
+    private static List<FeTransferUpdateModel> BuildSeedTransfers(Random rng, List<Shop> shops, DateOnly requisitionDate)
     {
         var includeTransfer = rng.Next(0, 2) == 1;
 
@@ -586,6 +603,52 @@ public static class DevDataSeeder
                 Math.Round(
                     (decimal)(rng.NextDouble() * 5 + 3),
                     2))
+        ];
+    }
+    
+    private static List<FeAdditionalCostUpdateModel> BuildSeedAdditionalCosts(Random rng, List<FeReason> reasons, DateOnly requisitionDate)
+    {
+        var includeAdditionalCost = rng.Next(0, 2) == 1;
+
+        if (!includeAdditionalCost)
+        {
+            return [];
+        }
+
+        var reason = reasons[rng.Next(reasons.Count)];
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        var useMileage = rng.Next(0, 2) == 1;
+
+        if (useMileage)
+        {
+            return
+            [
+                new FeAdditionalCostUpdateModel(
+                    null,
+                    weekEndingDate,
+                    reason.Id,
+                    reason.Reason,
+                    ChargingOption.Mileage,
+                    null,
+                    null,
+                    rng.Next(1, 101),
+                    0.45m)
+            ];
+        }
+
+        return
+        [
+            new FeAdditionalCostUpdateModel(
+                null,
+                weekEndingDate,
+                reason.Id,
+                reason.Reason,
+                ChargingOption.Job,
+                rng.Next(1, 11),
+                Math.Round((decimal)(rng.NextDouble() * 10 + 3), 2),
+                null,
+                null)
         ];
     }
 
@@ -657,6 +720,20 @@ public static class DevDataSeeder
                 x.Week,
                 x.TotalNumber,
                 x.RatePerJob,
+                x.TotalValue
+            }),
+            
+            AdditionalCosts = requisition.FeAdditionalCosts.Select(x => new
+            {
+                x.Id,
+                x.WeekEndingDate,
+                x.ReasonId,
+                x.ReasonText,
+                x.ChargingOption,
+                x.TotalNumber,
+                x.RatePerJob,
+                x.Miles,
+                x.RatePerMile,
                 x.TotalValue
             })
         });

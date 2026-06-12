@@ -70,13 +70,15 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         RequisitionDetails details,
         IEnumerable<FeGeneralTaskUpdateModel> taskModels,
         IEnumerable<FeMileageUpdateModel> mileageModels,
-        IEnumerable<FeTransferUpdateModel> transferModels)
+        IEnumerable<FeTransferUpdateModel> transferModels,
+        IEnumerable<FeAdditionalCostUpdateModel> additionalCostModels)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requisitionNumber);
         ArgumentNullException.ThrowIfNull(details);
         ArgumentNullException.ThrowIfNull(taskModels);
         ArgumentNullException.ThrowIfNull(mileageModels);
         ArgumentNullException.ThrowIfNull(transferModels);
+        ArgumentNullException.ThrowIfNull(additionalCostModels);
 
         var requisition = new FeRequisition
         {
@@ -88,6 +90,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         requisition.SyncGeneralTasks(taskModels);
         requisition.SyncMileages(mileageModels);
         requisition.SyncTransfers(transferModels);
+        requisition.SyncAdditionalCosts(additionalCostModels);
 
         return requisition;
     }
@@ -248,6 +251,65 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                     incoming.RatePerJob);
 
                 _feTransfers.Add(transfer);
+            }
+        }
+
+        RecalculateSubtotal();
+    }
+    
+    public void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
+    {
+        ArgumentNullException.ThrowIfNull(incomingAdditionalCosts);
+
+        var incomingList = incomingAdditionalCosts.ToList();
+        var existingAdditionalCosts = _feAdditionalCosts.ToDictionary(x => x.Id);
+
+        var incomingIds = incomingList
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        var additionalCostsToRemove = _feAdditionalCosts
+            .Where(x => !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var additionalCost in additionalCostsToRemove)
+        {
+            _feAdditionalCosts.Remove(additionalCost);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (incoming.Id.HasValue)
+            {
+                if (!existingAdditionalCosts.TryGetValue(incoming.Id.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Additional cost '{incoming.Id}' not found.");
+                }
+
+                existing.Update(
+                    incoming.WeekEndingDate,
+                    incoming.ReasonId,
+                    incoming.ReasonText,
+                    incoming.ChargingOption,
+                    incoming.TotalNumber,
+                    incoming.RatePerJob,
+                    incoming.Miles,
+                    incoming.RatePerMile);
+            }
+            else
+            {
+                var additionalCost = FeAdditionalCost.Create(
+                    incoming.WeekEndingDate,
+                    incoming.ReasonId,
+                    incoming.ReasonText,
+                    incoming.ChargingOption,
+                    incoming.TotalNumber,
+                    incoming.RatePerJob,
+                    incoming.Miles,
+                    incoming.RatePerMile);
+
+                _feAdditionalCosts.Add(additionalCost);
             }
         }
 

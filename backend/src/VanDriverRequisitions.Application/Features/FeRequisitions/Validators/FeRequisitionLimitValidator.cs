@@ -15,7 +15,8 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
             .Where(x =>
                 x.Category == RequisitionRowCategory.GeneralTask ||
                 x.Category == RequisitionRowCategory.Mileage ||
-                x.Category == RequisitionRowCategory.Transfer)
+                x.Category == RequisitionRowCategory.Transfer ||
+                x.Category == RequisitionRowCategory.AdditionalCost)
             .ToListAsync(cancellationToken);
 
         var failures = new List<ValidationFailure>();
@@ -163,7 +164,52 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
                         $"Transfer exceeds maximum rate of £{transferRule.MaxRate:0.00}."));
             }
         }
+        
+        var additionalCostRule = rules.FirstOrDefault(x => x.Category == RequisitionRowCategory.AdditionalCost);
 
+        foreach (var additionalCost in requisition.FeAdditionalCosts)
+        {
+            if (additionalCost.ChargingOption == ChargingOption.Job)
+            {
+                if (additionalCostRule is null)
+                {
+                    failures.Add(new ValidationFailure("Form", "No limit rule is configured for additional costs."));
+                    continue;
+                }
+
+                if (additionalCost.TotalNumber > additionalCostRule.MaxQuantity)
+                {
+                    failures.Add(new ValidationFailure(nameof(additionalCost.TotalNumber), $"Additional cost exceeds maximum quantity of {additionalCostRule.MaxQuantity}."));
+                }
+
+                if (additionalCost.RatePerJob > additionalCostRule.MaxRate)
+                {
+                    failures.Add(new ValidationFailure(nameof(additionalCost.RatePerJob), $"Additional cost exceeds maximum rate of £{additionalCostRule.MaxRate:0.00}."));
+                }
+                
+                continue;
+            }
+
+            if (additionalCost.ChargingOption == ChargingOption.Mileage)
+            {
+                if (mileageRule is null)
+                {
+                    failures.Add(new ValidationFailure("Form", "No limit rule is configured for mileage."));
+                    continue;
+                }
+
+                if (additionalCost.Miles > mileageRule.MaxQuantity)
+                {
+                    failures.Add(new ValidationFailure(nameof(additionalCost.Miles), $"Additional cost mileage exceeds maximum mileage of {mileageRule.MaxQuantity}."));
+                }
+
+                if (additionalCost.RatePerMile > mileageRule.MaxRate)
+                {
+                    failures.Add(new ValidationFailure(nameof(additionalCost.RatePerMile), $"Additional cost mileage exceeds maximum rate of £{mileageRule.MaxRate:0.00}."));
+                }
+            }
+        }
+        
         if (failures.Count != 0)
         {
             throw new ValidationException(failures);
@@ -181,5 +227,4 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
         6 => "Saturday",
         _ => "Unknown"
     };
-
 }

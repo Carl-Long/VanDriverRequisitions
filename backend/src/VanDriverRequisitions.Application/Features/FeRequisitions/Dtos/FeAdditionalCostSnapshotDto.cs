@@ -1,8 +1,8 @@
 using VanDriverRequisitions.Domain.Enums;
 
-namespace VanDriverRequisitions.Domain.Entities.FE.Models;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
-public sealed class FeAdditionalCostSnapshot
+public sealed class FeAdditionalCostSnapshotDto
 {
     public DateOnly WeekEndingDate { get; init; }
 

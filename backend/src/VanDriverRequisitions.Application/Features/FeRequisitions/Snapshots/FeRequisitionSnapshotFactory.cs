@@ -39,7 +39,9 @@ public static class FeRequisitionSnapshotFactory
                 .Select(CreateTransferSnapshot)
                 .ToList(),
             
-            AdditionalCosts = []
+            AdditionalCosts = requisition.FeAdditionalCosts
+                .Select(CreateAdditionalCostSnapshot)
+                .ToList()
         };
     }
     
@@ -119,6 +121,22 @@ public static class FeRequisitionSnapshotFactory
             TotalNumber = transfer.TotalNumber,
             RatePerJob = transfer.RatePerJob ?? 0,
             TotalValue = transfer.TotalValue ?? 0
+        };
+    }
+    
+    private static FeAdditionalCostSnapshot CreateAdditionalCostSnapshot(FeAdditionalCost cost)
+    {
+        return new FeAdditionalCostSnapshot
+        {
+            WeekEndingDate = cost.WeekEndingDate,
+            ReasonId = cost.ReasonId,
+            ReasonText = cost.ReasonText,
+            ChargingOption = cost.ChargingOption,
+            TotalNumber = cost.TotalNumber,
+            RatePerJob = cost.RatePerJob,
+            Miles = cost.Miles,
+            RatePerMile = cost.RatePerMile,
+            TotalValue = cost.TotalValue
         };
     }
 }

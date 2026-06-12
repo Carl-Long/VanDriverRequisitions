@@ -89,7 +89,8 @@ public class FeRequisitionService(
             requisitionData.Details,
             requisitionData.TaskModels,
             requisitionData.MileageModels,
-            requisitionData.TransferModels);
+            requisitionData.TransferModels,
+            requisitionData.AdditionalCostModels);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
@@ -145,7 +146,8 @@ public class FeRequisitionService(
                 requisitionData.Details,
                 requisitionData.TaskModels,
                 requisitionData.MileageModels,
-                requisitionData.TransferModels);
+                requisitionData.TransferModels,
+                requisitionData.AdditionalCostModels);
             
             context.FeRequisitions.Add(requisition);
         }
@@ -269,11 +271,23 @@ public class FeRequisitionService(
             .Where(x => transferShopIds.Contains(x.Id))
             .Select(ShopProjections.AsRequisitionSnapshotDto)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
+        
+        var reasonIds = saveFeRequisitionDto.FeAdditionalCosts
+            .Select(x => x.ReasonId)
+            .Distinct()
+            .ToList();
+
+        var reasonMap = await context.FeReasons
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => reasonIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
 
         var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
         var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
         var mileageModels = BuildMileageModels(saveFeRequisitionDto.FeMileages);
         var transferModels = BuildTransferModels(saveFeRequisitionDto.FeTransfers, transferShopMap);
+        var additionalCostModels = BuildAdditionalCostModels(saveFeRequisitionDto.FeAdditionalCosts, reasonMap);
 
         return new RequisitionBuildData(
             driverSummary,
@@ -281,6 +295,7 @@ public class FeRequisitionService(
             taskModels,
             mileageModels,
             transferModels,
+            additionalCostModels,
             shop.IsActive);
     }
     
@@ -326,6 +341,17 @@ public class FeRequisitionService(
             })
             .ToList();
     }
+    
+    private static List<FeAdditionalCostUpdateModel> BuildAdditionalCostModels(
+        IEnumerable<SaveFeAdditionalCostDto> additionalCosts,
+        IReadOnlyDictionary<Guid, FeReason> reasonMap)
+    {
+        return additionalCosts
+            .Select(dto => !reasonMap.TryGetValue(dto.ReasonId, out var reason) 
+                ? throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.") 
+                : FeAdditionalCostModelMapper.ToUpdateModel(dto, reason))
+            .ToList();
+    }
 
     private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
     {
@@ -340,8 +366,9 @@ public class FeRequisitionService(
         requisition.SyncGeneralTasks(requisitionData.TaskModels);
         requisition.SyncMileages(requisitionData.MileageModels);
         requisition.SyncTransfers(requisitionData.TransferModels);
+        requisition.SyncAdditionalCosts(requisitionData.AdditionalCostModels);
     }
-
+    
     private AuditUser GetAuditUser(string actionName)
     {
         return currentUser.User is not null
@@ -377,5 +404,6 @@ public class FeRequisitionService(
         List<FeGeneralTaskUpdateModel> TaskModels,
         List<FeMileageUpdateModel> MileageModels,
         List<FeTransferUpdateModel> TransferModels,
+        List<FeAdditionalCostUpdateModel> AdditionalCostModels,
         bool IsShopActive);
 }

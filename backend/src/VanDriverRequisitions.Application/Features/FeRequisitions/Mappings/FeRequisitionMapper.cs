@@ -42,17 +42,10 @@ public static class FeRequisitionMapper
             SubmittedAtUtc = requisition.SubmittedAtUtc,
             SubmittedByNameSnapshot = requisition.SubmittedByNameSnapshot,
             
-            FeGeneralTasks = requisition.FeGeneralTasks
-                .Select(MapGeneralTaskDetail)
-                .ToList(),
-
-            FeMileages = requisition.FeMileages
-                .Select(MapMileageDetail)
-                .ToList(),
-            
-            FeTransfers = requisition.FeTransfers
-                .Select(MapTransferDetail)
-                .ToList(),
+            FeGeneralTasks = requisition.FeGeneralTasks.Select(MapGeneralTaskDetail).ToList(),
+            FeMileages = requisition.FeMileages.Select(MapMileageDetail).ToList(),
+            FeTransfers = requisition.FeTransfers.Select(MapTransferDetail).ToList(),
+            FeAdditionalCosts = requisition.FeAdditionalCosts.Select(MapAdditionalCostDetail).ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };
@@ -124,6 +117,23 @@ public static class FeRequisitionMapper
             TotalNumber = transfer.TotalNumber,
             RatePerJob = transfer.RatePerJob,
             TotalValue = transfer.TotalValue
+        };
+    }
+    
+    private static FeAdditionalCostDetailDto MapAdditionalCostDetail(FeAdditionalCost cost)
+    {
+        return new FeAdditionalCostDetailDto
+        {
+            Id = cost.Id,
+            WeekEndingDate = cost.WeekEndingDate,
+            ReasonId = cost.ReasonId,
+            ReasonText = cost.ReasonText,
+            ChargingOption = cost.ChargingOption,
+            TotalNumber = cost.TotalNumber,
+            RatePerJob = cost.RatePerJob,
+            Miles = cost.Miles,
+            RatePerMile = cost.RatePerMile,
+            TotalValue = cost.TotalValue
         };
     }
     

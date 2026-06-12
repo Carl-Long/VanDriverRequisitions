@@ -1,13 +1,13 @@
 using VanDriverRequisitions.Domain.Enums;
 
-namespace VanDriverRequisitions.Domain.Entities.FE.Models;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
-public sealed class FeAdditionalCostSnapshot
+public sealed class SaveFeAdditionalCostDto
 {
+    public Guid? Id { get; set; }
     public DateOnly WeekEndingDate { get; init; }
 
     public Guid ReasonId { get; init; }
-    public string ReasonText { get; init; } = string.Empty;
 
     public ChargingOption ChargingOption { get; init; }
 
@@ -16,6 +16,4 @@ public sealed class FeAdditionalCostSnapshot
 
     public int? Miles { get; init; }
     public decimal? RatePerMile { get; init; }
-
-    public decimal? TotalValue { get; init; }
 }

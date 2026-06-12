@@ -10,4 +10,5 @@ public sealed class SaveFeRequisitionDto
     public required IReadOnlyCollection<SaveFeGeneralTaskDto> FeGeneralTasks { get; init; }
     public required IReadOnlyCollection<SaveFeMileageDto> FeMileages { get; init; }
     public required IReadOnlyCollection<SaveFeTransferDto> FeTransfers { get; init; }
+    public required IReadOnlyCollection<SaveFeAdditionalCostDto> FeAdditionalCosts { get; init; }
 }
