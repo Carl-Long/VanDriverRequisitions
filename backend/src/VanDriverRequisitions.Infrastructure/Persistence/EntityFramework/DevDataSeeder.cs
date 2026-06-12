@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
@@ -34,9 +35,6 @@ public static class DevDataSeeder
     // System user (audit fallback)
     // ─────────────────────────────────────────────
 
-    private static readonly Guid SystemUserId = Guid.Empty;
-    private const string SystemUserName = "SYSTEM_SEED";
-
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
@@ -53,9 +51,7 @@ public static class DevDataSeeder
         }
 
         logger?.LogInformation("Seeding development data...");
-
-        var now = DateTime.UtcNow;
-
+        
         // ─────────────────────────────────────────────
         // 1. TASK TYPES AND REASONS
         // ─────────────────────────────────────────────
@@ -378,13 +374,8 @@ public static class DevDataSeeder
             
             var requisitionNumber = $"F{i:D9}";
 
-            var requisition = FeRequisition.Create(
-                requisitionNumber,
-                details,
-                taskModels,
-                mileageModels,
-                transferModels,
-                additionalCostModels);
+            var updateModel = new FeRequisitionUpdateModel(details, taskModels, mileageModels, transferModels, additionalCostModels);
+            var requisition = FeRequisition.Create(requisitionNumber, updateModel);
             
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
@@ -399,14 +390,7 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var submittedAtUtc = createdDate.AddHours(2);
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
                     break;
                 }
 
@@ -414,27 +398,11 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
-
                     var submittedAtUtc = createdDate.AddHours(2);
                     var rejectedAtUtc = createdDate.AddDays(1);
-
-                    var rejectedReason =
-                        RejectionReasons[rng.Next(RejectionReasons.Length)];
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
-                    requisition.RejectSubmission(
-                        new AuditUser(
-                            rejecter.Id,
-                            rejecter.Name),
-                        rejectedAtUtc,
-                        rejectedReason);
-
+                    var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
+                    requisition.RejectSubmission(new AuditUser(rejecter.Id, rejecter.Name), rejectedAtUtc, rejectedReason);
                     break;
                 }
 
@@ -442,33 +410,16 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var approver = SeedUsers[rng.Next(SeedUsers.Length)];
-
                     var submittedAtUtc = createdDate.AddHours(2);
                     var approvedAtUtc = createdDate.AddDays(2);
-
                     var poNumber = BuildSeedPoNumber(i);
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
-                    requisition.ApproveSubmission(
-                        new AuditUser(
-                            approver.Id,
-                            approver.Name),
-                        approvedAtUtc,
-                        poNumber);
-
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
+                    requisition.ApproveSubmission(new AuditUser(approver.Id, approver.Name), approvedAtUtc, poNumber);
                     break;
                 }
 
                 default:
-                    throw new ArgumentOutOfRangeException(
-                        message: "Unknown status attempted during seed",
-                        null);
+                    throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);
             }
 
             requisitions.Add(requisition);
@@ -667,75 +618,5 @@ public static class DevDataSeeder
     private static string BuildSeedPoNumber(int i)
     {
         return $"PO-SEED-{i:D6}";
-    }
-
-    private static string BuildSeedSnapshotJson(FeRequisition requisition)
-    {
-        return System.Text.Json.JsonSerializer.Serialize(new
-        {
-            requisition.Id,
-            requisition.RequisitionNumber,
-            requisition.RequisitionDate,
-            requisition.VanDriverId,
-            requisition.VanDriverName,
-            requisition.TradersName,
-            requisition.VanDriverCode,
-            requisition.ShopId,
-            requisition.ShopCode,
-            requisition.ShopName,
-            requisition.IsVatApplicable,
-            requisition.Subtotal,
-            GeneralTasks = requisition.FeGeneralTasks.Select(x => new
-            {
-                x.Id,
-                x.FeTaskTypeId,
-                x.TaskTypeName,
-                x.TaskTypeCode,
-                x.WeekEndingDate,
-                x.Week,
-                x.RatePerJob,
-                x.TotalValue
-            }),
-
-            Mileages = requisition.FeMileages.Select(x => new
-            {
-                x.Id,
-                x.WeekEndingDate,
-                x.Week,
-                x.TotalMiles,
-                x.RatePerMile,
-                x.TotalValue
-            }),
-            
-            Transfers = requisition.FeTransfers.Select(x => new
-            {
-                x.Id,
-                x.WeekEndingDate,
-                x.ShopIdFrom,
-                x.ShopCodeFrom,
-                x.ShopNameFrom,
-                x.ShopIdTo,
-                x.ShopCodeTo,
-                x.ShopNameTo,
-                x.Week,
-                x.TotalNumber,
-                x.RatePerJob,
-                x.TotalValue
-            }),
-            
-            AdditionalCosts = requisition.FeAdditionalCosts.Select(x => new
-            {
-                x.Id,
-                x.WeekEndingDate,
-                x.ReasonId,
-                x.ReasonText,
-                x.ChargingOption,
-                x.TotalNumber,
-                x.RatePerJob,
-                x.Miles,
-                x.RatePerMile,
-                x.TotalValue
-            })
-        });
     }
 }

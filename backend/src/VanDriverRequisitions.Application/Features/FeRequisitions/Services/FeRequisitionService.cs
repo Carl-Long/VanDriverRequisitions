@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
@@ -23,7 +24,8 @@ public class FeRequisitionService(
     ICurrentUserService currentUser,
     IValidatorService validator,
     IPoNumberGenerator poNumberGenerator,
-    IFeRequisitionLimitValidator limitValidator) : IFeRequisitionService
+    IFeRequisitionLimitValidator limitValidator,
+    IFeRequisitionSaveDataBuilder saveDataBuilder) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -83,14 +85,10 @@ public class FeRequisitionService(
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
         var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
-        var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
-        var requisition = FeRequisition.Create(
-            requisitionNumber,
-            requisitionData.Details,
-            requisitionData.TaskModels,
-            requisitionData.MileageModels,
-            requisitionData.TransferModels,
-            requisitionData.AdditionalCostModels);
+        
+        var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
+
+        var requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
@@ -98,7 +96,7 @@ public class FeRequisitionService(
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> UpdateAsync(Guid id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
@@ -110,14 +108,15 @@ public class FeRequisitionService(
 
         SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
 
-        var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
-        ApplySaveData(requisition, requisitionData);
-
+        var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
+        
+        requisition.Update(saveData.UpdateModel);
+        
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
@@ -126,7 +125,7 @@ public class FeRequisitionService(
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        var requisitionData = await BuildRequisitionDataAsync(saveFeRequisitionDto, cancellationToken);
+        var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
 
         FeRequisition requisition;
 
@@ -136,18 +135,12 @@ public class FeRequisitionService(
                 ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
             SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
-            ApplySaveData(requisition, requisitionData);
+            requisition.Update(saveData.UpdateModel);
         }
         else
         {
             var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
-            requisition = FeRequisition.Create(
-                requisitionNumber,
-                requisitionData.Details,
-                requisitionData.TaskModels,
-                requisitionData.MileageModels,
-                requisitionData.TransferModels,
-                requisitionData.AdditionalCostModels);
+            requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
             
             context.FeRequisitions.Add(requisition);
         }
@@ -161,7 +154,7 @@ public class FeRequisitionService(
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
-        return await MapToDetailDtoAsync(requisition, requisitionData.DriverSummary, requisitionData.IsShopActive, cancellationToken);
+        return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
@@ -238,83 +231,7 @@ public class FeRequisitionService(
             .SingleAsync(cancellationToken);
     }
     
-    private async Task<RequisitionBuildData> BuildRequisitionDataAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken) {
-        var driverSummary = await context.VanDrivers
-            .AsNoTracking()
-            .Where(x => x.Id == saveFeRequisitionDto.VanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
-
-        var shop = await context.Shops
-            .AsNoTracking()
-            .Where(x => x.Id == saveFeRequisitionDto.ShopId)
-            .Select(ShopProjections.AsRequisitionSnapshotDto)
-            .SingleAsync(cancellationToken);
-
-        var taskTypeIds = saveFeRequisitionDto.FeGeneralTasks
-            .Select(x => x.FeTaskTypeId)
-            .Distinct()
-            .ToList();
-
-        var taskTypeMap = await context.FeTaskTypes
-            .Where(x => taskTypeIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-        
-        var transferShopIds = saveFeRequisitionDto.FeTransfers
-            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
-            .Distinct()
-            .ToList();
-
-        var transferShopMap = await context.Shops
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => transferShopIds.Contains(x.Id))
-            .Select(ShopProjections.AsRequisitionSnapshotDto)
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-        
-        var reasonIds = saveFeRequisitionDto.FeAdditionalCosts
-            .Select(x => x.ReasonId)
-            .Distinct()
-            .ToList();
-
-        var reasonMap = await context.FeReasons
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => reasonIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-
-        var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
-        var taskModels = BuildGeneralTaskModels(saveFeRequisitionDto.FeGeneralTasks, taskTypeMap);
-        var mileageModels = BuildMileageModels(saveFeRequisitionDto.FeMileages);
-        var transferModels = BuildTransferModels(saveFeRequisitionDto.FeTransfers, transferShopMap);
-        var additionalCostModels = BuildAdditionalCostModels(saveFeRequisitionDto.FeAdditionalCosts, reasonMap);
-
-        return new RequisitionBuildData(
-            driverSummary,
-            details,
-            taskModels,
-            mileageModels,
-            transferModels,
-            additionalCostModels,
-            shop.IsActive);
-    }
     
-    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks, IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
-    {
-        return tasks
-            .Select(dto =>
-            {
-                var taskType = taskTypeMap[dto.FeTaskTypeId];
-                return FeGeneralTaskModelMapper.ToUpdateModel(dto, taskType);
-            })
-            .ToList();
-    }
-    
-    private static List<FeMileageUpdateModel> BuildMileageModels(IEnumerable<SaveFeMileageDto> mileages)
-    {
-        return mileages.Select(FeMileageModelMapper.ToUpdateModel).ToList();
-    }
-
     private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
         FeRequisition requisition,
         VanDriverLookupDto? driverSummary,
@@ -325,48 +242,6 @@ public class FeRequisitionService(
         var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
         
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
-    }
-    
-    private static List<FeTransferUpdateModel> BuildTransferModels(
-        IEnumerable<SaveFeTransferDto> transfers,
-        IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
-    {
-        return transfers
-            .Select(dto =>
-            {
-                var fromShop = MapShopSnapshot(dto.ShopIdFrom, shopMap);
-                var toShop = MapShopSnapshot(dto.ShopIdTo, shopMap);
-
-                return FeTransferModelMapper.ToUpdateModel(dto, fromShop, toShop);
-            })
-            .ToList();
-    }
-    
-    private static List<FeAdditionalCostUpdateModel> BuildAdditionalCostModels(
-        IEnumerable<SaveFeAdditionalCostDto> additionalCosts,
-        IReadOnlyDictionary<Guid, FeReason> reasonMap)
-    {
-        return additionalCosts
-            .Select(dto => !reasonMap.TryGetValue(dto.ReasonId, out var reason) 
-                ? throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.") 
-                : FeAdditionalCostModelMapper.ToUpdateModel(dto, reason))
-            .ToList();
-    }
-
-    private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
-    {
-        return !shopMap.TryGetValue(shopId, out var shop) 
-            ? throw new NotFoundException($"Shop '{shopId}' was not found.") 
-            : new ShopSnapshot(shop.Id, shop.Code, shop.Name);
-    }
-    
-    private static void ApplySaveData(FeRequisition requisition, RequisitionBuildData requisitionData)
-    {
-        requisition.UpdateDetails(requisitionData.Details);
-        requisition.SyncGeneralTasks(requisitionData.TaskModels);
-        requisition.SyncMileages(requisitionData.MileageModels);
-        requisition.SyncTransfers(requisitionData.TransferModels);
-        requisition.SyncAdditionalCosts(requisitionData.AdditionalCostModels);
     }
     
     private AuditUser GetAuditUser(string actionName)
@@ -397,13 +272,4 @@ public class FeRequisitionService(
                 "Any changes you have made since opening the requisition will need to be re-entered.");
         }
     }
-    
-    private sealed record RequisitionBuildData(
-        VanDriverLookupDto DriverSummary,
-        RequisitionDetails Details,
-        List<FeGeneralTaskUpdateModel> TaskModels,
-        List<FeMileageUpdateModel> MileageModels,
-        List<FeTransferUpdateModel> TransferModels,
-        List<FeAdditionalCostUpdateModel> AdditionalCostModels,
-        bool IsShopActive);
 }

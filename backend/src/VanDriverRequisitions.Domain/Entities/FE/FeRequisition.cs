@@ -65,20 +65,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
 
-    public static FeRequisition Create(
-        string requisitionNumber,
-        RequisitionDetails details,
-        IEnumerable<FeGeneralTaskUpdateModel> taskModels,
-        IEnumerable<FeMileageUpdateModel> mileageModels,
-        IEnumerable<FeTransferUpdateModel> transferModels,
-        IEnumerable<FeAdditionalCostUpdateModel> additionalCostModels)
+    public static FeRequisition Create(string requisitionNumber, FeRequisitionUpdateModel model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requisitionNumber);
-        ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(taskModels);
-        ArgumentNullException.ThrowIfNull(mileageModels);
-        ArgumentNullException.ThrowIfNull(transferModels);
-        ArgumentNullException.ThrowIfNull(additionalCostModels);
+        ArgumentNullException.ThrowIfNull(model);
 
         var requisition = new FeRequisition
         {
@@ -86,16 +76,77 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             Status = RequisitionStatus.Draft
         };
 
-        requisition.UpdateDetails(details);
-        requisition.SyncGeneralTasks(taskModels);
-        requisition.SyncMileages(mileageModels);
-        requisition.SyncTransfers(transferModels);
-        requisition.SyncAdditionalCosts(additionalCostModels);
-
+        requisition.Update(model);
         return requisition;
     }
+    
+    public void Update(FeRequisitionUpdateModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
 
-    public void UpdateDetails(RequisitionDetails details)
+        UpdateDetails(model.Details);
+        SyncGeneralTasks(model.GeneralTasks);
+        SyncMileages(model.Mileages);
+        SyncTransfers(model.Transfers);
+        SyncAdditionalCosts(model.AdditionalCosts);
+
+        RecalculateSubtotal();
+    }
+    
+    public void Submit(AuditUser submittedBy, DateTime submittedAtUtc, string snapshotJson)
+    {
+        ArgumentNullException.ThrowIfNull(submittedBy);
+        ArgumentException.ThrowIfNullOrWhiteSpace(snapshotJson);
+
+        if (!CanSubmit)
+        {
+            throw new InvalidOperationException("Only draft or rejected requisitions can be submitted.");
+        }
+
+        if (PendingSubmission is not null)
+        {
+            throw new InvalidOperationException("A pending submission already exists.");
+        }
+
+        var submission = FeRequisitionSubmission.Create(NextSubmissionNumber, submittedBy, submittedAtUtc, snapshotJson);
+
+        _submissions.Add(submission);
+
+        Status = RequisitionStatus.Submitted;
+        SubmittedById = submittedBy.Id;
+        SubmittedByNameSnapshot = submittedBy.NameSnapshot;
+        SubmittedAtUtc = submittedAtUtc;
+
+        ClearRejection();
+    }
+
+    public void ApproveSubmission(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
+    {
+        ArgumentNullException.ThrowIfNull(approvedBy);
+        ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
+
+        var submission = PendingSubmission
+            ?? throw new InvalidOperationException("No pending submission exists.");
+
+        submission.Approve(approvedBy, approvedAtUtc, poNumber);
+
+        Approve(approvedBy, approvedAtUtc, poNumber);
+    }
+
+    public void RejectSubmission(AuditUser rejectedBy, DateTime rejectedAtUtc, string rejectionNotes)
+    {
+        ArgumentNullException.ThrowIfNull(rejectedBy);
+        ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
+
+        var submission = PendingSubmission
+            ?? throw new InvalidOperationException("No pending submission exists.");
+
+        submission.Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
+
+        Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
+    }
+    
+    private void UpdateDetails(RequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
 
@@ -112,8 +163,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         IsVatApplicable = details.Driver.HasVat;
     }
-
-    public void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
+    
+        private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
         ArgumentNullException.ThrowIfNull(incomingTasks);
 
@@ -158,11 +209,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 _feGeneralTasks.Add(task);
             }
         }
-
-        RecalculateSubtotal();
     }
     
-    public void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
+    private void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
     {
         ArgumentNullException.ThrowIfNull(incomingMileages);
 
@@ -200,11 +249,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 _feMileages.Add(mileage);
             }
         }
-        
-        RecalculateSubtotal();
     }
     
-    public void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
+    private void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
     {
         ArgumentNullException.ThrowIfNull(incomingTransfers);
 
@@ -253,11 +300,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 _feTransfers.Add(transfer);
             }
         }
-
-        RecalculateSubtotal();
     }
     
-    public void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
+    private void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
         ArgumentNullException.ThrowIfNull(incomingAdditionalCosts);
 
@@ -312,61 +357,6 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 _feAdditionalCosts.Add(additionalCost);
             }
         }
-
-        RecalculateSubtotal();
-    }
-
-    public void Submit(AuditUser submittedBy, DateTime submittedAtUtc, string snapshotJson)
-    {
-        ArgumentNullException.ThrowIfNull(submittedBy);
-        ArgumentException.ThrowIfNullOrWhiteSpace(snapshotJson);
-
-        if (!CanSubmit)
-        {
-            throw new InvalidOperationException("Only draft or rejected requisitions can be submitted.");
-        }
-
-        if (PendingSubmission is not null)
-        {
-            throw new InvalidOperationException("A pending submission already exists.");
-        }
-
-        var submission = FeRequisitionSubmission.Create(NextSubmissionNumber, submittedBy, submittedAtUtc, snapshotJson);
-
-        _submissions.Add(submission);
-
-        Status = RequisitionStatus.Submitted;
-        SubmittedById = submittedBy.Id;
-        SubmittedByNameSnapshot = submittedBy.NameSnapshot;
-        SubmittedAtUtc = submittedAtUtc;
-
-        ClearRejection();
-    }
-
-    public void ApproveSubmission(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
-    {
-        ArgumentNullException.ThrowIfNull(approvedBy);
-        ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
-
-        var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
-
-        submission.Approve(approvedBy, approvedAtUtc, poNumber);
-
-        Approve(approvedBy, approvedAtUtc, poNumber);
-    }
-
-    public void RejectSubmission(AuditUser rejectedBy, DateTime rejectedAtUtc, string rejectionNotes)
-    {
-        ArgumentNullException.ThrowIfNull(rejectedBy);
-        ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
-
-        var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
-
-        submission.Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
-
-        Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
     }
 
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
