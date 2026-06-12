@@ -1,5 +1,5 @@
 import { SubmissionStatus } from "../fe-submissions-view/submission-status";
-import { WeeklyQuantities } from "./fe-requisition.types";
+import { ChargingOption, WeeklyQuantities } from "./fe-requisition.types";
 
 export type FeRequisitionSubmissionDetail = {
     id: string;
@@ -48,6 +48,7 @@ export type FeRequisitionSnapshot = {
     generalTasks: FeGeneralTaskSnapshot[];
     mileages: FeMileageSnapshot[];
     transfers: FeTransferSnapshot[];
+    additionalCosts: FeAdditionalCostSnapshot[];
 };
 
 export type FeGeneralTaskSnapshot = {
@@ -80,4 +81,16 @@ export type FeTransferSnapshot = {
     ratePerJob: number | null;
     totalValue: number | null;
     week: WeeklyQuantities;
+};
+
+export type FeAdditionalCostSnapshot = {
+    weekEndingDate: string;
+    reasonId: string;
+    reasonText: string;
+    chargingOption: ChargingOption;
+    totalNumber: number | null;
+    ratePerJob: number | null;
+    miles: number | null;
+    ratePerMile: number | null;
+    totalValue: number | null;
 };

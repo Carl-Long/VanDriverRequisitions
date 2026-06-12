@@ -17,6 +17,9 @@ import { calculateFeRequisitionSubtotal } from "../utils/fe-requisition-calculat
 import { calculateFeTransferFormTotals } from "../lib/calculate-fe-transfer-form";
 import { createFeTransferDraftFromForm } from "../lib/create-fe-transfer-draft-from-form";
 import { FeTransferForm } from "../types/fe-transfer-form";
+import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
+import { createFeAdditionalCostDraftFromForm } from "../lib/create-fe-additional-cost-draft-from-form";
+import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     const [draft, setDraft] = useState<FeRequisitionDraft>(
@@ -203,6 +206,54 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         }));
     }
 
+    function addAdditionalCost(form: FeAdditionalCostForm) {
+        const additionalCost = createFeAdditionalCostDraftFromForm({ form });
+
+        setDraft((prev) => ({
+            ...prev,
+            feAdditionalCosts: [...prev.feAdditionalCosts, additionalCost],
+        }));
+    }
+
+    function updateAdditionalCost(clientId: string, form: FeAdditionalCostForm) {
+        const totals = calculateFeAdditionalCostFormTotals(form);
+
+        setDraft((prev) => ({
+            ...prev,
+            feAdditionalCosts: prev.feAdditionalCosts.map((row) => {
+                if (row.clientId !== clientId) {
+                    return row;
+                }
+
+                return {
+                    ...row,
+
+                    weekEndingDate: form.weekEndingDate,
+
+                    reasonId: form.reasonId,
+                    reasonText: form.reasonText,
+
+                    chargingOption: form.chargingOption,
+
+                    totalNumber: form.chargingOption === "Job" ? form.totalNumber : null,
+                    ratePerJob: form.chargingOption === "Job" ? form.ratePerJob : null,
+
+                    miles: form.chargingOption === "Mileage" ? form.miles : null,
+                    ratePerMile: form.chargingOption === "Mileage" ? form.ratePerMile : null,
+
+                    totalValue: totals.totalValue,
+                };
+            }),
+        }));
+    }
+
+    function removeAdditionalCost(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            feAdditionalCosts: prev.feAdditionalCosts.filter((x) => x.clientId !== clientId),
+        }));
+    }
+
     return {
         draft,
         subtotal,
@@ -224,5 +275,9 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         addTransfer,
         updateTransfer,
         removeTransfer,
+
+        addAdditionalCost,
+        updateAdditionalCost,
+        removeAdditionalCost
     };
 }

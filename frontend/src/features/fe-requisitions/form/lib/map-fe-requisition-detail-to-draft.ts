@@ -94,7 +94,25 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             ratePerJob: transfer.ratePerJob,
             totalValue: transfer.totalValue ?? 0,
         })),
-        
-        feAdditionalCosts: [],
+
+        feAdditionalCosts: detail.feAdditionalCosts.map((cost) => ({
+            id: cost.id,
+            clientId: crypto.randomUUID(),
+
+            weekEndingDate: new Date(cost.weekEndingDate),
+
+            reasonId: cost.reasonId,
+            reasonText: cost.reasonText,
+
+            chargingOption: cost.chargingOption,
+
+            totalNumber: cost.totalNumber,
+            ratePerJob: cost.ratePerJob,
+
+            miles: cost.miles,
+            ratePerMile: cost.ratePerMile,
+
+            totalValue: cost.totalValue ?? 0,
+        })),
     };
 }

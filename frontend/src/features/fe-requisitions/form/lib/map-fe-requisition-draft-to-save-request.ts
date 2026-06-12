@@ -65,7 +65,21 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
 
             ratePerJob: transfer.ratePerJob,
         })),
-        
-        feAdditionalCosts: [],
+
+        feAdditionalCosts: draft.feAdditionalCosts.map((cost) => ({
+            id: cost.id,
+
+            weekEndingDate: toDateOnlyString(cost.weekEndingDate) ?? "",
+
+            reasonId: cost.reasonId ?? "",
+
+            chargingOption: cost.chargingOption,
+
+            totalNumber: cost.chargingOption === "Job" ? cost.totalNumber : null,
+            ratePerJob: cost.chargingOption === "Job" ? cost.ratePerJob : null,
+
+            miles: cost.chargingOption === "Mileage" ? cost.miles : null,
+            ratePerMile: cost.chargingOption === "Mileage" ? cost.ratePerMile : null,
+        })),
     };
 }

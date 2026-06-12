@@ -29,6 +29,7 @@ import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisition
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
+import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -73,6 +74,9 @@ export function FeRequisitionShell({
         addTransfer,
         updateTransfer,
         removeTransfer,
+        addAdditionalCost,
+        updateAdditionalCost,
+        removeAdditionalCost,
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
@@ -429,6 +433,23 @@ export function FeRequisitionShell({
                             clearError("form");
                         }}
                         onDelete={removeTransfer}
+                    />
+                }
+                additionalCosts={
+                    <FeAdditionalCostWorkspace
+                        readonly={isReadonly}
+                        rows={draft.feAdditionalCosts}
+                        additionalCostLimitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
+                        })}
+                        mileageLimitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                        })}
+                        onAdd={addAdditionalCost}
+                        onUpdate={updateAdditionalCost}
+                        onDelete={removeAdditionalCost}
                     />
                 }
                 submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
