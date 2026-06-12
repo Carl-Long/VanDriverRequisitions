@@ -109,13 +109,13 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
         return tasks
             .Select(dto => !taskTypeMap.TryGetValue(dto.FeTaskTypeId, out var taskType) 
                 ? throw new NotFoundException($"Task type '{dto.FeTaskTypeId}' was not found.") 
-                : FeGeneralTaskModelMapper.ToUpdateModel(dto, taskType))
+                : FeGeneralTaskMapper.ToUpdateModel(dto, taskType))
             .ToList();
     }
 
     private static List<FeMileageUpdateModel> BuildMileageModels(IEnumerable<SaveFeMileageDto> mileages)
     {
-        return mileages.Select(FeMileageModelMapper.ToUpdateModel).ToList();
+        return mileages.Select(FeMileageMapper.ToUpdateModel).ToList();
     }
 
     private static List<FeTransferUpdateModel> BuildTransferModels(
@@ -128,7 +128,7 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
                 var fromShop = MapShopSnapshot(dto.ShopIdFrom, shopMap);
                 var toShop = MapShopSnapshot(dto.ShopIdTo, shopMap);
 
-                return FeTransferModelMapper.ToUpdateModel(dto, fromShop, toShop);
+                return FeTransferMapper.ToUpdateModel(dto, fromShop, toShop);
             })
             .ToList();
     }
@@ -140,7 +140,7 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
         return additionalCosts
             .Select(dto => !reasonMap.TryGetValue(dto.ReasonId, out var reason) 
                 ? throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.") 
-                : FeAdditionalCostModelMapper.ToUpdateModel(dto, reason))
+                : FeAdditionalCostMapper.ToUpdateModel(dto, reason))
             .ToList();
     }
 
