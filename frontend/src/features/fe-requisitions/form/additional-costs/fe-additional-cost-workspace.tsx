@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
-
+import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import {
     TableHeader,
     TableHeaderCell,
@@ -24,6 +22,9 @@ import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { calculateFeAdditionalCostTotals } from "../lib/calculate-fe-additional-cost-totals";
 import { mapFeAdditionalCostDraftToForm } from "../lib/map-fe-additional-cost-draft-to-form";
 import { FeAdditionalCostDrawer } from "./fe-additional-cost-drawer";
+import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../components/editable-cell-button";
+import { DeleteRowButton } from "../components/delete-row-button";
 
 type Props = {
     readonly: boolean;
@@ -176,7 +177,7 @@ function AdditionalCostsTable({
                                     align="right"
                                     nowrap
                                 >
-                                    Actions
+                                    Delete
                                 </TableHeaderCell>
                             )}
                         </TableHeaderRow>
@@ -195,20 +196,26 @@ function AdditionalCostsTable({
                             return (
                                 <TableRow
                                     key={row.clientId}
-                                    className={hasLimitIssue ? "bg-warning/10" : undefined}
+                                    onClick={readonly ? undefined : () => onEdit(row)}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue: hasLimitIssue,
+                                    })}
                                 >
-
                                     <TableCell>
-                                        {row.weekEndingDate
-                                            ? row.weekEndingDate.toLocaleDateString()
-                                            : "-"}
+                                        {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
                                     </TableCell>
 
                                     <TableCell>
                                         <div>
-                                            <div className="font-medium">
+                                            <EditableCellButton
+                                                readonly={readonly}
+                                                ariaLabel="Edit additional cost row"
+                                                onEdit={() => onEdit(row)}
+                                                className="font-medium"
+                                            >
                                                 {row.reasonText ?? "-"}
-                                            </div>
+                                            </EditableCellButton>
 
                                             {hasLimitIssue && (
                                                 <div className="mt-2 space-y-1">
@@ -231,9 +238,7 @@ function AdditionalCostsTable({
                                     <TableCell>{row.chargingOption}</TableCell>
 
                                     <TableCell align="right">
-                                        {row.chargingOption === "Mileage"
-                                            ? `${row.miles ?? 0} mi`
-                                            : row.totalNumber ?? 0}
+                                        {row.chargingOption === "Mileage" ? `${row.miles ?? 0} mi` : row.totalNumber ?? 0}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
@@ -251,21 +256,10 @@ function AdditionalCostsTable({
                                     {!readonly && (
                                         <TableCell align="right" nowrap>
                                             <div className="flex justify-end gap-2">
-                                                <IconButton
-                                                    variant="ghost"
-                                                    tone="accent"
-                                                    onClick={() => onEdit(row)}
-                                                >
-                                                    <Pencil size={14} />
-                                                </IconButton>
-
-                                                <IconButton
-                                                    tone="danger"
-                                                    variant="ghost"
-                                                    onClick={() => onDelete(row.clientId)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </IconButton>
+                                                <DeleteRowButton
+                                                    ariaLabel="Delete additional cost row"
+                                                    onDelete={() => onDelete(row.clientId)}
+                                                />
                                             </div>
                                         </TableCell>
                                     )}

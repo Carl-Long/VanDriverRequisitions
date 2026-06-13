@@ -1,14 +1,12 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
 import { calculateFeGeneralTaskTotals } from "../lib/calculate-fe-general-task-totals";
-
 import { useState } from "react";
 import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { IconButton } from "@/components/ui/button/icon-button";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 import {
@@ -21,6 +19,9 @@ import {
     TableHeaderRow,
 } from "@/components/ui/table/table";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
+import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../components/editable-cell-button";
+import { DeleteRowButton } from "../components/delete-row-button";
 
 type Props = {
     readonly: boolean;
@@ -200,7 +201,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                     align="right"
                                     nowrap
                                 >
-                                    Actions
+                                    Delete
                                 </TableHeaderCell>
                             )}
                         </TableHeaderRow>
@@ -214,22 +215,26 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                             return (
                                 <TableRow
                                     key={task.clientId}
-                                    className={hasLimitIssue ? "bg-warning/10" : undefined}
+                                    onClick={readonly ? undefined : () => onEdit(task)}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue: hasLimitIssue,
+                                    })}
                                 >
                                     <TableCell>
                                         <div>
-                                            <div>
-                                                {task.weekEndingDate
-                                                    ? task.weekEndingDate.toLocaleDateString()
-                                                    : "-"}
-                                            </div>
+                                            <EditableCellButton
+                                                readonly={readonly}
+                                                ariaLabel="Edit general task row"
+                                                onEdit={() => onEdit(task)}
+                                            >
+                                                {task.weekEndingDate ? task.weekEndingDate.toLocaleDateString() : "-"}
+                                            </EditableCellButton>
 
                                             {hasLimitIssue && (
                                                 <div className="mt-1 space-y-1">
                                                     <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
+                                                        {limitStatus.state === "missing-limit" ? "Missing limit" : "Exceeds limit"}
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
@@ -283,21 +288,10 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                     {!readonly && (
                                         <TableCell align="right" nowrap>
                                             <div className="flex justify-end gap-2">
-                                                <IconButton
-                                                    variant="ghost"
-                                                    tone="accent"
-                                                    onClick={() => onEdit(task)}
-                                                >
-                                                    <Pencil size={14} />
-                                                </IconButton>
-
-                                                <IconButton
-                                                    tone="danger"
-                                                    variant="ghost"
-                                                    onClick={() => onDelete(task.clientId)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </IconButton>
+                                                <DeleteRowButton
+                                                    ariaLabel="Delete general task row"
+                                                    onDelete={() => onDelete(task.clientId)}
+                                                />
                                             </div>
                                         </TableCell>
                                     )}
@@ -374,6 +368,6 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                     </TableFooter>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }
