@@ -82,11 +82,12 @@ export function AppDrawer({
             className="
                 fixed inset-0 z-50 m-0 h-screen max-h-none
                 w-screen max-w-none border-0 bg-transparent p-0
+                text-foreground
                 backdrop:bg-black/40
                 open:flex open:justify-end
             "
         >
-            <div className="flex h-full w-full max-w-2xl flex-col bg-surface shadow-2xl">
+            <div className="flex h-full w-full max-w-2xl flex-col bg-surface text-foreground shadow-2xl">
                 <div className="flex items-center justify-between border-b border-border px-6 py-4">
                     <h2 id={titleId} className="text-lg font-semibold">
                         {title}
