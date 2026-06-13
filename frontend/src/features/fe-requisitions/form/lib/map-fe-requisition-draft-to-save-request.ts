@@ -12,9 +12,7 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
 
         feGeneralTasks: draft.feGeneralTasks.map((task) => ({
             id: task.id,
-
             feTaskTypeId: task.taskTypeId ?? "",
-
             weekEndingDate: toDateOnlyString(task.weekEndingDate) ?? "",
 
             week: {
@@ -30,8 +28,58 @@ export function mapFeRequisitionDraftToSaveRequest(draft: FeRequisitionDraft): S
             ratePerJob: task.ratePerJob,
         })),
 
-        feMileages: [],
-        feTransfers: [],
-        feAdditionalCosts: [],
+        feMileages: draft.feMileages.map((mileage) => ({
+            id: mileage.id,
+            weekEndingDate: toDateOnlyString(mileage.weekEndingDate) ?? "",
+
+            week: {
+                sunday: mileage.quantities.sunday,
+                monday: mileage.quantities.monday,
+                tuesday: mileage.quantities.tuesday,
+                wednesday: mileage.quantities.wednesday,
+                thursday: mileage.quantities.thursday,
+                friday: mileage.quantities.friday,
+                saturday: mileage.quantities.saturday,
+            },
+
+            ratePerMile: mileage.ratePerMile,
+        })),
+
+        feTransfers: draft.feTransfers.map((transfer) => ({
+            id: transfer.id,
+
+            weekEndingDate: toDateOnlyString(transfer.weekEndingDate) ?? "",
+
+            shopIdFrom: transfer.shopIdFrom ?? "",
+            shopIdTo: transfer.shopIdTo ?? "",
+
+            week: {
+                sunday: transfer.quantities.sunday,
+                monday: transfer.quantities.monday,
+                tuesday: transfer.quantities.tuesday,
+                wednesday: transfer.quantities.wednesday,
+                thursday: transfer.quantities.thursday,
+                friday: transfer.quantities.friday,
+                saturday: transfer.quantities.saturday,
+            },
+
+            ratePerJob: transfer.ratePerJob,
+        })),
+
+        feAdditionalCosts: draft.feAdditionalCosts.map((cost) => ({
+            id: cost.id,
+
+            weekEndingDate: toDateOnlyString(cost.weekEndingDate) ?? "",
+
+            reasonId: cost.reasonId ?? "",
+
+            chargingOption: cost.chargingOption,
+
+            totalNumber: cost.chargingOption === "Job" ? cost.totalNumber : null,
+            ratePerJob: cost.chargingOption === "Job" ? cost.ratePerJob : null,
+
+            miles: cost.chargingOption === "Mileage" ? cost.miles : null,
+            ratePerMile: cost.chargingOption === "Mileage" ? cost.ratePerMile : null,
+        })),
     };
 }

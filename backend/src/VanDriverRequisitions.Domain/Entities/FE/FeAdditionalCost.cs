@@ -5,12 +5,14 @@ using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
+public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
 {
-    public Guid FeRequisitionId { get; init; }
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
-    public Guid ReasonId { get; init; }
-    public required string ReasonText { get; init; }
+    private FeAdditionalCost() { } // EF Core
+
+    public Guid FeRequisitionId { get; private set; }
+    public DateOnly WeekEndingDate { get; private set; }
+    public Guid ReasonId { get; private set; }
+    public string ReasonText { get; private set; } = string.Empty;
     public ChargingOption ChargingOption { get; private set; }
     public int? Miles { get; private set; }
     public decimal? RatePerMile { get; private set; }
@@ -18,12 +20,81 @@ public class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
 
-    public void SetMiles(int miles, decimal rate)
+    public static FeAdditionalCost Create(
+        DateOnly weekEndingDate,
+        Guid reasonId,
+        string reasonText,
+        ChargingOption chargingOption,
+        int? totalNumber,
+        decimal? ratePerJob,
+        int? miles,
+        decimal? ratePerMile)
     {
+        var cost = new FeAdditionalCost();
+
+        cost.Update(
+            weekEndingDate,
+            reasonId,
+            reasonText,
+            chargingOption,
+            totalNumber,
+            ratePerJob,
+            miles,
+            ratePerMile);
+
+        return cost;
+    }
+
+    public void Update(
+        DateOnly weekEndingDate,
+        Guid reasonId,
+        string reasonText,
+        ChargingOption chargingOption,
+        int? totalNumber,
+        decimal? ratePerJob,
+        int? miles,
+        decimal? ratePerMile)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reasonText);
+
+        WeekEndingDate = weekEndingDate;
+        ReasonId = reasonId;
+        ReasonText = reasonText.Trim();
+
+        switch (chargingOption)
+        {
+            case ChargingOption.Mileage:
+                SetMileage(miles, ratePerMile);
+                break;
+
+            case ChargingOption.Job:
+                SetJobs(totalNumber, ratePerJob);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(
+                    nameof(chargingOption),
+                    chargingOption,
+                    "Unknown charging option.");
+        }
+    }
+
+    private void SetMileage(int? miles, decimal? ratePerMile)
+    {
+        if (!miles.HasValue || miles.Value <= 0)
+        {
+            throw new InvalidOperationException("Miles must be greater than zero.");
+        }
+
+        if (!ratePerMile.HasValue || ratePerMile.Value < 0)
+        {
+            throw new InvalidOperationException("Rate per mile is required and cannot be negative.");
+        }
+
         ChargingOption = ChargingOption.Mileage;
 
         Miles = miles;
-        RatePerMile = rate;
+        RatePerMile = ratePerMile;
 
         TotalNumber = null;
         RatePerJob = null;
@@ -31,12 +102,22 @@ public class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
         Recalculate();
     }
 
-    public void SetJobs(int jobs, decimal rate)
+    private void SetJobs(int? totalNumber, decimal? ratePerJob)
     {
+        if (!totalNumber.HasValue || totalNumber.Value <= 0)
+        {
+            throw new InvalidOperationException("Total number must be greater than zero.");
+        }
+
+        if (!ratePerJob.HasValue || ratePerJob.Value < 0)
+        {
+            throw new InvalidOperationException("Rate per job is required and cannot be negative.");
+        }
+
         ChargingOption = ChargingOption.Job;
 
-        TotalNumber = jobs;
-        RatePerJob = rate;
+        TotalNumber = totalNumber;
+        RatePerJob = ratePerJob;
 
         Miles = null;
         RatePerMile = null;
@@ -46,8 +127,8 @@ public class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
 
     private void Recalculate()
     {
-        TotalValue = ChargingOption == ChargingOption.Mileage 
-            ? WeeklyCalculator.Calculate(Miles ?? 0, RatePerMile) 
+        TotalValue = ChargingOption == ChargingOption.Mileage
+            ? WeeklyCalculator.Calculate(Miles ?? 0, RatePerMile)
             : WeeklyCalculator.Calculate(TotalNumber ?? 0, RatePerJob);
     }
 }

@@ -19,6 +19,9 @@ public sealed class FeRequisitionDetailDto
     public string Status { get; init; } = string.Empty;
     public decimal Subtotal { get; init; }
     public required List<FeGeneralTaskDetailDto> FeGeneralTasks { get; init; }
+    public required List<FeMileageDetailDto> FeMileages { get; init; }
+    public required List<FeTransferDetailDto> FeTransfers { get; init; }
+    public required List<FeAdditionalCostDetailDto> FeAdditionalCosts { get; init; }
 
     public bool IsEditable { get; init; }
     public DateTime? SubmittedAtUtc { get; init; }

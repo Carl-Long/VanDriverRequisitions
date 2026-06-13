@@ -28,13 +28,9 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
 
         feGeneralTasks: detail.feGeneralTasks.map((task) => ({
             id: task.id,
-
             clientId: crypto.randomUUID(),
-
             taskTypeId: task.feTaskTypeId,
-
             taskTypeLabel: task.taskTypeName,
-
             weekEndingDate: new Date(task.weekEndingDate),
 
             quantities: {
@@ -48,14 +44,75 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             },
 
             totalNumber: task.totalNumber,
-
             ratePerJob: task.ratePerJob,
-
             totalValue: task.totalValue ?? 0,
         })),
 
-        mileageRows: [],
-        transferRows: [],
-        additionalCostRows: [],
+        feMileages: detail.feMileages.map((mileage) => ({
+            id: mileage.id,
+            clientId: crypto.randomUUID(),
+            weekEndingDate: new Date(mileage.weekEndingDate),
+
+            quantities: {
+                sunday: mileage.week.sunday,
+                monday: mileage.week.monday,
+                tuesday: mileage.week.tuesday,
+                wednesday: mileage.week.wednesday,
+                thursday: mileage.week.thursday,
+                friday: mileage.week.friday,
+                saturday: mileage.week.saturday,
+            },
+
+            totalMiles: mileage.totalMiles ?? 0,
+            ratePerMile: mileage.ratePerMile,
+            totalValue: mileage.totalValue ?? 0,
+        })),
+
+        feTransfers: detail.feTransfers.map((transfer) => ({
+            id: transfer.id,
+            clientId: crypto.randomUUID(),
+
+            shopIdFrom: transfer.shopIdFrom,
+            shopLabelFrom: `${transfer.shopCodeFrom} - ${transfer.shopNameFrom}`,
+
+            shopIdTo: transfer.shopIdTo,
+            shopLabelTo: `${transfer.shopCodeTo} - ${transfer.shopNameTo}`,
+
+            weekEndingDate: new Date(transfer.weekEndingDate),
+
+            quantities: {
+                sunday: transfer.week.sunday,
+                monday: transfer.week.monday,
+                tuesday: transfer.week.tuesday,
+                wednesday: transfer.week.wednesday,
+                thursday: transfer.week.thursday,
+                friday: transfer.week.friday,
+                saturday: transfer.week.saturday,
+            },
+
+            totalNumber: transfer.totalNumber,
+            ratePerJob: transfer.ratePerJob,
+            totalValue: transfer.totalValue ?? 0,
+        })),
+
+        feAdditionalCosts: detail.feAdditionalCosts.map((cost) => ({
+            id: cost.id,
+            clientId: crypto.randomUUID(),
+
+            weekEndingDate: new Date(cost.weekEndingDate),
+
+            reasonId: cost.reasonId,
+            reasonText: cost.reasonText,
+
+            chargingOption: cost.chargingOption,
+
+            totalNumber: cost.totalNumber,
+            ratePerJob: cost.ratePerJob,
+
+            miles: cost.miles,
+            ratePerMile: cost.ratePerMile,
+
+            totalValue: cost.totalValue ?? 0,
+        })),
     };
 }

@@ -5,31 +5,37 @@ using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
-public class FeMileage : AuditableEntity, IFeRequisitionChild
+public sealed class FeMileage : AuditableEntity, IFeRequisitionChild
 {
-    private FeMileage() { } // For EF core
-    
-    public FeMileage(WeeklyQuantities week)
-    {
-        Week = week;
-    }
-    
-    public Guid FeRequisitionId { get; init; }
-    public DateOnly WeekEndingDate { get; init; } = DateOnly.FromDateTime(DateTime.UtcNow);
+    private FeMileage() { } // EF Core
+
+    public Guid FeRequisitionId { get; private set; }
+    public DateOnly WeekEndingDate { get; private set; }
     public WeeklyQuantities Week { get; private set; } = null!;
     public int? TotalMiles { get; private set; }
     public decimal? RatePerMile { get; private set; }
     public decimal? TotalValue { get; private set; }
 
-    public void SetWeekValues(WeeklyQuantities week)
+    public static FeMileage Create(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerMile)
     {
-        Week = week;
-        RecalculateTotals();
+        var mileage = new FeMileage();
+        mileage.Update(weekEndingDate, week, ratePerMile);
+        return mileage;
     }
 
-    public void SetRate(decimal? ratePerMile)
+    public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerMile)
     {
+        ArgumentNullException.ThrowIfNull(week);
+
+        if (ratePerMile < 0)
+        {
+            throw new InvalidOperationException("Rate per mile cannot be negative.");
+        }
+
+        WeekEndingDate = weekEndingDate;
+        Week = week;
         RatePerMile = ratePerMile;
+
         RecalculateTotals();
     }
 
@@ -37,12 +43,14 @@ public class FeMileage : AuditableEntity, IFeRequisitionChild
     {
         var totalMiles = Week.Total;
         var totalValue = WeeklyCalculator.Calculate(totalMiles, RatePerMile);
+
         return (totalMiles, totalValue);
     }
 
     private void RecalculateTotals()
     {
         var (totalMiles, totalValue) = CalculateTotals();
+
         TotalMiles = totalMiles;
         TotalValue = totalValue;
     }

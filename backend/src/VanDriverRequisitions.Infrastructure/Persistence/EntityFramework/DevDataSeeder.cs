@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
@@ -17,41 +18,42 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 public static class DevDataSeeder
 {
     // ─────────────────────────────────────────────
-    // Task Types (lookup only)
+    // Task Types / Reasons (lookup only)
     // ─────────────────────────────────────────────
 
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
     private static readonly Guid DeliveriesTaskTypeId = new("c0000001-0001-0001-0001-000000000002");
     private static readonly Guid WasteTaskTypeId = new("c0000001-0001-0001-0001-000000000003");
     private static readonly Guid LoadingTaskTypeId = new("c0000001-0001-0001-0001-000000000004");
+    
+    private static readonly Guid ParkingReasonId = new("f0000001-0001-0001-0001-000000000001");
+    private static readonly Guid TollReasonId = new("f0000001-0001-0001-0001-000000000002");
+    private static readonly Guid WaitingTimeReasonId = new("f0000001-0001-0001-0001-000000000003");
+    private static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
 
     // ─────────────────────────────────────────────
     // System user (audit fallback)
     // ─────────────────────────────────────────────
 
-    private static readonly Guid SystemUserId = Guid.Empty;
-    private const string SystemUserName = "SYSTEM_SEED";
-
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
+        var hasReasons = await context.FeReasons.AnyAsync();
         var hasRules = await context.RequisitionLimitRules.AnyAsync();
         var hasShops = await context.Shops.AnyAsync();
         var hasDrivers = await context.VanDrivers.AnyAsync();
         var hasRequisitions = await context.FeRequisitions.AnyAsync();
 
-        if (hasTaskTypes && hasRules && hasShops && hasDrivers)
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasReasons && hasRequisitions)
         {
             logger?.LogInformation("Dev seed already exists — skipping.");
             return;
         }
 
         logger?.LogInformation("Seeding development data...");
-
-        var now = DateTime.UtcNow;
-
+        
         // ─────────────────────────────────────────────
-        // 1. TASK TYPES (pure lookup only)
+        // 1. TASK TYPES AND REASONS
         // ─────────────────────────────────────────────
 
         if (!hasTaskTypes)
@@ -65,6 +67,19 @@ public static class DevDataSeeder
 
             await context.SaveChangesAsync();
             logger?.LogInformation("Seeded FeTaskTypes");
+        }
+        
+        if (!hasReasons)
+        {
+            context.FeReasons.AddRange(
+                new FeReason { Id = ParkingReasonId, Reason = "Parking" },
+                new FeReason { Id = TollReasonId, Reason = "Toll charge" },
+                new FeReason { Id = WaitingTimeReasonId, Reason = "Waiting time" },
+                new FeReason { Id = ExtraMileageReasonId, Reason = "Extra mileage" }
+            );
+
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Seeded FeReasons");
         }
 
         // ─────────────────────────────────────────────
@@ -311,6 +326,7 @@ public static class DevDataSeeder
         var rng = new Random(123);
 
         var taskTypes = await context.FeTaskTypes.ToListAsync();
+        var reasons = await context.FeReasons.ToListAsync();
 
         var shops = await context.Shops
             .Where(x => x.IsActive)
@@ -349,11 +365,18 @@ public static class DevDataSeeder
                     shop.Code,
                     shop.Name));
 
-            var taskModels = BuildSeedTasks(rng, taskTypes, DateOnly.FromDateTime(createdDate));
+            var requisitionDate = DateOnly.FromDateTime(createdDate);
 
+            var taskModels = BuildSeedTasks(rng, taskTypes, requisitionDate);
+            var mileageModels = BuildSeedMileages(rng, requisitionDate);
+            var transferModels = BuildSeedTransfers(rng, shops, requisitionDate);
+            var additionalCostModels = BuildSeedAdditionalCosts(rng, reasons, requisitionDate);
+            
             var requisitionNumber = $"F{i:D9}";
 
-            var requisition = FeRequisition.Create(requisitionNumber, details, taskModels);
+            var updateModel = new FeRequisitionUpdateModel(details, taskModels, mileageModels, transferModels, additionalCostModels);
+            var requisition = FeRequisition.Create(requisitionNumber, updateModel);
+            
             requisition.CreatedAtUtc = createdDate;
             requisition.CreatedById = user.Id;
             requisition.CreatedByNameSnapshot = user.Name;
@@ -367,14 +390,7 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var submittedAtUtc = createdDate.AddHours(2);
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
                     break;
                 }
 
@@ -382,27 +398,11 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var rejecter = SeedUsers[rng.Next(SeedUsers.Length)];
-
                     var submittedAtUtc = createdDate.AddHours(2);
                     var rejectedAtUtc = createdDate.AddDays(1);
-
-                    var rejectedReason =
-                        RejectionReasons[rng.Next(RejectionReasons.Length)];
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
-                    requisition.RejectSubmission(
-                        new AuditUser(
-                            rejecter.Id,
-                            rejecter.Name),
-                        rejectedAtUtc,
-                        rejectedReason);
-
+                    var rejectedReason = RejectionReasons[rng.Next(RejectionReasons.Length)];
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
+                    requisition.RejectSubmission(new AuditUser(rejecter.Id, rejecter.Name), rejectedAtUtc, rejectedReason);
                     break;
                 }
 
@@ -410,33 +410,16 @@ public static class DevDataSeeder
                 {
                     var submitter = SeedUsers[rng.Next(SeedUsers.Length)];
                     var approver = SeedUsers[rng.Next(SeedUsers.Length)];
-
                     var submittedAtUtc = createdDate.AddHours(2);
                     var approvedAtUtc = createdDate.AddDays(2);
-
                     var poNumber = BuildSeedPoNumber(i);
-
-                    requisition.Submit(
-                        new AuditUser(
-                            submitter.Id,
-                            submitter.Name),
-                        submittedAtUtc,
-                        BuildSeedSnapshotJson(requisition));
-
-                    requisition.ApproveSubmission(
-                        new AuditUser(
-                            approver.Id,
-                            approver.Name),
-                        approvedAtUtc,
-                        poNumber);
-
+                    requisition.Submit(new AuditUser(submitter.Id, submitter.Name), submittedAtUtc, FeRequisitionSnapshotFactory.CreateJson(requisition));
+                    requisition.ApproveSubmission(new AuditUser(approver.Id, approver.Name), approvedAtUtc, poNumber);
                     break;
                 }
 
                 default:
-                    throw new ArgumentOutOfRangeException(
-                        message: "Unknown status attempted during seed",
-                        null);
+                    throw new ArgumentOutOfRangeException(message: "Unknown status attempted during seed", null);
             }
 
             requisitions.Add(requisition);
@@ -497,6 +480,128 @@ public static class DevDataSeeder
 
         return tasks;
     }
+    
+    private static List<FeMileageUpdateModel> BuildSeedMileages(Random rng, DateOnly requisitionDate)
+    {
+        // Not every seeded requisition needs mileage.
+        // This gives a decent spread of requisitions with and without mileage.
+        var includeMileage = rng.Next(0, 2) == 1;
+
+        if (!includeMileage)
+        {
+            return [];
+        }
+
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        return
+        [
+            new FeMileageUpdateModel(
+                null,
+                weekEndingDate,
+                new WeeklyQuantities(
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41),
+                    rng.Next(0, 41)),
+                0.45m)
+        ];
+    }
+    
+    private static List<FeTransferUpdateModel> BuildSeedTransfers(Random rng, List<Shop> shops, DateOnly requisitionDate)
+    {
+        var includeTransfer = rng.Next(0, 2) == 1;
+
+        if (!includeTransfer)
+        {
+            return [];
+        }
+
+        var fromShop = shops[rng.Next(shops.Count)];
+        var toShop = shops[rng.Next(shops.Count)];
+
+        while (toShop.Id == fromShop.Id)
+        {
+            toShop = shops[rng.Next(shops.Count)];
+        }
+
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        return
+        [
+            new FeTransferUpdateModel(
+                null,
+                new ShopSnapshot(
+                    fromShop.Id,
+                    fromShop.Code,
+                    fromShop.Name),
+                new ShopSnapshot(
+                    toShop.Id,
+                    toShop.Code,
+                    toShop.Name),
+                weekEndingDate,
+                new WeeklyQuantities(
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11),
+                    rng.Next(0, 11)),
+                Math.Round(
+                    (decimal)(rng.NextDouble() * 5 + 3),
+                    2))
+        ];
+    }
+    
+    private static List<FeAdditionalCostUpdateModel> BuildSeedAdditionalCosts(Random rng, List<FeReason> reasons, DateOnly requisitionDate)
+    {
+        var includeAdditionalCost = rng.Next(0, 2) == 1;
+
+        if (!includeAdditionalCost)
+        {
+            return [];
+        }
+
+        var reason = reasons[rng.Next(reasons.Count)];
+        var weekEndingDate = requisitionDate.AddDays(6 - (int)requisitionDate.DayOfWeek);
+
+        var useMileage = rng.Next(0, 2) == 1;
+
+        if (useMileage)
+        {
+            return
+            [
+                new FeAdditionalCostUpdateModel(
+                    null,
+                    weekEndingDate,
+                    reason.Id,
+                    reason.Reason,
+                    ChargingOption.Mileage,
+                    null,
+                    null,
+                    rng.Next(1, 101),
+                    0.45m)
+            ];
+        }
+
+        return
+        [
+            new FeAdditionalCostUpdateModel(
+                null,
+                weekEndingDate,
+                reason.Id,
+                reason.Reason,
+                ChargingOption.Job,
+                rng.Next(1, 11),
+                Math.Round((decimal)(rng.NextDouble() * 10 + 3), 2),
+                null,
+                null)
+        ];
+    }
 
     private static string Esc(string value) => value.Replace("'", "''");
 
@@ -513,35 +618,5 @@ public static class DevDataSeeder
     private static string BuildSeedPoNumber(int i)
     {
         return $"PO-SEED-{i:D6}";
-    }
-
-    private static string BuildSeedSnapshotJson(FeRequisition requisition)
-    {
-        return System.Text.Json.JsonSerializer.Serialize(new
-        {
-            requisition.Id,
-            requisition.RequisitionNumber,
-            requisition.RequisitionDate,
-            requisition.VanDriverId,
-            requisition.VanDriverName,
-            requisition.TradersName,
-            requisition.VanDriverCode,
-            requisition.ShopId,
-            requisition.ShopCode,
-            requisition.ShopName,
-            requisition.IsVatApplicable,
-            requisition.Subtotal,
-            GeneralTasks = requisition.FeGeneralTasks.Select(x => new
-            {
-                x.Id,
-                x.FeTaskTypeId,
-                x.TaskTypeName,
-                x.TaskTypeCode,
-                x.WeekEndingDate,
-                x.Week,
-                x.RatePerJob,
-                x.TotalValue
-            })
-        });
     }
 }

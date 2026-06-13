@@ -5,13 +5,11 @@ using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 
 public static class FeRequisitionMapper
 {
-
     public static FeRequisitionDetailDto MapRequisitionToDetailDto(
         FeRequisition requisition,
         VanDriverLookupDto vanDriverSummary,
@@ -34,28 +32,56 @@ public static class FeRequisitionMapper
             PoNumber = requisition.PoNumber,
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
-            IsEditable = requisition.Status is RequisitionStatus.Draft or RequisitionStatus.Rejected,
+            IsEditable = requisition.CanEdit,
             ApprovedAtUtc = requisition.ApprovedAtUtc,
             ApprovedByNameSnapshot = requisition.ApprovedByNameSnapshot,
             RejectedAtUtc = requisition.RejectedAtUtc,
             RejectedByNameSnapshot = requisition.RejectedByNameSnapshot,
             SubmittedAtUtc = requisition.SubmittedAtUtc,
             SubmittedByNameSnapshot = requisition.SubmittedByNameSnapshot,
-            
+
             FeGeneralTasks = requisition.FeGeneralTasks
-                    .Select(MapGeneralTaskDetail)
-                    .ToList(),
-            
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
+                .Select(FeGeneralTaskMapper.ToDetailDto)
+                .ToList(),
+
+            FeMileages = requisition.FeMileages
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
+                .Select(FeMileageMapper.ToDetailDto)
+                .ToList(),
+
+            FeTransfers = requisition.FeTransfers
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.ShopNameFrom)
+                .ThenBy(x => x.ShopNameTo)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
+                .Select(FeTransferMapper.ToDetailDto)
+                .ToList(),
+
+            FeAdditionalCosts = requisition.FeAdditionalCosts
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.ReasonText)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
+                .Select(FeAdditionalCostMapper.ToDetailDto)
+                .ToList(),
+
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };
     }
-    
+
     public static RequisitionDetails MapToRequisitionDetails(
-        SaveFeRequisitionDto saveFeRequisitionDto, 
-        VanDriverLookupDto driverSummary, 
+        SaveFeRequisitionDto saveFeRequisitionDto,
+        VanDriverLookupDto driverSummary,
         ShopRequisitionSnapshotDto shop)
     {
-        return new RequisitionDetails(saveFeRequisitionDto.RequisitionDate,
+        return new RequisitionDetails(
+            saveFeRequisitionDto.RequisitionDate,
             new VanDriverSnapshot(
                 driverSummary.Id,
                 driverSummary.Code,
@@ -67,37 +93,7 @@ public static class FeRequisitionMapper
                 shop.Code,
                 shop.Name));
     }
-    
-    private static FeGeneralTaskDetailDto MapGeneralTaskDetail(FeGeneralTask task)
-    {
-        return new FeGeneralTaskDetailDto
-        {
-            Id = task.Id,
-            FeTaskTypeId = task.FeTaskTypeId,
-            TaskTypeName = task.TaskTypeName,
-            TaskTypeCode = task.TaskTypeCode,
-            WeekEndingDate = task.WeekEndingDate,
-            Week = MapWeekToDto(task.Week),
-            TotalNumber = task.TotalNumber,
-            RatePerJob = task.RatePerJob,
-            TotalValue = task.TotalValue
-        };
-    }
-    
-    private static WeeklyQuantitiesDto MapWeekToDto(WeeklyQuantities week)
-    {
-        return new WeeklyQuantitiesDto
-        {
-            Sunday = week.Sunday,
-            Monday = week.Monday,
-            Tuesday = week.Tuesday,
-            Wednesday = week.Wednesday,
-            Thursday = week.Thursday,
-            Friday = week.Friday,
-            Saturday = week.Saturday
-        };
-    }
-    
+
     private static List<FeRequisitionSubmissionHistoryDto> MapSubmissionHistory(IEnumerable<FeRequisitionSubmission> submissions)
     {
         return submissions

@@ -12,9 +12,5 @@ export function calculateFeGeneralTaskFormTotals(form: FeGeneralTaskForm) {
 
     const totalValue = totalJobs * (form.ratePerJob ?? 0);
 
-    return {
-        totalJobs,
-
-        totalValue,
-    };
+    return { totalJobs, totalValue };
 }

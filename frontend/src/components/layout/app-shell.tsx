@@ -4,11 +4,17 @@ import { Topbar } from "./topbar";
 
 export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
     return (
-        <div className="flex flex-col h-screen bg-background text-foreground">
-            <Topbar />
-            <div className="flex flex-1 min-w-0 overflow-hidden">
-                <Sidebar />
-                <main className="flex-1 min-w-0 min-h-0 overflow-y-auto py-6 lg:py-8 xl:py-10">
+        <div className="flex h-screen flex-col bg-background text-foreground print:block print:h-auto print:min-h-0 print:overflow-visible">
+            <div className="print:hidden">
+                <Topbar />
+            </div>
+
+            <div className="flex min-w-0 flex-1 overflow-hidden print:block print:overflow-visible">
+                <div className="print:hidden">
+                    <Sidebar />
+                </div>
+
+                <main className="min-h-0 min-w-0 flex-1 overflow-y-auto py-6 lg:py-8 xl:py-10 print:block print:h-auto print:min-h-0 print:overflow-visible print:py-0">
                     {children}
                 </main>
             </div>

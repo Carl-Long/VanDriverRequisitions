@@ -64,15 +64,12 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             : _submissions.Max(x => x.SubmissionNumber) + 1;
 
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
+    public bool CanEdit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
 
-    public static FeRequisition Create(
-        string requisitionNumber,
-        RequisitionDetails details,
-        IEnumerable<FeGeneralTaskUpdateModel> taskModels)
+    public static FeRequisition Create(string requisitionNumber, FeRequisitionUpdateModel model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(requisitionNumber);
-        ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(taskModels);
+        ArgumentNullException.ThrowIfNull(model);
 
         var requisition = new FeRequisition
         {
@@ -80,79 +77,28 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             Status = RequisitionStatus.Draft
         };
 
-        requisition.UpdateDetails(details);
-        requisition.SyncGeneralTasks(taskModels);
-
+        requisition.Update(model);
         return requisition;
     }
-
-    public void UpdateDetails(RequisitionDetails details)
+    
+    public void Update(FeRequisitionUpdateModel model)
     {
-        ArgumentNullException.ThrowIfNull(details);
+        ArgumentNullException.ThrowIfNull(model);
 
-        RequisitionDate = details.RequisitionDate;
-
-        VanDriverId = details.Driver.Id;
-        VanDriverCode = details.Driver.Code;
-        VanDriverName = details.Driver.Name;
-        TradersName = details.Driver.TradersName;
-
-        ShopId = details.Shop.Id;
-        ShopCode = details.Shop.Code;
-        ShopName = details.Shop.Name;
-
-        IsVatApplicable = details.Driver.HasVat;
-    }
-
-    public void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
-    {
-        ArgumentNullException.ThrowIfNull(incomingTasks);
-
-        var incomingList = incomingTasks.ToList();
-        var existingTasks = _feGeneralTasks.ToDictionary(x => x.Id);
-
-        var incomingIds = incomingList
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
-
-        var tasksToRemove = _feGeneralTasks
-            .Where(x => !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var task in tasksToRemove)
+        if (!CanEdit)
         {
-            _feGeneralTasks.Remove(task);
+            throw new InvalidOperationException("Only draft or rejected requisitions can be edited.");
         }
 
-        foreach (var incoming in incomingList)
-        {
-            if (incoming.Id.HasValue)
-            {
-                if (!existingTasks.TryGetValue(incoming.Id.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"Task '{incoming.Id}' not found.");
-                }
-
-                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerJob);
-            }
-            else
-            {
-                var task = FeGeneralTask.Create(
-                    incoming.FeTaskTypeId,
-                    incoming.TaskTypeName,
-                    incoming.TaskTypeCode,
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
-
-                _feGeneralTasks.Add(task);
-            }
-        }
+        UpdateDetails(model.Details);
+        SyncGeneralTasks(model.GeneralTasks);
+        SyncMileages(model.Mileages);
+        SyncTransfers(model.Transfers);
+        SyncAdditionalCosts(model.AdditionalCosts);
 
         RecalculateSubtotal();
     }
-
+    
     public void Submit(AuditUser submittedBy, DateTime submittedAtUtc, string snapshotJson)
     {
         ArgumentNullException.ThrowIfNull(submittedBy);
@@ -205,7 +151,223 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
     }
+    
+    private void UpdateDetails(RequisitionDetails details)
+    {
+        ArgumentNullException.ThrowIfNull(details);
 
+        RequisitionDate = details.RequisitionDate;
+
+        VanDriverId = details.Driver.Id;
+        VanDriverCode = details.Driver.Code;
+        VanDriverName = details.Driver.Name;
+        TradersName = details.Driver.TradersName;
+
+        ShopId = details.Shop.Id;
+        ShopCode = details.Shop.Code;
+        ShopName = details.Shop.Name;
+
+        IsVatApplicable = details.Driver.HasVat;
+    }
+    
+    private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
+    {
+        ArgumentNullException.ThrowIfNull(incomingTasks);
+
+        var incomingList = incomingTasks.ToList();
+        var existingTasks = GetPersistedChildrenById(_feGeneralTasks);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
+
+        var tasksToRemove = _feGeneralTasks
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var task in tasksToRemove)
+        {
+            _feGeneralTasks.Remove(task);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (IsExistingChild(incoming.Id))
+            {
+                if (!existingTasks.TryGetValue(incoming.Id!.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Task '{incoming.Id}' not found.");
+                }
+
+                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerJob);
+            }
+            else
+            {
+                var task = FeGeneralTask.Create(
+                    incoming.FeTaskTypeId,
+                    incoming.TaskTypeName,
+                    incoming.TaskTypeCode,
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+
+                _feGeneralTasks.Add(task);
+            }
+        }
+    }
+    
+    private void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
+    {
+        ArgumentNullException.ThrowIfNull(incomingMileages);
+
+        var incomingList = incomingMileages.ToList();
+        var existingMileages = GetPersistedChildrenById(_feMileages);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
+
+        var mileagesToRemove = _feMileages
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var mileage in mileagesToRemove)
+        {
+            _feMileages.Remove(mileage);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (IsExistingChild(incoming.Id))
+            {
+                if (!existingMileages.TryGetValue(incoming.Id!.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Mileage '{incoming.Id}' not found.");
+                }
+
+                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
+            }
+            else
+            {
+                var mileage = FeMileage.Create(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
+                _feMileages.Add(mileage);
+            }
+        }
+    }
+    
+    private void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
+    {
+        ArgumentNullException.ThrowIfNull(incomingTransfers);
+
+        var incomingList = incomingTransfers.ToList();
+        var existingTransfers = GetPersistedChildrenById(_feTransfers);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
+
+        var transfersToRemove = _feTransfers
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var transfer in transfersToRemove)
+        {
+            _feTransfers.Remove(transfer);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (IsExistingChild(incoming.Id))
+            {
+                if (!existingTransfers.TryGetValue(incoming.Id!.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Transfer '{incoming.Id}' not found.");
+                }
+
+                existing.Update(
+                    incoming.FromShop,
+                    incoming.ToShop,
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+            }
+            else
+            {
+                var transfer = FeTransfer.Create(
+                    incoming.FromShop,
+                    incoming.ToShop,
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+
+                _feTransfers.Add(transfer);
+            }
+        }
+    }
+    
+    private void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
+    {
+        ArgumentNullException.ThrowIfNull(incomingAdditionalCosts);
+
+        var incomingList = incomingAdditionalCosts.ToList();
+        var existingAdditionalCosts = GetPersistedChildrenById(_feAdditionalCosts);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
+
+        var additionalCostsToRemove = _feAdditionalCosts
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
+            .ToList();
+
+        foreach (var additionalCost in additionalCostsToRemove)
+        {
+            _feAdditionalCosts.Remove(additionalCost);
+        }
+
+        foreach (var incoming in incomingList)
+        {
+            if (IsExistingChild(incoming.Id))
+            {
+                if (!existingAdditionalCosts.TryGetValue(incoming.Id!.Value, out var existing))
+                {
+                    throw new InvalidOperationException($"Additional cost '{incoming.Id}' not found.");
+                }
+
+                existing.Update(
+                    incoming.WeekEndingDate,
+                    incoming.ReasonId,
+                    incoming.ReasonText,
+                    incoming.ChargingOption,
+                    incoming.TotalNumber,
+                    incoming.RatePerJob,
+                    incoming.Miles,
+                    incoming.RatePerMile);
+            }
+            else
+            {
+                var additionalCost = FeAdditionalCost.Create(
+                    incoming.WeekEndingDate,
+                    incoming.ReasonId,
+                    incoming.ReasonText,
+                    incoming.ChargingOption,
+                    incoming.TotalNumber,
+                    incoming.RatePerJob,
+                    incoming.Miles,
+                    incoming.RatePerMile);
+
+                _feAdditionalCosts.Add(additionalCost);
+            }
+        }
+    }
+    
+    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
+    {
+        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
+    }
+
+    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
+    {
+        return incomingItems
+            .Select(getId)
+            .Where(IsExistingChild)
+            .Select(id => id!.Value)
+            .ToHashSet();
+    }
+
+    private static bool IsExistingChild(Guid? id)
+    {
+        return id.HasValue && id.Value != Guid.Empty;
+    }
+    
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)
@@ -238,8 +400,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ClearApproval();
     }
 
-    private void ClearApproval()
-    {
+    private void ClearApproval() {
         ApprovedById = null;
         ApprovedByNameSnapshot = null;
         ApprovedAtUtc = null;

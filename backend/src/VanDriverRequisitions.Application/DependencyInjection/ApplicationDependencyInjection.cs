@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Validation;
 using VanDriverRequisitions.Application.Features.FeReasons.Services;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
@@ -24,6 +25,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IFeRequisitionUserService, FeRequisitionUserService>();
+        services.AddScoped<IFeRequisitionSaveDataBuilder, FeRequisitionSaveDataBuilder>();
         services.AddScoped<IFeRequisitionLimitValidator, FeRequisitionLimitValidator>();
         services.AddScoped<IVanDriverService, VanDriverService>();
         services.AddScoped<IValidatorService, ValidatorService>();

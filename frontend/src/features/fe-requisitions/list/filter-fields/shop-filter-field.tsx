@@ -13,6 +13,8 @@ type Props = {
     label: string | null;
     error?: string;
     hideLabel?: boolean;
+    fieldLabel?: string;
+    placeholder?: string;
     includeAllOption?: boolean;
     prefixLabel?: boolean;
     onChange: (value: string | null, label: string | null) => void;
@@ -32,6 +34,8 @@ export function ShopFilterField({
     label,
     error,
     hideLabel = false,
+    fieldLabel = "Shop",
+    placeholder = "Select Shop",
     includeAllOption = false,
     prefixLabel = false,
     onChange,
@@ -76,14 +80,14 @@ export function ShopFilterField({
                         ? `Shop: ${label}`
                         : label
                     : prefixLabel
-                      ? "Shop: All shops"
-                      : null
+                        ? "Shop: All shops"
+                        : null
             }
             options={options}
             emptyStateText={loading ? "Loading shops..." : "No shops available"}
             noMatchesText="No matching shops found"
             pinnedOptions={includeAllOption ? STATIC_OPTIONS : []}
-            placeholder={loading ? "Loading shops..." : "Shop: All shops"}
+            placeholder={loading ? "Loading shops..." : placeholder}
             onChange={(value, option) => {
                 if (value === "__ALL__") {
                     onChange(null, null);
@@ -100,7 +104,7 @@ export function ShopFilterField({
     }
 
     return (
-        <Field required={required} label="Shop" error={error}>
+        <Field required={required} label={fieldLabel} error={error}>
             {combobox}
         </Field>
     );

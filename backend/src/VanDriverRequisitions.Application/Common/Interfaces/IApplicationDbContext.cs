@@ -9,6 +9,7 @@ public interface IApplicationDbContext
 {
     DbSet<FeRequisition> FeRequisitions { get; }
     DbSet<FeGeneralTask> FeGeneralTasks { get; }
+    DbSet<FeMileage> FeMileages { get; }
     DbSet<FeRequisitionSubmission> FeRequisitionSubmissions { get; }
     DbSet<FeTaskType> FeTaskTypes { get; }
     DbSet<FeReason> FeReasons { get; }

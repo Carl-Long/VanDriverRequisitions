@@ -31,9 +31,17 @@ public static class FeRequisitionSnapshotFactory
                 .Select(CreateGeneralTaskSnapshot)
                 .ToList(),
 
-            Mileages = [],
-            Transfers = [],
-            AdditionalCosts = []
+            Mileages = requisition.FeMileages
+                .Select(CreateMileageSnapshot)
+                .ToList(),
+            
+            Transfers = requisition.FeTransfers
+                .Select(CreateTransferSnapshot)
+                .ToList(),
+            
+            AdditionalCosts = requisition.FeAdditionalCosts
+                .Select(CreateAdditionalCostSnapshot)
+                .ToList()
         };
     }
     
@@ -59,6 +67,76 @@ public static class FeRequisitionSnapshotFactory
             TotalNumber = task.TotalNumber,
             RatePerJob = task.RatePerJob,
             TotalValue = task.TotalValue
+        };
+    }
+    
+    private static FeMileageSnapshot CreateMileageSnapshot(FeMileage mileage)
+    {
+        return new FeMileageSnapshot
+        {
+            WeekEndingDate = mileage.WeekEndingDate,
+
+            Week = new WeeklyQuantitiesSnapshot
+            {
+                Saturday = mileage.Week.Saturday ?? 0,
+                Sunday = mileage.Week.Sunday ?? 0,
+                Monday = mileage.Week.Monday ?? 0,
+                Tuesday = mileage.Week.Tuesday ?? 0,
+                Wednesday = mileage.Week.Wednesday ?? 0,
+                Thursday = mileage.Week.Thursday ?? 0,
+                Friday = mileage.Week.Friday ?? 0
+            },
+
+            TotalMiles = mileage.TotalMiles ?? 0,
+            RatePerMile = mileage.RatePerMile ?? 0,
+            TotalValue = mileage.TotalValue ?? 0
+        };
+    }
+    
+    private static FeTransferSnapshot CreateTransferSnapshot(FeTransfer transfer)
+    {
+        return new FeTransferSnapshot
+        {
+            WeekEndingDate = transfer.WeekEndingDate,
+
+            ShopIdFrom = transfer.ShopIdFrom,
+            ShopCodeFrom = transfer.ShopCodeFrom,
+            ShopNameFrom = transfer.ShopNameFrom,
+
+            ShopIdTo = transfer.ShopIdTo,
+            ShopCodeTo = transfer.ShopCodeTo,
+            ShopNameTo = transfer.ShopNameTo,
+
+            Week = new WeeklyQuantitiesSnapshot
+            {
+                Saturday = transfer.Week.Saturday ?? 0,
+                Sunday = transfer.Week.Sunday ?? 0,
+                Monday = transfer.Week.Monday ?? 0,
+                Tuesday = transfer.Week.Tuesday ?? 0,
+                Wednesday = transfer.Week.Wednesday ?? 0,
+                Thursday = transfer.Week.Thursday ?? 0,
+                Friday = transfer.Week.Friday ?? 0
+            },
+
+            TotalNumber = transfer.TotalNumber,
+            RatePerJob = transfer.RatePerJob ?? 0,
+            TotalValue = transfer.TotalValue ?? 0
+        };
+    }
+    
+    private static FeAdditionalCostSnapshot CreateAdditionalCostSnapshot(FeAdditionalCost cost)
+    {
+        return new FeAdditionalCostSnapshot
+        {
+            WeekEndingDate = cost.WeekEndingDate,
+            ReasonId = cost.ReasonId,
+            ReasonText = cost.ReasonText,
+            ChargingOption = cost.ChargingOption,
+            TotalNumber = cost.TotalNumber,
+            RatePerJob = cost.RatePerJob,
+            Miles = cost.Miles,
+            RatePerMile = cost.RatePerMile,
+            TotalValue = cost.TotalValue
         };
     }
 }

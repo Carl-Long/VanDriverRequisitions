@@ -13,6 +13,9 @@ type Props = {
 
     details: React.ReactNode;
     renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
+    mileage: React.ReactNode;
+    transfers: React.ReactNode;
+    additionalCosts: React.ReactNode;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
     getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
@@ -24,6 +27,9 @@ export function FeRequisitionTabs({
     onActiveKeyChange,
     details,
     renderTaskTypeTab,
+    mileage,
+    transfers,
+    additionalCosts,
     submissionHistory,
     submissionHistoryCount,
     getTaskTypeTabHasWarning,
@@ -64,6 +70,9 @@ export function FeRequisitionTabs({
             <div>
                 {activeTab?.type === "details" && details}
                 {activeTab?.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
+                {activeTab?.type === "mileage" && mileage}
+                {activeTab?.type === "transfers" && transfers}
+                {activeTab?.type === "additional-costs" && additionalCosts}
                 {activeTab?.type === "submission-history" && submissionHistory}
             </div>
         </div>
@@ -86,8 +95,8 @@ function TabButton({ active, onClick, children }: Readonly<TabButtonProps>) {
                 active
                     ? ["bg-accent", "text-accent-foreground", "shadow-sm"].join(" ")
                     : ["text-muted-foreground", "hover:text-foreground", "hover:bg-accent/20"].join(
-                          " ",
-                      ),
+                        " ",
+                    ),
             ].join(" ")}
         >
             {children}

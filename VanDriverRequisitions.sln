@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VanDriverRequisitions.Infra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VanDriverRequisitions.Api", "backend\src\VanDriverRequisitions.Api\VanDriverRequisitions.Api.csproj", "{657BBF2F-3E20-4EAC-B099-F0655E5619B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VanDriverRequisitions.Domain.UnitTests", "backend\tests\VanDriverRequisitions.Domain.UnitTests\VanDriverRequisitions.Domain.UnitTests.csproj", "{1B03C0CD-9159-4DAD-94C9-566132CD8CD3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{657BBF2F-3E20-4EAC-B099-F0655E5619B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{657BBF2F-3E20-4EAC-B099-F0655E5619B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{657BBF2F-3E20-4EAC-B099-F0655E5619B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B03C0CD-9159-4DAD-94C9-566132CD8CD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B03C0CD-9159-4DAD-94C9-566132CD8CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B03C0CD-9159-4DAD-94C9-566132CD8CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B03C0CD-9159-4DAD-94C9-566132CD8CD3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

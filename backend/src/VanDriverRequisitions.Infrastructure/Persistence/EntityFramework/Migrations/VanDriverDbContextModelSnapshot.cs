@@ -344,7 +344,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         {
                             t.HasCheckConstraint("CK_FeAdditionalCosts_Miles_NonNegative", "[Miles] IS NULL OR [Miles] >= 0");
 
-                            t.HasCheckConstraint("CK_FeAdditionalCosts_MutuallyExclusive", "([ChargingOption] = 0 AND [Miles] IS NOT NULL AND [TotalNumber] IS NULL) OR ([ChargingOption] = 1 AND [TotalNumber] IS NOT NULL AND [Miles] IS NULL)");
+                            t.HasCheckConstraint("CK_FeAdditionalCosts_MutuallyExclusive", "([ChargingOption] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [TotalNumber] IS NULL AND [RatePerJob] IS NULL) OR ([ChargingOption] = 1 AND [TotalNumber] IS NOT NULL AND [RatePerJob] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)");
 
                             t.HasCheckConstraint("CK_FeAdditionalCosts_RatePerJob_NonNegative", "[RatePerJob] IS NULL OR [RatePerJob] >= 0");
 
@@ -836,11 +836,31 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ShopCodeFrom")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ShopCodeTo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<Guid>("ShopIdFrom")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ShopIdTo")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ShopNameFrom")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ShopNameTo")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("TotalNumber")
                         .HasColumnType("int");

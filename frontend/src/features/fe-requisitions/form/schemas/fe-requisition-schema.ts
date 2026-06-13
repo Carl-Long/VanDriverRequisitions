@@ -19,16 +19,21 @@ export const feRequisitionSchema = z
             .refine((x) => x !== null, "Shop is required"),
 
         feGeneralTasks: z.array(z.any()),
+        feMileages: z.array(z.any()),
+        feTransfers: z.array(z.any()),
+        feAdditionalCosts: z.array(z.any()),
     })
     .superRefine((data, ctx) => {
-        const hasAnyRows = data.feGeneralTasks.length > 0;
+        const hasAnyRows =
+            data.feGeneralTasks.length > 0 ||
+            data.feMileages.length > 0 ||
+            data.feTransfers.length > 0 ||
+            data.feAdditionalCosts.length > 0;
 
         if (!hasAnyRows) {
             ctx.addIssue({
                 code: "custom",
-
                 path: ["form"],
-
                 message: "At least one requisition row is required",
             });
         }

@@ -27,6 +27,9 @@ import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-stat
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
+import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
+import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -65,6 +68,15 @@ export function FeRequisitionShell({
         addGeneralTask,
         updateGeneralTask,
         removeGeneralTask,
+        addMileage,
+        updateMileage,
+        removeMileage,
+        addTransfer,
+        updateTransfer,
+        removeTransfer,
+        addAdditionalCost,
+        updateAdditionalCost,
+        removeAdditionalCost,
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
@@ -379,6 +391,65 @@ export function FeRequisitionShell({
                         onShopChange={setShop}
                         errors={errors}
                         clearError={clearError}
+                    />
+                }
+                mileage={
+                    <FeMileageWorkspace
+                        limitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                        })}
+                        readonly={isReadonly}
+                        rows={draft.feMileages}
+                        onAdd={(form) => {
+                            addMileage(form);
+                            clearError("feMileages");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateMileage(clientId, form);
+                            clearError("feMileages");
+                            clearError("form");
+                        }}
+                        onDelete={removeMileage}
+                    />
+                }
+                transfers={
+                    <FeTransferWorkspace
+                        limitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.TRANSFER,
+                        })}
+                        readonly={isReadonly}
+                        transfers={draft.feTransfers}
+                        onAdd={(form) => {
+                            addTransfer(form);
+                            clearError("feTransfers");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateTransfer(clientId, form);
+                            clearError("feTransfers");
+                            clearError("form");
+                        }}
+                        onDelete={removeTransfer}
+                    />
+                }
+                additionalCosts={
+                    <FeAdditionalCostWorkspace
+                        readonly={isReadonly}
+                        rows={draft.feAdditionalCosts}
+                        additionalCostLimitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
+                        })}
+                        mileageLimitRule={resolveFeRequisitionLimitRule({
+                            rules: limitRules,
+                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                        })}
+                        onAdd={addAdditionalCost}
+                        onUpdate={updateAdditionalCost}
+                        onDelete={removeAdditionalCost}
                     />
                 }
                 submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
