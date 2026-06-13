@@ -32,7 +32,7 @@ public static class FeRequisitionMapper
             PoNumber = requisition.PoNumber,
             RejectionNotes = requisition.RejectionNotes,
             Subtotal = requisition.Subtotal,
-            IsEditable = requisition.Status is RequisitionStatus.Draft or RequisitionStatus.Rejected,
+            IsEditable = requisition.CanEdit,
             ApprovedAtUtc = requisition.ApprovedAtUtc,
             ApprovedByNameSnapshot = requisition.ApprovedByNameSnapshot,
             RejectedAtUtc = requisition.RejectedAtUtc,

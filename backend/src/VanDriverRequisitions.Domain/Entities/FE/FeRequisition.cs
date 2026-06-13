@@ -64,6 +64,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             : _submissions.Max(x => x.SubmissionNumber) + 1;
 
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
+    public bool CanEdit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
 
     public static FeRequisition Create(string requisitionNumber, FeRequisitionUpdateModel model)
     {
@@ -83,6 +84,11 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     public void Update(FeRequisitionUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
+        if (!CanEdit)
+        {
+            throw new InvalidOperationException("Only draft or rejected requisitions can be edited.");
+        }
 
         UpdateDetails(model.Details);
         SyncGeneralTasks(model.GeneralTasks);
@@ -164,20 +170,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         IsVatApplicable = details.Driver.HasVat;
     }
     
-        private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
+    private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
         ArgumentNullException.ThrowIfNull(incomingTasks);
 
         var incomingList = incomingTasks.ToList();
-        var existingTasks = _feGeneralTasks.ToDictionary(x => x.Id);
-
-        var incomingIds = incomingList
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
+        var existingTasks = GetPersistedChildrenById(_feGeneralTasks);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
 
         var tasksToRemove = _feGeneralTasks
-            .Where(x => !incomingIds.Contains(x.Id))
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
             .ToList();
 
         foreach (var task in tasksToRemove)
@@ -187,9 +189,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         foreach (var incoming in incomingList)
         {
-            if (incoming.Id.HasValue)
+            if (IsExistingChild(incoming.Id))
             {
-                if (!existingTasks.TryGetValue(incoming.Id.Value, out var existing))
+                if (!existingTasks.TryGetValue(incoming.Id!.Value, out var existing))
                 {
                     throw new InvalidOperationException($"Task '{incoming.Id}' not found.");
                 }
@@ -216,15 +218,11 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(incomingMileages);
 
         var incomingList = incomingMileages.ToList();
-        var existingMileages = _feMileages.ToDictionary(x => x.Id);
-
-        var incomingIds = incomingList
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
+        var existingMileages = GetPersistedChildrenById(_feMileages);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
 
         var mileagesToRemove = _feMileages
-            .Where(x => !incomingIds.Contains(x.Id))
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
             .ToList();
 
         foreach (var mileage in mileagesToRemove)
@@ -234,13 +232,13 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         foreach (var incoming in incomingList)
         {
-            if (incoming.Id.HasValue)
+            if (IsExistingChild(incoming.Id))
             {
-                if (!existingMileages.TryGetValue(incoming.Id.Value, out var existing))
+                if (!existingMileages.TryGetValue(incoming.Id!.Value, out var existing))
                 {
                     throw new InvalidOperationException($"Mileage '{incoming.Id}' not found.");
                 }
-                
+
                 existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
             }
             else
@@ -256,15 +254,11 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(incomingTransfers);
 
         var incomingList = incomingTransfers.ToList();
-        var existingTransfers = _feTransfers.ToDictionary(x => x.Id);
-
-        var incomingIds = incomingList
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
+        var existingTransfers = GetPersistedChildrenById(_feTransfers);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
 
         var transfersToRemove = _feTransfers
-            .Where(x => !incomingIds.Contains(x.Id))
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
             .ToList();
 
         foreach (var transfer in transfersToRemove)
@@ -274,9 +268,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         foreach (var incoming in incomingList)
         {
-            if (incoming.Id.HasValue)
+            if (IsExistingChild(incoming.Id))
             {
-                if (!existingTransfers.TryGetValue(incoming.Id.Value, out var existing))
+                if (!existingTransfers.TryGetValue(incoming.Id!.Value, out var existing))
                 {
                     throw new InvalidOperationException($"Transfer '{incoming.Id}' not found.");
                 }
@@ -307,15 +301,11 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(incomingAdditionalCosts);
 
         var incomingList = incomingAdditionalCosts.ToList();
-        var existingAdditionalCosts = _feAdditionalCosts.ToDictionary(x => x.Id);
-
-        var incomingIds = incomingList
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
+        var existingAdditionalCosts = GetPersistedChildrenById(_feAdditionalCosts);
+        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
 
         var additionalCostsToRemove = _feAdditionalCosts
-            .Where(x => !incomingIds.Contains(x.Id))
+            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
             .ToList();
 
         foreach (var additionalCost in additionalCostsToRemove)
@@ -325,9 +315,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         foreach (var incoming in incomingList)
         {
-            if (incoming.Id.HasValue)
+            if (IsExistingChild(incoming.Id))
             {
-                if (!existingAdditionalCosts.TryGetValue(incoming.Id.Value, out var existing))
+                if (!existingAdditionalCosts.TryGetValue(incoming.Id!.Value, out var existing))
                 {
                     throw new InvalidOperationException($"Additional cost '{incoming.Id}' not found.");
                 }
@@ -358,7 +348,26 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             }
         }
     }
+    
+    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
+    {
+        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
+    }
 
+    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
+    {
+        return incomingItems
+            .Select(getId)
+            .Where(IsExistingChild)
+            .Select(id => id!.Value)
+            .ToHashSet();
+    }
+
+    private static bool IsExistingChild(Guid? id)
+    {
+        return id.HasValue && id.Value != Guid.Empty;
+    }
+    
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)
@@ -391,8 +400,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ClearApproval();
     }
 
-    private void ClearApproval()
-    {
+    private void ClearApproval() {
         ApprovedById = null;
         ApprovedByNameSnapshot = null;
         ApprovedAtUtc = null;
