@@ -9,12 +9,9 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
-using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
-using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
-using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;

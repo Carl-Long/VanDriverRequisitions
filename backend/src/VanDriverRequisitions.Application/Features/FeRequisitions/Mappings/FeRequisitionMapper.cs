@@ -41,18 +41,33 @@ public static class FeRequisitionMapper
             SubmittedByNameSnapshot = requisition.SubmittedByNameSnapshot,
 
             FeGeneralTasks = requisition.FeGeneralTasks
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
                 .Select(FeGeneralTaskMapper.ToDetailDto)
                 .ToList(),
 
             FeMileages = requisition.FeMileages
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
                 .Select(FeMileageMapper.ToDetailDto)
                 .ToList(),
 
             FeTransfers = requisition.FeTransfers
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.ShopNameFrom)
+                .ThenBy(x => x.ShopNameTo)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
                 .Select(FeTransferMapper.ToDetailDto)
                 .ToList(),
 
             FeAdditionalCosts = requisition.FeAdditionalCosts
+                .OrderBy(x => x.WeekEndingDate)
+                .ThenBy(x => x.ReasonText)
+                .ThenBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
                 .Select(FeAdditionalCostMapper.ToDetailDto)
                 .ToList(),
 
