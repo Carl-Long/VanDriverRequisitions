@@ -78,8 +78,8 @@ export type FeTransferSnapshot = {
     shopCodeTo: string;
     shopNameTo: string;
     totalNumber: number;
-    ratePerJob: number | null;
-    totalValue: number | null;
+    ratePerJob: number;
+    totalValue: number;
     week: WeeklyQuantities;
 };
 
@@ -92,5 +92,5 @@ export type FeAdditionalCostSnapshot = {
     ratePerJob: number | null;
     miles: number | null;
     ratePerMile: number | null;
-    totalValue: number | null;
+    totalValue: number;
 };

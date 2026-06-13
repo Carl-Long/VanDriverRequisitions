@@ -9,6 +9,9 @@ import { FeSubmissionGeneralTasksTable } from "@/features/fe-requisitions/fe-sub
 import { FeSubmissionHeader } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-header";
 import { FeSubmissionPageSkeleton } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";
 import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-snapshot-summary";
+import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
+import { FeSubmissionTransfersTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-transfers-table";
+import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
 
 export default function SubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -52,6 +55,9 @@ export default function SubmissionPage() {
                     <FeSubmissionHeader submission={submission} />
                     <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
                     <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
+                    <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
+                    <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />
+                    <FeSubmissionAdditionalCostsTable rows={submission.snapshot.additionalCosts} />
                 </div>
             </div>
         </PageContainer>
