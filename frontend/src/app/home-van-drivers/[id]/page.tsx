@@ -123,6 +123,7 @@ export default function Page() {
         <PageContainer>
             <FeRequisitionShell
                 mode={requisition.isEditable ? "edit" : "readonly"}
+                initialActiveTabKey={initialTabKey}
                 backHref={backToListHref}
                 feRequisition={requisition}
                 limitRules={limitRules}

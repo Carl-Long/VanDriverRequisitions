@@ -60,9 +60,9 @@ export default function SubmissionPage() {
                         Back to requisition
                     </BackLink>
 
-                    <Button type="button" tone="accent" onClick={() => globalThis.print()}>
+                    <Button type="button" variant="outline" tone="accent" onClick={() => globalThis.print()}>
                         <Printer size={14} />
-                        Print
+                        Print / Save PDF
                     </Button>
                 </div>
 
