@@ -3,6 +3,7 @@ import { ChargingOption, WeeklyQuantities } from "./fe-requisition.types";
 
 export type FeRequisitionSubmissionDetail = {
     id: string;
+    requisitionId: string;
     submissionNumber: number;
     status: SubmissionStatus;
     submittedByName: string;

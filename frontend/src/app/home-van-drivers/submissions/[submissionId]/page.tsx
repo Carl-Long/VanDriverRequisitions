@@ -12,6 +12,10 @@ import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submi
 import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
 import { FeSubmissionTransfersTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-transfers-table";
 import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
+import { ArrowLeft, Printer } from "lucide-react";
+import Link from "next/link";
+import { BackLink } from "@/components/ui/navigation-back-link";
+import { Button } from "@/components/ui/button/button";
 
 export default function SubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -50,14 +54,27 @@ export default function SubmissionPage() {
 
     return (
         <PageContainer>
-            <div className="print-page">
-                <div className="space-y-6 submission-print">
-                    <FeSubmissionHeader submission={submission} />
-                    <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
-                    <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
-                    <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
-                    <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />
-                    <FeSubmissionAdditionalCostsTable rows={submission.snapshot.additionalCosts} />
+            <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3 print:hidden">
+                    <BackLink href={`/home-van-drivers/${submission.requisitionId}?tab=submission-history`}>
+                        Back to requisition
+                    </BackLink>
+
+                    <Button type="button" tone="accent" onClick={() => globalThis.print()}>
+                        <Printer size={14} />
+                        Print
+                    </Button>
+                </div>
+
+                <div className="print-page">
+                    <div className="space-y-6 submission-print">
+                        <FeSubmissionHeader submission={submission} />
+                        <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
+                        <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
+                        <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
+                        <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />
+                        <FeSubmissionAdditionalCostsTable rows={submission.snapshot.additionalCosts} />
+                    </div>
                 </div>
             </div>
         </PageContainer>

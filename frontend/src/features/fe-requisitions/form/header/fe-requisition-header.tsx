@@ -6,14 +6,17 @@ import { FeRequisitionSubmitStatus } from "./fe-requisition-submit-status";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { SaveAction } from "../components/fe-requisition-shell";
 import { formatDateTime } from "@/lib/format/date";
-import { User, Calendar } from "lucide-react";
+import { User, Calendar, ArrowLeft } from "lucide-react";
 import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { StatusPill } from "../../list/components/status-pill";
+import Link from "next/link";
+import { BackLink } from "@/components/ui/navigation-back-link";
 
 type Props = {
     mode: FeRequisitionPageMode;
+    backHref?: string;
     requisitionNumber?: string | null;
     status: RequisitionStatus | null;
     subtotal: number;
@@ -32,6 +35,7 @@ type Props = {
 
 export function FeRequisitionHeader({
     mode,
+    backHref,
     requisitionNumber,
     status,
     subtotal,
@@ -65,13 +69,25 @@ export function FeRequisitionHeader({
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0">
-                        <h1 className="flex flex-wrap items-center gap-3 font-semibold text-lg leading-none tracking-tight">
-                            <span>{title}</span>
-
-                            {mode !== "create" && requisitionNumber && (
-                                <span className="font-mono">{requisitionNumber}</span>
+                        <div className="flex flex-wrap items-center gap-3">
+                            {backHref && (
+                                <>
+                                    <BackLink href={backHref} compact>
+                                        Requisitions
+                                    </BackLink>
+                                    
+                                    <div className="hidden h-4 w-px bg-border sm:block" />
+                                </>
                             )}
-                        </h1>
+
+                            <h1 className="flex flex-wrap items-center gap-3 font-semibold text-lg leading-none tracking-tight">
+                                <span>{title}</span>
+
+                                {mode !== "create" && requisitionNumber && (
+                                    <span className="font-mono">{requisitionNumber}</span>
+                                )}
+                            </h1>
+                        </div>
                     </div>
                     {mode !== "readonly" && mode !== "approval" && (
                         <FeRequisitionSubmitStatus
