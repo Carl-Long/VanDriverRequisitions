@@ -452,7 +452,12 @@ export function FeRequisitionShell({
                         onDelete={removeAdditionalCost}
                     />
                 }
-                submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
+                submissionHistory={
+                    <FeSubmissionHistoryTab
+                        submissions={draft.submissionHistory}
+                        returnTo={backHref}
+                    />
+                } 
                 renderTaskTypeTab={(taskTypeId) => {
                     const taskType = taskTypes.find((x) => x.id === taskTypeId);
 

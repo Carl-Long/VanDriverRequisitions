@@ -7,9 +7,9 @@ import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 
-type Props = { submissions: FeRequisitionSubmissionHistory[] };
+type Props = { submissions: FeRequisitionSubmissionHistory[]; returnTo?: string; };
 
-export function FeSubmissionHistoryTab({ submissions }: Readonly<Props>) {
+export function FeSubmissionHistoryTab({ submissions, returnTo }: Readonly<Props>) {
     const orderedSubmissions = [...submissions].sort(
         (a, b) => b.submissionNumber - a.submissionNumber,
     );
@@ -21,18 +21,37 @@ export function FeSubmissionHistoryTab({ submissions }: Readonly<Props>) {
     return (
         <div className="space-y-4">
             {orderedSubmissions.map((submission) => (
-                <SubmissionCard key={submission.id} submission={submission} />
+                <SubmissionCard
+                    key={submission.id}
+                    submission={submission}
+                    returnTo={returnTo}
+                />
             ))}
         </div>
     );
 }
 
-type SubmissionCardProps = { submission: FeRequisitionSubmissionHistory };
+type SubmissionCardProps = {
+    submission: FeRequisitionSubmissionHistory;
+    returnTo?: string;
+};
 
-function SubmissionCard({ submission }: Readonly<SubmissionCardProps>) {
+function getSubmissionHref(submissionId: string, returnTo?: string) {
+    const params = new URLSearchParams();
+
+    if (returnTo) {
+        params.set("returnTo", returnTo);
+    }
+
+    const query = params.toString();
+
+    return `/home-van-drivers/submissions/${submissionId}${query ? `?${query}` : ""}`;
+}
+
+function SubmissionCard({ submission, returnTo }: Readonly<SubmissionCardProps>) {
     return (
         <Link
-            href={`/home-van-drivers/submissions/${submission.id}`}
+            href={getSubmissionHref(submission.id, returnTo)}
             className="
                 group
                 block
