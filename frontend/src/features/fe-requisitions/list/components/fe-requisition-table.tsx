@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Surface } from "@/components/ui/surface";
 import {
     TableHeader,
@@ -15,10 +16,11 @@ import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 
 type Props = {
     items: FeRequisitionSummary[];
+    getHref: (item: FeRequisitionSummary) => string;
     onRowClick: (item: FeRequisitionSummary) => void;
 };
 
-export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
+export function FeRequisitionTable({ items, getHref, onRowClick }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -44,26 +46,40 @@ export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
                                 key={req.id}
                                 onClick={() => onRowClick(req)}
                                 className="
-                        cursor-pointer
-                        hover:bg-surface-hover
-                        hover:shadow-sm
-                        transition-all
-                    "
+                                    cursor-pointer
+                                    transition-all
+                                    hover:bg-surface-hover
+                                    hover:shadow-sm
+                                "
                             >
-                                {/* Requisition */}
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="font-semibold text-foreground">
-                                            {req.requisitionNumber}
-                                        </span>
+                                    <Link
+                                        href={getHref(req)}
+                                        aria-label={`Open requisition ${req.requisitionNumber}`}
+                                        className="
+                                        inline-flex rounded-sm text-left
+                                        focus-visible:outline-none
+                                        focus-visible:ring-2
+                                        focus-visible:ring-ring
+                                        focus-visible:ring-offset-2
+                                        focus-visible:ring-offset-surface
+                                    "
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                        }}
+                                    >
+                                        <span className="flex flex-col leading-tight">
+                                            <span className="font-semibold text-foreground">
+                                                {req.requisitionNumber}
+                                            </span>
 
-                                        <span className="text-xs text-muted-foreground">
-                                            {formatDateGB(req.requisitionDate)}
+                                            <span className="text-xs text-muted-foreground">
+                                                {formatDateGB(req.requisitionDate)}
+                                            </span>
                                         </span>
-                                    </div>
+                                    </Link>
                                 </TableCell>
 
-                                {/* Company */}
                                 <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="font-medium text-foreground">
@@ -76,27 +92,20 @@ export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
                                     </div>
                                 </TableCell>
 
-                                {/* Status */}
                                 <TableCell align="center" nowrap>
                                     <div className="flex justify-center">
                                         <StatusPill status={req.status as RequisitionStatus} />
                                     </div>
                                 </TableCell>
 
-                                {/* Amount */}
                                 <TableCell
                                     align="right"
                                     nowrap
-                                    className="
-                            font-semibold
-                            tabular-nums
-                            text-foreground
-                        "
+                                    className="font-semibold tabular-nums text-foreground"
                                 >
                                     {formatCurrencyGB(req.subtotal)}
                                 </TableCell>
 
-                                {/* Shop */}
                                 <TableCell>
                                     <div className="flex flex-col leading-tight">
                                         <span className="font-medium text-foreground">
@@ -109,12 +118,12 @@ export function FeRequisitionTable({ items, onRowClick }: Readonly<Props>) {
                                     </div>
                                 </TableCell>
 
-                                {/* Last Modified */}
                                 <TableCell>
                                     <ActivityMetaCell
                                         date={req.updatedAtUtc ?? req.createdAtUtc}
                                         user={
-                                            req.updatedByNameSnapshot ?? req.createdByNameSnapshot
+                                            req.updatedByNameSnapshot ??
+                                            req.createdByNameSnapshot
                                         }
                                         userClassName="max-w-[160px] truncate"
                                     />

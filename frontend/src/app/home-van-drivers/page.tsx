@@ -104,10 +104,6 @@ export default function HomeVanDriversPage() {
         return <NotFound />;
     }
 
-    // =========================
-    // Render
-    // =========================
-
     return (
         <PageContainer>
             <PageHeader title="Home Van Drivers" description="View and manage FE requisitions.">
@@ -148,6 +144,7 @@ export default function HomeVanDriversPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
+                    getHref={(req) => `/home-van-drivers/${req.id}`}
                     onRowClick={(req) => router.push(`/home-van-drivers/${req.id}`)}
                 />
             )}
