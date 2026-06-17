@@ -23,16 +23,6 @@ export function FeSubmissionHeader({ submission }: Readonly<Props>) {
 
                 <div className="flex items-center gap-3">
                     <SubmissionStatusPill status={submission.status} />
-
-                    <Button
-                        type="button"
-                        tone="accent"
-                        className="no-print"
-                        onClick={() => globalThis.print()}
-                    >
-                        <Printer size={14} />
-                        Print
-                    </Button>
                 </div>
             </div>
 

@@ -3,6 +3,7 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 public sealed class FeRequisitionSubmissionDetailDto
 {
     public Guid Id { get; init; }
+    public Guid RequisitionId { get; init; }
     public int SubmissionNumber { get; init; }
     public string Status { get; init; } = string.Empty;
     public string SubmittedByName { get; init; } = string.Empty;

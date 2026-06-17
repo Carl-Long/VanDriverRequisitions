@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Info, Plus, X } from "lucide-react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from "react";
+import { Info, Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
+import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
@@ -30,6 +30,8 @@ type Props = {
     onClose: () => void;
     onSave: (form: FeAdditionalCostForm) => void;
 };
+
+type SubmitIntent = "close" | "add-another";
 
 export function FeAdditionalCostDrawer({
     open,
@@ -59,7 +61,7 @@ export function FeAdditionalCostDrawer({
 
     const totals = useMemo(() => calculateFeAdditionalCostFormTotals(form), [form]);
 
-    function handleSave() {
+    function saveForm(intent: SubmitIntent) {
         const result = schema.safeParse(form);
 
         if (!result.success) {
@@ -69,19 +71,11 @@ export function FeAdditionalCostDrawer({
 
         setErrors({});
         onSave(result.data);
-        onClose();
-    }
 
-    function handleSaveAndAddAnother() {
-        const result = schema.safeParse(form);
-
-        if (!result.success) {
-            setErrors(mapZodErrors(result.error));
+        if (intent === "close") {
+            onClose();
             return;
         }
-
-        setErrors({});
-        onSave(result.data);
 
         setForm(createEmptyFeAdditionalCostForm(result.data.weekEndingDate));
     }
@@ -114,126 +108,131 @@ export function FeAdditionalCostDrawer({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
-            <div className="flex h-full w-full max-w-2xl flex-col bg-surface shadow-2xl">
-                <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                    <h2 className="text-lg font-semibold">{title}</h2>
+        <AppDrawer
+            open={open}
+            title={title}
+            onClose={onClose}
+            footer={
+                <div className="flex items-center justify-between">
+                    <Button type="button" tone="accent" onClick={onClose}>
+                        Cancel
+                    </Button>
 
-                    <IconButton variant="ghost" tone="accent" size="sm" onClick={onClose}>
-                        <X size={18} />
-                    </IconButton>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    <LimitSummary
-                        chargingOption={form.chargingOption}
-                        additionalCostLimitRule={additionalCostLimitRule}
-                        mileageLimitRule={mileageLimitRule}
-                    />
-
-                    <Field label="Week Ending" required error={errors["weekEndingDate"]}>
-                        <DatePicker
-                            value={form.weekEndingDate ?? undefined}
-                            onChange={(date) => {
-                                setForm((prev) => ({
-                                    ...prev,
-                                    weekEndingDate: date ?? null,
-                                }));
-
-                                clearError("weekEndingDate");
-                            }}
-                        />
-                    </Field>
-
-                    <FeReasonField
-                        required
-                        value={form.reasonId}
-                        label={form.reasonText}
-                        error={errors["reasonId"]}
-                        onChange={(value, label) => {
-                            setForm((prev) => ({
-                                ...prev,
-                                reasonId: value,
-                                reasonText: label,
-                            }));
-
-                            clearError("reasonId");
-                            clearError("form");
-                        }}
-                    />
-
-                    <Field label="Charging Option" required error={errors["chargingOption"]}>
-                        <div className="grid grid-cols-2 gap-3">
-                            <Button
-                                type="button"
-                                variant={form.chargingOption === "Job" ? "solid" : "outline"}
-                                onClick={() => setChargingOption("Job")}
-                            >
-                                Job
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant={form.chargingOption === "Mileage" ? "solid" : "outline"}
-                                onClick={() => setChargingOption("Mileage")}
-                            >
-                                Mileage
-                            </Button>
-                        </div>
-                    </Field>
-
-                    {form.chargingOption === "Job" ? (
-                        <JobFields
-                            form={form}
-                            errors={errors}
-                            setForm={setForm}
-                            clearError={clearError}
-                        />
-                    ) : (
-                        <MileageFields
-                            form={form}
-                            errors={errors}
-                            setForm={setForm}
-                            clearError={clearError}
-                        />
-                    )}
-
-                    {errors.form && <Alert>{errors.form}</Alert>}
-
-                    <div className="rounded-2xl border border-border bg-surface-subtle p-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Total Value</span>
-                            <span className="font-medium">
-                                {formatCurrencyGB(totals.totalValue)}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2">
-                        <Button tone="accent" onClick={onClose}>
-                            Cancel
+                    <div className="flex items-center gap-4">
+                        <Button
+                            type="button"
+                            className="min-w-[160px]"
+                            variant="outline"
+                            onClick={() => saveForm("close")}
+                        >
+                            {isEditMode ? "Update & Close" : "Add & Close"}
                         </Button>
 
-                        <div className="flex items-center gap-4">
+                        {!isEditMode && (
                             <Button
+                                form="additional-cost-drawer-form"
+                                type="submit"
                                 className="min-w-[160px]"
-                                variant="outline"
-                                onClick={handleSave}
                             >
-                                {isEditMode ? "Update & Close" : "Add & Close"}
+                                <Plus className="h-4 w-4" />
+                                Add & Create Another
                             </Button>
-
-                            {!isEditMode && (
-                                <Button className="min-w-[160px]" onClick={handleSaveAndAddAnother}>
-                                    <Plus className="h-4 w-4" />
-                                    Add & Create Another
-                                </Button>
-                            )}
-                        </div>
+                        )}
                     </div>
                 </div>
-            </div>
-        </div>
+            }
+        >
+            <form
+                id="additional-cost-drawer-form"
+                className="space-y-6"
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    saveForm(isEditMode ? "close" : "add-another");
+                }}
+            >
+                <LimitSummary
+                    chargingOption={form.chargingOption}
+                    additionalCostLimitRule={additionalCostLimitRule}
+                    mileageLimitRule={mileageLimitRule}
+                />
+
+                <Field label="Week Ending" required error={errors["weekEndingDate"]}>
+                    <DatePicker
+                        value={form.weekEndingDate ?? undefined}
+                        onChange={(date) => {
+                            setForm((prev) => ({
+                                ...prev,
+                                weekEndingDate: date ?? null,
+                            }));
+
+                            clearError("weekEndingDate");
+                        }}
+                    />
+                </Field>
+
+                <FeReasonField
+                    required
+                    value={form.reasonId}
+                    label={form.reasonText}
+                    error={errors["reasonId"]}
+                    onChange={(value, label) => {
+                        setForm((prev) => ({
+                            ...prev,
+                            reasonId: value,
+                            reasonText: label,
+                        }));
+
+                        clearError("reasonId");
+                        clearError("form");
+                    }}
+                />
+
+                <Field label="Charging Option" required error={errors["chargingOption"]}>
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button
+                            type="button"
+                            variant={form.chargingOption === "Job" ? "solid" : "outline"}
+                            onClick={() => setChargingOption("Job")}
+                        >
+                            Job
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant={form.chargingOption === "Mileage" ? "solid" : "outline"}
+                            onClick={() => setChargingOption("Mileage")}
+                        >
+                            Mileage
+                        </Button>
+                    </div>
+                </Field>
+
+                {form.chargingOption === "Job" ? (
+                    <JobFields
+                        form={form}
+                        errors={errors}
+                        setForm={setForm}
+                        clearError={clearError}
+                    />
+                ) : (
+                    <MileageFields
+                        form={form}
+                        errors={errors}
+                        setForm={setForm}
+                        clearError={clearError}
+                    />
+                )}
+
+                {errors.form && <Alert>{errors.form}</Alert>}
+
+                <div className="rounded-2xl border border-border bg-surface-subtle p-4">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Total Value</span>
+                        <span className="font-medium">{formatCurrencyGB(totals.totalValue)}</span>
+                    </div>
+                </div>
+            </form>
+        </AppDrawer>
     );
 }
 
@@ -289,7 +288,7 @@ function LimitSummary({
 type ConditionalFieldsProps = {
     form: FeAdditionalCostForm;
     errors: Record<string, string>;
-    setForm: React.Dispatch<React.SetStateAction<FeAdditionalCostForm>>;
+    setForm: Dispatch<SetStateAction<FeAdditionalCostForm>>;
     clearError: (field: string) => void;
 };
 

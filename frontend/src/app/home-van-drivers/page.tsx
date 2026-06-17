@@ -21,11 +21,7 @@ import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/list/com
 import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
 import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
-import {
-    filtersFromSearchParams,
-    pageFromSearchParams,
-    buildSearchParams,
-} from "@/features/fe-requisitions/list/lib/url-state";
+import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams, } from "@/features/fe-requisitions/list/lib/url-state";
 import { getApiErrorMessage } from "@/lib/api/client";
 
 export default function HomeVanDriversPage() {
@@ -40,9 +36,11 @@ export default function HomeVanDriversPage() {
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const canCreate = canCreateRequisitions(user);
+    const currentUserId = user?.id;
 
     useEffect(() => {
-        if (!canCreateRequisitions(user)) return;
+        if (!canCreate || !currentUserId) return;
         let cancelled = false;
 
         async function run() {
@@ -81,6 +79,8 @@ export default function HomeVanDriversPage() {
             cancelled = true;
         };
     }, [
+        canCreate,
+        currentUserId,
         page,
         filters.status,
         filters.shopId,
@@ -96,6 +96,16 @@ export default function HomeVanDriversPage() {
         router.replace(`${pathname}?${params.toString()}`);
     }
 
+    const currentListUrl = `${pathname}${searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : ""}`;
+
+    function getRequisitionHref(req: FeRequisitionSummary) {
+        return `/home-van-drivers/${req.id}?returnTo=${encodeURIComponent(currentListUrl)}`;
+    }
+
+    const newRequisitionHref = `/home-van-drivers/new?returnTo=${encodeURIComponent(currentListUrl)}`;
+
     function resetFilters() {
         router.replace(pathname);
     }
@@ -104,14 +114,10 @@ export default function HomeVanDriversPage() {
         return <NotFound />;
     }
 
-    // =========================
-    // Render
-    // =========================
-
     return (
         <PageContainer>
             <PageHeader title="Home Van Drivers" description="View and manage FE requisitions.">
-                <Button onClick={() => router.push("/home-van-drivers/new")}>
+                <Button onClick={() => router.push(newRequisitionHref)}>
                     <Plus size={16} />
                     <span>New Requisition</span>
                 </Button>
@@ -148,7 +154,8 @@ export default function HomeVanDriversPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
-                    onRowClick={(req) => router.push(`/home-van-drivers/${req.id}`)}
+                    getHref={getRequisitionHref}
+                    onRowClick={(req) => router.push(getRequisitionHref(req))}
                 />
             )}
 

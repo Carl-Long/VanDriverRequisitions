@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
-
+import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import {
     TableHeader,
     TableHeaderCell,
@@ -24,6 +22,9 @@ import { calculateFeMileageTotals } from "../lib/calculate-fe-mileage-totals";
 import { mapFeMileageDraftToForm } from "../lib/map-fe-mileage-draft-to-form";
 import { FeMileageDrawer } from "./fe-mileage-drawer";
 import { getMileageLimitStatus } from "../lib/get-fe-mileage-limit-status";
+import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../components/editable-cell-button";
+import { DeleteRowButton } from "../components/delete-row-button";
 
 type Props = {
     readonly: boolean;
@@ -187,7 +188,7 @@ function MileageTable({
                                     align="right"
                                     nowrap
                                 >
-                                    Actions
+                                    Delete
                                 </TableHeaderCell>
                             )}
                         </TableHeaderRow>
@@ -201,15 +202,21 @@ function MileageTable({
                             return (
                                 <TableRow
                                     key={row.clientId}
-                                    className={hasLimitIssue ? "bg-warning/10" : undefined}
+                                    onClick={readonly ? undefined : () => onEdit(row)}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue: hasLimitIssue,
+                                    })}
                                 >
                                     <TableCell>
                                         <div>
-                                            <div>
-                                                {row.weekEndingDate
-                                                    ? row.weekEndingDate.toLocaleDateString()
-                                                    : "-"}
-                                            </div>
+                                            <EditableCellButton
+                                                readonly={readonly}
+                                                ariaLabel="Edit mileage row"
+                                                onEdit={() => onEdit(row)}
+                                            >
+                                                {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
+                                            </EditableCellButton>
 
                                             {hasLimitIssue && (
                                                 <div className="mt-1 space-y-1">
@@ -250,21 +257,10 @@ function MileageTable({
                                     {!readonly && (
                                         <TableCell align="right" nowrap>
                                             <div className="flex justify-end gap-2">
-                                                <IconButton
-                                                    variant="ghost"
-                                                    tone="accent"
-                                                    onClick={() => onEdit(row)}
-                                                >
-                                                    <Pencil size={14} />
-                                                </IconButton>
-
-                                                <IconButton
-                                                    tone="danger"
-                                                    variant="ghost"
-                                                    onClick={() => onDelete(row.clientId)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </IconButton>
+                                                <DeleteRowButton
+                                                    ariaLabel="Delete mileage row"
+                                                    onDelete={() => onDelete(row.clientId)}
+                                                />
                                             </div>
                                         </TableCell>
                                     )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import NotFound from "@/app/not-found";
@@ -12,6 +12,9 @@ import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submi
 import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
 import { FeSubmissionTransfersTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-transfers-table";
 import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
+import { Printer } from "lucide-react";
+import { BackLink } from "@/components/ui/navigation-back-link";
+import { Button } from "@/components/ui/button/button";
 
 export default function SubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -19,6 +22,25 @@ export default function SubmissionPage() {
     const { data: submission, loading, error, notFound } = useSubmission(params.submissionId);
 
     const errors = [error].filter((e): e is string => Boolean(e));
+
+    const searchParams = useSearchParams();
+
+    const returnTo = searchParams.get("returnTo");
+
+    const safeReturnTo =
+        returnTo && returnTo.startsWith("/home-van-drivers") && !returnTo.startsWith("//")
+            ? returnTo
+            : null;
+
+    const backToRequisitionParams = new URLSearchParams();
+
+    backToRequisitionParams.set("tab", "submission-history");
+
+    if (safeReturnTo) {
+        backToRequisitionParams.set("returnTo", safeReturnTo);
+    }
+
+    const backToRequisitionHref = `/home-van-drivers/${submission?.requisitionId}?${backToRequisitionParams.toString()}`;
 
     if (loading) {
         return (
@@ -50,14 +72,27 @@ export default function SubmissionPage() {
 
     return (
         <PageContainer>
-            <div className="print-page">
-                <div className="space-y-6 submission-print">
-                    <FeSubmissionHeader submission={submission} />
-                    <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
-                    <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
-                    <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
-                    <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />
-                    <FeSubmissionAdditionalCostsTable rows={submission.snapshot.additionalCosts} />
+            <div className="space-y-4">
+                <div className="flex items-center justify-between gap-3 print:hidden">
+                    <BackLink href={backToRequisitionHref}>
+                        Back to requisition
+                    </BackLink>
+
+                    <Button type="button" variant="outline" tone="accent" onClick={() => globalThis.print()}>
+                        <Printer size={14} />
+                        Print / Save PDF
+                    </Button>
+                </div>
+
+                <div className="print-page">
+                    <div className="space-y-6 submission-print">
+                        <FeSubmissionHeader submission={submission} />
+                        <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
+                        <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
+                        <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
+                        <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />
+                        <FeSubmissionAdditionalCostsTable rows={submission.snapshot.additionalCosts} />
+                    </div>
                 </div>
             </div>
         </PageContainer>

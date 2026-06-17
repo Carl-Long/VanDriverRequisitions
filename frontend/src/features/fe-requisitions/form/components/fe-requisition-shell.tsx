@@ -38,6 +38,8 @@ type Props = {
     submitWindowStatus: SubmitWindowStatus | null;
     submitWindowStatusLoading: boolean;
     feRequisition?: FeRequisitionDetail;
+    initialActiveTabKey?: string;
+    backHref?: string;
 };
 
 export type SaveAction =
@@ -55,6 +57,8 @@ export function FeRequisitionShell({
     feRequisition,
     submitWindowStatus,
     submitWindowStatusLoading,
+    initialActiveTabKey,
+    backHref,
 }: Readonly<Props>) {
     const initialDraft = feRequisition ? mapFeRequisitionDetailToDraft(feRequisition) : undefined;
 
@@ -90,14 +94,12 @@ export function FeRequisitionShell({
             }
 
             const next = { ...prev };
-
             delete next[field];
-
             return next;
         });
     }
 
-    const [activeTab, setActiveTab] = useState("details");
+    const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
@@ -120,9 +122,7 @@ export function FeRequisitionShell({
 
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
-
-            setActiveTab("details");
-
+            setActiveKey("details");
             return;
         }
 
@@ -171,7 +171,7 @@ export function FeRequisitionShell({
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
 
-            setActiveTab("details");
+            setActiveKey("details");
             return;
         }
 
@@ -348,6 +348,7 @@ export function FeRequisitionShell({
         <div className="space-y-4">
             <FeRequisitionHeader
                 mode={mode}
+                backHref={backHref}
                 requisitionNumber={draft.requisitionNumber}
                 status={draft.status}
                 subtotal={subtotal}
@@ -375,9 +376,8 @@ export function FeRequisitionShell({
             )}
 
             <FeRequisitionTabs
-                mode={mode}
-                activeKey={activeTab}
-                onActiveKeyChange={setActiveTab}
+                activeKey={activeKey}
+                onActiveKeyChange={setActiveKey}
                 taskTypes={taskTypes}
                 submissionHistoryCount={draft.submissionHistory.length}
                 getTaskTypeTabHasWarning={getTaskTypeTabHasWarning}
@@ -452,7 +452,12 @@ export function FeRequisitionShell({
                         onDelete={removeAdditionalCost}
                     />
                 }
-                submissionHistory={<FeSubmissionHistoryTab submissions={draft.submissionHistory} />}
+                submissionHistory={
+                    <FeSubmissionHistoryTab
+                        submissions={draft.submissionHistory}
+                        returnTo={backHref}
+                    />
+                } 
                 renderTaskTypeTab={(taskTypeId) => {
                     const taskType = taskTypes.find((x) => x.id === taskTypeId);
 

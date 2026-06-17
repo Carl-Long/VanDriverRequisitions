@@ -10,6 +10,7 @@ public static class FeRequisitionSubmissionMapper
         return new FeRequisitionSubmissionDetailDto
         {
             Id = submission.Id,
+            RequisitionId = submission.FeRequisitionId,
             SubmissionNumber = submission.SubmissionNumber,
             Status = submission.Status.ToString(),
             SubmittedByName = submission.SubmittedByNameSnapshot,

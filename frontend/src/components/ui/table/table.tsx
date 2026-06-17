@@ -13,24 +13,24 @@ function getAlignClass(align: Align) {
     }
 }
 
-export function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
+export function Table({ className, ...props }: Readonly<React.HTMLAttributes<HTMLTableElement>>) {
     return <table className={cn("w-full text-sm", className)} {...props} />;
 }
 
 export function TableHeader({
     className,
     ...props
-}: React.HTMLAttributes<HTMLTableSectionElement>) {
+}: Readonly<React.HTMLAttributes<HTMLTableSectionElement>>) {
     return (
         <thead className={cn("border-b border-border bg-surface-elevated", className)} {...props} />
     );
 }
 
-export function TableBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
+export function TableBody({ className, ...props }: Readonly<React.HTMLAttributes<HTMLTableSectionElement>>) {
     return <tbody className={cn("divide-y divide-border-subtle", className)} {...props} />;
 }
 
-export function TableHeaderRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
+export function TableHeaderRow({ className, ...props }: Readonly<React.HTMLAttributes<HTMLTableRowElement>>) {
     return (
         <tr
             className={cn(
@@ -42,7 +42,7 @@ export function TableHeaderRow({ className, ...props }: React.HTMLAttributes<HTM
     );
 }
 
-export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) {
+export function TableRow({ className, ...props }: Readonly<React.HTMLAttributes<HTMLTableRowElement>>) {
     return (
         <tr
             className={cn("group transition-colors duration-150 hover:bg-surface-hover", className)}
@@ -92,7 +92,7 @@ export function TableCell({ align = "left", nowrap = false, className, ...props 
 export function TableFooter({
     className,
     ...props
-}: React.HTMLAttributes<HTMLTableSectionElement>) {
+}: Readonly<React.HTMLAttributes<HTMLTableSectionElement>>) {
     return (
         <tfoot
             className={cn("border-t border-border bg-surface-elevated font-semibold", className)}

@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
-
+import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import { IconButton } from "@/components/ui/button/icon-button";
 import {
     TableHeader,
     TableHeaderCell,
@@ -16,13 +14,15 @@ import {
     TableHeaderRow,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
-
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { FeTransferDraft } from "../types/fe-transfer-draft";
 import { FeTransferForm } from "../types/fe-transfer-form";
 import { calculateFeTransferTotals } from "../lib/calculate-fe-transfer-totals";
 import { mapFeTransferDraftToForm } from "../lib/map-fe-transfer-draft-to-form";
 import { FeTransferDrawer } from "./fe-transfer-drawer";
+import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../components/editable-cell-button";
+import { DeleteRowButton } from "../components/delete-row-button";
 
 type Props = {
     readonly: boolean;
@@ -193,7 +193,7 @@ function TransfersTable({
                                     align="right"
                                     nowrap
                                 >
-                                    Actions
+                                    Delete
                                 </TableHeaderCell>
                             )}
                         </TableHeaderRow>
@@ -207,37 +207,39 @@ function TransfersTable({
                             return (
                                 <TableRow
                                     key={transfer.clientId}
-                                    className={hasLimitIssue ? "bg-warning/10" : undefined}
+                                    onClick={readonly ? undefined : () => onEdit(transfer)}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue: hasLimitIssue,
+                                    })}
                                 >
-                                    
                                     <TableCell>
-                                        {transfer.weekEndingDate
-                                            ? transfer.weekEndingDate.toLocaleDateString()
-                                            : "-"}
+                                        {transfer.weekEndingDate ? transfer.weekEndingDate.toLocaleDateString() : "-"}
                                     </TableCell>
 
                                     <TableCell>
                                         <div className="space-y-1">
-                                            <div className="text-sm">
-                                                <span className="text-muted-foreground">From: </span>
-                                                <span className="font-medium">
-                                                    {transfer.shopLabelFrom ?? "-"}
+                                            <EditableCellButton
+                                                readonly={readonly}
+                                                ariaLabel="Edit transfer row"
+                                                onEdit={() => onEdit(transfer)}
+                                                className="block w-full"
+                                            >
+                                                <span className="block text-sm">
+                                                    <span className="text-muted-foreground">From: </span>
+                                                    <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
                                                 </span>
-                                            </div>
 
-                                            <div className="text-sm">
-                                                <span className="text-muted-foreground">To: </span>
-                                                <span className="font-medium">
-                                                    {transfer.shopLabelTo ?? "-"}
+                                                <span className="block text-sm">
+                                                    <span className="text-muted-foreground">To: </span>
+                                                    <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
                                                 </span>
-                                            </div>
+                                            </EditableCellButton>
 
                                             {hasLimitIssue && (
                                                 <div className="mt-2 space-y-1">
                                                     <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
+                                                        {limitStatus.state === "missing-limit" ? "Missing limit" : "Exceeds limit"}
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
@@ -250,33 +252,13 @@ function TransfersTable({
                                         </div>
                                     </TableCell>
 
-                                    <TableCell align="center">
-                                        {transfer.quantities.sunday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.monday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.tuesday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.wednesday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.thursday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.friday ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell align="center">
-                                        {transfer.quantities.saturday ?? "-"}
-                                    </TableCell>
+                                    <TableCell align="center">{transfer.quantities.sunday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.monday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.tuesday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.wednesday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.thursday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.friday ?? "-"}</TableCell>
+                                    <TableCell align="center">{transfer.quantities.saturday ?? "-"}</TableCell>
 
                                     <TableCell align="right">{transfer.totalNumber}</TableCell>
 
@@ -291,21 +273,10 @@ function TransfersTable({
                                     {!readonly && (
                                         <TableCell align="right" nowrap>
                                             <div className="flex justify-end gap-2">
-                                                <IconButton
-                                                    variant="ghost"
-                                                    tone="accent"
-                                                    onClick={() => onEdit(transfer)}
-                                                >
-                                                    <Pencil size={14} />
-                                                </IconButton>
-
-                                                <IconButton
-                                                    tone="danger"
-                                                    variant="ghost"
-                                                    onClick={() => onDelete(transfer.clientId)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </IconButton>
+                                                <DeleteRowButton
+                                                    ariaLabel="Delete transfer row"
+                                                    onDelete={() => onDelete(transfer.clientId)}
+                                                />
                                             </div>
                                         </TableCell>
                                     )}

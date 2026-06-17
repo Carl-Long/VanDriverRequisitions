@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import { getApiErrorMessage, ApiError } from "@/lib/api/client";
@@ -19,6 +19,14 @@ import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/
 export default function Page() {
     const params = useParams<{ id: string }>();
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const returnTo = searchParams.get("returnTo");
+    const backToListHref =
+        returnTo && returnTo.startsWith("/home-van-drivers") && !returnTo.startsWith("//")
+            ? returnTo
+            : "/home-van-drivers";
+
+    const initialTabKey = searchParams.get("tab") ?? undefined;
 
     const {
         limitRules,
@@ -115,12 +123,14 @@ export default function Page() {
         <PageContainer>
             <FeRequisitionShell
                 mode={requisition.isEditable ? "edit" : "readonly"}
+                initialActiveTabKey={initialTabKey}
+                backHref={backToListHref}
                 feRequisition={requisition}
                 limitRules={limitRules}
                 taskTypes={taskTypes}
                 submitWindowStatus={submitWindowStatus}
                 submitWindowStatusLoading={submitWindowStatusLoading}
-            />
+            ></FeRequisitionShell>
         </PageContainer>
     );
 }

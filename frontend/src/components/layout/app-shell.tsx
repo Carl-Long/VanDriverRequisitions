@@ -14,7 +14,7 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
                     <Sidebar />
                 </div>
 
-                <main className="min-h-0 min-w-0 flex-1 overflow-y-auto py-6 lg:py-8 xl:py-10 print:block print:h-auto print:min-h-0 print:overflow-visible print:py-0">
+                <main className="min-h-0 min-w-0 flex-1 overflow-y-auto py-4 xl:py-6 print:block print:h-auto print:min-h-0 print:overflow-visible print:py-0">
                     {children}
                 </main>
             </div>

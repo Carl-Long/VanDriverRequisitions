@@ -1,16 +1,15 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
+import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
-import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
-import { useMemo } from "react";
 
 type Props = {
-    mode: FeRequisitionPageMode;
     taskTypes: FeTaskType[];
     activeKey: string;
     onActiveKeyChange: (key: string) => void;
-
     details: React.ReactNode;
     renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
     mileage: React.ReactNode;
@@ -39,35 +38,34 @@ export function FeRequisitionTabs({
         [taskTypes, submissionHistoryCount],
     );
 
-    const activeTab = tabs.find((x) => x.key === activeKey);
+    const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
+
+    function tabHasWarning(tab: (typeof tabs)[number]) {
+        return tab.type === "general-task" && getTaskTypeTabHasWarning?.(tab.taskTypeId);
+    }
 
     return (
         <div className="space-y-6">
-            <div className="overflow-x-auto">
-                <div className="inline-flex min-w-max gap-1 rounded-2xl bg-surface-elevated p-1">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface-elevated/70 p-1 shadow-sm">
+                <div
+                    role="tablist"
+                    aria-label="Requisition sections"
+                    className="flex min-w-max gap-1"
+                >
                     {tabs.map((tab) => (
                         <TabButton
                             key={tab.key}
-                            active={tab.key === activeKey}
+                            active={tab.key === activeTab?.key}
+                            hasWarning={tabHasWarning(tab)}
                             onClick={() => onActiveKeyChange(tab.key)}
                         >
-                            <span className="inline-flex items-center gap-2">
-                                {tab.label}
-
-                                {tab.type === "general-task" &&
-                                    getTaskTypeTabHasWarning?.(tab.taskTypeId) && (
-                                        <span
-                                            className="h-2 w-2 rounded-full bg-warning"
-                                            title="This tab has limit warnings"
-                                        />
-                                    )}
-                            </span>
+                            {tab.label}
                         </TabButton>
                     ))}
                 </div>
             </div>
 
-            <div>
+            <div role="tabpanel">
                 {activeTab?.type === "details" && details}
                 {activeTab?.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
                 {activeTab?.type === "mileage" && mileage}
@@ -81,25 +79,40 @@ export function FeRequisitionTabs({
 
 type TabButtonProps = {
     active: boolean;
+    hasWarning?: boolean;
     onClick: () => void;
     children: React.ReactNode;
 };
 
-function TabButton({ active, onClick, children }: Readonly<TabButtonProps>) {
+function TabButton({ active, hasWarning, onClick, children }: Readonly<TabButtonProps>) {
     return (
         <button
             type="button"
+            role="tab"
+            aria-selected={active}
             onClick={onClick}
-            className={[
-                "cursor-pointer whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200",
+            className={cn(
+                "inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200",
+                "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 cursor-pointer",
                 active
-                    ? ["bg-accent", "text-accent-foreground", "shadow-sm"].join(" ")
-                    : ["text-muted-foreground", "hover:text-foreground", "hover:bg-accent/20"].join(
-                        " ",
-                    ),
-            ].join(" ")}
+                    ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                    : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+            )}
         >
-            {children}
+            <span>{children}</span>
+
+            {hasWarning && (
+                <span
+                    title="This tab has limit warnings"
+                    className={cn(
+                        "inline-flex h-5 w-5 items-center justify-center rounded-full",
+                        active ? "bg-warning/15 text-warning" : "bg-warning/10 text-warning",
+                    )}
+                >
+                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="sr-only">This tab has limit warnings</span>
+                </span>
+            )}
         </button>
     );
 }
