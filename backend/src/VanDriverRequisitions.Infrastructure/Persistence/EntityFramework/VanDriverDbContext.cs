@@ -63,12 +63,11 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
     public async Task<string> NextPoNumberAsync(CancellationToken cancellationToken)
     {
         var result = await Database
-            .SqlQueryRaw<long>(
-                $"SELECT NEXT VALUE FOR {DbSequences.PoNumber} AS Value")
+            .SqlQueryRaw<long>($"SELECT NEXT VALUE FOR {DbSequences.PoNumber} AS Value")
             .ToListAsync(cancellationToken);
 
         var year = DateTime.UtcNow.ToString("yy");
-
+        
         return $"PO{year}-{result[0]:D6}";
     }
 }

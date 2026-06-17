@@ -22,6 +22,7 @@ public class FeRequisitionService(
     IValidatorService validator,
     IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator,
+    IRequisitionNumberGenerator feRequisitionNumberGenerator,
     IFeRequisitionSaveDataBuilder saveDataBuilder) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -81,7 +82,7 @@ public class FeRequisitionService(
     {
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
-        var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
+        var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
         
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
 
