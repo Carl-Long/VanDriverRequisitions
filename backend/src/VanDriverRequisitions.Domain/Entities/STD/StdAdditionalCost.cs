@@ -50,9 +50,9 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
 
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonName);
 
-        if (model.NumberOfBags < 0)
+        if (model.NumberOfBags < 1)
         {
-            throw new InvalidOperationException("Number of bags cannot be negative.");
+            throw new InvalidOperationException("Number of bags must be at least 1.");
         }
 
         Date = model.Date;

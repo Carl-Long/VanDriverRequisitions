@@ -45,14 +45,14 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
 
         ArgumentException.ThrowIfNullOrWhiteSpace(model.PostCodeZone);
 
-        if (model.VanPacksOut < 0)
+        if (model.VanPacksOut < 1)
         {
-            throw new InvalidOperationException("Van packs out cannot be negative.");
+            throw new InvalidOperationException("Van packs out must be at least 1.");
         }
 
-        if (model.FilledBags < 0)
+        if (model.FilledBags < 1)
         {
-            throw new InvalidOperationException("Filled bags cannot be negative.");
+            throw new InvalidOperationException("Filled bags must be at least 1.");
         }
 
         if (model.FilledBags > model.VanPacksOut)

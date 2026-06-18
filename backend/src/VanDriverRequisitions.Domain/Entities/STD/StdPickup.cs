@@ -41,14 +41,14 @@ public sealed class StdPickup : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Date is required.");
         }
 
-        if (model.NumberOfBags < 0)
+        if (model.NumberOfBags < 1)
         {
-            throw new InvalidOperationException("Number of bags cannot be negative.");
+            throw new InvalidOperationException("Number of bags must be at least 1.");
         }
 
-        if (model.NumberOfHouseholds < 0)
+        if (model.NumberOfHouseholds <= 1)
         {
-            throw new InvalidOperationException("Number of households cannot be negative.");
+            throw new InvalidOperationException("Number of households must be at least 1.");
         }
 
         var charge = StdChargeCalculator.Calculate(model.ChargeType, model.Miles, model.RatePerMile, model.FlatCharge);
