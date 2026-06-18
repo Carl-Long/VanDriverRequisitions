@@ -1,0 +1,73 @@
+using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Entities.STD.Models;
+using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.Helpers;
+using VanDriverRequisitions.Domain.Interfaces;
+
+namespace VanDriverRequisitions.Domain.Entities.STD;
+
+public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
+{
+    private StdAdditionalCost() { } // EF Core
+
+    public Guid StdRequisitionId { get; private set; }
+
+    public DateOnly Date { get; private set; }
+
+    public Guid ReasonId { get; private set; }
+    public string ReasonNameSnapshot { get; private set; } = string.Empty;
+
+    public int NumberOfBags { get; private set; }
+
+    public StdChargeType ChargeType { get; private set; }
+
+    public int? Miles { get; private set; }
+    public decimal? RatePerMile { get; private set; }
+    public decimal? FlatCharge { get; private set; }
+
+    public decimal? TotalValue { get; private set; }
+
+    public static StdAdditionalCost Create(StdAdditionalCostUpdateModel model)
+    {
+        var additionalCost = new StdAdditionalCost();
+        additionalCost.Update(model);
+        return additionalCost;
+    }
+
+    public void Update(StdAdditionalCostUpdateModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        if (model.Date == default)
+        {
+            throw new InvalidOperationException("Date is required.");
+        }
+
+        if (model.ReasonId == Guid.Empty)
+        {
+            throw new InvalidOperationException("Reason is required.");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonName);
+
+        if (model.NumberOfBags < 0)
+        {
+            throw new InvalidOperationException("Number of bags cannot be negative.");
+        }
+
+        Date = model.Date;
+        ReasonId = model.ReasonId;
+        ReasonNameSnapshot = model.ReasonName.Trim();
+        NumberOfBags = model.NumberOfBags;
+
+        ChargeType = model.ChargeType;
+
+        var charge = StdChargeCalculator.Calculate(model.ChargeType, model.Miles, model.RatePerMile, model.FlatCharge);
+
+        ChargeType = model.ChargeType;
+        Miles = charge.Miles;
+        RatePerMile = charge.RatePerMile;
+        FlatCharge = charge.FlatCharge;
+        TotalValue = charge.TotalValue;
+    }
+}
