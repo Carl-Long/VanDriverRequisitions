@@ -12,6 +12,7 @@ using VanDriverRequisitions.Application.Features.StdCollectionTypes.Services;
 using VanDriverRequisitions.Application.Features.StdLocations.Services;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Services;
+using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.Users.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Services;
@@ -35,6 +36,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IStdRequisitionSaveDataBuilder, StdRequisitionSaveDataBuilder>();
         services.AddScoped<IStdCollectionTypeService, StdCollectionTypeService>();
         services.AddScoped<IStdLocationService, StdLocationService>();
+        services.AddScoped<IStdRequisitionLimitValidator, StdRequisitionLimitValidator>();
         
         services.AddScoped<ISubmitWindowService, SubmitWindowService>();
         services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();

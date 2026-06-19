@@ -8,6 +8,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
+using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.STD;
@@ -22,6 +23,7 @@ public sealed class StdRequisitionService(
     IPoNumberGenerator poNumberGenerator,
     IStdRequisitionNumberGenerator stdRequisitionNumberGenerator,
     IStdRequisitionSaveDataBuilder saveDataBuilder,
+    IStdRequisitionLimitValidator limitValidator,
     TimeProvider timeProvider) : IStdRequisitionService
 {
     public async Task<PagedResult<StdRequisitionSummaryDto>> GetAllAsync(StdRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -59,7 +61,7 @@ public sealed class StdRequisitionService(
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
-    
+
     public async Task<StdRequisitionSubmissionDetailDto> GetSubmissionAsync(Guid submissionId, CancellationToken cancellationToken = default)
     {
         var submission = await context.StdRequisitionSubmissions
@@ -88,6 +90,8 @@ public sealed class StdRequisitionService(
 
         var requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
+        await limitValidator.ValidateAsync(requisition, cancellationToken);
+
         context.StdRequisitions.Add(requisition);
 
         await context.SaveChangesAsync(cancellationToken);
@@ -108,11 +112,13 @@ public sealed class StdRequisitionService(
 
         requisition.Update(saveData.UpdateModel);
 
+        await limitValidator.ValidateAsync(requisition, cancellationToken);
+
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
-    
+
     public async Task<StdRequisitionDetailDto> SubmitAsync(Guid? id, SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
         var auditUser = GetAuditUser("Submission");
@@ -139,6 +145,9 @@ public sealed class StdRequisitionService(
         }
 
         var now = GetUtcNow();
+
+        await limitValidator.ValidateAsync(requisition, cancellationToken);
+
         var snapshotJson = StdRequisitionSnapshotFactory.CreateJson(requisition);
 
         requisition.Submit(auditUser, now, snapshotJson);
@@ -147,7 +156,7 @@ public sealed class StdRequisitionService(
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
-    
+
     public async Task<StdRequisitionDetailDto> ApproveAsync(Guid id, ApproveStdRequisitionDto approveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
         var auditUser = GetAuditUser("Approval");
@@ -169,7 +178,7 @@ public sealed class StdRequisitionService(
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
-    
+
     public async Task<StdRequisitionDetailDto> RejectAsync(Guid id, RejectStdRequisitionDto rejectStdRequisitionDto, CancellationToken cancellationToken = default)
     {
         var auditUser = GetAuditUser("Rejection");
@@ -242,7 +251,7 @@ public sealed class StdRequisitionService(
             .Property(nameof(StdRequisition.RowVersion))
             .OriginalValue = rowVersion;
     }
-    
+
     private AuditUser GetAuditUser(string actionName)
     {
         return currentUser.User is not null
