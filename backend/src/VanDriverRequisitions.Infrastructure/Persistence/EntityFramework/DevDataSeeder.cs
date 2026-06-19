@@ -7,6 +7,7 @@ using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
+using VanDriverRequisitions.Domain.Entities.STD;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
@@ -18,7 +19,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 public static class DevDataSeeder
 {
     // ─────────────────────────────────────────────
-    // Task Types / Reasons (lookup only)
+    // FE Task Types / Reasons (lookup only)
     // ─────────────────────────────────────────────
 
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
@@ -30,6 +31,15 @@ public static class DevDataSeeder
     private static readonly Guid TollReasonId = new("f0000001-0001-0001-0001-000000000002");
     private static readonly Guid WaitingTimeReasonId = new("f0000001-0001-0001-0001-000000000003");
     private static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
+    
+    // ─────────────────────────────────────────────
+    // STD Collection Types
+    // ─────────────────────────────────────────────
+
+    private static readonly Guid StdBookBanksCollectionTypeId = new("c1000001-0001-0001-0001-000000000001");
+    private static readonly Guid StdClothingBanksCollectionTypeId = new("c1000001-0001-0001-0001-000000000002");
+    private static readonly Guid StdDonationBinsCollectionTypeId = new("c1000001-0001-0001-0001-000000000003");
+    
 
     // ─────────────────────────────────────────────
     // System user (audit fallback)
@@ -43,8 +53,10 @@ public static class DevDataSeeder
         var hasShops = await context.Shops.AnyAsync();
         var hasDrivers = await context.VanDrivers.AnyAsync();
         var hasRequisitions = await context.FeRequisitions.AnyAsync();
+        var hasStdCollectionTypes = await context.StdCollectionTypes.AnyAsync();
+        var hasStdLocations = await context.StdLocations.AnyAsync();
 
-        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasReasons && hasRequisitions)
+        if (hasTaskTypes && hasRules && hasShops && hasDrivers && hasReasons && hasRequisitions && hasStdCollectionTypes && hasStdLocations)
         {
             logger?.LogInformation("Dev seed already exists — skipping.");
             return;
@@ -80,6 +92,11 @@ public static class DevDataSeeder
 
             await context.SaveChangesAsync();
             logger?.LogInformation("Seeded FeReasons");
+        }
+        
+        if (!hasStdCollectionTypes)
+        {
+            await SeedStdCollectionTypesAsync(context, logger);
         }
 
         // ─────────────────────────────────────────────
@@ -158,6 +175,11 @@ public static class DevDataSeeder
         if (!hasShops)
         {
             await SeedShopsAsync(context, logger);
+        }
+        
+        if (!hasStdLocations)
+        {
+            await SeedStdLocationsAsync(context, logger);
         }
 
         // ─────────────────────────────────────────────
@@ -255,6 +277,80 @@ public static class DevDataSeeder
         await context.Database.ExecuteSqlRawAsync(sb.ToString());
         logger?.LogInformation("Seeded {Count} shops ({Active} active, {Inactive} inactive).", count, 800, 200);
     }
+    
+    // Std Location seeds
+    
+    private static readonly string[] StdLocationNames =
+    [
+        "High Street Charity Bank",
+        "Retail Park Textile Bin",
+        "Community Centre Collection Point",
+        "Station Road Business Park",
+        "Market Square Collection Site",
+        "Church Hall Collection Point",
+        "Industrial Estate Unit",
+        "Village Hall Collection Point",
+        "Town Centre Collection Point",
+        "Supermarket Car Park Collection"
+    ];
+    
+    private static async Task SeedStdLocationsAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        var shops = await context.Shops
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.Code)
+            .Take(100)
+            .ToListAsync();
+
+        var collectionTypes = await context.StdCollectionTypes
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.Code)
+            .ToListAsync();
+
+        if (shops.Count == 0 || collectionTypes.Count == 0)
+        {
+            logger?.LogWarning(
+                "Skipped STD locations seed because shops or STD collection types are missing. Shops: {ShopCount}, CollectionTypes: {CollectionTypeCount}",
+                shops.Count,
+                collectionTypes.Count);
+
+            return;
+        }
+
+        var locations = new List<StdLocation>();
+        var locationIndex = 0;
+
+        foreach (var shop in shops)
+        {
+            foreach (var collectionType in collectionTypes)
+            {
+                var locationName = StdLocationNames[locationIndex % StdLocationNames.Length];
+                
+                locations.Add(new StdLocation
+                {
+                    Id = BuildStdLocationId(locationIndex),
+                    ShopId = shop.Id,
+                    CollectionTypeId = collectionType.Id,
+                    LocationName = locationName,
+                    PostCode = shop.Postcode,
+                    IsActive = true
+                });
+
+                locationIndex++;
+            }
+        }
+
+        context.StdLocations.AddRange(locations);
+
+        await context.SaveChangesAsync();
+
+        logger?.LogInformation("Seeded {Count} STD locations.", locations.Count);
+    }
+
+    private static Guid BuildStdLocationId(int index)
+    {
+        return new Guid($"c2000000-0000-0000-0000-{index:D12}");
+    }
 
     // ─── Van Driver seed data ──────────────────────────────────────────────
 
@@ -319,6 +415,36 @@ public static class DevDataSeeder
         (new Guid("10000000-0000-0000-0000-000000000004"), "Emma Wilson"),
         (new Guid("10000000-0000-0000-0000-000000000005"), "David Taylor"),
     ];
+    
+    private static async Task SeedStdCollectionTypesAsync(VanDriverDbContext context, ILogger? logger)
+    {
+        context.StdCollectionTypes.AddRange(
+            new StdCollectionType
+            {
+                Id = StdBookBanksCollectionTypeId,
+                Code = "27013",
+                Name = "Book Banks",
+                IsActive = true
+            },
+            new StdCollectionType
+            {
+                Id = StdClothingBanksCollectionTypeId,
+                Code = "27012",
+                Name = "Clothing Banks",
+                IsActive = true
+            },
+            new StdCollectionType
+            {
+                Id = StdDonationBinsCollectionTypeId,
+                Code = "27065",
+                Name = "Donation Bins",
+                IsActive = true
+            });
+
+        await context.SaveChangesAsync();
+
+        logger?.LogInformation("Seeded STD collection types.");
+    }
 
     private static async Task SeedRequisitionsAsync(VanDriverDbContext context, ILogger? logger)
     {
