@@ -3,6 +3,8 @@ export const categoryOptions = [
     { value: "1", label: "Mileage" },
     { value: "2", label: "Transfer" },
     { value: "3", label: "Additional Cost" },
+    { value: "4", label: "Flat Charge" },
+    { value: "5", label: "Van Pack" },
 ] as const;
 
 export const fasciaOptions = [

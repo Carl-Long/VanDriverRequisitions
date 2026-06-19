@@ -161,9 +161,35 @@ public static class DevDataSeeder
                         null,
                         Fascia.Fe,
                         30,
-                        15.00m))
-            );
+                        15.00m)),
+                // ─── STD Mileage ─────────────────────────────
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.Mileage,
+                        null,
+                        Fascia.Std,
+                        300,
+                        0.50m)),
 
+                // ─── STD Flat Charges ───────────────────────
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.FlatCharge,
+                        null,
+                        Fascia.Std,
+                        999,
+                        25.00m)),
+
+                // ─── STD Van Packs ──────────────────────────
+                // MaxRate is used as the fixed van pack price.
+                RequisitionLimitRule.Create(
+                    new RequisitionLimitRuleDetails(
+                        RequisitionRowCategory.VanPack,
+                        null,
+                        Fascia.Std,
+                        50,
+                        10.00m))
+            );
             await context.SaveChangesAsync();
             logger?.LogInformation("Seeded RequisitionLimitRules");
         }

@@ -113,6 +113,7 @@ export function RequisitionLimitRuleFormModal({
 
     const categoryId = useWatch({ control, name: "categoryId" });
     const isGeneralTask = categoryId === "0";
+    const maxRateLabel = categoryId === "5" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
 
     useEffect(() => {
         if (!open) return;
@@ -212,7 +213,7 @@ export function RequisitionLimitRuleFormModal({
                     </Field>
 
                     {/* Max Rate */}
-                    <Field label="Max Rate (£)" required error={errors.maxRate?.message}>
+                    <Field label={maxRateLabel} required error={errors.maxRate?.message}>
                         <Input
                             type="number"
                             step="0.01"
