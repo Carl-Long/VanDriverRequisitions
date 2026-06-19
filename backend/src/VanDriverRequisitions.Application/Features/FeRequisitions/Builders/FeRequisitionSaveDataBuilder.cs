@@ -4,6 +4,7 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Models;
+using VanDriverRequisitions.Application.Features.Shops.Dtos;
 using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;

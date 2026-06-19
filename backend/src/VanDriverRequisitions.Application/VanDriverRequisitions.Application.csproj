@@ -18,6 +18,8 @@
 
     <ItemGroup>
       <Folder Include="Features\Shops\Validators\" />
+      <Folder Include="Features\StdRequisitions\Services\" />
+      <Folder Include="Features\StdRequisitions\Snapshots\" />
     </ItemGroup>
 
 </Project>

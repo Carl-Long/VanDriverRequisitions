@@ -1,4 +1,4 @@
-namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+namespace VanDriverRequisitions.Application.Features.Shops.Dtos;
 
 public sealed class ShopRequisitionSnapshotDto
 {
