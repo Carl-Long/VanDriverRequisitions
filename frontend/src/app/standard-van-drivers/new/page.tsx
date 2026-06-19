@@ -9,6 +9,7 @@ import { canCreateRequisitions } from "@/features/auth/roles";
 import { StdRequisitionShell } from "@/features/std-requisitions/form/components/std-requisition-shell";
 import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import { useAuth } from "@/providers/auth-provider";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 
 export default function NewStdRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -21,7 +22,13 @@ export default function NewStdRequisitionPage() {
             ? returnTo
             : "/standard-van-drivers";
 
-    if (authLoading) {
+    const {
+        status: submitWindowStatus,
+        loading: submitWindowStatusLoading,
+        error: submitWindowStatusError,
+    } = useSubmitWindowStatus();
+
+    if (authLoading || submitWindowStatusLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -33,9 +40,22 @@ export default function NewStdRequisitionPage() {
         return <NotFound />;
     }
 
+    if (submitWindowStatusError) {
+        return (
+            <PageContainer>
+                <Alert tone="danger">{submitWindowStatusError}</Alert>
+            </PageContainer>
+        );
+    }
+
     return (
         <PageContainer>
-            <StdRequisitionShell mode="create" backHref={backHref} />
+            <StdRequisitionShell
+                mode="create"
+                backHref={backHref}
+                submitWindowStatus={submitWindowStatus}
+                submitWindowStatusLoading={submitWindowStatusLoading}
+            />
         </PageContainer>
     );
 }

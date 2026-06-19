@@ -10,37 +10,36 @@ import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
 import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
-
 import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
 import { mapZodErrors } from "@/features/fe-requisitions/form/lib/map-zod-errors";
-import { getApiErrorMessage } from "@/lib/api/client";
+import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
 import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
-import { Button } from "@/components/ui/button/button";
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/format/date";
+import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
+import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
+import { useToast } from "@/providers/toast-provider";
+import { StdRequisitionHeader } from "../header/std-requisition-header";
+import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 
 
 
 type Props = {
     mode: StdRequisitionPageMode;
     stdRequisition?: StdRequisitionDetail;
+    submitWindowStatus: SubmitWindowStatus | null;
+    submitWindowStatusLoading: boolean;
     initialActiveTabKey?: string;
     backHref?: string;
 };
 
-export type StdSaveAction =
-    | "saveAndContinue"
-    | "saveAndClose"
-    | "submit"
-    | "approve"
-    | "reject"
-    | null;
-
 export function StdRequisitionShell({
     mode,
     stdRequisition,
+    submitWindowStatus,
+    submitWindowStatusLoading,
     initialActiveTabKey,
     backHref,
 }: Readonly<Props>) {
@@ -61,18 +60,20 @@ export function StdRequisitionShell({
         removeCollectionChargeBanksAndBins,
     } = useStdRequisitionDraft(initialDraft);
 
-    const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
+    const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [savingAction, setSavingAction] = useState<StdSaveAction>(null);
+    const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
+    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const isReadonly =
-        mode === "readonly" ||
-        mode === "approval" ||
-        draft.status === "Submitted" ||
-        draft.status === "Approved";
-    
-        
-    const canSubmit = !isReadonly && (draft.status === null || draft.status === "Draft" || draft.status === "Rejected");
+    const toast = useToast();
+
+    const isReadonly = mode === "readonly" || mode === "approval";
+
+    const canSubmitStatus =
+        draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
+
+    const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
 
     function clearError(field: string) {
         setErrors((prev) => {
@@ -86,204 +87,173 @@ export function StdRequisitionShell({
         });
     }
 
-    async function handleSave(action: Exclude<StdSaveAction, "submit" | "approve" | "reject" | null>) {
-        const validation = createStdRequisitionSchema().safeParse(draft);
+    async function saveRequisition(
+        continueEditing: boolean = false,
+    ): Promise<StdRequisitionDetail | undefined> {
+        const result = createStdRequisitionSchema().safeParse(draft);
 
-        if (!validation.success) {
-            const nextErrors = mapZodErrors(validation.error);
-            setErrors(nextErrors);
-
-            if (
-                nextErrors.requisitionDate ||
-                nextErrors.vanDriverId ||
-                nextErrors.vanDriverName ||
-                nextErrors.shopId
-            ) {
-                setActiveKey("details");
-            } else {
-                setActiveKey("collection-charges-banks-and-bins");
-            }
-
+        if (!result.success) {
+            setErrors(mapZodErrors(result.error));
+            setActiveKey("details");
             return;
         }
 
-        setSavingAction(action);
-        setErrors({});
-
         try {
+            setErrors({});
+            setIsSaving(true);
+
             const request = mapStdRequisitionDraftToSaveRequest(draft);
 
-            const saved = draft.requisitionId
-                ? await stdRequisitionsApi.update(draft.requisitionId, request)
-                : await stdRequisitionsApi.create(request);
+            let saved: StdRequisitionDetail;
+
+            if (draft.requisitionId) {
+                saved = await stdRequisitionsApi.update(draft.requisitionId, request);
+            } else {
+                saved = await stdRequisitionsApi.create(request);
+            }
 
             replaceDraft(mapStdRequisitionDetailToDraft(saved));
 
-            if (action === "saveAndClose") {
-                router.push(backHref ?? "/standard-van-drivers");
-                return;
-            }
+            toast.success(`Requisition #${saved.requisitionNumber} saved`);
 
-            if (!draft.requisitionId) {
+            if (continueEditing) {
                 const editHref = `/standard-van-drivers/${saved.id}${backHref ? `?returnTo=${encodeURIComponent(backHref)}` : ""
                     }`;
 
-                router.replace(editHref);
+                router.push(editHref);
+            } else {
+                router.push(backHref ?? "/standard-van-drivers");
             }
+
+            return saved;
         } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form: getApiErrorMessage(err, "Failed to save requisition"),
+                });
+
+                return;
+            }
+
             setErrors({
-                form: getApiErrorMessage(err, "Failed to save STD requisition."),
+                form: "Failed to save requisition",
             });
         } finally {
-            setSavingAction(null);
+            setIsSaving(false);
         }
     }
 
-    async function handleSubmit() {
-        const validation = createStdRequisitionSchema().safeParse(draft);
+    async function submitRequisition() {
+        const result = createStdRequisitionSchema().safeParse(draft);
 
-        if (!validation.success) {
-            const nextErrors = mapZodErrors(validation.error);
-            setErrors(nextErrors);
-
-            if (
-                nextErrors.requisitionDate ||
-                nextErrors.vanDriverId ||
-                nextErrors.vanDriverName ||
-                nextErrors.shopId
-            ) {
-                setActiveKey("details");
-            } else {
-                setActiveKey("collection-charges-banks-and-bins");
-            }
-
+        if (!result.success) {
+            setErrors(mapZodErrors(result.error));
+            setActiveKey("details");
             return;
         }
 
-        setSavingAction("submit");
-        setErrors({});
-
         try {
+            setErrors({});
+            setIsSaving(true);
+
             const request = mapStdRequisitionDraftToSaveRequest(draft);
 
             const submitted = draft.requisitionId
                 ? await stdRequisitionsApi.submitExisting(draft.requisitionId, request)
                 : await stdRequisitionsApi.submitNew(request);
 
-            replaceDraft(mapStdRequisitionDetailToDraft(submitted));
+            toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
 
-            if (!draft.requisitionId) {
-                const editHref = `/standard-van-drivers/${submitted.id}${backHref ? `?returnTo=${encodeURIComponent(backHref)}` : ""
-                    }`;
-
-                router.replace(editHref);
-            }
+            router.push(backHref ?? "/standard-van-drivers");
         } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form: getApiErrorMessage(err, "Failed to submit requisition"),
+                });
+
+                return;
+            }
+
             setErrors({
-                form: getApiErrorMessage(err, "Failed to submit STD requisition."),
+                form: "Failed to submit requisition",
             });
         } finally {
-            setSavingAction(null);
+            setIsSaving(false);
+        }
+    }
+
+    async function handleSaveDraft() {
+        setActiveAction("saveAndClose");
+
+        try {
+            await saveRequisition();
+        } finally {
+            setActiveAction(null);
+        }
+    }
+
+    async function handleSaveAndContinue() {
+        setActiveAction("saveAndContinue");
+
+        try {
+            await saveRequisition(true);
+        } finally {
+            setActiveAction(null);
+        }
+    }
+
+    function handleSubmitRequest() {
+        setIsSubmitModalOpen(true);
+    }
+
+    async function handleSubmitConfirm() {
+        setIsSubmitModalOpen(false);
+        setActiveAction("submit");
+
+        try {
+            await submitRequisition();
+        } finally {
+            setActiveAction(null);
         }
     }
 
     const title =
         mode === "create"
-            ? "Create New STD Requisition"
+            ? "Create New Requisition"
             : mode === "edit"
                 ? "Editing STD Requisition"
                 : mode === "approval"
-                    ? "Reviewing STD Requisition"
-                    : "Viewing STD Requisition";
+                    ? "Reviewing Requisition"
+                    : "Viewing Requisition";
 
     return (
         <div className="space-y-4">
-            <div className="pb-2">
-                <div className="flex flex-col gap-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                        {backHref && (
-                            <>
-                                <BackLink href={backHref} compact>
-                                    Requisitions
-                                </BackLink>
+            <StdRequisitionHeader
+                mode={mode}
+                backHref={backHref}
+                requisitionNumber={draft.requisitionNumber}
+                status={draft.status}
+                subtotal={subtotal}
+                submitWindowStatus={submitWindowStatus}
+                submitStatusLoading={submitWindowStatusLoading}
+                activeAction={activeAction}
+                canSubmit={canSubmit}
+                submittedAtUtc={draft.submittedAtUtc}
+                submittedByNameSnapshot={draft.submittedByNameSnapshot}
+                onSaveDraft={handleSaveDraft}
+                onSaveAndContinue={handleSaveAndContinue}
+                onSubmit={handleSubmitRequest}
+            />
 
-                                <div className="hidden h-4 w-px bg-border sm:block" />
-                            </>
-                        )}
-
-                        <h1 className="flex flex-wrap items-center gap-3 text-lg font-semibold leading-none tracking-tight">
-                            <span>{title}</span>
-
-                            {mode !== "create" && draft.requisitionNumber && (
-                                <span className="font-mono">{draft.requisitionNumber}</span>
-                            )}
-                        </h1>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <span className="inline-flex items-center rounded-full border border-warning-border bg-warning-surface px-3 py-1 text-xs font-medium text-warning">
-                            {draft.status ?? "Unsaved"}
-                        </span>
-
-                        <div className="h-4 w-px bg-border" />
-
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Subtotal</span>
-
-                            <span className="font-medium tabular-nums">
-                                {formatCurrencyGB(subtotal)}
-                            </span>
-                            {draft.submittedByNameSnapshot && draft.submittedAtUtc && (
-                                <>
-                                    <div className="h-4 w-px bg-border" />
-
-                                    <span className="text-sm text-muted-foreground">
-                                        Submitted by{" "}
-                                        <span className="font-medium text-foreground">
-                                            {draft.submittedByNameSnapshot}
-                                        </span>{" "}
-                                        • {formatDateTime(draft.submittedAtUtc)}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {!isReadonly && (
-                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        disabled={savingAction !== null}
-                        onClick={() => handleSave("saveAndClose")}
-                    >
-                        {savingAction === "saveAndClose" ? "Saving..." : "Save & Close"}
-                    </Button>
-
-                    <Button
-                        type="button"
-                        variant="outline"
-                        disabled={savingAction !== null}
-                        onClick={() => handleSave("saveAndContinue")}
-                    >
-                        {savingAction === "saveAndContinue" ? "Saving..." : "Save & Continue"}
-                    </Button>
-
-                    {canSubmit && (
-                        <Button
-                            type="button"
-                            disabled={savingAction !== null}
-                            onClick={handleSubmit}
-                        >
-                            {savingAction === "submit" ? "Submitting..." : "Submit"}
-                        </Button>
-                    )}
-                </div>
+            {errors.form && (
+                <Alert tone="danger">
+                    <ul className="list-disc space-y-1 pl-5">
+                        {errors.form.split("\n").map((message) => (
+                            <li key={message}>{message}</li>
+                        ))}
+                    </ul>
+                </Alert>
             )}
-
-            {errors.form && <Alert tone="danger">{errors.form}</Alert>}
 
             <StdRequisitionTabs
                 activeKey={activeKey}
@@ -306,8 +276,16 @@ export function StdRequisitionShell({
                         readonly={isReadonly}
                         shopId={draft.shopId}
                         rows={draft.collectionChargesBanksAndBins}
-                        onAdd={addCollectionChargeBanksAndBins}
-                        onUpdate={updateCollectionChargeBanksAndBins}
+                        onAdd={(form) => {
+                            addCollectionChargeBanksAndBins(form);
+                            clearError("collectionChargesBanksAndBins");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateCollectionChargeBanksAndBins(clientId, form);
+                            clearError("collectionChargesBanksAndBins");
+                            clearError("form");
+                        }}
                         onDelete={removeCollectionChargeBanksAndBins}
                     />
                 }
@@ -318,6 +296,16 @@ export function StdRequisitionShell({
                     </Alert>
                 }
             />
+
+            {canSubmit && (
+                <RequisitionSubmitModal
+                    open={isSubmitModalOpen}
+                    loading={activeAction === "submit"}
+                    detailLabel="collection details"
+                    onClose={() => setIsSubmitModalOpen(false)}
+                    onConfirm={handleSubmitConfirm}
+                />
+            )}
         </div>
     );
 }

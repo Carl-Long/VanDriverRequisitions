@@ -13,6 +13,7 @@ import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/co
 import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std-requisition.types";
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
 import { useAuth } from "@/providers/auth-provider";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 
 export default function StdRequisitionDetailPage() {
     const { user, loading: authLoading } = useAuth();
@@ -29,6 +30,12 @@ export default function StdRequisitionDetailPage() {
         returnTo && returnTo.startsWith("/standard-van-drivers") && !returnTo.startsWith("//")
             ? returnTo
             : "/standard-van-drivers";
+
+    const {
+        status: submitWindowStatus,
+        loading: submitWindowStatusLoading,
+        error: submitWindowStatusError,
+    } = useSubmitWindowStatus();
 
     useEffect(() => {
         if (!params.id) {
@@ -65,7 +72,7 @@ export default function StdRequisitionDetailPage() {
         };
     }, [params.id]);
 
-    if (authLoading || loading) {
+    if (authLoading || loading || submitWindowStatusLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -77,10 +84,12 @@ export default function StdRequisitionDetailPage() {
         return <NotFound />;
     }
 
-    if (error) {
+    if (error || submitWindowStatusError) {
         return (
             <PageContainer>
-                <Alert tone="danger">{error}</Alert>
+                <Alert tone="danger">
+                    {error ?? submitWindowStatusError}
+                </Alert>
             </PageContainer>
         );
     }
@@ -95,6 +104,8 @@ export default function StdRequisitionDetailPage() {
                 mode={requisition.isEditable ? "edit" : "readonly"}
                 stdRequisition={requisition}
                 backHref={backHref}
+                submitWindowStatus={submitWindowStatus}
+                submitWindowStatusLoading={submitWindowStatusLoading}
             />
         </PageContainer>
     );

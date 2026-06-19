@@ -1,31 +1,28 @@
 "use client";
 
 import type { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
-import type { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
-import { StatusPill } from "../../list/components/status-pill";
-import { FeRequisitionActions } from "./fe-requisition-actions";
-import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
-import type { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
-import type { SaveAction } from "../components/fe-requisition-shell";
+import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
+import { StdStatusPill } from "../../list/components/std-status-pill";
+import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
+import { RequisitionActions } from "@/features/requisitions-shared/components/requisition-actions";
 import { RequisitionHeader } from "@/features/requisitions-shared/components/requisition-header";
+import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 
 type Props = {
-    mode: FeRequisitionPageMode;
+    mode: StdRequisitionPageMode;
     backHref?: string;
     requisitionNumber?: string | null;
-    status: RequisitionStatus | null;
+    status: StdRequisitionStatus | null;
     subtotal: number;
     submitWindowStatus: SubmitWindowStatus | null;
     submitStatusLoading: boolean;
-    activeAction: SaveAction;
+    activeAction: RequisitionSaveAction;
     canSubmit: boolean;
     submittedAtUtc: string | null;
     submittedByNameSnapshot: string | null;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
-    onApprove: () => void;
-    onReject: () => void;
 };
 
 function UnsavedPill() {
@@ -36,7 +33,7 @@ function UnsavedPill() {
     );
 }
 
-export function FeRequisitionHeader({
+export function StdRequisitionHeader({
     mode,
     backHref,
     requisitionNumber,
@@ -51,19 +48,15 @@ export function FeRequisitionHeader({
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
-    onApprove,
-    onReject,
 }: Readonly<Props>) {
-    const TITLES: Record<FeRequisitionPageMode, string> = {
-        create: "Create New Requisition",
-        edit: "Editing Requisition",
-        readonly: "Viewing Requisition",
-        approval: "Reviewing Requisition",
+    const TITLES: Record<StdRequisitionPageMode, string> = {
+        create: "Create New STD Requisition",
+        edit: "Editing STD Requisition",
+        readonly: "Viewing STD Requisition",
+        approval: "Reviewing STD Requisition",
     };
 
     const title = TITLES[mode];
-
-    const canApproveOrReject = mode === "approval" && status === "Submitted";
 
     const showSubmittedBy =
         (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
@@ -72,18 +65,12 @@ export function FeRequisitionHeader({
 
     const actions =
         mode !== "readonly" && mode !== "approval" ? (
-            <FeRequisitionActions
+            <RequisitionActions
                 activeAction={activeAction}
                 canSubmit={canSubmit}
                 onSaveDraft={onSaveDraft}
                 onSaveAndContinue={onSaveAndContinue}
                 onSubmit={onSubmit}
-            />
-        ) : canApproveOrReject ? (
-            <FeRequisitionApprovalActions
-                activeAction={activeAction}
-                onApprove={onApprove}
-                onReject={onReject}
             />
         ) : null;
 
@@ -93,7 +80,7 @@ export function FeRequisitionHeader({
             backHref={backHref}
             backLabel="Requisitions"
             requisitionNumber={mode === "create" ? null : requisitionNumber}
-            statusNode={status ? <StatusPill status={status} /> : <UnsavedPill />}
+            statusNode={status ? <StdStatusPill status={status} /> : <UnsavedPill />}
             subtotal={subtotal}
             submitWindowStatus={submitWindowStatus}
             submitStatusLoading={submitStatusLoading}

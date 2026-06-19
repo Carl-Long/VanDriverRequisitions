@@ -211,7 +211,7 @@ function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableP
                                 onClick={readonly ? undefined : () => onEdit(row)}
                                 className={getEditableTableRowClassName({ readonly })}
                             >
-                                <TableCell>{row.date ? formatDateGB(row.date) : "-"}</TableCell>
+                                <TableCell>{row.date ? row.date.toLocaleDateString() : "-"}</TableCell>
 
                                 <TableCell>
                                     <EditableCellButton

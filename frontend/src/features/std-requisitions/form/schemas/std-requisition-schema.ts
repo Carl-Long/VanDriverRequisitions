@@ -59,29 +59,37 @@ const banksAndBinsRowSchema = z
     });
 
 export function createStdRequisitionSchema() {
-    return z.object({
-        requisitionDate: z
-            .date()
-            .nullable()
-            .refine((value) => value !== null, "Requisition date is required"),
+    return z
+        .object({
+            requisitionDate: z
+                .date()
+                .nullable()
+                .refine((value) => value !== null, "Requisition date is required"),
 
-        vanDriverId: z
-            .string()
-            .nullable()
-            .refine((value) => value !== null, "Van driver is required"),
+            vanDriverId: z
+                .string()
+                .nullable()
+                .refine((value) => value !== null, "Van driver is required"),
 
-        vanDriverName: z
-            .string()
-            .nullable()
-            .refine((value) => Boolean(value?.trim()), "Van driver name is required"),
+            vanDriverName: z
+                .string()
+                .nullable()
+                .refine((value) => Boolean(value?.trim()), "Van driver name is required"),
 
-        shopId: z
-            .string()
-            .nullable()
-            .refine((value) => value !== null, "Shop is required"),
+            shopId: z
+                .string()
+                .nullable()
+                .refine((value) => value !== null, "Shop is required"),
 
-        collectionChargesBanksAndBins: z
-            .array(banksAndBinsRowSchema)
-            .min(1, "At least one Banks & Bins row is required"),
-    });
+            collectionChargesBanksAndBins: z.array(banksAndBinsRowSchema),
+        })
+        .superRefine((data, ctx) => {
+            if (data.collectionChargesBanksAndBins.length === 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["form"],
+                    message: "At least one requisition row is required",
+                });
+            }
+        });
 }
