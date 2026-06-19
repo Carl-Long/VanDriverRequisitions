@@ -9,6 +9,7 @@ import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode"
 import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
 import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
+import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -31,10 +32,17 @@ export function StdRequisitionShell({
     initialActiveTabKey,
     backHref,
 }: Readonly<Props>) {
-    // We will map stdRequisition to draft in the next slice.
-    // For now this supports the create page.
-    const { draft, subtotal, setRequisitionDate, setVanDriver, setVanDriverName, setShop } =
-        useStdRequisitionDraft();
+    const {
+        draft,
+        subtotal,
+        setRequisitionDate,
+        setVanDriver,
+        setVanDriverName,
+        setShop,
+        addCollectionChargeBanksAndBins,
+        updateCollectionChargeBanksAndBins,
+        removeCollectionChargeBanksAndBins,
+    } = useStdRequisitionDraft();
 
     const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,10 +65,10 @@ export function StdRequisitionShell({
         mode === "create"
             ? "Create New STD Requisition"
             : mode === "edit"
-              ? "Editing STD Requisition"
-              : mode === "approval"
-                ? "Reviewing STD Requisition"
-                : "Viewing STD Requisition";
+                ? "Editing STD Requisition"
+                : mode === "approval"
+                    ? "Reviewing STD Requisition"
+                    : "Viewing STD Requisition";
 
     return (
         <div className="space-y-4">
@@ -130,9 +138,14 @@ export function StdRequisitionShell({
                     />
                 }
                 collectionChargesBanksAndBins={
-                    <Alert>
-                        Banks & Bins rows will be added in the next slice. Select details first.
-                    </Alert>
+                    <StdCollectionChargeBanksAndBinsWorkspace
+                        readonly={isReadonly}
+                        shopId={draft.shopId}
+                        rows={draft.collectionChargesBanksAndBins}
+                        onAdd={addCollectionChargeBanksAndBins}
+                        onUpdate={updateCollectionChargeBanksAndBins}
+                        onDelete={removeCollectionChargeBanksAndBins}
+                    />
                 }
                 submissionHistory={
                     <Alert>
