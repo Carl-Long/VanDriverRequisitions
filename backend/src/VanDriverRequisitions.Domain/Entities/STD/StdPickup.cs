@@ -46,7 +46,7 @@ public sealed class StdPickup : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Number of bags must be at least 1.");
         }
 
-        if (model.NumberOfHouseholds <= 1)
+        if (model.NumberOfHouseholds < 1)
         {
             throw new InvalidOperationException("Number of households must be at least 1.");
         }

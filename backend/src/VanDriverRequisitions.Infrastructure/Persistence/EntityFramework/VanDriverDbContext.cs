@@ -3,21 +3,25 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Constants;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Extensions;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
-public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
-    : DbContext(options), IApplicationDbContext
+public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options) : DbContext(options), IApplicationDbContext
 {
     public DbSet<FeRequisition> FeRequisitions => Set<FeRequisition>();
-    public DbSet<FeGeneralTask> FeGeneralTasks => Set<FeGeneralTask>();
-    public DbSet<FeMileage> FeMileages => Set<FeMileage>();
     public DbSet<FeRequisitionSubmission> FeRequisitionSubmissions => Set<FeRequisitionSubmission>();
     public DbSet<FeTaskType> FeTaskTypes => Set<FeTaskType>();
     public DbSet<FeReason> FeReasons => Set<FeReason>();
+    
+    public DbSet<StdRequisition> StdRequisitions => Set<StdRequisition>();
+    public DbSet<StdRequisitionSubmission> StdRequisitionSubmissions => Set<StdRequisitionSubmission>();
+    public DbSet<StdCollectionType> StdCollectionTypes => Set<StdCollectionType>();
+    public DbSet<StdLocation> StdLocations => Set<StdLocation>();
+    
     public DbSet<RequisitionLimitRule> RequisitionLimitRules => Set<RequisitionLimitRule>();
     public DbSet<SubmitWindow> SubmitWindows => Set<SubmitWindow>();
     public DbSet<Shop> Shops => Set<Shop>();
@@ -59,7 +63,16 @@ public class VanDriverDbContext(DbContextOptions<VanDriverDbContext> options)
 
         return $"F{result[0]:D9}";
     }
+    
+    public async Task<string> NextStdRequisitionNumberAsync(CancellationToken cancellationToken)
+    {
+        var result = await Database
+            .SqlQueryRaw<long>($"SELECT NEXT VALUE FOR {DbSequences.StdRequisitionNumber} AS Value")
+            .ToListAsync(cancellationToken);
 
+        return $"S{result[0]:D9}";
+    }
+    
     public async Task<string> NextPoNumberAsync(CancellationToken cancellationToken)
     {
         var result = await Database

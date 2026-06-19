@@ -5,8 +5,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Exten
 
 public static class SequenceExtensions
 {
-    public static void ApplySequences(
-        this ModelBuilder modelBuilder)
+    public static void ApplySequences(this ModelBuilder modelBuilder)
     {
         modelBuilder.HasSequence<long>(DbSequences.FeRequisitionNumber)
             .StartsAt(DbSequences.FeRequisitionNumberStartsAt)
@@ -16,10 +15,9 @@ public static class SequenceExtensions
             .StartsAt(DbSequences.PoNumberStartsAt)
             .IncrementsBy(DbSequences.PoNumberIncrementsBy
             );
-            
-        // Future sequences:
-        //  modelBuilder.HasSequence<long>(DbSequences.StdRequisitionNumber)
-        //      .StartsAt(DbSequences.StdRequisitionNumberStartsAt)
-        //      .IncrementsBy(DbSequences.StdRequisitionNumberIncrementsBy);
+        
+        modelBuilder.HasSequence<long>(DbSequences.StdRequisitionNumber)
+            .StartsAt(DbSequences.StdRequisitionNumberStartsAt)
+            .IncrementsBy(DbSequences.StdRequisitionNumberIncrementsBy);
     }
 }
