@@ -46,6 +46,7 @@ public class StdLocationConfiguration : IEntityTypeConfiguration<StdLocation>
         builder.HasIndex(x => x.LocationName);
         builder.HasIndex(x => x.PostCode);
         builder.HasIndex(x => x.IsActive);
+        builder.HasIndex(x => new { x.ShopId, x.CollectionTypeId, x.IsActive });
 
         builder.ApplyAuditableConfiguration();
     }
