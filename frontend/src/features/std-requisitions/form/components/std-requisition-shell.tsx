@@ -2,8 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
-import { BackLink } from "@/components/ui/navigation-back-link";
-import { formatCurrencyGB } from "@/lib/format/currency";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
 import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
 import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
@@ -17,7 +15,7 @@ import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
 import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
-import { formatDateTime } from "@/lib/format/date";
+
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 import { useToast } from "@/providers/toast-provider";
@@ -25,6 +23,8 @@ import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
+import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
+
 
 
 
@@ -381,10 +381,10 @@ export function StdRequisitionShell({
                     />
                 }
                 submissionHistory={
-                    <Alert>
-                        Submission history will be wired after save, submit, and submission view are
-                        connected.
-                    </Alert>
+                    <StdSubmissionHistoryTab
+                        submissions={draft.submissionHistory}
+                        returnTo={backHref}
+                    />
                 }
             />
 

@@ -31,6 +31,9 @@ export default function StdRequisitionDetailPage() {
             ? returnTo
             : "/standard-van-drivers";
 
+    const tabParam = searchParams.get("tab");
+    const initialActiveTabKey = tabParam === "submission-history" ? "submission-history" : undefined;
+
     const {
         status: submitWindowStatus,
         loading: submitWindowStatusLoading,
@@ -106,6 +109,7 @@ export default function StdRequisitionDetailPage() {
                 backHref={backHref}
                 submitWindowStatus={submitWindowStatus}
                 submitWindowStatusLoading={submitWindowStatusLoading}
+                initialActiveTabKey={initialActiveTabKey}
             />
         </PageContainer>
     );
