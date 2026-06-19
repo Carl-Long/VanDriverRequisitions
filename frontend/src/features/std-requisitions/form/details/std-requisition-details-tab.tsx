@@ -56,7 +56,7 @@ export function StdRequisitionDetailsTab({
                 <h2 className="text-lg font-semibold">Requisition Details</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Manage STD requisition information
+                    Manage requisition information
                 </p>
             </div>
 

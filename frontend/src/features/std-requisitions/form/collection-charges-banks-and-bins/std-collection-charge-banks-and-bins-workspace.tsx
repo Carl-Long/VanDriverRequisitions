@@ -5,15 +5,7 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableHeader,
-    TableHeaderCell,
-    TableHeaderRow,
-    TableRow,
-} from "@/components/ui/table/table";
+import { TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 
@@ -26,6 +18,7 @@ import { StdCollectionChargeBanksAndBinsDrawer } from "./std-collection-charge-b
 import { DeleteRowButton } from "@/features/fe-requisitions/form/components/delete-row-button";
 import { EditableCellButton } from "@/features/fe-requisitions/form/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/fe-requisitions/form/lib/get-editable-table-row-class-name";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     readonly: boolean;
@@ -50,21 +43,18 @@ export function StdCollectionChargeBanksAndBinsWorkspace({
     );
 
     const subtotal = calculateStdCollectionChargeBanksAndBinsRowsTotal(rows);
-    const totalBags = rows.reduce((total, row) => total + (row.numberOfBags ?? 0), 0);
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-md font-semibold">Banks & Bins</h2>
+                    <h2 className="text-md font-semibold">Banks & Bins Collection Charges</h2>
 
                     <p className="text-sm text-muted-foreground">
-                        Manage STD collection charges for banks and bins.
+                        Manage collection charges for banks and bins.
                     </p>
-
                     <p className="text-sm text-muted-foreground">
-                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {totalBags} bags •{" "}
-                        {formatCurrencyGB(subtotal)}
+                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {formatCurrencyGB(subtotal)}
                     </p>
                 </div>
 
@@ -78,15 +68,15 @@ export function StdCollectionChargeBanksAndBinsWorkspace({
                         }}
                     >
                         <Plus size={14} />
-                        Add Banks & Bins
+                        Add Banks & Bins Charge
                     </Button>
                 )}
             </div>
 
             {!shopId && !readonly && (
-                <div className="rounded-2xl border border-warning-border bg-warning-surface p-4 text-sm text-warning">
+                <Alert tone="warning">
                     Select a shop on the Details tab before adding Banks & Bins rows.
-                </div>
+                </Alert>
             )}
 
             {rows.length === 0 ? (
@@ -139,6 +129,12 @@ type TableProps = {
 function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableProps>) {
     const subtotal = calculateStdCollectionChargeBanksAndBinsRowsTotal(rows);
 
+    const totalBags = rows.reduce((total, row) => total + (row.numberOfBags ?? 0), 0);
+
+    const totalMiles = rows.reduce((total, row) => {
+        return row.chargeType === "Mileage" ? total + (row.miles ?? 0) : total;
+    }, 0);
+
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
@@ -160,24 +156,38 @@ function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableP
                             <TableHeaderCell
                                 className="sticky top-0 z-20 bg-surface-elevated"
                                 align="right"
+                                nowrap
                             >
                                 Bags
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
-                                Charge
-                            </TableHeaderCell>
-
                             <TableHeaderCell
                                 className="sticky top-0 z-20 bg-surface-elevated"
-                                align="right"
+                                nowrap
                             >
-                                Miles / Rate
+                                Charge Type
                             </TableHeaderCell>
 
                             <TableHeaderCell
                                 className="sticky top-0 z-20 bg-surface-elevated"
                                 align="right"
+                                nowrap
+                            >
+                                Miles
+                            </TableHeaderCell>
+
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                                nowrap
+                            >
+                                Rate / Charge
+                            </TableHeaderCell>
+
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                                nowrap
                             >
                                 Total
                             </TableHeaderCell>
@@ -201,18 +211,26 @@ function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableP
                                 onClick={readonly ? undefined : () => onEdit(row)}
                                 className={getEditableTableRowClassName({ readonly })}
                             >
-                                <TableCell>
-                                    {row.date ? formatDateGB(row.date) : "-"}
-                                </TableCell>
+                                <TableCell>{row.date ? formatDateGB(row.date) : "-"}</TableCell>
 
                                 <TableCell>
                                     <EditableCellButton
                                         readonly={readonly}
                                         ariaLabel="Edit Banks & Bins row"
                                         onEdit={() => onEdit(row)}
-                                        className="font-medium"
+                                        className="text-left"
                                     >
-                                        {row.collectionTypeLabel ?? "-"}
+                                        <span className="flex flex-col leading-tight">
+                                            <span className="font-medium">
+                                                {row.collectionTypeLabel ?? "-"}
+                                            </span>
+
+                                            {row.collectionTypeCode && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {row.collectionTypeCode}
+                                                </span>
+                                            )}
+                                        </span>
                                     </EditableCellButton>
                                 </TableCell>
 
@@ -230,16 +248,20 @@ function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableP
                                     </div>
                                 </TableCell>
 
-                                <TableCell align="right">{row.numberOfBags ?? "-"}</TableCell>
+                                <TableCell align="right" className="tabular-nums">
+                                    {row.numberOfBags ?? "-"}
+                                </TableCell>
 
                                 <TableCell>{getStdChargeTypeLabel(row.chargeType)}</TableCell>
 
                                 <TableCell align="right" className="tabular-nums">
+                                    {row.chargeType === "Mileage" ? row.miles ?? "-" : "-"}
+                                </TableCell>
+
+                                <TableCell align="right" className="tabular-nums">
                                     {row.chargeType === "Mileage"
-                                        ? `${row.miles ?? 0} mi @ ${formatCurrencyGB(
-                                              row.ratePerMile ?? 0,
-                                          )}`
-                                        : "-"}
+                                        ? formatCurrencyGB(row.ratePerMile ?? 0)
+                                        : formatCurrencyGB(row.flatCharge ?? 0)}
                                 </TableCell>
 
                                 <TableCell align="right" className="font-semibold tabular-nums">
@@ -259,8 +281,23 @@ function BanksAndBinsTable({ readonly, rows, onEdit, onDelete }: Readonly<TableP
                     </TableBody>
 
                     <TableFooter>
-                        <TableRow>
-                            <TableCell>Subtotal</TableCell>
+                        <TableRow className="bg-surface-elevated font-semibold">
+                            <TableCell>Totals</TableCell>
+
+                            <TableCell />
+                            <TableCell />
+
+                            <TableCell align="right" className="tabular-nums">
+                                {totalBags}
+                            </TableCell>
+
+                            <TableCell />
+
+                            <TableCell align="right" className="tabular-nums">
+                                {totalMiles}
+                            </TableCell>
+
+                            <TableCell />
 
                             <TableCell align="right" className="tabular-nums">
                                 {formatCurrencyGB(subtotal)}

@@ -59,7 +59,7 @@ export function StdCollectionTypeField({
     const options = useMemo<ComboboxOption<StdCollectionTypeLookup>[]>(() => {
         return items.map((item) => ({
             value: item.id,
-            label: `${item.code} - ${item.name}`,
+            label: `${item.name} (${item.code})`,
             data: item,
         }));
     }, [items]);

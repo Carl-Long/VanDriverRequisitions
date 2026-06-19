@@ -178,7 +178,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                         setForm((prev) => ({
                             ...prev,
                             collectionTypeId: value,
-                            collectionTypeLabel: label,
+                            collectionTypeLabel: collectionType?.name ?? label,
                             collectionTypeCode: collectionType?.code ?? null,
 
                             // Locations depend on collection type.
@@ -204,7 +204,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                         setForm((prev) => ({
                             ...prev,
                             locationId: value,
-                            locationLabel: label,
+                            locationLabel: location?.locationName ?? label,
                             locationPostCode: location?.postCode ?? null,
                         }));
 

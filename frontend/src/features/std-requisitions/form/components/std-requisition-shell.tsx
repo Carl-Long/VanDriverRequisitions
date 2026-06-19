@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/navigation-back-link";
 import { formatCurrencyGB } from "@/lib/format/currency";
@@ -10,6 +10,17 @@ import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
 import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
+
+import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
+import { mapZodErrors } from "@/features/fe-requisitions/form/lib/map-zod-errors";
+import { getApiErrorMessage } from "@/lib/api/client";
+import { stdRequisitionsApi } from "../../api/std-requisitions-api";
+import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
+import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
+import { Button } from "@/components/ui/button/button";
+import { useRouter } from "next/navigation";
+
+
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -32,9 +43,14 @@ export function StdRequisitionShell({
     initialActiveTabKey,
     backHref,
 }: Readonly<Props>) {
+
+    const router = useRouter();
+    const initialDraft = useMemo(() => (stdRequisition ? mapStdRequisitionDetailToDraft(stdRequisition) : undefined), [stdRequisition]);
+
     const {
         draft,
         subtotal,
+        replaceDraft,
         setRequisitionDate,
         setVanDriver,
         setVanDriverName,
@@ -42,10 +58,11 @@ export function StdRequisitionShell({
         addCollectionChargeBanksAndBins,
         updateCollectionChargeBanksAndBins,
         removeCollectionChargeBanksAndBins,
-    } = useStdRequisitionDraft();
+    } = useStdRequisitionDraft(initialDraft);
 
     const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [savingAction, setSavingAction] = useState<StdSaveAction>(null);
 
     const isReadonly = mode === "readonly" || mode === "approval";
 
@@ -59,6 +76,59 @@ export function StdRequisitionShell({
             delete next[field];
             return next;
         });
+    }
+
+    async function handleSave(action: Exclude<StdSaveAction, "submit" | "approve" | "reject" | null>) {
+        const validation = createStdRequisitionSchema().safeParse(draft);
+
+        if (!validation.success) {
+            const nextErrors = mapZodErrors(validation.error);
+            setErrors(nextErrors);
+
+            if (
+                nextErrors.requisitionDate ||
+                nextErrors.vanDriverId ||
+                nextErrors.vanDriverName ||
+                nextErrors.shopId
+            ) {
+                setActiveKey("details");
+            } else {
+                setActiveKey("collection-charges-banks-and-bins");
+            }
+
+            return;
+        }
+
+        setSavingAction(action);
+        setErrors({});
+
+        try {
+            const request = mapStdRequisitionDraftToSaveRequest(draft);
+
+            const saved = draft.requisitionId
+                ? await stdRequisitionsApi.update(draft.requisitionId, request)
+                : await stdRequisitionsApi.create(request);
+
+            replaceDraft(mapStdRequisitionDetailToDraft(saved));
+
+            if (action === "saveAndClose") {
+                router.push(backHref ?? "/standard-van-drivers");
+                return;
+            }
+
+            if (!draft.requisitionId) {
+                const editHref = `/standard-van-drivers/${saved.id}${backHref ? `?returnTo=${encodeURIComponent(backHref)}` : ""
+                    }`;
+
+                router.replace(editHref);
+            }
+        } catch (err) {
+            setErrors({
+                form: getApiErrorMessage(err, "Failed to save STD requisition."),
+            });
+        } finally {
+            setSavingAction(null);
+        }
     }
 
     const title =
@@ -112,11 +182,25 @@ export function StdRequisitionShell({
                 </div>
             </div>
 
-            {stdRequisition && (
-                <Alert tone="warning">
-                    Edit/read mapping will be wired in the next slice. This shell currently supports
-                    the create page foundation.
-                </Alert>
+            {!isReadonly && (
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        disabled={savingAction !== null}
+                        onClick={() => handleSave("saveAndClose")}
+                    >
+                        {savingAction === "saveAndClose" ? "Saving..." : "Save & Close"}
+                    </Button>
+
+                    <Button
+                        type="button"
+                        disabled={savingAction !== null}
+                        onClick={() => handleSave("saveAndContinue")}
+                    >
+                        {savingAction === "saveAndContinue" ? "Saving..." : "Save & Continue"}
+                    </Button>
+                </div>
             )}
 
             {errors.form && <Alert tone="danger">{errors.form}</Alert>}

@@ -28,7 +28,7 @@ export function StdRequisitionTabs({
 }: Readonly<Props>) {
     const tabs: Tab[] = [
         { key: "details", label: "Details" },
-        { key: "collection-charges-banks-and-bins", label: "Banks & Bins" },
+        { key: "collection-charges-banks-and-bins", label: "Banks & Bins Collections" },
         {
             key: "submission-history",
             label: `Submission History (${submissionHistoryCount})`,

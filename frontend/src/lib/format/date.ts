@@ -93,3 +93,7 @@ export function addDays(date: Date, days: number): Date {
     d.setDate(d.getDate() + days);
     return d;
 }
+
+export function parseDateOnly(value: string | null | undefined) {
+    return value ? new Date(`${value}T00:00:00`) : null;
+}

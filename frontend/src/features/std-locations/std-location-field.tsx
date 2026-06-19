@@ -78,7 +78,7 @@ export function StdLocationField({
     const options = useMemo<ComboboxOption<StdLocationLookup>[]>(() => {
         return items.map((item) => ({
             value: item.id,
-            label: `${item.locationName} — ${item.postCode}`,
+            label: `${item.locationName} - ${item.postCode}`,
             data: item,
         }));
     }, [items]);

@@ -121,10 +121,15 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         }));
     }
 
+    function replaceDraft(nextDraft: StdRequisitionDraft) {
+        setDraft(nextDraft);
+    }
+
     return {
         draft,
         subtotal,
-
+        
+        replaceDraft,
         setRowVersion,
         setRequisitionDate,
         setVanDriver,
