@@ -17,7 +17,7 @@ export const navigation = [
     },
     {
         title: "Standard Van Drivers",
-        href: "/standard-drivers",
+        href: "/standard-van-drivers",
         icon: Shirt,
     },
     {

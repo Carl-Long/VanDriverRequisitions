@@ -18,7 +18,7 @@ type Props = {
 
 type VanDriverOption = ComboboxOption<VanDriverLookup>;
 
-export function FeVanDriverField({ disabled, value, label, error, onChange }: Readonly<Props>) {
+export function VanDriverField({ disabled, value, label, error, onChange }: Readonly<Props>) {
     return (
         <Field label="Van Driver" error={error} required>
             <Combobox<VanDriverLookup>

@@ -107,6 +107,7 @@ export default function FeRequisitionApprovalsPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
+                    getHref={(req) => `/home-van-drivers/approvals/${req.id}`}
                     onRowClick={(req) => router.push(`/home-van-drivers/approvals/${req.id}`)}
                 />
             )}

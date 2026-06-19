@@ -18,7 +18,7 @@ const cards: LaunchCardProps[] = [
     {
         title: "Standard Van Drivers",
         description: "Raise and view requisitions for home and fashion stores",
-        href: "/standard-drivers",
+        href: "/standard-van-drivers",
         icon: Shirt,
     },
     {

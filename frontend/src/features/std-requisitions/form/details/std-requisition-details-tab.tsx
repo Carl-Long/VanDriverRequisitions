@@ -3,21 +3,19 @@
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
-import { FeRequisitionDraft } from "../types/fe-requisition-draft";
-import { VanDriverLookup } from "@/lib/api/van-drivers";
-import { VanDriverSummaryCard } from "../../../van-drivers/components/van-driver-summary-card";
+import { Alert } from "@/components/ui/alert";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
-
-import { Alert } from "@/components/ui/alert";
-import { StatusPill } from "../../list/components/status-pill";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
 import { VanDriverField } from "@/features/van-drivers/components/van-driver-field";
-
+import { VanDriverSummaryCard } from "@/features/van-drivers/components/van-driver-summary-card";
+import type { VanDriverLookup } from "@/lib/api/van-drivers";
+import type { StdRequisitionDraft } from "../types/std-requisition-draft";
+import { StdStatusPill } from "../../list/components/std-status-pill";
+import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
 
 type Props = {
     readonly: boolean;
-    draft: FeRequisitionDraft;
+    draft: StdRequisitionDraft;
     errors: Record<string, string>;
     clearError: (field: string) => void;
     onRequisitionDateChange: (date: Date | null) => void;
@@ -30,7 +28,7 @@ type Props = {
     onShopChange: (params: { id: string | null; label: string | null }) => void;
 };
 
-export function FeRequisitionDetailsTab({
+export function StdRequisitionDetailsTab({
     readonly,
     draft,
     errors,
@@ -57,10 +55,12 @@ export function FeRequisitionDetailsTab({
             <div>
                 <h2 className="text-lg font-semibold">Requisition Details</h2>
 
-                <p className="mt-1 text-sm text-muted-foreground">Manage requisition information</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Manage STD requisition information
+                </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="rounded-2xl border border-border bg-surface p-6">
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                         <Field label="Requisition Date" error={errors.requisitionDate} required>
@@ -139,7 +139,7 @@ export function FeRequisitionDetailsTab({
                                     </p>
                                 </div>
 
-                                {processingStatus && <StatusPill status={processingStatus} />}
+                                {processingStatus && <StdStatusPill status={processingStatus} />}
                             </div>
 
                             <div className="grid gap-6 md:grid-cols-2">

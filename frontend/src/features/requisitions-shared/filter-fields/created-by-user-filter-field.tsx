@@ -3,9 +3,12 @@
 import { Field } from "@/components/ui/field/field";
 
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
+import { requisitionUsersApi } from "../lib/requisition-users-api";
 
-import { requisitionUsersApi } from "@/features/fe-requisitions/list/lib/requisition-users-api";
-import { CreatedByFilter } from "../../types/fe-requisiton-filters.types";
+export type CreatedByFilter =
+    | { type: "any" }
+    | { type: "me" }
+    | { type: "user"; userId: string; label: string };
 
 const STATIC_OPTIONS: ComboboxOption[] = [
     {

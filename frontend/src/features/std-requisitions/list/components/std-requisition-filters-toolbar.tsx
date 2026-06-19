@@ -7,21 +7,18 @@ import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
-import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
+import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
+import { StdStatusFilterField } from "../filter-fields/std-status-filter-field";
 import { CreatedByUserFilterField } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
 import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
-import { StatusFilterField } from "@/features/fe-requisitions/list/filter-fields/status-filter-field";
-
 
 type Props = {
-    filters: FeRequisitionFilters;
-
-    onFiltersChange: (filters: FeRequisitionFilters) => void;
-
+    filters: StdRequisitionFilters;
+    onFiltersChange: (filters: StdRequisitionFilters) => void;
     onReset: () => void;
 };
 
-export function FeRequisitionFiltersToolbar({
+export function StdRequisitionFiltersToolbar({
     filters,
     onFiltersChange,
     onReset,
@@ -29,8 +26,6 @@ export function FeRequisitionFiltersToolbar({
     return (
         <Surface className="mb-5 p-5">
             <div className="flex flex-col gap-5">
-                {/* Header */}
-
                 <div>
                     <div className="flex items-center gap-2">
                         <SlidersHorizontal size={16} className="text-muted-foreground" />
@@ -42,8 +37,6 @@ export function FeRequisitionFiltersToolbar({
                         Showing your requisitions by default. Refine by creator, status, or shop.
                     </p>
                 </div>
-
-                {/* Search row */}
 
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="relative w-full max-w-md">
@@ -57,7 +50,6 @@ export function FeRequisitionFiltersToolbar({
                             onChange={(e) => {
                                 onFiltersChange({
                                     ...filters,
-
                                     requisitionNumber: e.target.value,
                                 });
                             }}
@@ -68,16 +60,11 @@ export function FeRequisitionFiltersToolbar({
 
                     <Button tone="accent" variant="solid" size="sm" onClick={onReset}>
                         <RotateCcw size={16} />
-
                         <span>Reset Filters</span>
                     </Button>
                 </div>
 
-                {/* Filter row */}
-
                 <div className="flex flex-wrap items-center gap-3">
-                    {/* Created By */}
-
                     <div className="min-w-[260px] flex-1">
                         <CreatedByUserFilterField
                             hideLabel
@@ -85,30 +72,24 @@ export function FeRequisitionFiltersToolbar({
                             onChange={(value) => {
                                 onFiltersChange({
                                     ...filters,
-
                                     createdBy: value,
                                 });
                             }}
                         />
                     </div>
 
-                    {/* Status */}
-
                     <div className="min-w-[220px]">
-                        <StatusFilterField
+                        <StdStatusFilterField
                             hideLabel
                             value={filters.status}
                             onChange={(value) => {
                                 onFiltersChange({
                                     ...filters,
-
                                     status: value,
                                 });
                             }}
                         />
                     </div>
-
-                    {/* Shop */}
 
                     <div className="min-w-[260px] flex-1">
                         <ShopFilterField
@@ -120,9 +101,7 @@ export function FeRequisitionFiltersToolbar({
                             onChange={(value, label) => {
                                 onFiltersChange({
                                     ...filters,
-
                                     shopId: value,
-
                                     shopLabel: label,
                                 });
                             }}

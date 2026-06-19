@@ -1,16 +1,17 @@
 import { CreatedByFilter } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
 import {
-    REQUISITION_STATUSES,
-    INITIAL_FILTERS,
-    RequisitionStatus,
-} from "../../constants/fe-requisition-status.constants";
-import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
+    INITIAL_STD_REQUISITION_FILTERS,
+    STD_REQUISITION_STATUSES,
+    type StdRequisitionStatus,
+} from "../../constants/std-requisition-status.constants";
+
+import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
 
 function isValidStatus(value: string | null) {
-    return value !== null && REQUISITION_STATUSES.includes(value as any);
+    return value !== null && STD_REQUISITION_STATUSES.includes(value as StdRequisitionStatus);
 }
 
-export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequisitionFilters {
+export function filtersFromSearchParams(searchParams: URLSearchParams): StdRequisitionFilters {
     const createdBy = searchParams.get("createdBy");
 
     let createdByFilter: CreatedByFilter = {
@@ -33,12 +34,12 @@ export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequis
     }
 
     return {
-        ...INITIAL_FILTERS,
+        ...INITIAL_STD_REQUISITION_FILTERS,
 
         requisitionNumber: searchParams.get("requisitionNumber") ?? "",
 
         status: isValidStatus(searchParams.get("status"))
-            ? (searchParams.get("status") as RequisitionStatus)
+            ? (searchParams.get("status") as StdRequisitionStatus)
             : "",
 
         shopId: searchParams.get("shopId"),
@@ -57,7 +58,7 @@ export function pageFromSearchParams(searchParams: URLSearchParams): number {
     return page;
 }
 
-export function buildSearchParams(filters: FeRequisitionFilters, page: number) {
+export function buildSearchParams(filters: StdRequisitionFilters, page: number) {
     const params = new URLSearchParams();
 
     if (filters.requisitionNumber) {
