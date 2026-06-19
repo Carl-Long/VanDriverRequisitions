@@ -1,6 +1,6 @@
 namespace VanDriverRequisitions.Application.Common.Interfaces;
 
-public interface IRequisitionNumberGenerator
+public interface IFeRequisitionNumberGenerator
 {
     Task<string> GenerateAsync(CancellationToken cancellationToken = default);
 }
