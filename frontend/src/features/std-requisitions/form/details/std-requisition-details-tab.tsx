@@ -11,7 +11,7 @@ import { VanDriverSummaryCard } from "@/features/van-drivers/components/van-driv
 import type { VanDriverLookup } from "@/lib/api/van-drivers";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 import { StdStatusPill } from "../../list/components/std-status-pill";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 
 type Props = {
     readonly: boolean;

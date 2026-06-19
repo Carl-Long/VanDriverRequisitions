@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
-import { CreatedByUserFilterField } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
+import { CreatedByUserFilterField } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 import { StatusFilterField } from "@/features/fe-requisitions/list/filter-fields/status-filter-field";
 
 

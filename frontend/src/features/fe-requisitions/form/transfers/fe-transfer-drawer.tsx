@@ -18,7 +18,7 @@ import { createEmptyFeTransferForm } from "../lib/create-empty-fe-transfer-form"
 import { createFeTransferFormSchema } from "../schemas/create-fe-transfer-form-schema";
 import { mapZodErrors } from "../lib/map-zod-errors";
 import { DayInput } from "../form-fields/day-input";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 
 type Props = {
     open: boolean;

@@ -11,7 +11,7 @@ import { SummaryField } from "@/components/ui/field/summary-field";
 
 import { Alert } from "@/components/ui/alert";
 import { StatusPill } from "../../list/components/status-pill";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 import { VanDriverField } from "@/features/van-drivers/components/van-driver-field";
 
 

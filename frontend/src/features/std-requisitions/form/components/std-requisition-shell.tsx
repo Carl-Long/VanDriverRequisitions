@@ -19,6 +19,7 @@ import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-
 import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { Button } from "@/components/ui/button/button";
 import { useRouter } from "next/navigation";
+import { formatDateTime } from "@/lib/format/date";
 
 
 
@@ -64,7 +65,14 @@ export function StdRequisitionShell({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [savingAction, setSavingAction] = useState<StdSaveAction>(null);
 
-    const isReadonly = mode === "readonly" || mode === "approval";
+    const isReadonly =
+        mode === "readonly" ||
+        mode === "approval" ||
+        draft.status === "Submitted" ||
+        draft.status === "Approved";
+    
+        
+    const canSubmit = !isReadonly && (draft.status === null || draft.status === "Draft" || draft.status === "Rejected");
 
     function clearError(field: string) {
         setErrors((prev) => {
@@ -131,6 +139,54 @@ export function StdRequisitionShell({
         }
     }
 
+    async function handleSubmit() {
+        const validation = createStdRequisitionSchema().safeParse(draft);
+
+        if (!validation.success) {
+            const nextErrors = mapZodErrors(validation.error);
+            setErrors(nextErrors);
+
+            if (
+                nextErrors.requisitionDate ||
+                nextErrors.vanDriverId ||
+                nextErrors.vanDriverName ||
+                nextErrors.shopId
+            ) {
+                setActiveKey("details");
+            } else {
+                setActiveKey("collection-charges-banks-and-bins");
+            }
+
+            return;
+        }
+
+        setSavingAction("submit");
+        setErrors({});
+
+        try {
+            const request = mapStdRequisitionDraftToSaveRequest(draft);
+
+            const submitted = draft.requisitionId
+                ? await stdRequisitionsApi.submitExisting(draft.requisitionId, request)
+                : await stdRequisitionsApi.submitNew(request);
+
+            replaceDraft(mapStdRequisitionDetailToDraft(submitted));
+
+            if (!draft.requisitionId) {
+                const editHref = `/standard-van-drivers/${submitted.id}${backHref ? `?returnTo=${encodeURIComponent(backHref)}` : ""
+                    }`;
+
+                router.replace(editHref);
+            }
+        } catch (err) {
+            setErrors({
+                form: getApiErrorMessage(err, "Failed to submit STD requisition."),
+            });
+        } finally {
+            setSavingAction(null);
+        }
+    }
+
     const title =
         mode === "create"
             ? "Create New STD Requisition"
@@ -177,6 +233,19 @@ export function StdRequisitionShell({
                             <span className="font-medium tabular-nums">
                                 {formatCurrencyGB(subtotal)}
                             </span>
+                            {draft.submittedByNameSnapshot && draft.submittedAtUtc && (
+                                <>
+                                    <div className="h-4 w-px bg-border" />
+
+                                    <span className="text-sm text-muted-foreground">
+                                        Submitted by{" "}
+                                        <span className="font-medium text-foreground">
+                                            {draft.submittedByNameSnapshot}
+                                        </span>{" "}
+                                        • {formatDateTime(draft.submittedAtUtc)}
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -195,11 +264,22 @@ export function StdRequisitionShell({
 
                     <Button
                         type="button"
+                        variant="outline"
                         disabled={savingAction !== null}
                         onClick={() => handleSave("saveAndContinue")}
                     >
                         {savingAction === "saveAndContinue" ? "Saving..." : "Save & Continue"}
                     </Button>
+
+                    {canSubmit && (
+                        <Button
+                            type="button"
+                            disabled={savingAction !== null}
+                            onClick={handleSubmit}
+                        >
+                            {savingAction === "submit" ? "Submitting..." : "Submit"}
+                        </Button>
+                    )}
                 </div>
             )}
 

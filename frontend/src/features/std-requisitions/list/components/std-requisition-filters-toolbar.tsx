@@ -9,8 +9,8 @@ import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
 import { StdStatusFilterField } from "../filter-fields/std-status-filter-field";
-import { CreatedByUserFilterField } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
-import { ShopFilterField } from "@/features/requisitions-shared/filter-fields/shop-filter-field";
+import { CreatedByUserFilterField } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 
 type Props = {
     filters: StdRequisitionFilters;

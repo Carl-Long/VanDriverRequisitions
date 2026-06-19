@@ -1,4 +1,4 @@
-import { CreatedByFilter } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
+import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
 import {
     REQUISITION_STATUSES,
     INITIAL_FILTERS,

@@ -3,7 +3,7 @@
 import { Field } from "@/components/ui/field/field";
 
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
-import { requisitionUsersApi } from "../lib/requisition-users-api";
+import { requisitionUsersApi } from "../../lib/requisition-users-api";
 
 export type CreatedByFilter =
     | { type: "any" }
@@ -36,8 +36,8 @@ export function CreatedByUserFilterField({ value, onChange, hideLabel = false }:
         value.type === "me"
             ? "Created By: Me"
             : value.type === "any"
-              ? "Created By: Anyone"
-              : `Created By: ${value.label}`;
+                ? "Created By: Anyone"
+                : `Created By: ${value.label}`;
 
     const combobox = (
         <Combobox

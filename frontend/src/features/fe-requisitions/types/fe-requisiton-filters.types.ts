@@ -1,4 +1,4 @@
-import { CreatedByFilter } from "@/features/requisitions-shared/filter-fields/created-by-user-filter-field";
+import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
 import { RequisitionStatus } from "../constants/fe-requisition-status.constants";
 
 export type FeRequisitionFilters = {
