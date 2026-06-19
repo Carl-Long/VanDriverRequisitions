@@ -7,6 +7,7 @@ import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode"
 import { RequisitionActions } from "@/features/requisitions-shared/components/requisition-actions";
 import { RequisitionHeader } from "@/features/requisitions-shared/components/requisition-header";
 import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
+import { RequisitionApprovalActions } from "@/features/requisitions-shared/components/requisition-approval-actions";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -23,6 +24,8 @@ type Props = {
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
+    onApprove: () => void;
+    onReject: () => void;
 };
 
 function UnsavedPill() {
@@ -48,6 +51,8 @@ export function StdRequisitionHeader({
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
+    onApprove,
+    onReject
 }: Readonly<Props>) {
     const TITLES: Record<StdRequisitionPageMode, string> = {
         create: "Create New STD Requisition",
@@ -58,10 +63,9 @@ export function StdRequisitionHeader({
 
     const title = TITLES[mode];
 
-    const showSubmittedBy =
-        (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
-
+    const showSubmittedBy = (status === "Submitted" || status === "Approved") && !!submittedByNameSnapshot;
     const showSubmitWindowStatus = mode !== "readonly" && mode !== "approval";
+    const canApproveOrReject = mode === "approval" && status === "Submitted";
 
     const actions =
         mode !== "readonly" && mode !== "approval" ? (
@@ -71,6 +75,12 @@ export function StdRequisitionHeader({
                 onSaveDraft={onSaveDraft}
                 onSaveAndContinue={onSaveAndContinue}
                 onSubmit={onSubmit}
+            />
+        ) : canApproveOrReject ? (
+            <RequisitionApprovalActions
+                activeAction={activeAction}
+                onApprove={onApprove}
+                onReject={onReject}
             />
         ) : null;
 

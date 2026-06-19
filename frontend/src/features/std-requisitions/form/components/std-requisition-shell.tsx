@@ -23,6 +23,8 @@ import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requ
 import { useToast } from "@/providers/toast-provider";
 import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
+import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
+import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 
 
 
@@ -65,6 +67,8 @@ export function StdRequisitionShell({
     const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
     const toast = useToast();
 
@@ -217,6 +221,91 @@ export function StdRequisitionShell({
         }
     }
 
+    function handleApproveRequest() {
+        if (mode !== "approval") {
+            return;
+        }
+
+        setIsApproveModalOpen(true);
+    }
+
+    function handleRejectRequest() {
+        if (mode !== "approval") {
+            return;
+        }
+
+        setIsRejectModalOpen(true);
+    }
+
+    async function handleApproveConfirm() {
+        if (!draft.requisitionId) {
+            return;
+        }
+
+        setIsApproveModalOpen(false);
+        setActiveAction("approve");
+
+        try {
+            setErrors({});
+            setIsSaving(true);
+
+            const approved = await stdRequisitionsApi.approve(draft.requisitionId, {
+                rowVersion: draft.rowVersion,
+            });
+
+            toast.success(`Requisition #${approved.requisitionNumber} approved`);
+            router.push("/standard-van-drivers/approvals");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form: getApiErrorMessage(err, "Failed to approve requisition"),
+                });
+
+                return;
+            }
+
+            setErrors({ form: "Failed to approve requisition", });
+        } finally {
+            setIsSaving(false);
+            setActiveAction(null);
+        }
+    }
+
+    async function handleRejectConfirm(rejectionNotes: string) {
+        if (!draft.requisitionId) {
+            return;
+        }
+
+        setIsRejectModalOpen(false);
+        setActiveAction("reject");
+
+        try {
+            setErrors({});
+            setIsSaving(true);
+
+            const rejected = await stdRequisitionsApi.reject(draft.requisitionId, {
+                rowVersion: draft.rowVersion,
+                rejectionNotes,
+            });
+
+            toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
+            router.push("/standard-van-drivers/approvals");
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setErrors({
+                    form: getApiErrorMessage(err, "Failed to reject requisition"),
+                });
+
+                return;
+            }
+
+            setErrors({ form: "Failed to reject requisition", });
+        } finally {
+            setIsSaving(false);
+            setActiveAction(null);
+        }
+    }
+
     const title =
         mode === "create"
             ? "Create New Requisition"
@@ -243,6 +332,8 @@ export function StdRequisitionShell({
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmitRequest}
+                onApprove={handleApproveRequest}
+                onReject={handleRejectRequest}
             />
 
             {errors.form && (
@@ -305,6 +396,24 @@ export function StdRequisitionShell({
                     onClose={() => setIsSubmitModalOpen(false)}
                     onConfirm={handleSubmitConfirm}
                 />
+            )}
+
+            {mode === "approval" && (
+                <>
+                    <RequisitionApproveModal
+                        open={isApproveModalOpen}
+                        loading={activeAction === "approve"}
+                        onClose={() => setIsApproveModalOpen(false)}
+                        onConfirm={handleApproveConfirm}
+                    />
+
+                    <RequisitionRejectModal
+                        open={isRejectModalOpen}
+                        loading={activeAction === "reject"}
+                        onClose={() => setIsRejectModalOpen(false)}
+                        onConfirm={handleRejectConfirm}
+                    />
+                </>
             )}
         </div>
     );
