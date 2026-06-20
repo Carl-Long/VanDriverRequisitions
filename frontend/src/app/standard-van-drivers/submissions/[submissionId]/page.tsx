@@ -13,6 +13,7 @@ import { StdSubmissionHeader } from "@/features/std-requisitions/std-submissions
 import { StdSubmissionSnapshotSummary } from "@/features/std-requisitions/std-submissions-view/std-submission-snapshot-summary";
 import { StdSubmissionBanksAndBinsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-banks-and-bins-table";
 import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
+import { StdSubmissionVanPacksTable } from "@/features/std-requisitions/std-submissions-view/std-submission-van-packs-table";
 
 export default function StdSubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -86,6 +87,9 @@ export default function StdSubmissionPage() {
 
                         <StdSubmissionBanksAndBinsTable
                             rows={submission.snapshot.collectionChargesBanksAndBins}
+                        />
+                        <StdSubmissionVanPacksTable
+                            rows={submission.snapshot.collectionVanPacks}
                         />
                     </div>
                 </div>

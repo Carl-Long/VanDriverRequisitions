@@ -2,18 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
-
-type TabKey =
-    | "details"
-    | "collection-charges-banks-and-bins"
-    | "collection-van-packs"
-    | "submission-history";
-
-type Tab = {
-    key: TabKey;
-    label: string;
-    hasWarning?: boolean;
-};
+import { buildStdRequisitionTabs } from "../lib/build-std-requisition-tabs";
+import { useMemo } from "react";
 
 type Props = {
     activeKey: string;
@@ -40,25 +30,20 @@ export function StdRequisitionTabs({
 
 }: Readonly<Props>) {
 
-    const tabs: Tab[] = [
-        { key: "details", label: "Details" },
-        {
-            key: "collection-charges-banks-and-bins",
-            label: "Banks & Bins Collections",
-            hasWarning: collectionChargesBanksAndBinsHasWarning,
-        },
-        {
-            key: "collection-van-packs",
-            label: "Van Pack Collections",
-            hasWarning: collectionVanPacksHasWarning,
-        },
-        {
-            key: "submission-history",
-            label: `Submission History (${submissionHistoryCount})`,
-        },
-    ];
-
+    const tabs = useMemo(() => buildStdRequisitionTabs(submissionHistoryCount), [submissionHistoryCount],);
     const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
+
+    function tabHasWarning(tab: (typeof tabs)[number]) {
+        if (tab.type === "banks-and-bins") {
+            return collectionChargesBanksAndBinsHasWarning;
+        }
+
+        if (tab.type === "van-packs") {
+            return collectionVanPacksHasWarning;
+        }
+
+        return false;
+    }
 
     return (
         <div className="space-y-6">
@@ -72,7 +57,7 @@ export function StdRequisitionTabs({
                         <TabButton
                             key={tab.key}
                             active={tab.key === activeTab.key}
-                            hasWarning={tab.hasWarning}
+                            hasWarning={tabHasWarning(tab)}
                             onClick={() => onActiveKeyChange(tab.key)}
                         >
                             {tab.label}
