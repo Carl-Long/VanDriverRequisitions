@@ -29,6 +29,7 @@ import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-l
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
 import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collection-van-pack-rate-change-message";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -100,6 +101,8 @@ export function StdRequisitionShell({
             return next;
         });
     }
+
+    const vanPackRateChangeMessage = getStdCollectionVanPackRateChangeMessage(draft.collectionVanPacks, stdVanPackLimitRule,);
 
     function collectionChargesBanksAndBinsHasWarning() {
         if (isReadonly) {
@@ -382,6 +385,12 @@ export function StdRequisitionShell({
                             <li key={message}>{message}</li>
                         ))}
                     </ul>
+                </Alert>
+            )}
+
+            {!isReadonly && vanPackRateChangeMessage && (
+                <Alert tone="warning">
+                    {vanPackRateChangeMessage}
                 </Alert>
             )}
 

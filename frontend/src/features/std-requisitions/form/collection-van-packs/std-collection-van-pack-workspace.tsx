@@ -266,7 +266,7 @@ function VanPackTable({
                                                     <div className="text-xs font-medium text-warning">
                                                         {limitStatus.state === "missing-limit"
                                                             ? "Missing price"
-                                                            : "Stale price"}
+                                                            : "Exceeds price"}
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
