@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { getApiErrorMessage } from "@/lib/api/client";
 
 import {
@@ -30,9 +29,5 @@ export function useRequisitionLimitRules() {
         load();
     }, []);
 
-    return {
-        limitRules,
-        loading,
-        error,
-    };
+    return { limitRules, loading, error, };
 }

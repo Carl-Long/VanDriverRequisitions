@@ -1,6 +1,16 @@
 import { z } from "zod";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
-export function createStdCollectionChargeBanksAndBinsFormSchema() {
+type Params = {
+    mileageLimitRule?: RequisitionLimitRuleSummary;
+    flatChargeLimitRule?: RequisitionLimitRuleSummary;
+};
+
+export function createStdCollectionChargeBanksAndBinsFormSchema({
+    mileageLimitRule,
+    flatChargeLimitRule,
+}: Params) {
     return z
         .object({
             date: z.date({
@@ -62,6 +72,33 @@ export function createStdCollectionChargeBanksAndBinsFormSchema() {
                         message: "Flat charge must be empty for mileage charges",
                     });
                 }
+
+                if (!mileageLimitRule) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["form"],
+                        message:
+                            "No STD mileage limit rule is configured. Please contact an administrator.",
+                    });
+
+                    return;
+                }
+
+                if (form.miles !== null && form.miles > mileageLimitRule.maxQuantity) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["miles"],
+                        message: `Maximum mileage of ${mileageLimitRule.maxQuantity} exceeded`,
+                    });
+                }
+
+                if (form.ratePerMile !== null && form.ratePerMile > mileageLimitRule.maxRate) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["ratePerMile"],
+                        message: `Maximum rate of ${formatCurrencyGB(mileageLimitRule.maxRate)} exceeded`,
+                    });
+                }
             }
 
             if (form.chargeType === "FlatCharge") {
@@ -78,6 +115,25 @@ export function createStdCollectionChargeBanksAndBinsFormSchema() {
                         code: "custom",
                         path: ["form"],
                         message: "Mileage fields must be empty for flat charges",
+                    });
+                }
+
+                if (!flatChargeLimitRule) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["form"],
+                        message:
+                            "No STD flat charge limit rule is configured. Please contact an administrator.",
+                    });
+
+                    return;
+                }
+
+                if (form.flatCharge !== null && form.flatCharge > flatChargeLimitRule.maxRate) {
+                    ctx.addIssue({
+                        code: "custom",
+                        path: ["flatCharge"],
+                        message: `Maximum flat charge of ${formatCurrencyGB(flatChargeLimitRule.maxRate)} exceeded`,
                     });
                 }
             }

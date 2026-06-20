@@ -14,7 +14,7 @@ import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisi
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
-import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 
 export default function Page() {
     const params = useParams<{ id: string }>();

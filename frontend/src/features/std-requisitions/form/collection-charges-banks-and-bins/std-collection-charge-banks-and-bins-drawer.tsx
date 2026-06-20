@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Info, Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
@@ -19,12 +19,15 @@ import { mapZodErrors } from "@/features/fe-requisitions/form/lib/map-zod-errors
 import { StdCollectionTypeField } from "@/features/std-collection-types/std-collection-type-field";
 import { StdLocationField } from "@/features/std-locations/std-location-field";
 import { StdChargeType, STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 type Props = {
     open: boolean;
     title: string;
     shopId: string | null;
     initialValues?: StdCollectionChargeBanksAndBinsForm;
+    mileageLimitRule?: RequisitionLimitRuleSummary;
+    flatChargeLimitRule?: RequisitionLimitRuleSummary;
     onClose: () => void;
     onSave: (form: StdCollectionChargeBanksAndBinsForm) => void;
 };
@@ -36,6 +39,8 @@ export function StdCollectionChargeBanksAndBinsDrawer({
     title,
     shopId,
     initialValues,
+    mileageLimitRule,
+    flatChargeLimitRule,
     onClose,
     onSave,
 }: Readonly<Props>) {
@@ -45,7 +50,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const schema = createStdCollectionChargeBanksAndBinsFormSchema();
+    const schema = createStdCollectionChargeBanksAndBinsFormSchema({
+        mileageLimitRule,
+        flatChargeLimitRule,
+    });
+
     const isEditMode = initialValues !== undefined;
 
     useEffect(() => {
@@ -89,18 +98,21 @@ export function StdCollectionChargeBanksAndBinsDrawer({
         });
     }
 
-    function setChargeType(chargeType: StdChargeType) {
+    function setChargeType(chargeType: StdCollectionChargeBanksAndBinsForm["chargeType"]) {
         setForm((prev) => ({
             ...prev,
             chargeType,
-            miles: chargeType === STD_CHARGE_TYPE.Mileage ? prev.miles : null,
-            ratePerMile: chargeType === STD_CHARGE_TYPE.Mileage ? prev.ratePerMile : null,
-            flatCharge: chargeType === STD_CHARGE_TYPE.FlatCharge ? prev.flatCharge : null,
+            miles: chargeType === "Mileage" ? prev.miles : null,
+            ratePerMile: chargeType === "Mileage" ? prev.ratePerMile : null,
+            flatCharge: chargeType === "FlatCharge" ? prev.flatCharge : null,
         }));
 
-        setErrors({});
+        clearError("miles");
+        clearError("ratePerMile");
+        clearError("flatCharge");
+        clearError("form");
     }
-
+    
     if (!open) {
         return null;
     }
@@ -140,6 +152,14 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                 </div>
             }
         >
+            {errors.form && <Alert tone="danger">{errors.form}</Alert>}
+
+            <LimitSummary
+                chargeType={form.chargeType}
+                mileageLimitRule={mileageLimitRule}
+                flatChargeLimitRule={flatChargeLimitRule}
+            />
+
             <form
                 id="std-banks-bins-drawer-form"
                 className="space-y-6"
@@ -262,11 +282,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                                 value={form.miles ?? ""}
                                 state={errors.miles ? "error" : "default"}
                                 onChange={(event) => {
-                                    const value = event.target.value;
+                                    const value = event.target.value === "" ? null : Number(event.target.value);
 
                                     setForm((prev) => ({
                                         ...prev,
-                                        miles: value === "" ? null : Number(value),
+                                        miles: value,
                                     }));
 
                                     clearError("miles");
@@ -283,11 +303,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                                 value={form.ratePerMile ?? ""}
                                 state={errors.ratePerMile ? "error" : "default"}
                                 onChange={(event) => {
-                                    const value = event.target.value;
+                                    const value = event.target.value === "" ? null : Number(event.target.value);
 
                                     setForm((prev) => ({
                                         ...prev,
-                                        ratePerMile: value === "" ? null : Number(value),
+                                        ratePerMile: value,
                                     }));
 
                                     clearError("ratePerMile");
@@ -305,11 +325,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                             value={form.flatCharge ?? ""}
                             state={errors.flatCharge ? "error" : "default"}
                             onChange={(event) => {
-                                const value = event.target.value;
+                                const value = event.target.value === "" ? null : Number(event.target.value);
 
                                 setForm((prev) => ({
                                     ...prev,
-                                    flatCharge: value === "" ? null : Number(value),
+                                    flatCharge: value,
                                 }));
 
                                 clearError("flatCharge");
@@ -330,5 +350,58 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                 </div>
             </form>
         </AppDrawer>
+    );
+}
+
+type LimitSummaryProps = {
+    chargeType: StdCollectionChargeBanksAndBinsForm["chargeType"];
+    mileageLimitRule?: RequisitionLimitRuleSummary;
+    flatChargeLimitRule?: RequisitionLimitRuleSummary;
+};
+
+function LimitSummary({
+    chargeType,
+    mileageLimitRule,
+    flatChargeLimitRule,
+}: Readonly<LimitSummaryProps>) {
+    const activeRule = chargeType === "Mileage" ? mileageLimitRule : flatChargeLimitRule;
+
+    return (
+        <div className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+
+            <div className="text-sm">
+                <div className="font-medium">
+                    {chargeType === "Mileage"
+                        ? "Mileage Limits"
+                        : "Flat Charge Limits"}
+                </div>
+
+                {activeRule ? (
+                    <>
+                        {chargeType === "Mileage" && (
+                            <div className="mt-1 text-muted-foreground">
+                                Maximum miles:{" "}
+                                <strong className="text-foreground">
+                                    {activeRule.maxQuantity}
+                                </strong>
+                            </div>
+                        )}
+
+                        <div className={chargeType === "Mileage" ? "text-muted-foreground" : "mt-1 text-muted-foreground"}>
+                            {chargeType === "Mileage" ? "Maximum rate per mile" : "Maximum flat charge"}
+                            :{" "}
+                            <strong className="text-foreground">
+                                {formatCurrencyGB(activeRule.maxRate)}
+                            </strong>
+                        </div>
+                    </>
+                ) : (
+                    <div className="mt-1 text-muted-foreground">
+                        No limit rule is configured for this option.
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

@@ -24,7 +24,7 @@ import { RequisitionApproveModal } from "@/features/requisitions-shared/componen
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
-import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 
@@ -331,7 +331,7 @@ export function StdRequisitionShell({
         mode === "create"
             ? "Create New Requisition"
             : mode === "edit"
-                ? "Editing STD Requisition"
+                ? "Editing Requisition"
                 : mode === "approval"
                     ? "Reviewing Requisition"
                     : "Viewing Requisition";

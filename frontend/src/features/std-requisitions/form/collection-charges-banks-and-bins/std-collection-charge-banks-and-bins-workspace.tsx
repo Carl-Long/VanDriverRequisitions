@@ -111,6 +111,8 @@ export function StdCollectionChargeBanksAndBinsWorkspace({
                 open={open}
                 title={editingRow ? "Edit Banks & Bins Row" : "Add Banks & Bins Row"}
                 shopId={shopId}
+                mileageLimitRule={mileageLimitRule}
+                flatChargeLimitRule={flatChargeLimitRule}
                 initialValues={
                     editingRow
                         ? mapStdCollectionChargeBanksAndBinsDraftToForm(editingRow)
