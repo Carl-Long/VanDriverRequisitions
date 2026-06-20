@@ -49,6 +49,7 @@ export type StdRequisitionDetail = {
     isEditable: boolean;
 
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBins[];
+    collectionVanPacks: StdCollectionVanPack[];
 
     submittedByNameSnapshot: string | null;
     submittedAtUtc: string | null;
@@ -85,4 +86,16 @@ export type StdCollectionChargeBanksAndBins = {
     flatCharge: number | null;
 
     totalValue: number | null;
+};
+
+export type StdCollectionVanPack = {
+    id: string;
+    deliveryDate: string;
+    postCodeZone: string;
+    vanPacksOut: number;
+    filledBags: number;
+    unusedVanPacks: number;
+    percentReturned: number;
+    ratePerVanPack: number;
+    totalValue: number;
 };

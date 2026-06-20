@@ -58,6 +58,58 @@ const banksAndBinsRowSchema = z
         }
     });
 
+const vanPackRowSchema = z
+    .object({
+        clientId: z.string(),
+        id: z.string().nullable(),
+
+        deliveryDate: z
+            .date()
+            .nullable()
+            .refine((value) => value !== null, "Delivery date is required"),
+
+        postCodeZone: z.string().trim().min(1, "Postcode zone is required"),
+
+        vanPacksOut: z.number().int().min(1, "Van packs out must be greater than zero").nullable(),
+
+        filledBags: z.number().int().min(1, "Filled bags must be greater than zero").nullable(),
+
+        unusedVanPacks: z.number(),
+        percentReturned: z.number(),
+
+        ratePerVanPack: z.number().min(0),
+        totalValue: z.number().min(0),
+    })
+    .superRefine((row, ctx) => {
+        if (row.vanPacksOut === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["vanPacksOut"],
+                message: "Van packs out is required",
+            });
+        }
+
+        if (row.filledBags === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["filledBags"],
+                message: "Filled bags is required",
+            });
+        }
+
+        if (
+            row.vanPacksOut !== null &&
+            row.filledBags !== null &&
+            row.filledBags > row.vanPacksOut
+        ) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["filledBags"],
+                message: "Filled bags cannot be greater than van packs out",
+            });
+        }
+    });
+
 export function createStdRequisitionSchema() {
     return z
         .object({
@@ -82,9 +134,13 @@ export function createStdRequisitionSchema() {
                 .refine((value) => value !== null, "Shop is required"),
 
             collectionChargesBanksAndBins: z.array(banksAndBinsRowSchema),
+            collectionVanPacks: z.array(vanPackRowSchema),
         })
         .superRefine((data, ctx) => {
-            if (data.collectionChargesBanksAndBins.length === 0) {
+            const totalRows =
+                data.collectionChargesBanksAndBins.length + data.collectionVanPacks.length;
+
+            if (totalRows === 0) {
                 ctx.addIssue({
                     code: "custom",
                     path: ["form"],

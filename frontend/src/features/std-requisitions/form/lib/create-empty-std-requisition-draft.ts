@@ -30,6 +30,7 @@ export function createEmptyStdRequisitionDraft(): StdRequisitionDraft {
         rejectionNotes: null,
 
         collectionChargesBanksAndBins: [],
+        collectionVanPacks: [],
 
         submissionHistory: [],
     };

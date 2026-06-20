@@ -2,6 +2,7 @@ import type { VanDriverLookup } from "@/lib/api/van-drivers";
 import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
 import type { StdCollectionChargeBanksAndBinsDraft } from "./std-collection-charge-banks-and-bins-draft";
 import type { StdSubmissionHistoryDraft } from "./std-submission-history-draft";
+import type { StdCollectionVanPackDraft } from "./std-collection-van-pack-draft";
 
 export type StdRequisitionDraft = {
     requisitionId: string | null;
@@ -32,6 +33,7 @@ export type StdRequisitionDraft = {
     rejectedAtUtc: string | null;
 
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBinsDraft[];
+    collectionVanPacks: StdCollectionVanPackDraft[];
 
     submissionHistory: StdSubmissionHistoryDraft[];
 };

@@ -1,4 +1,4 @@
-import { toDateOnlyString } from "@/lib/format/date";
+import { toRequiredDateOnlyString } from "@/lib/format/date";
 import type { SaveStdRequisition } from "../../types/std-requisition-save.types";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 
@@ -19,7 +19,7 @@ export function mapStdRequisitionDraftToSaveRequest(
 
     return {
         rowVersion: draft.rowVersion,
-        requisitionDate: toDateOnlyString(draft.requisitionDate) ?? "",
+        requisitionDate: toRequiredDateOnlyString(draft.requisitionDate, "Requisition date is required."),
         vanDriverId: draft.vanDriverId,
         vanDriverName: draft.vanDriverName?.trim() ?? "",
         shopId: draft.shopId,
@@ -39,7 +39,7 @@ export function mapStdRequisitionDraftToSaveRequest(
 
             return {
                 id: row.id,
-                date: toDateOnlyString(row.date) ?? "",
+                date: toRequiredDateOnlyString(row.date, "Banks and Bins Collection date is required. ") ?? "",
                 collectionTypeId: row.collectionTypeId,
                 locationId: row.locationId,
                 numberOfBags: row.numberOfBags,
@@ -47,6 +47,32 @@ export function mapStdRequisitionDraftToSaveRequest(
                 miles: row.chargeType === "Mileage" ? row.miles : null,
                 ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
                 flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+            };
+        }),
+
+        collectionVanPacks: draft.collectionVanPacks.map((row) => {
+            if (row.deliveryDate === null) {
+                throw new Error("Van Pack delivery date is required.");
+            }
+
+            if (!row.postCodeZone?.trim()) {
+                throw new Error("Van Pack postcode zone is required.");
+            }
+
+            if (row.vanPacksOut === null) {
+                throw new Error("Van packs out is required.");
+            }
+
+            if (row.filledBags === null) {
+                throw new Error("Filled bags is required.");
+            }
+
+            return {
+                id: row.id,
+                deliveryDate: toRequiredDateOnlyString(row.deliveryDate, "Van Pack delivery date is required."),
+                postCodeZone: row.postCodeZone.trim(),
+                vanPacksOut: row.vanPacksOut,
+                filledBags: row.filledBags,
             };
         }),
     };

@@ -9,6 +9,13 @@ import { calculateStdRequisitionSubtotal } from "../lib/calculate-std-requisitio
 import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 import { createStdCollectionChargeBanksAndBinsDraftFromForm } from "../lib/create-std-collection-charge-banks-and-bins-draft-from-form";
 import { calculateStdCollectionChargeBanksAndBinsFormTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
+import {
+    calculateStdCollectionVanPackUnusedVanPacks,
+    calculateStdCollectionVanPackPercentReturned,
+    calculateStdCollectionVanPackFormTotal,
+} from "../lib/calculate-std-collection-van-pack-form";
+import { createStdCollectionVanPackDraftFromForm } from "../lib/create-std-collection-van-pack-draft-from-form";
+import { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -121,6 +128,50 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         }));
     }
 
+    function addCollectionVanPack(form: StdCollectionVanPackForm, ratePerVanPack: number) {
+        const row = createStdCollectionVanPackDraftFromForm({
+            form,
+            ratePerVanPack,
+        });
+
+        setDraft((prev) => ({
+            ...prev,
+            collectionVanPacks: [...prev.collectionVanPacks, row],
+        }));
+    }
+
+    function updateCollectionVanPack(
+        clientId: string,
+        form: StdCollectionVanPackForm,
+        ratePerVanPack: number,
+    ) {
+        setDraft((prev) => ({
+            ...prev,
+            collectionVanPacks: prev.collectionVanPacks.map((row) =>
+                row.clientId === clientId
+                    ? {
+                          ...row,
+                          deliveryDate: form.deliveryDate,
+                          postCodeZone: form.postCodeZone.trim(),
+                          vanPacksOut: form.vanPacksOut,
+                          filledBags: form.filledBags,
+                          unusedVanPacks: calculateStdCollectionVanPackUnusedVanPacks(form),
+                          percentReturned: calculateStdCollectionVanPackPercentReturned(form),
+                          ratePerVanPack,
+                          totalValue: calculateStdCollectionVanPackFormTotal(form, ratePerVanPack),
+                      }
+                    : row,
+            ),
+        }));
+    }
+
+    function removeCollectionVanPack(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            collectionVanPacks: prev.collectionVanPacks.filter((row) => row.clientId !== clientId),
+        }));
+    }
+
     function replaceDraft(nextDraft: StdRequisitionDraft) {
         setDraft(nextDraft);
     }
@@ -128,7 +179,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     return {
         draft,
         subtotal,
-        
+
         replaceDraft,
         setRowVersion,
         setRequisitionDate,
@@ -139,5 +190,9 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         addCollectionChargeBanksAndBins,
         updateCollectionChargeBanksAndBins,
         removeCollectionChargeBanksAndBins,
+
+        addCollectionVanPack,
+        updateCollectionVanPack,
+        removeCollectionVanPack,
     };
 }

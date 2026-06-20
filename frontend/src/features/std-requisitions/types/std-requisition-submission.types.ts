@@ -59,6 +59,7 @@ export type StdRequisitionSnapshot = {
     subtotal: number;
 
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBinsSnapshot[];
+    collectionVanPacks: StdCollectionVanPackSnapshot[];
 };
 
 export type StdCollectionChargeBanksAndBinsSnapshot = {
@@ -81,4 +82,15 @@ export type StdCollectionChargeBanksAndBinsSnapshot = {
     flatCharge: number | null;
 
     totalValue: number | null;
+};
+
+export type StdCollectionVanPackSnapshot = {
+    deliveryDate: string;
+    postCodeZone: string;
+    vanPacksOut: number;
+    filledBags: number;
+    unusedVanPacks: number;
+    percentReturned: number;
+    ratePerVanPack: number;
+    totalValue: number;
 };

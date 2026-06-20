@@ -25,6 +25,16 @@ export function toDateOnlyString(date?: Date | null): string | null {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+export function toRequiredDateOnlyString(value: Date | null, message: string): string {
+    const result = toDateOnlyString(value);
+
+    if (!result) {
+        throw new Error(message);
+    }
+
+    return result;
+}
+
 export function formatDateTime(iso: string): string {
     return new Date(iso).toLocaleDateString("en-GB", {
         day: "numeric",

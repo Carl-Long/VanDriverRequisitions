@@ -1,8 +1,10 @@
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
+import { calculateStdCollectionChargeBanksAndBinsRowsTotal } from "./calculate-std-collection-charge-banks-and-bins-form";
+import { calculateStdCollectionVanPackRowsTotal } from "./calculate-std-collection-van-pack-form";
 
 export function calculateStdRequisitionSubtotal(draft: StdRequisitionDraft) {
-    return draft.collectionChargesBanksAndBins.reduce(
-        (total, row) => total + (row.totalValue ?? 0),
-        0,
+    return (
+        calculateStdCollectionChargeBanksAndBinsRowsTotal(draft.collectionChargesBanksAndBins,) 
+        + calculateStdCollectionVanPackRowsTotal(draft.collectionVanPacks)
     );
 }
