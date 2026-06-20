@@ -16,6 +16,7 @@ import {
 } from "../lib/calculate-std-collection-van-pack-form";
 import { createStdCollectionVanPackDraftFromForm } from "../lib/create-std-collection-van-pack-draft-from-form";
 import { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
+import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -150,16 +151,15 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
             collectionVanPacks: prev.collectionVanPacks.map((row) =>
                 row.clientId === clientId
                     ? {
-                          ...row,
-                          deliveryDate: form.deliveryDate,
-                          postCodeZone: form.postCodeZone.trim(),
-                          vanPacksOut: form.vanPacksOut,
-                          filledBags: form.filledBags,
-                          unusedVanPacks: calculateStdCollectionVanPackUnusedVanPacks(form),
-                          percentReturned: calculateStdCollectionVanPackPercentReturned(form),
-                          ratePerVanPack,
-                          totalValue: calculateStdCollectionVanPackFormTotal(form, ratePerVanPack),
-                      }
+                        ...row,
+                        deliveryDate: form.deliveryDate,
+                        postCodeZone: normaliseUkPostcodeOutwardCode(form.postCodeZone), vanPacksOut: form.vanPacksOut,
+                        filledBags: form.filledBags,
+                        unusedVanPacks: calculateStdCollectionVanPackUnusedVanPacks(form),
+                        percentReturned: calculateStdCollectionVanPackPercentReturned(form),
+                        ratePerVanPack,
+                        totalValue: calculateStdCollectionVanPackFormTotal(form, ratePerVanPack),
+                    }
                     : row,
             ),
         }));

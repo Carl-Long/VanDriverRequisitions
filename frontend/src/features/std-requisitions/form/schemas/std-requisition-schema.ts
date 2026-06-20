@@ -1,3 +1,4 @@
+import { isUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 import { z } from "zod";
 
 const banksAndBinsRowSchema = z
@@ -68,11 +69,26 @@ const vanPackRowSchema = z
             .nullable()
             .refine((value) => value !== null, "Delivery date is required"),
 
-        postCodeZone: z.string().trim().min(1, "Postcode zone is required"),
+        postCodeZone: z
+            .string()
+            .trim()
+            .min(1, "Postcode zone is required")
+            .refine(
+                (value) => isUkPostcodeOutwardCode(value),
+                "Enter a valid postcode zone, for example M1, B33 or SW1A",
+            ),
 
-        vanPacksOut: z.number().int().min(1, "Van packs out must be greater than zero").nullable(),
+        vanPacksOut: z
+            .number()
+            .int("Must be a whole number")
+            .min(1, "Van packs out must be greater than zero")
+            .nullable(),
 
-        filledBags: z.number().int().min(1, "Filled bags must be greater than zero").nullable(),
+        filledBags: z
+            .number()
+            .int("Must be a whole number")
+            .min(1, "Filled bags must be greater than zero")
+            .nullable(),
 
         unusedVanPacks: z.number(),
         percentReturned: z.number(),

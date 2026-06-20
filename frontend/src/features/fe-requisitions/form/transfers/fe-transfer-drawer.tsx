@@ -122,6 +122,7 @@ export function FeTransferDrawer({
         >
             <form
                 id="transfer-drawer-form"
+                noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
                     event.preventDefault();

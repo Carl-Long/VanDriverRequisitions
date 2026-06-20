@@ -162,6 +162,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 
             <form
                 id="std-banks-bins-drawer-form"
+                noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
                     event.preventDefault();

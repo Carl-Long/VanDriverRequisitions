@@ -1,6 +1,7 @@
 import { toRequiredDateOnlyString } from "@/lib/format/date";
 import type { SaveStdRequisition } from "../../types/std-requisition-save.types";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
+import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 
 export function mapStdRequisitionDraftToSaveRequest(
     draft: StdRequisitionDraft,
@@ -70,8 +71,7 @@ export function mapStdRequisitionDraftToSaveRequest(
             return {
                 id: row.id,
                 deliveryDate: toRequiredDateOnlyString(row.deliveryDate, "Van Pack delivery date is required."),
-                postCodeZone: row.postCodeZone.trim(),
-                vanPacksOut: row.vanPacksOut,
+                postCodeZone: normaliseUkPostcodeOutwardCode(row.postCodeZone), vanPacksOut: row.vanPacksOut,
                 filledBags: row.filledBags,
             };
         }),

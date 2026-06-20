@@ -121,6 +121,7 @@ export function FeGeneralTaskDrawer({
         >
             <form
                 id="general-task-drawer-form"
+                noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
                     event.preventDefault();

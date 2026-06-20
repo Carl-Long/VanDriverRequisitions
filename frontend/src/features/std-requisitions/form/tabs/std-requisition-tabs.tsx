@@ -3,7 +3,11 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
 
-type TabKey = "details" | "collection-charges-banks-and-bins" | "submission-history";
+type TabKey =
+    | "details"
+    | "collection-charges-banks-and-bins"
+    | "collection-van-packs"
+    | "submission-history";
 
 type Tab = {
     key: TabKey;
@@ -16,9 +20,11 @@ type Props = {
     onActiveKeyChange: (key: string) => void;
     details: React.ReactNode;
     collectionChargesBanksAndBins: React.ReactNode;
+    collectionChargesBanksAndBinsHasWarning?: boolean;
+    collectionVanPacks: React.ReactNode;
+    collectionVanPacksHasWarning?: boolean;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
-    collectionChargesBanksAndBinsHasWarning?: boolean;
 };
 
 export function StdRequisitionTabs({
@@ -26,20 +32,25 @@ export function StdRequisitionTabs({
     onActiveKeyChange,
     details,
     collectionChargesBanksAndBins,
+    collectionChargesBanksAndBinsHasWarning,
+    collectionVanPacks,
+    collectionVanPacksHasWarning,
     submissionHistory,
     submissionHistoryCount,
-    collectionChargesBanksAndBinsHasWarning,
+
 }: Readonly<Props>) {
 
     const tabs: Tab[] = [
-        {
-            key: "details",
-            label: "Details",
-        },
+        { key: "details", label: "Details" },
         {
             key: "collection-charges-banks-and-bins",
             label: "Banks & Bins Collections",
             hasWarning: collectionChargesBanksAndBinsHasWarning,
+        },
+        {
+            key: "collection-van-packs",
+            label: "Van Pack Collections",
+            hasWarning: collectionVanPacksHasWarning,
         },
         {
             key: "submission-history",
@@ -72,8 +83,8 @@ export function StdRequisitionTabs({
 
             <div role="tabpanel">
                 {activeTab.key === "details" && details}
-                {activeTab.key === "collection-charges-banks-and-bins" &&
-                    collectionChargesBanksAndBins}
+                {activeTab.key === "collection-charges-banks-and-bins" && collectionChargesBanksAndBins}
+                {activeTab.key === "collection-van-packs" && collectionVanPacks}
                 {activeTab.key === "submission-history" && submissionHistory}
             </div>
         </div>

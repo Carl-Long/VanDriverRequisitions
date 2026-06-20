@@ -27,7 +27,8 @@ import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
-
+import { areCurrencyAmountsEqual, formatCurrencyGB } from "@/lib/format/currency";
+import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
 
 
 
@@ -54,6 +55,7 @@ export function StdRequisitionShell({
     const { limitRules, error: limitRulesError } = useRequisitionLimitRules();
     const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
     const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
+    const stdVanPackLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.VAN_PACK, });
 
     const {
         draft,
@@ -66,6 +68,9 @@ export function StdRequisitionShell({
         addCollectionChargeBanksAndBins,
         updateCollectionChargeBanksAndBins,
         removeCollectionChargeBanksAndBins,
+        addCollectionVanPack,
+        updateCollectionVanPack,
+        removeCollectionVanPack,
     } = useStdRequisitionDraft(initialDraft);
 
     const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
@@ -110,6 +115,23 @@ export function StdRequisitionShell({
                     stdFlatChargeLimitRule,
                 ).state !== "ok",
         );
+    }
+
+
+    function collectionVanPacksHasWarning() {
+        if (isReadonly) {
+            return false;
+        }
+
+        if (draft.collectionVanPacks.length === 0) {
+            return false;
+        }
+
+        if (!stdVanPackLimitRule) {
+            return true;
+        }
+
+        return draft.collectionVanPacks.some((row) => !areCurrencyAmountsEqual(row.ratePerVanPack, stdVanPackLimitRule.maxRate),);
     }
 
     async function saveRequisition(
@@ -404,6 +426,23 @@ export function StdRequisitionShell({
                         onDelete={removeCollectionChargeBanksAndBins}
                     />
                 }
+                collectionVanPacks={
+                    <StdCollectionVanPackWorkspace
+                        readonly={isReadonly}
+                        rows={draft.collectionVanPacks}
+                        vanPackLimitRule={stdVanPackLimitRule}
+                        onAdd={(form, ratePerVanPack) => {
+                            addCollectionVanPack(form, ratePerVanPack);
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form, ratePerVanPack) => {
+                            updateCollectionVanPack(clientId, form, ratePerVanPack);
+                            clearError("form");
+                        }}
+                        onDelete={removeCollectionVanPack}
+                    />
+                }
+                collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
                 submissionHistory={
                     <StdSubmissionHistoryTab
                         submissions={draft.submissionHistory}

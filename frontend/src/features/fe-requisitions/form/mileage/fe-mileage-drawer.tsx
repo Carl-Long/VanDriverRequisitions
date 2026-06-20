@@ -121,6 +121,7 @@ export function FeMileageDrawer({
         >
             <form
                 id="mileage-drawer-form"
+                noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
                     event.preventDefault();

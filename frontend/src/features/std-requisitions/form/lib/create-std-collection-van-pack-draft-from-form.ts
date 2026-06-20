@@ -1,3 +1,4 @@
+import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 import type { StdCollectionVanPackDraft } from "../types/std-collection-van-pack-draft";
 import type { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
 import {
@@ -21,8 +22,8 @@ export function createStdCollectionVanPackDraftFromForm({
 
         deliveryDate: form.deliveryDate,
 
-        postCodeZone: form.postCodeZone.trim(),
-
+        postCodeZone: normaliseUkPostcodeOutwardCode(form.postCodeZone),
+        
         vanPacksOut: form.vanPacksOut,
         filledBags: form.filledBags,
 
