@@ -368,7 +368,7 @@ export function FeRequisitionShell({
             {errors.form && (
                 <Alert tone="danger">
                     <ul className="list-disc space-y-1 pl-5">
-                        {errors.form.split("\n").map((message) => (
+                        {[...new Set(errors.form.split("\n").filter(Boolean))].map((message) => (
                             <li key={message}>{message}</li>
                         ))}
                     </ul>
@@ -457,7 +457,7 @@ export function FeRequisitionShell({
                         submissions={draft.submissionHistory}
                         returnTo={backHref}
                     />
-                } 
+                }
                 renderTaskTypeTab={(taskTypeId) => {
                     const taskType = taskTypes.find((x) => x.id === taskTypeId);
 

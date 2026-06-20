@@ -15,7 +15,6 @@ import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
 import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
-
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 import { useToast } from "@/providers/toast-provider";
@@ -24,6 +23,10 @@ import { RequisitionSubmitModal } from "@/features/requisitions-shared/component
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
+import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
+import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
+import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
+import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 
 
 
@@ -48,6 +51,9 @@ export function StdRequisitionShell({
 
     const router = useRouter();
     const initialDraft = useMemo(() => (stdRequisition ? mapStdRequisitionDetailToDraft(stdRequisition) : undefined), [stdRequisition]);
+    const { limitRules, error: limitRulesError } = useRequisitionLimitRules();
+    const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
+    const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
 
     const {
         draft,
@@ -89,6 +95,21 @@ export function StdRequisitionShell({
             delete next[field];
             return next;
         });
+    }
+
+    function collectionChargesBanksAndBinsHasWarning() {
+        if (isReadonly) {
+            return false;
+        }
+
+        return draft.collectionChargesBanksAndBins.some(
+            (row) =>
+                getStdBanksAndBinsLimitStatus(
+                    row,
+                    stdMileageLimitRule,
+                    stdFlatChargeLimitRule,
+                ).state !== "ok",
+        );
     }
 
     async function saveRequisition(
@@ -317,6 +338,8 @@ export function StdRequisitionShell({
 
     return (
         <div className="space-y-4">
+            {limitRulesError && <Alert tone="danger">{limitRulesError}</Alert>}
+
             <StdRequisitionHeader
                 mode={mode}
                 backHref={backHref}
@@ -339,7 +362,7 @@ export function StdRequisitionShell({
             {errors.form && (
                 <Alert tone="danger">
                     <ul className="list-disc space-y-1 pl-5">
-                        {errors.form.split("\n").map((message) => (
+                        {[...new Set(errors.form.split("\n").filter(Boolean))].map((message) => (
                             <li key={message}>{message}</li>
                         ))}
                     </ul>
@@ -350,6 +373,7 @@ export function StdRequisitionShell({
                 activeKey={activeKey}
                 onActiveKeyChange={setActiveKey}
                 submissionHistoryCount={draft.submissionHistory.length}
+                collectionChargesBanksAndBinsHasWarning={collectionChargesBanksAndBinsHasWarning()}
                 details={
                     <StdRequisitionDetailsTab
                         readonly={isReadonly}
@@ -367,14 +391,14 @@ export function StdRequisitionShell({
                         readonly={isReadonly}
                         shopId={draft.shopId}
                         rows={draft.collectionChargesBanksAndBins}
+                        mileageLimitRule={stdMileageLimitRule}
+                        flatChargeLimitRule={stdFlatChargeLimitRule}
                         onAdd={(form) => {
                             addCollectionChargeBanksAndBins(form);
-                            clearError("collectionChargesBanksAndBins");
                             clearError("form");
                         }}
                         onUpdate={(clientId, form) => {
                             updateCollectionChargeBanksAndBins(clientId, form);
-                            clearError("collectionChargesBanksAndBins");
                             clearError("form");
                         }}
                         onDelete={removeCollectionChargeBanksAndBins}

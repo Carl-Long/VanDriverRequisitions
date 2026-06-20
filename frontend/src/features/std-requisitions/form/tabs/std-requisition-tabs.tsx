@@ -1,21 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { AlertTriangle } from "lucide-react";
 
 type TabKey = "details" | "collection-charges-banks-and-bins" | "submission-history";
 
 type Tab = {
     key: TabKey;
     label: string;
+    hasWarning?: boolean;
 };
 
 type Props = {
     activeKey: string;
-    onActiveKeyChange: (key: TabKey) => void;
+    onActiveKeyChange: (key: string) => void;
     details: React.ReactNode;
     collectionChargesBanksAndBins: React.ReactNode;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
+    collectionChargesBanksAndBinsHasWarning?: boolean;
 };
 
 export function StdRequisitionTabs({
@@ -25,10 +28,19 @@ export function StdRequisitionTabs({
     collectionChargesBanksAndBins,
     submissionHistory,
     submissionHistoryCount,
+    collectionChargesBanksAndBinsHasWarning,
 }: Readonly<Props>) {
+
     const tabs: Tab[] = [
-        { key: "details", label: "Details" },
-        { key: "collection-charges-banks-and-bins", label: "Banks & Bins Collections" },
+        {
+            key: "details",
+            label: "Details",
+        },
+        {
+            key: "collection-charges-banks-and-bins",
+            label: "Banks & Bins Collections",
+            hasWarning: collectionChargesBanksAndBinsHasWarning,
+        },
         {
             key: "submission-history",
             label: `Submission History (${submissionHistoryCount})`,
@@ -49,6 +61,7 @@ export function StdRequisitionTabs({
                         <TabButton
                             key={tab.key}
                             active={tab.key === activeTab.key}
+                            hasWarning={tab.hasWarning}
                             onClick={() => onActiveKeyChange(tab.key)}
                         >
                             {tab.label}
@@ -69,11 +82,12 @@ export function StdRequisitionTabs({
 
 type TabButtonProps = {
     active: boolean;
+    hasWarning?: boolean;
     onClick: () => void;
     children: React.ReactNode;
 };
 
-function TabButton({ active, onClick, children }: Readonly<TabButtonProps>) {
+function TabButton({ active, hasWarning, onClick, children }: Readonly<TabButtonProps>) {
     return (
         <button
             type="button"
@@ -82,13 +96,26 @@ function TabButton({ active, onClick, children }: Readonly<TabButtonProps>) {
             onClick={onClick}
             className={cn(
                 "inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200",
-                "cursor-pointer focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
+                "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 cursor-pointer",
                 active
                     ? "bg-background text-foreground shadow-sm ring-1 ring-border"
                     : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
             )}
         >
-            {children}
+            <span>{children}</span>
+
+            {hasWarning && (
+                <span
+                    title="This tab has limit warnings"
+                    className={cn(
+                        "inline-flex h-5 w-5 items-center justify-center rounded-full",
+                        active ? "bg-warning/15 text-warning" : "bg-warning/10 text-warning",
+                    )}
+                >
+                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="sr-only">This tab has limit warnings</span>
+                </span>
+            )}
         </button>
     );
 }

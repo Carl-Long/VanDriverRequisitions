@@ -243,8 +243,8 @@ function TransfersTable({
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message) => (
-                                                            <li key={message}>{message}</li>
+                                                        {limitStatus.messages.map((message, index) => (
+                                                            <li key={`${message}-${index}`}>{message}</li>
                                                         ))}
                                                     </ul>
                                                 </div>
