@@ -52,6 +52,12 @@ public static class StdRequisitionMapper
                 .ThenBy(x => x.Id)
                 .Select(StdCollectionChargeBanksAndBinsMapper.ToDetailDto)
                 .ToList(),
+            
+            CollectionVanPacks = requisition.CollectionVanPacks
+                .OrderBy(x => x.DeliveryDate)
+                .ThenBy(x => x.PostCodeZone)
+                .Select(StdCollectionVanPackMapper.ToDetailDto)
+                .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };

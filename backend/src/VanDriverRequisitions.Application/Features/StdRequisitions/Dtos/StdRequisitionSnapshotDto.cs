@@ -17,4 +17,5 @@ public sealed class StdRequisitionSnapshotDto
     public decimal Subtotal { get; init; }
 
     public List<StdCollectionChargeBanksAndBinsSnapshotDto> CollectionChargesBanksAndBins { get; init; } = [];
+    public List<StdCollectionVanPackSnapshotDto> CollectionVanPacks { get; init; } = [];
 }

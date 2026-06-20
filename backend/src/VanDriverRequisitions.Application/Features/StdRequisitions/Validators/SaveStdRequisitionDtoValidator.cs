@@ -35,10 +35,13 @@ public sealed class SaveStdRequisitionDtoValidator : AbstractValidator<SaveStdRe
 
         RuleForEach(x => x.CollectionChargesBanksAndBins)
             .SetValidator(new SaveStdCollectionChargeBanksAndBinsDtoValidator());
+        
+        RuleForEach(x => x.CollectionVanPacks)
+            .SetValidator(new SaveStdCollectionVanPackDtoValidator());
     }
 
     private static bool HaveAtLeastOneRow(SaveStdRequisitionDto dto)
     {
-        return dto.CollectionChargesBanksAndBins.Any();
+        return dto.CollectionChargesBanksAndBins.Any() || dto.CollectionVanPacks.Any();
     }
 }

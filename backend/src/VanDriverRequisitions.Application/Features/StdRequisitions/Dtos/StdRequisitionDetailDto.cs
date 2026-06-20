@@ -22,6 +22,7 @@ public sealed class StdRequisitionDetailDto
     public decimal Subtotal { get; init; }
 
     public required List<StdCollectionChargeBanksAndBinsDetailDto> CollectionChargesBanksAndBins { get; init; }
+    public required List<StdCollectionVanPackDetailDto> CollectionVanPacks { get; init; }
 
     public bool IsEditable { get; init; }
 

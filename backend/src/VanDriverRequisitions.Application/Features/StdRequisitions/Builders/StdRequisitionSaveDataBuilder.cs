@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
@@ -10,6 +12,7 @@ using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 
@@ -39,13 +42,21 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
             saveStdRequisitionDto.CollectionChargesBanksAndBins,
             collectionTypeMap,
             locationMap);
+        
+        var vanPackRate = saveStdRequisitionDto.CollectionVanPacks.Count > 0
+            ? await GetRequiredVanPackRateAsync(cancellationToken)
+            : 0m;
+        
+        var collectionVanPacks = saveStdRequisitionDto.CollectionVanPacks
+            .Select(x => StdCollectionVanPackMapper.ToUpdateModel(x, vanPackRate))
+            .ToList();
 
         var updateModel = new StdRequisitionUpdateModel(
             details,
             Pickups: [],
             Transfers: [],
             CollectionChargesBanksAndBins: collectionChargeModels,
-            CollectionVanPacks: [],
+            CollectionVanPacks: collectionVanPacks,
             AdditionalCosts: []);
 
         return new StdRequisitionSaveData(driverSummary, updateModel, shop.IsActive);
@@ -131,5 +142,27 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
         return !locationMap.TryGetValue(locationId, out var location)
             ? throw new NotFoundException($"STD location '{locationId}' was not found.")
             : location;
+    }
+    
+    private async Task<decimal> GetRequiredVanPackRateAsync(CancellationToken cancellationToken)
+    {
+        var rule = await context.RequisitionLimitRules
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                x => x.Fascia == Fascia.Std &&
+                     x.Category == RequisitionRowCategory.VanPack,
+                cancellationToken);
+
+        if (rule is null)
+        {
+            throw new ValidationException(
+            [
+                new ValidationFailure(
+                    nameof(SaveStdRequisitionDto.CollectionVanPacks),
+                    "No STD van pack pricing rule is configured. Please contact an administrator.")
+            ]);
+        }
+
+        return rule.MaxRate;
     }
 }

@@ -36,7 +36,23 @@ public static class StdRequisitionSnapshotFactory
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
                 .Select(CreateCollectionChargeBanksAndBinsSnapshot)
-                .ToList()
+                .ToList(),
+            
+            CollectionVanPacks = requisition.CollectionVanPacks
+                .OrderBy(x => x.DeliveryDate)
+                .ThenBy(x => x.PostCodeZone)
+                .Select(x => new StdCollectionVanPackSnapshotDto
+                {
+                    DeliveryDate = x.DeliveryDate,
+                    PostCodeZone = x.PostCodeZone,
+                    VanPacksOut = x.VanPacksOut,
+                    FilledBags = x.FilledBags,
+                    UnusedVanPacks = x.UnusedVanPacks,
+                    PercentReturned = x.PercentReturned,
+                    RatePerVanPack = x.RatePerVanPack,
+                    TotalValue = x.TotalValue ?? 0m,
+                })
+                .ToList(),
         };
     }
 
