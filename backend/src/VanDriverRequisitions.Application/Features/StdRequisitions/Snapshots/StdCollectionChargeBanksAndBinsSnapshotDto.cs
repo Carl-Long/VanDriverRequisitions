@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using VanDriverRequisitions.Domain.Enums;
 
-namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
+namespace VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 
 public sealed class StdCollectionChargeBanksAndBinsSnapshotDto
 {

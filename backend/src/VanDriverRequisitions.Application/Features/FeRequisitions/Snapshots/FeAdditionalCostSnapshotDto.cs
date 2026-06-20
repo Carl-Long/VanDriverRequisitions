@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using VanDriverRequisitions.Domain.Enums;
 
-namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 
 public sealed class FeAdditionalCostSnapshotDto
 {

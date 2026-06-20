@@ -1,3 +1,5 @@
+using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
+
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 
 public sealed class StdRequisitionSubmissionDetailDto

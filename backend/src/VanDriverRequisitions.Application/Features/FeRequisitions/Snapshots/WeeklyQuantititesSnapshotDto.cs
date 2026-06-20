@@ -1,4 +1,4 @@
-namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+namespace VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 
 public sealed class WeeklyQuantitiesSnapshotDto
 {

@@ -1,4 +1,4 @@
-namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
+namespace VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 
 public sealed record StdCollectionVanPackSnapshotDto
 {
