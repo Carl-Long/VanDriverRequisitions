@@ -24,17 +24,16 @@ import { RequisitionApproveModal } from "@/features/requisitions-shared/componen
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
-import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
-import { areCurrencyAmountsEqual, formatCurrencyGB } from "@/lib/format/currency";
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
-
-
+import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
+import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 type Props = {
     mode: StdRequisitionPageMode;
     stdRequisition?: StdRequisitionDetail;
+    limitRules: RequisitionLimitRuleSummary[];
     submitWindowStatus: SubmitWindowStatus | null;
     submitWindowStatusLoading: boolean;
     initialActiveTabKey?: string;
@@ -44,6 +43,7 @@ type Props = {
 export function StdRequisitionShell({
     mode,
     stdRequisition,
+    limitRules,
     submitWindowStatus,
     submitWindowStatusLoading,
     initialActiveTabKey,
@@ -52,7 +52,6 @@ export function StdRequisitionShell({
 
     const router = useRouter();
     const initialDraft = useMemo(() => (stdRequisition ? mapStdRequisitionDetailToDraft(stdRequisition) : undefined), [stdRequisition]);
-    const { limitRules, error: limitRulesError } = useRequisitionLimitRules();
     const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
     const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
     const stdVanPackLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.VAN_PACK, });
@@ -117,21 +116,18 @@ export function StdRequisitionShell({
         );
     }
 
-
     function collectionVanPacksHasWarning() {
         if (isReadonly) {
             return false;
         }
 
-        if (draft.collectionVanPacks.length === 0) {
-            return false;
-        }
-
-        if (!stdVanPackLimitRule) {
-            return true;
-        }
-
-        return draft.collectionVanPacks.some((row) => !areCurrencyAmountsEqual(row.ratePerVanPack, stdVanPackLimitRule.maxRate),);
+        return draft.collectionVanPacks.some(
+            (row) =>
+                getStdCollectionVanPackLimitStatus(
+                    row,
+                    stdVanPackLimitRule,
+                ).state !== "ok",
+        );
     }
 
     async function saveRequisition(
@@ -360,8 +356,6 @@ export function StdRequisitionShell({
 
     return (
         <div className="space-y-4">
-            {limitRulesError && <Alert tone="danger">{limitRulesError}</Alert>}
-
             <StdRequisitionHeader
                 mode={mode}
                 backHref={backHref}

@@ -10,6 +10,7 @@ import { StdRequisitionShell } from "@/features/std-requisitions/form/components
 import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import { useAuth } from "@/providers/auth-provider";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 
 export default function NewStdRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -22,13 +23,13 @@ export default function NewStdRequisitionPage() {
             ? returnTo
             : "/standard-van-drivers";
 
-    const {
-        status: submitWindowStatus,
-        loading: submitWindowStatusLoading,
-        error: submitWindowStatusError,
-    } = useSubmitWindowStatus();
+    const { status: submitWindowStatus, loading: submitWindowStatusLoading, error: submitWindowStatusError, } = useSubmitWindowStatus();
+    const { limitRules, loading: limitRulesLoading, error: limitRulesError, } = useRequisitionLimitRules();
+    const errors = [limitRulesError, submitWindowStatusError].filter((e): e is string => Boolean(e));
 
-    if (authLoading || submitWindowStatusLoading) {
+    const pageLoading = authLoading || limitRulesLoading || submitWindowStatusLoading;
+
+    if (pageLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -48,11 +49,24 @@ export default function NewStdRequisitionPage() {
         );
     }
 
+    if (errors.length > 0) {
+        return (
+            <PageContainer>
+                <div className="space-y-4">
+                    {errors.map((error, index) => (
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
+                    ))}
+                </div>
+            </PageContainer>
+        );
+    }
+
     return (
         <PageContainer>
             <StdRequisitionShell
                 mode="create"
                 backHref={backHref}
+                limitRules={limitRules}
                 submitWindowStatus={submitWindowStatus}
                 submitWindowStatusLoading={submitWindowStatusLoading}
             />

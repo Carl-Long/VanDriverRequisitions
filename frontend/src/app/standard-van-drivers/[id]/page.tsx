@@ -14,16 +14,17 @@ import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
 import { useAuth } from "@/providers/auth-provider";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 
 export default function StdRequisitionDetailPage() {
     const { user, loading: authLoading } = useAuth();
     const params = useParams<{ id: string }>();
     const searchParams = useSearchParams();
+    const { limitRules, loading: limitRulesLoading, error: limitRulesError } = useRequisitionLimitRules();
 
     const [requisition, setRequisition] = useState<StdRequisitionDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
     const returnTo = searchParams.get("returnTo");
 
     const backHref =
@@ -33,12 +34,9 @@ export default function StdRequisitionDetailPage() {
 
     const tabParam = searchParams.get("tab");
     const initialActiveTabKey = tabParam === "submission-history" ? "submission-history" : undefined;
-
-    const {
-        status: submitWindowStatus,
-        loading: submitWindowStatusLoading,
-        error: submitWindowStatusError,
-    } = useSubmitWindowStatus();
+    const { status: submitWindowStatus, loading: submitWindowStatusLoading, error: submitWindowStatusError, } = useSubmitWindowStatus();
+    const errors = [error, limitRulesError, submitWindowStatusError].filter((e): e is string => Boolean(e));
+    const pageLoading = authLoading || loading || limitRulesLoading || submitWindowStatusLoading;
 
     useEffect(() => {
         if (!params.id) {
@@ -75,7 +73,7 @@ export default function StdRequisitionDetailPage() {
         };
     }, [params.id]);
 
-    if (authLoading || loading || submitWindowStatusLoading) {
+    if (pageLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -87,12 +85,14 @@ export default function StdRequisitionDetailPage() {
         return <NotFound />;
     }
 
-    if (error || submitWindowStatusError) {
+    if (errors.length > 0) {
         return (
             <PageContainer>
-                <Alert tone="danger">
-                    {error ?? submitWindowStatusError}
-                </Alert>
+                <div className="space-y-4">
+                    {errors.map((error, index) => (
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
+                    ))}
+                </div>
             </PageContainer>
         );
     }
@@ -105,6 +105,7 @@ export default function StdRequisitionDetailPage() {
         <PageContainer>
             <StdRequisitionShell
                 mode={requisition.isEditable ? "edit" : "readonly"}
+                limitRules={limitRules}
                 stdRequisition={requisition}
                 backHref={backHref}
                 submitWindowStatus={submitWindowStatus}

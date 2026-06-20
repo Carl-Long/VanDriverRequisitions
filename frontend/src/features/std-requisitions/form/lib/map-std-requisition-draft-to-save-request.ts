@@ -40,7 +40,7 @@ export function mapStdRequisitionDraftToSaveRequest(
 
             return {
                 id: row.id,
-                date: toRequiredDateOnlyString(row.date, "Banks and Bins Collection date is required. ") ?? "",
+                date: toRequiredDateOnlyString(row.date,"Banks & Bins collection date is required."), 
                 collectionTypeId: row.collectionTypeId,
                 locationId: row.locationId,
                 numberOfBags: row.numberOfBags,
@@ -71,7 +71,8 @@ export function mapStdRequisitionDraftToSaveRequest(
             return {
                 id: row.id,
                 deliveryDate: toRequiredDateOnlyString(row.deliveryDate, "Van Pack delivery date is required."),
-                postCodeZone: normaliseUkPostcodeOutwardCode(row.postCodeZone), vanPacksOut: row.vanPacksOut,
+                postCodeZone: normaliseUkPostcodeOutwardCode(row.postCodeZone), 
+                vanPacksOut: row.vanPacksOut,
                 filledBags: row.filledBags,
             };
         }),

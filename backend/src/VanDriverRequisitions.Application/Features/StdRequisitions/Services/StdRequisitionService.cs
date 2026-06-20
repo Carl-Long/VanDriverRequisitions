@@ -204,6 +204,10 @@ public sealed class StdRequisitionService(
         return await context.StdRequisitions
             .AsSplitQuery()
             .Include(x => x.CollectionChargesBanksAndBins)
+            .Include(x => x.CollectionVanPacks)
+            .Include(x => x.AdditionalCosts)
+            .Include(x => x.Transfers)
+            .Include(x => x.Pickups)
             .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }

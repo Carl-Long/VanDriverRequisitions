@@ -13,10 +13,12 @@ import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/co
 import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std-requisition.types";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 
 export default function StdRequisitionApprovalDetailPage() {
     const params = useParams<{ id: string }>();
     const { user, loading: authLoading } = useAuth();
+    const { limitRules, loading: limitRulesLoading, error: limitRulesError, } = useRequisitionLimitRules();
 
     const [requisition, setRequisition] = useState<StdRequisitionDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -24,6 +26,8 @@ export default function StdRequisitionApprovalDetailPage() {
     const [notFound, setNotFound] = useState(false);
 
     const canApprove = canApproveRequisitions(user);
+    const errors = [error, limitRulesError].filter((e): e is string => Boolean(e));
+
 
     useEffect(() => {
         if (authLoading || !canApprove) return;
@@ -62,7 +66,9 @@ export default function StdRequisitionApprovalDetailPage() {
         };
     }, [params.id, authLoading, canApprove]);
 
-    if (authLoading || loading) {
+    const pageLoading = loading || limitRulesLoading || authLoading;
+
+    if (pageLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -78,10 +84,14 @@ export default function StdRequisitionApprovalDetailPage() {
         return <NotFound />;
     }
 
-    if (error) {
+    if (errors.length > 0) {
         return (
             <PageContainer>
-                <Alert tone="danger">{error}</Alert>
+                <div className="space-y-4">
+                    {errors.map((error, index) => (
+                        <Alert key={`${index}-${error}`}>{error}</Alert>
+                    ))}
+                </div>
             </PageContainer>
         );
     }
@@ -96,6 +106,7 @@ export default function StdRequisitionApprovalDetailPage() {
                 mode="approval"
                 stdRequisition={requisition}
                 submitWindowStatus={null}
+                limitRules={limitRules}
                 submitWindowStatusLoading={false}
                 backHref="/standard-van-drivers/approvals"
             />

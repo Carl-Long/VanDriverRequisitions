@@ -23,7 +23,7 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
 
     public decimal PercentReturned => VanPacksOut == 0
         ? 0
-        : Math.Round((decimal)FilledBags / VanPacksOut * 100, 2);
+        : Math.Round((decimal)UnusedVanPacks / VanPacksOut * 100, 2);
 
     public decimal? TotalValue { get; private set; }
 
