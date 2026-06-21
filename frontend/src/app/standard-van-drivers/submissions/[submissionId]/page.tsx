@@ -16,6 +16,7 @@ import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/co
 import { StdSubmissionVanPacksTable } from "@/features/std-requisitions/std-submissions-view/std-submission-van-packs-table";
 import { StdSubmissionPickupsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-pickups-table";
 import { StdSubmissionTransfersTable } from "@/features/std-requisitions/std-submissions-view/std-submission-transfers-table";
+import { StdSubmissionAdditionalCostsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-additional-costs-table";
 
 export default function StdSubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -98,6 +99,9 @@ export default function StdSubmissionPage() {
                         />
                         <StdSubmissionTransfersTable
                             rows={submission.snapshot.transfers}
+                        />
+                        <StdSubmissionAdditionalCostsTable
+                            rows={submission.snapshot.additionalCosts}
                         />
                     </div>
                 </div>
