@@ -61,6 +61,7 @@ export type StdRequisitionSnapshot = {
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBinsSnapshot[];
     collectionVanPacks: StdCollectionVanPackSnapshot[];
     pickups: StdPickupSnapshot[];
+    transfers: StdTransferSnapshot[];
 };
 
 export type StdCollectionChargeBanksAndBinsSnapshot = {
@@ -104,5 +105,28 @@ export type StdPickupSnapshot = {
     miles: number | null;
     ratePerMile: number | null;
     flatCharge: number | null;
+    totalValue: number;
+};
+
+export type StdTransferSnapshot = {
+    date: string;
+
+    shopIdFrom: string;
+    shopCodeFrom: string;
+    shopNameFrom: string;
+
+    shopIdTo: string;
+    shopCodeTo: string;
+    shopNameTo: string;
+
+    numberOfBags: number | null;
+    numberOfBoxes: number | null;
+
+    chargeType: StdChargeType;
+
+    miles: number | null;
+    ratePerMile: number | null;
+    flatCharge: number | null;
+
     totalValue: number;
 };
