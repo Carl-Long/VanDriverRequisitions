@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { getStdChargeTypeLabel } from "../../constants/std-charge-type.constants";
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdCollectionChargeBanksAndBinsDraft } from "../types/std-collection-charge-banks-and-bins-draft";
 import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 import { calculateStdCollectionChargeBanksAndBinsRowsTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
@@ -20,6 +20,8 @@ import { Alert } from "@/components/ui/alert";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { cn } from "@/lib/utils";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
+import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -156,7 +158,7 @@ function BanksAndBinsTable({
     const totalBags = rows.reduce((total, row) => total + (row.numberOfBags ?? 0), 0);
 
     const totalMiles = rows.reduce((total, row) => {
-        return row.chargeType === "Mileage" ? total + (row.miles ?? 0) : total;
+        return row.chargeType === STD_CHARGE_TYPE.Mileage ? total + (row.miles ?? 0) : total;
     }, 0);
 
     return (
@@ -257,19 +259,10 @@ function BanksAndBinsTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <StdLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
                                     </TableCell>
@@ -313,17 +306,9 @@ function BanksAndBinsTable({
                                         {row.numberOfBags ?? "-"}
                                     </TableCell>
 
-                                    <TableCell>{getStdChargeTypeLabel(row.chargeType)}</TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.chargeType === "Mileage" ? row.miles ?? "-" : "-"}
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.chargeType === "Mileage"
-                                            ? formatCurrencyGB(row.ratePerMile ?? 0)
-                                            : formatCurrencyGB(row.flatCharge ?? 0)}
-                                    </TableCell>
+                                    <StdChargeTypeCell row={row} />
+                                    <StdMilesCell row={row} />
+                                    <StdRateChargeCell row={row} />
 
                                     <TableCell align="right" className="font-semibold tabular-nums">
                                         {formatCurrencyGB(row.totalValue ?? 0)}

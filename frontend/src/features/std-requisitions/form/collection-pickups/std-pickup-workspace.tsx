@@ -20,13 +20,13 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
-
-import { getStdChargeTypeLabel } from "../../constants/std-charge-type.constants";
 import type { StdPickupDraft } from "../types/std-pickup-draft";
 import type { StdPickupForm } from "../types/std-pickup-form";
 import { mapStdPickupDraftToForm } from "../lib/map-std-pickup-draft-to-form";
 import { StdPickupDrawer } from "./std-pickup-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
+import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
+import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 
 type Props = {
     readonly: boolean;
@@ -281,25 +281,10 @@ function PickupTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map(
-                                                            (message, index) => (
-                                                                <li
-                                                                    key={`${message}-${index}`}
-                                                                >
-                                                                    {message}
-                                                                </li>
-                                                            ),
-                                                        )}
-                                                    </ul>
-                                                </div>
+                                                <StdLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
                                     </TableCell>
@@ -312,21 +297,9 @@ function PickupTable({
                                         {row.numberOfHouseholds ?? "-"}
                                     </TableCell>
 
-                                    <TableCell>
-                                        {getStdChargeTypeLabel(row.chargeType)}
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.chargeType === "Mileage"
-                                            ? row.miles ?? "-"
-                                            : "-"}
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.chargeType === "Mileage"
-                                            ? formatCurrencyGB(row.ratePerMile ?? 0)
-                                            : formatCurrencyGB(row.flatCharge ?? 0)}
-                                    </TableCell>
+                                    <StdChargeTypeCell row={row} />
+                                    <StdMilesCell row={row} />
+                                    <StdRateChargeCell row={row} />
 
                                     <TableCell align="right" className="tabular-nums">
                                         {formatCurrencyGB(row.totalValue)}

@@ -21,16 +21,14 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
-
-import {
-    getStdChargeTypeLabel,
-    STD_CHARGE_TYPE,
-} from "../../constants/std-charge-type.constants";
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdTransferDraft } from "../types/std-transfer-draft";
 import type { StdTransferForm } from "../types/std-transfer-form";
 import { mapStdTransferDraftToForm } from "../lib/map-std-transfer-draft-to-form";
 import { StdTransferDrawer } from "./std-transfer-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
+import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
+import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 
 type Props = {
     readonly: boolean;
@@ -277,23 +275,10 @@ function TransfersTable({
                                             ? formatDateGB(transfer.date)
                                             : "-"}
                                         {hasLimitIssue && (
-                                            <div className="mt-2 space-y-1">
-                                                <div className="text-xs font-medium text-warning">
-                                                    {limitStatus.state === "missing-limit"
-                                                        ? "Missing limit"
-                                                        : "Exceeds limit"}
-                                                </div>
-
-                                                <ul className="list-disc pl-4 text-xs text-warning">
-                                                    {limitStatus.messages.map(
-                                                        (message) => (
-                                                            <li key={message}>
-                                                                {message}
-                                                            </li>
-                                                        ),
-                                                    )}
-                                                </ul>
-                                            </div>
+                                            <StdLimitWarningBlock
+                                                status={limitStatus}
+                                                className="mt-2"
+                                            />
                                         )}
                                     </TableCell>
 
@@ -335,25 +320,9 @@ function TransfersTable({
                                         {transfer.numberOfBoxes ?? "-"}
                                     </TableCell>
 
-                                    <TableCell>
-                                        {getStdChargeTypeLabel(transfer.chargeType)}
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {transfer.chargeType === STD_CHARGE_TYPE.Mileage
-                                            ? transfer.miles ?? "-"
-                                            : "-"}
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {transfer.chargeType === STD_CHARGE_TYPE.Mileage
-                                            ? formatCurrencyGB(
-                                                transfer.ratePerMile ?? 0,
-                                            )
-                                            : formatCurrencyGB(
-                                                transfer.flatCharge ?? 0,
-                                            )}
-                                    </TableCell>
+                                    <StdChargeTypeCell row={transfer} />
+                                    <StdMilesCell row={transfer} />
+                                    <StdRateChargeCell row={transfer} />
 
                                     <TableCell
                                         align="right"
