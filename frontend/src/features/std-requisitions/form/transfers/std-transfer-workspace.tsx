@@ -29,8 +29,8 @@ import {
 import type { StdTransferDraft } from "../types/std-transfer-draft";
 import type { StdTransferForm } from "../types/std-transfer-form";
 import { mapStdTransferDraftToForm } from "../lib/map-std-transfer-draft-to-form";
-import { getStdTransferLimitStatus } from "../lib/get-std-transfer-limit-status";
 import { StdTransferDrawer } from "./std-transfer-drawer";
+import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -254,7 +254,7 @@ function TransfersTable({
 
                     <TableBody>
                         {rows.map((transfer) => {
-                            const limitStatus = getStdTransferLimitStatus(
+                            const limitStatus = getStdChargeLimitStatus(
                                 transfer,
                                 mileageLimitRule,
                                 flatChargeLimitRule,

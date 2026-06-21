@@ -20,7 +20,6 @@ import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 import { calculateStdPickupFormTotal } from "../lib/calculate-std-pickup-form";
 import { createStdPickupDraftFromForm } from "../lib/create-std-pickup-draft-from-form";
 import { StdPickupForm } from "../types/std-pickup-form";
-import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import { calculateStdTransferFormTotal } from "../lib/calculate-std-transfer-form";
 import { createStdTransferDraftFromForm } from "../lib/create-std-transfer-draft-from-form";
 import { StdTransferForm } from "../types/std-transfer-form";

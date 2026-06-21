@@ -24,18 +24,15 @@ import { RequisitionApproveModal } from "@/features/requisitions-shared/componen
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
-import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
 import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collection-van-pack-rate-change-message";
-import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
 import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
-import { getStdTransferLimitStatus } from "../lib/get-std-transfer-limit-status";
 import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
-import { getStdAdditionalCostLimitStatus } from "../lib/get-std-additional-cost-limit-status";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
+import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -126,11 +123,11 @@ export function StdRequisitionShell({
 
         return draft.collectionChargesBanksAndBins.some(
             (row) =>
-                getStdBanksAndBinsLimitStatus(
+                getStdChargeLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
-                ).state !== "ok",
+                ).state !== "ok"
         );
     }
 
@@ -155,11 +152,11 @@ export function StdRequisitionShell({
 
         return draft.pickups.some(
             (row) =>
-                getStdPickupLimitStatus(
+                getStdChargeLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
-                ).state !== "ok",
+                ).state !== "ok"
         );
     }
 
@@ -170,11 +167,11 @@ export function StdRequisitionShell({
 
         return draft.transfers.some(
             (row) =>
-                getStdTransferLimitStatus(
+                getStdChargeLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
-                ).state !== "ok",
+                ).state !== "ok"
         );
     }
 
@@ -185,11 +182,11 @@ export function StdRequisitionShell({
 
         return draft.additionalCosts.some(
             (row) =>
-                getStdAdditionalCostLimitStatus(
+                getStdChargeLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
-                ).state !== "ok",
+                ).state !== "ok"
         );
     }
 

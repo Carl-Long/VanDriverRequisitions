@@ -25,8 +25,8 @@ import { getStdChargeTypeLabel } from "../../constants/std-charge-type.constants
 import type { StdPickupDraft } from "../types/std-pickup-draft";
 import type { StdPickupForm } from "../types/std-pickup-form";
 import { mapStdPickupDraftToForm } from "../lib/map-std-pickup-draft-to-form";
-import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
 import { StdPickupDrawer } from "./std-pickup-drawer";
+import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -250,7 +250,7 @@ function PickupTable({
 
                     <TableBody>
                         {rows.map((row) => {
-                            const limitStatus = getStdPickupLimitStatus(
+                            const limitStatus = getStdChargeLimitStatus(
                                 row,
                                 mileageLimitRule,
                                 flatChargeLimitRule,

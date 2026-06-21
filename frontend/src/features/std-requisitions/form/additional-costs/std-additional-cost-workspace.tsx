@@ -29,8 +29,8 @@ import {
 import type { StdAdditionalCostDraft } from "../types/std-additional-cost-draft";
 import type { StdAdditionalCostForm } from "../types/std-additional-cost-form";
 import { mapStdAdditionalCostDraftToForm } from "../lib/map-std-additional-cost-draft-to-form";
-import { getStdAdditionalCostLimitStatus } from "../lib/get-std-additional-cost-limit-status";
 import { StdAdditionalCostDrawer } from "./std-additional-cost-drawer";
+import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -247,7 +247,7 @@ function AdditionalCostsTable({
 
                     <TableBody>
                         {rows.map((row) => {
-                            const limitStatus = getStdAdditionalCostLimitStatus(
+                            const limitStatus = getStdChargeLimitStatus(
                                 row,
                                 mileageLimitRule,
                                 flatChargeLimitRule,
@@ -284,7 +284,7 @@ function AdditionalCostsTable({
                                                 <div className="mt-2 space-y-1">
                                                     <div className="text-xs font-medium text-warning">
                                                         {limitStatus.state ===
-                                                        "missing-limit"
+                                                            "missing-limit"
                                                             ? "Missing limit"
                                                             : "Exceeds limit"}
                                                     </div>

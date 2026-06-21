@@ -18,8 +18,8 @@ import { EditableCellButton } from "@/features/requisitions-shared/components/ed
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 import { Alert } from "@/components/ui/alert";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { cn } from "@/lib/utils";
+import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -230,7 +230,7 @@ function BanksAndBinsTable({
 
                     <TableBody>
                         {rows.map((row) => {
-                            const limitStatus = getStdBanksAndBinsLimitStatus(
+                            const limitStatus = getStdChargeLimitStatus(
                                 row,
                                 mileageLimitRule,
                                 flatChargeLimitRule,
