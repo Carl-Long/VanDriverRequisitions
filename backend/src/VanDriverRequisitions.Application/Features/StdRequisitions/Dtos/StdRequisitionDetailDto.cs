@@ -23,6 +23,7 @@ public sealed class StdRequisitionDetailDto
 
     public required List<StdCollectionChargeBanksAndBinsDetailDto> CollectionChargesBanksAndBins { get; init; }
     public required List<StdCollectionVanPackDetailDto> CollectionVanPacks { get; init; }
+    public required List<StdPickupDetailDto> Pickups { get; init; }
 
     public bool IsEditable { get; init; }
 

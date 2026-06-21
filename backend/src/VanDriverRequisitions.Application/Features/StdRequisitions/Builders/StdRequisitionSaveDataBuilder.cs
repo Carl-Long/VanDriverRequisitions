@@ -50,10 +50,14 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
         var collectionVanPacks = saveStdRequisitionDto.CollectionVanPacks
             .Select(x => StdCollectionVanPackMapper.ToUpdateModel(x, vanPackRate))
             .ToList();
+        
+        var pickups = saveStdRequisitionDto.Pickups
+            .Select(StdPickupMapper.ToUpdateModel)
+            .ToList();
 
         var updateModel = new StdRequisitionUpdateModel(
             details,
-            Pickups: [],
+            Pickups: pickups,
             Transfers: [],
             CollectionChargesBanksAndBins: collectionChargeModels,
             CollectionVanPacks: collectionVanPacks,

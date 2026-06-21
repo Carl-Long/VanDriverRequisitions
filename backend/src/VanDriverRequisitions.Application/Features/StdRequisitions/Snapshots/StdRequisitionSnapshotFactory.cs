@@ -53,6 +53,22 @@ public static class StdRequisitionSnapshotFactory
                     TotalValue = x.TotalValue ?? 0m,
                 })
                 .ToList(),
+            
+            Pickups = requisition.Pickups
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.ChargeType)
+                .Select(x => new StdPickupSnapshotDto
+                {
+                    Date = x.Date,
+                    NumberOfBags = x.NumberOfBags,
+                    NumberOfHouseholds = x.NumberOfHouseholds,
+                    ChargeType = x.ChargeType,
+                    Miles = x.Miles,
+                    RatePerMile = x.RatePerMile,
+                    FlatCharge = x.FlatCharge,
+                    TotalValue = x.TotalValue ?? 0m,
+                })
+                .ToList(),
         };
     }
 
