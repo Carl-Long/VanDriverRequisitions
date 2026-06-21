@@ -60,6 +60,7 @@ export type StdRequisitionSnapshot = {
 
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBinsSnapshot[];
     collectionVanPacks: StdCollectionVanPackSnapshot[];
+    pickups: StdPickupSnapshot[];
 };
 
 export type StdCollectionChargeBanksAndBinsSnapshot = {
@@ -92,5 +93,16 @@ export type StdCollectionVanPackSnapshot = {
     unusedVanPacks: number;
     percentReturned: number;
     ratePerVanPack: number;
+    totalValue: number;
+};
+
+export type StdPickupSnapshot = {
+    date: string;
+    numberOfBags: number;
+    numberOfHouseholds: number;
+    chargeType: StdChargeType;
+    miles: number | null;
+    ratePerMile: number | null;
+    flatCharge: number | null;
     totalValue: number;
 };

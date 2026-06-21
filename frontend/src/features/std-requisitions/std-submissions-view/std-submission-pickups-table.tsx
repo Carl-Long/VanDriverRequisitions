@@ -13,32 +13,32 @@ import {
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 import { getStdChargeTypeLabel } from "../constants/std-charge-type.constants";
-import type { StdCollectionChargeBanksAndBinsSnapshot } from "../types/std-requisition-submission.types";
+import type { StdPickupSnapshot } from "../types/std-requisition-submission.types";
 
 type Props = {
-    rows: StdCollectionChargeBanksAndBinsSnapshot[];
+    rows: StdPickupSnapshot[];
 };
 
-export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
+export function StdSubmissionPickupsTable({ rows }: Readonly<Props>) {
     if (rows.length === 0) {
         return null;
     }
 
     const orderedRows = [...rows].sort(
-        (a, b) =>
-            new Date(a.date).getTime() - new Date(b.date).getTime() ||
-            a.collectionTypeName.localeCompare(b.collectionTypeName) ||
-            a.locationName.localeCompare(b.locationName),
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
     const totals = orderedRows.reduce(
         (acc, row) => ({
-            totalBags: acc.totalBags + (row.numberOfBags ?? 0),
-            totalMiles: acc.totalMiles + (row.chargeType === "Mileage" ? row.miles ?? 0 : 0),
-            subtotal: acc.subtotal + (row.totalValue ?? 0),
+            totalBags: acc.totalBags + row.numberOfBags,
+            totalHouseholds: acc.totalHouseholds + row.numberOfHouseholds,
+            totalMiles:
+                acc.totalMiles + (row.chargeType === "Mileage" ? row.miles ?? 0 : 0),
+            subtotal: acc.subtotal + row.totalValue,
         }),
         {
             totalBags: 0,
+            totalHouseholds: 0,
             totalMiles: 0,
             subtotal: 0,
         },
@@ -47,14 +47,15 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
             <div className="mb-6 print-section-heading">
-                <h2 className="text-lg font-semibold">Collection Charges — Banks & Bins</h2>
+                <h2 className="text-lg font-semibold">Pickup Collections</h2>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Submitted collection charges for banks and bins
+                    Submitted pickup collection charges
                 </p>
 
                 <p className="text-sm text-muted-foreground">
-                    {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {totals.totalBags} bags •{" "}
+                    {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
+                    {totals.totalBags} bags • {totals.totalHouseholds} households •{" "}
                     {totals.totalMiles} miles • {formatCurrencyGB(totals.subtotal)}
                 </p>
             </div>
@@ -68,16 +69,12 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
                                     Date
                                 </TableHeaderCell>
 
-                                <TableHeaderCell className="min-w-[180px]">
-                                    Collection Type
-                                </TableHeaderCell>
-
-                                <TableHeaderCell className="min-w-[220px]">
-                                    Location
+                                <TableHeaderCell align="right" nowrap>
+                                    Bags
                                 </TableHeaderCell>
 
                                 <TableHeaderCell align="right" nowrap>
-                                    Bags
+                                    Households
                                 </TableHeaderCell>
 
                                 <TableHeaderCell nowrap>Charge Type</TableHeaderCell>
@@ -98,42 +95,22 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
 
                         <TableBody>
                             {orderedRows.map((row, index) => (
-                                <TableRow key={`${row.date}-${row.collectionTypeId}-${row.locationId}-${index}`}>
+                                <TableRow key={`${row.date}-${row.chargeType}-${index}`}>
                                     <TableCell nowrap className="print-col-week">
                                         {formatDateGB(row.date)}
                                     </TableCell>
 
-                                    <TableCell>
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="font-medium">
-                                                {row.collectionTypeName}
-                                            </span>
-
-                                            <span className="text-xs text-muted-foreground">
-                                                {row.collectionTypeCode}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="font-medium">
-                                                {row.locationName}
-                                            </span>
-
-                                            {row.locationPostCode && (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {row.locationPostCode}
-                                                </span>
-                                            )}
-                                        </div>
+                                    <TableCell align="right" className="tabular-nums">
+                                        {row.numberOfBags}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
-                                        {row.numberOfBags ?? "-"}
+                                        {row.numberOfHouseholds}
                                     </TableCell>
 
-                                    <TableCell>{getStdChargeTypeLabel(row.chargeType)}</TableCell>
+                                    <TableCell>
+                                        {getStdChargeTypeLabel(row.chargeType)}
+                                    </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
                                         {row.chargeType === "Mileage" ? row.miles ?? "-" : "-"}
@@ -149,7 +126,7 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
                                         align="right"
                                         className="font-semibold tabular-nums print-col-value"
                                     >
-                                        {formatCurrencyGB(row.totalValue ?? 0)}
+                                        {formatCurrencyGB(row.totalValue)}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -159,12 +136,12 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
                             <TableRow>
                                 <TableCell className="print-col-week">Totals</TableCell>
 
-                                <TableCell />
-
-                                <TableCell />
-
                                 <TableCell align="right" className="tabular-nums">
                                     {totals.totalBags}
+                                </TableCell>
+
+                                <TableCell align="right" className="tabular-nums">
+                                    {totals.totalHouseholds}
                                 </TableCell>
 
                                 <TableCell />

@@ -14,6 +14,7 @@ import { StdSubmissionSnapshotSummary } from "@/features/std-requisitions/std-su
 import { StdSubmissionBanksAndBinsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-banks-and-bins-table";
 import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import { StdSubmissionVanPacksTable } from "@/features/std-requisitions/std-submissions-view/std-submission-van-packs-table";
+import { StdSubmissionPickupsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-pickups-table";
 
 export default function StdSubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -90,6 +91,9 @@ export default function StdSubmissionPage() {
                         />
                         <StdSubmissionVanPacksTable
                             rows={submission.snapshot.collectionVanPacks}
+                        />
+                        <StdSubmissionPickupsTable
+                            rows={submission.snapshot.pickups}
                         />
                     </div>
                 </div>
