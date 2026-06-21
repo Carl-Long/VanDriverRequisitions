@@ -71,6 +71,13 @@ public static class StdRequisitionMapper
                 .ThenBy(x => x.ShopNameTo)
                 .Select(StdTransferMapper.ToDetailDto)
                 .ToList(),
+            
+            AdditionalCosts = requisition.AdditionalCosts
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.ReasonNameSnapshot)
+                .ThenBy(x => x.ChargeType)
+                .Select(StdAdditionalCostMapper.ToDetailDto)
+                .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
         };

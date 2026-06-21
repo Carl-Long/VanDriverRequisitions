@@ -44,13 +44,17 @@ public sealed class SaveStdRequisitionDtoValidator : AbstractValidator<SaveStdRe
         
         RuleForEach(x => x.Transfers)
             .SetValidator(new SaveStdTransferDtoValidator());
+        
+        RuleForEach(x => x.AdditionalCosts)
+            .SetValidator(new SaveStdAdditionalCostDtoValidator());
     }
 
     private static bool HaveAtLeastOneRow(SaveStdRequisitionDto dto)
     {
         return dto.CollectionChargesBanksAndBins.Any() 
                || dto.CollectionVanPacks.Any() 
-               ||  dto.Pickups.Any()
-               || dto.Transfers.Any();
+               || dto.Pickups.Any()
+               || dto.Transfers.Any()
+               || dto.AdditionalCosts.Any();
     }
 }

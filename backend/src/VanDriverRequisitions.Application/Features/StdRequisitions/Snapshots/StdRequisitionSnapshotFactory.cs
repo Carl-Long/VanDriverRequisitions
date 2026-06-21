@@ -97,6 +97,27 @@ public static class StdRequisitionSnapshotFactory
                     TotalValue = x.TotalValue ?? 0m,
                 })
                 .ToList(),
+            
+            AdditionalCosts = requisition.AdditionalCosts
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.ReasonNameSnapshot)
+                .Select(x => new StdAdditionalCostSnapshotDto
+                {
+                    Date = x.Date,
+
+                    ReasonId = x.ReasonId,
+                    ReasonName = x.ReasonNameSnapshot,
+
+                    NumberOfBags = x.NumberOfBags,
+
+                    ChargeType = x.ChargeType,
+                    Miles = x.Miles,
+                    RatePerMile = x.RatePerMile,
+                    FlatCharge = x.FlatCharge,
+
+                    TotalValue = x.TotalValue ?? 0m,
+                })
+                .ToList(),
         };
     }
 

@@ -11,6 +11,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
+using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
@@ -33,6 +34,8 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
         var locationMap = await LoadLocationMapAsync(
             saveStdRequisitionDto.CollectionChargesBanksAndBins,
             cancellationToken);
+        
+        var reasonMap = await LoadReasonMapAsync(saveStdRequisitionDto.AdditionalCosts, cancellationToken);
 
         var details = StdRequisitionMapper.MapToRequisitionDetails(
             saveStdRequisitionDto,
@@ -79,6 +82,12 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
                     : StdTransferMapper.ToUpdateModel(x, fromShop, toShop);
             })
             .ToList();
+        
+        var additionalCosts = saveStdRequisitionDto.AdditionalCosts
+            .Select(x => !reasonMap.TryGetValue(x.ReasonId, out var reason) 
+                ? throw new NotFoundException($"Additional cost reason '{x.ReasonId}' was not found.") 
+                : StdAdditionalCostMapper.ToUpdateModel(x, reason))
+            .ToList();
 
         var updateModel = new StdRequisitionUpdateModel(
             details,
@@ -86,7 +95,7 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
             Transfers: transfers,
             CollectionChargesBanksAndBins: collectionChargeModels,
             CollectionVanPacks: collectionVanPacks,
-            AdditionalCosts: []);
+            AdditionalCosts: additionalCosts);
 
         return new StdRequisitionSaveData(driverSummary, updateModel, shop.IsActive);
     }
@@ -140,6 +149,22 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(x => locationIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+    }
+    
+    private async Task<Dictionary<Guid, FeReason>> LoadReasonMapAsync(
+        IEnumerable<SaveStdAdditionalCostDto> additionalCosts,
+        CancellationToken cancellationToken)
+    {
+        var reasonIds = additionalCosts
+            .Select(x => x.ReasonId)
+            .Distinct()
+            .ToList();
+
+        return await context.FeReasons
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => reasonIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }
 
