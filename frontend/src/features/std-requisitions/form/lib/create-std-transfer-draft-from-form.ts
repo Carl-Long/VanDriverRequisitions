@@ -1,11 +1,13 @@
 import type { StdTransferDraft } from "../types/std-transfer-draft";
 import type { StdTransferForm } from "../types/std-transfer-form";
 import { calculateStdTransferFormTotal } from "./calculate-std-transfer-form";
-import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
+import { normaliseStdChargeFields } from "./normalise-std-charge-fields";
 
 export function createStdTransferDraftFromForm(
     form: StdTransferForm,
 ): StdTransferDraft {
+    const chargeFields = normaliseStdChargeFields(form);
+
     return {
         clientId: crypto.randomUUID(),
         id: null,
@@ -25,17 +27,7 @@ export function createStdTransferDraftFromForm(
         numberOfBags: form.numberOfBags,
         numberOfBoxes: form.numberOfBoxes,
 
-        chargeType: form.chargeType,
-
-        miles: form.chargeType === STD_CHARGE_TYPE.Mileage ? form.miles : null,
-        ratePerMile:
-            form.chargeType === STD_CHARGE_TYPE.Mileage
-                ? form.ratePerMile
-                : null,
-        flatCharge:
-            form.chargeType === STD_CHARGE_TYPE.FlatCharge
-                ? form.flatCharge
-                : null,
+        ...chargeFields,
 
         totalValue: calculateStdTransferFormTotal(form),
     };

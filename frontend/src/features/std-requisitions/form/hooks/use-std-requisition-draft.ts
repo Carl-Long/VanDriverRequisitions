@@ -27,6 +27,7 @@ import { StdTransferForm } from "../types/std-transfer-form";
 import { calculateStdAdditionalCostFormTotal } from "../lib/calculate-std-additional-cost-form";
 import { createStdAdditionalCostDraftFromForm } from "../lib/create-std-additional-cost-draft-from-form";
 import { StdAdditionalCostForm } from "../types/std-additional-cost-form";
+import { normaliseStdChargeFields } from "../lib/normalise-std-charge-fields";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -118,11 +119,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
 
                     numberOfBags: form.numberOfBags,
 
-                    chargeType: form.chargeType,
-
-                    miles: form.chargeType === "Mileage" ? form.miles : null,
-                    ratePerMile: form.chargeType === "Mileage" ? form.ratePerMile : null,
-                    flatCharge: form.chargeType === "FlatCharge" ? form.flatCharge : null,
+                    ...normaliseStdChargeFields(form),
 
                     totalValue,
                 };
@@ -203,13 +200,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
                         numberOfBags: form.numberOfBags,
                         numberOfHouseholds: form.numberOfHouseholds,
 
-                        chargeType: form.chargeType,
-
-                        miles: form.chargeType === "Mileage" ? form.miles : null,
-                        ratePerMile:
-                            form.chargeType === "Mileage" ? form.ratePerMile : null,
-                        flatCharge:
-                            form.chargeType === "FlatCharge" ? form.flatCharge : null,
+                        ...normaliseStdChargeFields(form),
 
                         totalValue: calculateStdPickupFormTotal(form),
                     }
@@ -257,20 +248,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
                         numberOfBags: form.numberOfBags,
                         numberOfBoxes: form.numberOfBoxes,
 
-                        chargeType: form.chargeType,
-
-                        miles:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.miles
-                                : null,
-                        ratePerMile:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.ratePerMile
-                                : null,
-                        flatCharge:
-                            form.chargeType === STD_CHARGE_TYPE.FlatCharge
-                                ? form.flatCharge
-                                : null,
+                        ...normaliseStdChargeFields(form),
 
                         totalValue: calculateStdTransferFormTotal(form),
                     }
@@ -310,20 +288,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
 
                         numberOfBags: form.numberOfBags,
 
-                        chargeType: form.chargeType,
-
-                        miles:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.miles
-                                : null,
-                        ratePerMile:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.ratePerMile
-                                : null,
-                        flatCharge:
-                            form.chargeType === STD_CHARGE_TYPE.FlatCharge
-                                ? form.flatCharge
-                                : null,
+                        ...normaliseStdChargeFields(form),
 
                         totalValue: calculateStdAdditionalCostFormTotal(form),
                     }
