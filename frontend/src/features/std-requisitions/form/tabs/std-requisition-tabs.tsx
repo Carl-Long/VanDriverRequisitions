@@ -17,6 +17,8 @@ type Props = {
     pickupsHasWarning?: boolean;
     transfers: React.ReactNode;
     transfersHasWarning?: boolean;
+    additionalCosts: React.ReactNode;
+    additionalCostsHasWarning?: boolean;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
 };
@@ -33,6 +35,8 @@ export function StdRequisitionTabs({
     pickupsHasWarning,
     transfers,
     transfersHasWarning,
+    additionalCosts,
+    additionalCostsHasWarning,
     submissionHistory,
     submissionHistoryCount,
 
@@ -56,6 +60,10 @@ export function StdRequisitionTabs({
 
         if (tab.type === "transfers") {
             return transfersHasWarning ?? false;
+        }
+
+        if (tab.type === "additional-costs") {
+            return additionalCostsHasWarning ?? false;
         }
 
         return false;
@@ -88,6 +96,7 @@ export function StdRequisitionTabs({
                 {activeTab.key === "collection-van-packs" && collectionVanPacks}
                 {activeTab.key === "pickups" && pickups}
                 {activeTab.key === "transfers" && transfers}
+                {activeTab.key === "additional-costs" && additionalCosts}
                 {activeTab.key === "submission-history" && submissionHistory}
             </div>
         </div>

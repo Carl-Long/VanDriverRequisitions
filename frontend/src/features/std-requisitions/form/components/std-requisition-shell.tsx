@@ -34,6 +34,8 @@ import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
 import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
 import { getStdTransferLimitStatus } from "../lib/get-std-transfer-limit-status";
 import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
+import { getStdAdditionalCostLimitStatus } from "../lib/get-std-additional-cost-limit-status";
+import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -81,6 +83,9 @@ export function StdRequisitionShell({
         addTransfer,
         updateTransfer,
         removeTransfer,
+        addAdditionalCost,
+        updateAdditionalCost,
+        removeAdditionalCost,
     } = useStdRequisitionDraft(initialDraft);
 
     const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
@@ -166,6 +171,21 @@ export function StdRequisitionShell({
         return draft.transfers.some(
             (row) =>
                 getStdTransferLimitStatus(
+                    row,
+                    stdMileageLimitRule,
+                    stdFlatChargeLimitRule,
+                ).state !== "ok",
+        );
+    }
+
+    function additionalCostsHasWarning() {
+        if (isReadonly) {
+            return false;
+        }
+
+        return draft.additionalCosts.some(
+            (row) =>
+                getStdAdditionalCostLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
@@ -442,6 +462,7 @@ export function StdRequisitionShell({
                 collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
                 pickupsHasWarning={pickupsHasWarning()}
                 transfersHasWarning={transfersHasWarning()}
+                additionalCostsHasWarning={additionalCostsHasWarning()}
                 details={
                     <StdRequisitionDetailsTab
                         readonly={isReadonly}
@@ -520,6 +541,23 @@ export function StdRequisitionShell({
                             clearError("form");
                         }}
                         onDelete={removeTransfer}
+                    />
+                }
+                additionalCosts={
+                    <StdAdditionalCostWorkspace
+                        readonly={isReadonly}
+                        rows={draft.additionalCosts}
+                        mileageLimitRule={stdMileageLimitRule}
+                        flatChargeLimitRule={stdFlatChargeLimitRule}
+                        onAdd={(form) => {
+                            addAdditionalCost(form);
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateAdditionalCost(clientId, form);
+                            clearError("form");
+                        }}
+                        onDelete={removeAdditionalCost}
                     />
                 }
                 submissionHistory={

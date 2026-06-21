@@ -28,6 +28,11 @@ export function buildStdRequisitionTabs(
             type: "transfers",
             key: "transfers",
             label: "Transfers"
+        },
+        {
+            type: "additional-costs",
+            key: "additional-costs",
+            label: "Additional Costs"
         }
     ];
 

@@ -25,6 +25,11 @@ export type StdRequisitionTab =
         label: "Transfers";
     }
     | {
+        type: "additional-costs";
+        key: "additional-costs";
+        label: "Additional Costs";
+    }
+    | {
         type: "submission-history";
         key: "submission-history";
         label: string;
