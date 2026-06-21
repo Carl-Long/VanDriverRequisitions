@@ -10,6 +10,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
@@ -54,11 +55,35 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
         var pickups = saveStdRequisitionDto.Pickups
             .Select(StdPickupMapper.ToUpdateModel)
             .ToList();
+        
+        var transferShopIds = saveStdRequisitionDto.Transfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+        
+        var transferShops = await context.Shops
+            .Where(x => transferShopIds.Contains(x.Id))
+            .Select(x => new ShopSnapshot(x.Id, x.Code, x.Name))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        
+        var transfers = saveStdRequisitionDto.Transfers
+            .Select(x =>
+            {
+                if (!transferShops.TryGetValue(x.ShopIdFrom, out var fromShop))
+                {
+                    throw new BadRequestException($"From shop '{x.ShopIdFrom}' was not found.");
+                }
+
+                return !transferShops.TryGetValue(x.ShopIdTo, out var toShop) 
+                    ? throw new BadRequestException($"To shop '{x.ShopIdTo}' was not found.") 
+                    : StdTransferMapper.ToUpdateModel(x, fromShop, toShop);
+            })
+            .ToList();
 
         var updateModel = new StdRequisitionUpdateModel(
             details,
             Pickups: pickups,
-            Transfers: [],
+            Transfers: transfers,
             CollectionChargesBanksAndBins: collectionChargeModels,
             CollectionVanPacks: collectionVanPacks,
             AdditionalCosts: []);

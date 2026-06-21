@@ -69,6 +69,34 @@ public static class StdRequisitionSnapshotFactory
                     TotalValue = x.TotalValue ?? 0m,
                 })
                 .ToList(),
+            
+            Transfers = requisition.Transfers
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.ShopNameFrom)
+                .ThenBy(x => x.ShopNameTo)
+                .Select(x => new StdTransferSnapshotDto
+                {
+                    Date = x.Date,
+
+                    ShopIdFrom = x.ShopIdFrom,
+                    ShopCodeFrom = x.ShopCodeFrom,
+                    ShopNameFrom = x.ShopNameFrom,
+
+                    ShopIdTo = x.ShopIdTo,
+                    ShopCodeTo = x.ShopCodeTo,
+                    ShopNameTo = x.ShopNameTo,
+
+                    NumberOfBags = x.NumberOfBags,
+                    NumberOfBoxes = x.NumberOfBoxes,
+
+                    ChargeType = x.ChargeType,
+                    Miles = x.Miles,
+                    RatePerMile = x.RatePerMile,
+                    FlatCharge = x.FlatCharge,
+
+                    TotalValue = x.TotalValue ?? 0m,
+                })
+                .ToList(),
         };
     }
 

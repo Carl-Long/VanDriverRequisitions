@@ -10,4 +10,5 @@ public sealed class SaveStdRequisitionDto
     public required IReadOnlyCollection<SaveStdCollectionChargeBanksAndBinsDto> CollectionChargesBanksAndBins { get; init; }
     public required IReadOnlyCollection<SaveStdCollectionVanPackDto> CollectionVanPacks { get; init; }
     public required IReadOnlyCollection<SaveStdPickupDto> Pickups { get; init; }
+    public required IReadOnlyCollection<SaveStdTransferDto> Transfers { get; init; }
 }

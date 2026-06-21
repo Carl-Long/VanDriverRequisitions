@@ -19,4 +19,5 @@ public sealed class StdRequisitionSnapshotDto
     public List<StdCollectionChargeBanksAndBinsSnapshotDto> CollectionChargesBanksAndBins { get; init; } = [];
     public List<StdCollectionVanPackSnapshotDto> CollectionVanPacks { get; init; } = [];
     public List<StdPickupSnapshotDto> Pickups { get; init; } = [];
+    public List<StdTransferSnapshotDto> Transfers { get; init; } = [];
 }
