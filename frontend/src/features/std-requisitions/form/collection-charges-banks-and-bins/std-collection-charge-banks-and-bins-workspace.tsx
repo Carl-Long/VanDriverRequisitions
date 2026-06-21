@@ -13,9 +13,9 @@ import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collectio
 import { calculateStdCollectionChargeBanksAndBinsRowsTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
 import { mapStdCollectionChargeBanksAndBinsDraftToForm } from "../lib/map-std-collection-charge-banks-and-bins-draft-to-form";
 import { StdCollectionChargeBanksAndBinsDrawer } from "./std-collection-charge-banks-and-bins-drawer";
-import { DeleteRowButton } from "@/features/fe-requisitions/form/components/delete-row-button";
-import { EditableCellButton } from "@/features/fe-requisitions/form/components/editable-cell-button";
-import { getEditableTableRowClassName } from "@/features/fe-requisitions/form/lib/get-editable-table-row-class-name";
+import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
+import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
+import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 import { Alert } from "@/components/ui/alert";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";

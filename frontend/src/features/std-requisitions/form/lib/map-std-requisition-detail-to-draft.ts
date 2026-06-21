@@ -77,6 +77,24 @@ export function mapStdRequisitionDetailToDraft(
             totalValue: row.totalValue,
         })),
 
+        pickups: requisition.pickups.map((row) => ({
+            clientId: row.id,
+            id: row.id,
+
+            date: parseDateOnly(row.date),
+
+            numberOfBags: row.numberOfBags,
+            numberOfHouseholds: row.numberOfHouseholds,
+
+            chargeType: row.chargeType,
+
+            miles: row.miles,
+            ratePerMile: row.ratePerMile,
+            flatCharge: row.flatCharge,
+
+            totalValue: row.totalValue,
+        })),
+
         submissionHistory: requisition.submissionHistory,
     };
 }

@@ -22,9 +22,9 @@ import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { calculateFeAdditionalCostTotals } from "../lib/calculate-fe-additional-cost-totals";
 import { mapFeAdditionalCostDraftToForm } from "../lib/map-fe-additional-cost-draft-to-form";
 import { FeAdditionalCostDrawer } from "./fe-additional-cost-drawer";
-import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
-import { EditableCellButton } from "../components/editable-cell-button";
-import { DeleteRowButton } from "../components/delete-row-button";
+import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
+import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 
 type Props = {
     readonly: boolean;

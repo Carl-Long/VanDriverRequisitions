@@ -12,7 +12,7 @@ import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/
 import { useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";

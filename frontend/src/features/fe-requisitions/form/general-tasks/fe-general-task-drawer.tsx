@@ -15,7 +15,7 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 import { DayInput } from "../form-fields/day-input";
 

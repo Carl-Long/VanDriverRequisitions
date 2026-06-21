@@ -1,21 +1,26 @@
 export type StdRequisitionTab =
     | {
-          type: "details";
-          key: "details";
-          label: "Details";
-      }
+        type: "details";
+        key: "details";
+        label: "Details";
+    }
     | {
-          type: "banks-and-bins";
-          key: "collection-charges-banks-and-bins";
-          label: "Banks & Bins Collections";
-      }
+        type: "banks-and-bins";
+        key: "collection-charges-banks-and-bins";
+        label: "Banks & Bins Collections";
+    }
     | {
-          type: "van-packs";
-          key: "collection-van-packs";
-          label: "Van Pack Collections";
-      }
+        type: "van-packs";
+        key: "collection-van-packs";
+        label: "Van Pack Collections";
+    }
     | {
-          type: "submission-history";
-          key: "submission-history";
-          label: string;
-      };
+        type: "pickups";
+        key: "pickups";
+        label: "Pickup Collections";
+    }
+    | {
+        type: "submission-history";
+        key: "submission-history";
+        label: string;
+    };

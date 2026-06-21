@@ -17,6 +17,9 @@ import {
 import { createStdCollectionVanPackDraftFromForm } from "../lib/create-std-collection-van-pack-draft-from-form";
 import { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
 import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
+import { calculateStdPickupFormTotal } from "../lib/calculate-std-pickup-form";
+import { createStdPickupDraftFromForm } from "../lib/create-std-pickup-draft-from-form";
+import { StdPickupForm } from "../types/std-pickup-form";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -172,6 +175,51 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         }));
     }
 
+    function addPickup(form: StdPickupForm) {
+        const row = createStdPickupDraftFromForm(form);
+
+        setDraft((prev) => ({
+            ...prev,
+            pickups: [...prev.pickups, row],
+        }));
+    }
+
+    function updatePickup(clientId: string, form: StdPickupForm) {
+        setDraft((prev) => ({
+            ...prev,
+            pickups: prev.pickups.map((row) =>
+                row.clientId === clientId
+                    ? {
+                        ...row,
+                        date: form.date,
+
+                        numberOfBags: form.numberOfBags,
+                        numberOfHouseholds: form.numberOfHouseholds,
+
+                        chargeType: form.chargeType,
+
+                        miles: form.chargeType === "Mileage" ? form.miles : null,
+                        ratePerMile:
+                            form.chargeType === "Mileage" ? form.ratePerMile : null,
+                        flatCharge:
+                            form.chargeType === "FlatCharge" ? form.flatCharge : null,
+
+                        totalValue: calculateStdPickupFormTotal(form),
+                    }
+                    : row,
+            ),
+        }));
+    }
+
+    function removePickup(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            pickups: prev.pickups.filter((row) => row.clientId !== clientId),
+        }));
+    }
+
+
+
     function replaceDraft(nextDraft: StdRequisitionDraft) {
         setDraft(nextDraft);
     }
@@ -194,5 +242,9 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         addCollectionVanPack,
         updateCollectionVanPack,
         removeCollectionVanPack,
+
+        addPickup,
+        updatePickup,
+        removePickup,
     };
 }

@@ -8,6 +8,7 @@ export type SaveStdRequisition = {
     shopId: string;
     collectionChargesBanksAndBins: SaveStdCollectionChargeBanksAndBins[];
     collectionVanPacks: SaveStdCollectionVanPack[];
+    pickups: SaveStdPickup[];
 };
 
 export type SaveStdCollectionChargeBanksAndBins = {
@@ -32,4 +33,15 @@ export type SaveStdCollectionVanPack = {
     postCodeZone: string;
     vanPacksOut: number;
     filledBags: number;
+};
+
+export type SaveStdPickup = {
+    id: string | null;
+    date: string;
+    numberOfBags: number;
+    numberOfHouseholds: number;
+    chargeType: StdChargeType;
+    miles: number | null;
+    ratePerMile: number | null;
+    flatCharge: number | null;
 };

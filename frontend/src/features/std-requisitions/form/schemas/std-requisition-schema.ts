@@ -126,6 +126,80 @@ const vanPackRowSchema = z
         }
     });
 
+const pickupRowSchema = z
+    .object({
+        clientId: z.string(),
+        id: z.string().nullable(),
+
+        date: z
+            .date()
+            .nullable()
+            .refine((value) => value !== null, "Date is required"),
+
+        numberOfBags: z
+            .number()
+            .int("Must be a whole number")
+            .min(1, "Bags must be greater than zero")
+            .nullable(),
+
+        numberOfHouseholds: z
+            .number()
+            .int("Must be a whole number")
+            .min(1, "Households must be greater than zero")
+            .nullable(),
+
+        chargeType: z.enum(["Mileage", "FlatCharge"]),
+
+        miles: z.number().int("Must be a whole number").min(0, "Cannot be negative").nullable(),
+        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
+        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+
+        totalValue: z.number().min(0),
+    })
+    .superRefine((row, ctx) => {
+        if (row.numberOfBags === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["numberOfBags"],
+                message: "Bags are required",
+            });
+        }
+
+        if (row.numberOfHouseholds === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["numberOfHouseholds"],
+                message: "Households are required",
+            });
+        }
+
+        if (row.chargeType === "Mileage") {
+            if (row.miles === null || row.miles <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["miles"],
+                    message: "Miles are required",
+                });
+            }
+
+            if (row.ratePerMile === null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["ratePerMile"],
+                    message: "Rate per mile is required",
+                });
+            }
+        }
+
+        if (row.chargeType === "FlatCharge" && row.flatCharge === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["flatCharge"],
+                message: "Flat charge is required",
+            });
+        }
+    });
+
 export function createStdRequisitionSchema() {
     return z
         .object({
@@ -151,10 +225,13 @@ export function createStdRequisitionSchema() {
 
             collectionChargesBanksAndBins: z.array(banksAndBinsRowSchema),
             collectionVanPacks: z.array(vanPackRowSchema),
+            pickups: z.array(pickupRowSchema),
         })
         .superRefine((data, ctx) => {
             const totalRows =
-                data.collectionChargesBanksAndBins.length + data.collectionVanPacks.length;
+                data.pickups.length +
+                data.collectionChargesBanksAndBins.length +
+                data.collectionVanPacks.length;
 
             if (totalRows === 0) {
                 ctx.addIssue({

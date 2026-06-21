@@ -5,52 +5,45 @@ import { Info, Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
-import { DatePicker } from "@/components/ui/date/date-picker";
 import { AppDrawer } from "@/components/ui/drawer";
+import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import { formatCurrencyGB } from "@/lib/format/currency";
-
-import { calculateStdCollectionChargeBanksAndBinsFormTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
-import { createEmptyStdCollectionChargeBanksAndBinsForm } from "../lib/create-empty-std-collection-charge-banks-and-bins-form";
-import { createStdCollectionChargeBanksAndBinsFormSchema } from "../schemas/create-std-collection-charge-banks-and-bins-form-schema";
-import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
-import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
-import { StdCollectionTypeField } from "@/features/std-collection-types/std-collection-type-field";
-import { StdLocationField } from "@/features/std-locations/std-location-field";
-import { StdChargeType, STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
+
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
+import type { StdPickupForm } from "../types/std-pickup-form";
+import { calculateStdPickupFormTotal } from "../lib/calculate-std-pickup-form";
+import { createEmptyStdPickupForm } from "../lib/create-empty-std-pickup-form";
+import { createStdPickupFormSchema } from "../schemas/create-std-pickup-form-schema";
 
 type Props = {
     open: boolean;
     title: string;
-    shopId: string | null;
-    initialValues?: StdCollectionChargeBanksAndBinsForm;
     mileageLimitRule?: RequisitionLimitRuleSummary;
     flatChargeLimitRule?: RequisitionLimitRuleSummary;
+    initialValues?: StdPickupForm;
     onClose: () => void;
-    onSave: (form: StdCollectionChargeBanksAndBinsForm) => void;
+    onSave: (form: StdPickupForm) => void;
 };
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdCollectionChargeBanksAndBinsDrawer({
+export function StdPickupDrawer({
     open,
     title,
-    shopId,
-    initialValues,
     mileageLimitRule,
     flatChargeLimitRule,
+    initialValues,
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdCollectionChargeBanksAndBinsForm>(
-        createEmptyStdCollectionChargeBanksAndBinsForm(),
-    );
-
+    const [form, setForm] = useState<StdPickupForm>(createEmptyStdPickupForm());
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const schema = createStdCollectionChargeBanksAndBinsFormSchema({
+    const schema = createStdPickupFormSchema({
         mileageLimitRule,
         flatChargeLimitRule,
     });
@@ -62,14 +55,19 @@ export function StdCollectionChargeBanksAndBinsDrawer({
             return;
         }
 
-        setForm(initialValues ?? createEmptyStdCollectionChargeBanksAndBinsForm());
+        setForm(initialValues ?? createEmptyStdPickupForm());
         setErrors({});
     }, [open, initialValues]);
 
-    const totalValue = useMemo(
-        () => calculateStdCollectionChargeBanksAndBinsFormTotal(form),
-        [form],
-    );
+    const totalValue = useMemo(() => calculateStdPickupFormTotal(form), [form]);
+
+    function clearError(field: string) {
+        setErrors((prev) => {
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    }
 
     function saveForm(intent: SubmitIntent) {
         const result = schema.safeParse(form);
@@ -87,26 +85,21 @@ export function StdCollectionChargeBanksAndBinsDrawer({
             return;
         }
 
-        setForm(createEmptyStdCollectionChargeBanksAndBinsForm(result.data.date));
+        setForm(createEmptyStdPickupForm(result.data.date));
     }
 
-    function clearError(field: string) {
-        setErrors((prev) => {
-            const next = { ...prev };
-            delete next[field];
-            return next;
-        });
-    }
-
-    function setChargeType(chargeType: StdCollectionChargeBanksAndBinsForm["chargeType"]) {
+    function setChargeType(chargeType: StdPickupForm["chargeType"]) {
         setForm((prev) => ({
             ...prev,
             chargeType,
-            miles: chargeType === "Mileage" ? prev.miles : null,
-            ratePerMile: chargeType === "Mileage" ? prev.ratePerMile : null,
-            flatCharge: chargeType === "FlatCharge" ? prev.flatCharge : null,
+            miles: chargeType === STD_CHARGE_TYPE.Mileage ? prev.miles : null,
+            ratePerMile:
+                chargeType === STD_CHARGE_TYPE.Mileage ? prev.ratePerMile : null,
+            flatCharge:
+                chargeType === STD_CHARGE_TYPE.FlatCharge ? prev.flatCharge : null,
         }));
 
+        clearError("chargeType");
         clearError("miles");
         clearError("ratePerMile");
         clearError("flatCharge");
@@ -140,7 +133,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 
                         {!isEditMode && (
                             <Button
-                                form="std-banks-bins-drawer-form"
+                                form="std-pickup-drawer-form"
                                 type="submit"
                                 className="min-w-[180px]"
                             >
@@ -153,7 +146,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
             }
         >
             <form
-                id="std-banks-bins-drawer-form"
+                id="std-pickup-drawer-form"
                 noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
@@ -161,12 +154,6 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     saveForm(isEditMode ? "close" : "add-another");
                 }}
             >
-                {!shopId && (
-                    <Alert tone="warning">
-                        Select a shop on the Details tab before adding Banks & Bins rows.
-                    </Alert>
-                )}
-
                 {errors.form && <Alert tone="danger">{errors.form}</Alert>}
 
                 <LimitSummary
@@ -174,7 +161,6 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     mileageLimitRule={mileageLimitRule}
                     flatChargeLimitRule={flatChargeLimitRule}
                 />
-
                 <Field label="Date" required error={errors.date}>
                     <DatePicker
                         value={form.date ?? undefined}
@@ -190,74 +176,71 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     />
                 </Field>
 
-                <StdCollectionTypeField
-                    required
-                    value={form.collectionTypeId}
-                    label={form.collectionTypeLabel}
-                    error={errors.collectionTypeId}
-                    onChange={(value, label, collectionType) => {
-                        setForm((prev) => ({
-                            ...prev,
-                            collectionTypeId: value,
-                            collectionTypeLabel: collectionType?.name ?? label,
-                            collectionTypeCode: collectionType?.code ?? null,
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field
+                        label="Number of Bags"
+                        required
+                        error={errors.numberOfBags}
+                    >
+                        <Input
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={form.numberOfBags ?? ""}
+                            state={errors.numberOfBags ? "error" : "default"}
+                            onChange={(event) => {
+                                const value =
+                                    event.target.value === ""
+                                        ? null
+                                        : Number(event.target.value);
 
-                            // Locations depend on collection type.
-                            locationId: null,
-                            locationLabel: null,
-                            locationPostCode: null,
-                        }));
+                                setForm((prev) => ({
+                                    ...prev,
+                                    numberOfBags: value,
+                                }));
 
-                        clearError("collectionTypeId");
-                        clearError("locationId");
-                        clearError("form");
-                    }}
-                />
+                                clearError("numberOfBags");
+                            }}
+                        />
+                    </Field>
 
-                <StdLocationField
-                    required
-                    shopId={shopId}
-                    collectionTypeId={form.collectionTypeId}
-                    value={form.locationId}
-                    label={form.locationLabel}
-                    error={errors.locationId}
-                    onChange={(value, label, location) => {
-                        setForm((prev) => ({
-                            ...prev,
-                            locationId: value,
-                            locationLabel: location?.locationName ?? label,
-                            locationPostCode: location?.postCode ?? null,
-                        }));
+                    <Field
+                        label="Number of Households"
+                        required
+                        error={errors.numberOfHouseholds}
+                    >
+                        <Input
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={form.numberOfHouseholds ?? ""}
+                            state={errors.numberOfHouseholds ? "error" : "default"}
+                            onChange={(event) => {
+                                const value =
+                                    event.target.value === ""
+                                        ? null
+                                        : Number(event.target.value);
 
-                        clearError("locationId");
-                        clearError("form");
-                    }}
-                />
+                                setForm((prev) => ({
+                                    ...prev,
+                                    numberOfHouseholds: value,
+                                }));
 
-                <Field label="Number of Bags" error={errors.numberOfBags}>
-                    <Input
-                        type="number"
-                        min={0}
-                        value={form.numberOfBags ?? ""}
-                        state={errors.numberOfBags ? "error" : "default"}
-                        onChange={(event) => {
-                            const value = event.target.value;
-
-                            setForm((prev) => ({
-                                ...prev,
-                                numberOfBags: value === "" ? null : Number(value),
-                            }));
-
-                            clearError("numberOfBags");
-                        }}
-                    />
-                </Field>
+                                clearError("numberOfHouseholds");
+                            }}
+                        />
+                    </Field>
+                </div>
 
                 <Field label="Charge Type" required error={errors.chargeType}>
                     <div className="grid grid-cols-2 gap-3">
                         <Button
                             type="button"
-                            variant={form.chargeType === STD_CHARGE_TYPE.Mileage ? "solid" : "outline"}
+                            variant={
+                                form.chargeType === STD_CHARGE_TYPE.Mileage
+                                    ? "solid"
+                                    : "outline"
+                            }
                             onClick={() => setChargeType(STD_CHARGE_TYPE.Mileage)}
                         >
                             Mileage
@@ -265,7 +248,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 
                         <Button
                             type="button"
-                            variant={form.chargeType === STD_CHARGE_TYPE.FlatCharge ? "solid" : "outline"}
+                            variant={
+                                form.chargeType === STD_CHARGE_TYPE.FlatCharge
+                                    ? "solid"
+                                    : "outline"
+                            }
                             onClick={() => setChargeType(STD_CHARGE_TYPE.FlatCharge)}
                         >
                             Flat charge
@@ -283,7 +270,10 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                                 value={form.miles ?? ""}
                                 state={errors.miles ? "error" : "default"}
                                 onChange={(event) => {
-                                    const value = event.target.value === "" ? null : Number(event.target.value);
+                                    const value =
+                                        event.target.value === ""
+                                            ? null
+                                            : Number(event.target.value);
 
                                     setForm((prev) => ({
                                         ...prev,
@@ -296,7 +286,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                             />
                         </Field>
 
-                        <Field label="Rate Per Mile" required error={errors.ratePerMile}>
+                        <Field
+                            label="Rate Per Mile"
+                            required
+                            error={errors.ratePerMile}
+                        >
                             <Input
                                 type="number"
                                 min={0}
@@ -304,7 +298,10 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                                 value={form.ratePerMile ?? ""}
                                 state={errors.ratePerMile ? "error" : "default"}
                                 onChange={(event) => {
-                                    const value = event.target.value === "" ? null : Number(event.target.value);
+                                    const value =
+                                        event.target.value === ""
+                                            ? null
+                                            : Number(event.target.value);
 
                                     setForm((prev) => ({
                                         ...prev,
@@ -326,7 +323,10 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                             value={form.flatCharge ?? ""}
                             state={errors.flatCharge ? "error" : "default"}
                             onChange={(event) => {
-                                const value = event.target.value === "" ? null : Number(event.target.value);
+                                const value =
+                                    event.target.value === ""
+                                        ? null
+                                        : Number(event.target.value);
 
                                 setForm((prev) => ({
                                     ...prev,
@@ -346,7 +346,9 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Total Value</span>
 
-                        <span className="font-medium">{formatCurrencyGB(totalValue)}</span>
+                        <span className="font-medium">
+                            {formatCurrencyGB(totalValue)}
+                        </span>
                     </div>
                 </div>
             </form>
@@ -355,7 +357,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 }
 
 type LimitSummaryProps = {
-    chargeType: StdCollectionChargeBanksAndBinsForm["chargeType"];
+    chargeType: StdPickupForm["chargeType"];
     mileageLimitRule?: RequisitionLimitRuleSummary;
     flatChargeLimitRule?: RequisitionLimitRuleSummary;
 };
@@ -365,7 +367,10 @@ function LimitSummary({
     mileageLimitRule,
     flatChargeLimitRule,
 }: Readonly<LimitSummaryProps>) {
-    const activeRule = chargeType === "Mileage" ? mileageLimitRule : flatChargeLimitRule;
+    const activeRule =
+        chargeType === STD_CHARGE_TYPE.Mileage
+            ? mileageLimitRule
+            : flatChargeLimitRule;
 
     return (
         <div className="flex gap-3 rounded-xl border border-border bg-surface-subtle p-4">
@@ -373,14 +378,14 @@ function LimitSummary({
 
             <div className="text-sm">
                 <div className="font-medium">
-                    {chargeType === "Mileage"
+                    {chargeType === STD_CHARGE_TYPE.Mileage
                         ? "Mileage Limits"
                         : "Flat Charge Limits"}
                 </div>
 
                 {activeRule ? (
                     <>
-                        {chargeType === "Mileage" && (
+                        {chargeType === STD_CHARGE_TYPE.Mileage && (
                             <div className="mt-1 text-muted-foreground">
                                 Maximum miles:{" "}
                                 <strong className="text-foreground">
@@ -389,8 +394,16 @@ function LimitSummary({
                             </div>
                         )}
 
-                        <div className={chargeType === "Mileage" ? "text-muted-foreground" : "mt-1 text-muted-foreground"}>
-                            {chargeType === "Mileage" ? "Maximum rate per mile" : "Maximum flat charge"}
+                        <div
+                            className={
+                                chargeType === STD_CHARGE_TYPE.Mileage
+                                    ? "text-muted-foreground"
+                                    : "mt-1 text-muted-foreground"
+                            }
+                        >
+                            {chargeType === STD_CHARGE_TYPE.Mileage
+                                ? "Maximum rate per mile"
+                                : "Maximum flat charge"}
                             :{" "}
                             <strong className="text-foreground">
                                 {formatCurrencyGB(activeRule.maxRate)}

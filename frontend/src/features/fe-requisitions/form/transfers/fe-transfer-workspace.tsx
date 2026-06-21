@@ -20,9 +20,9 @@ import { FeTransferForm } from "../types/fe-transfer-form";
 import { calculateFeTransferTotals } from "../lib/calculate-fe-transfer-totals";
 import { mapFeTransferDraftToForm } from "../lib/map-fe-transfer-draft-to-form";
 import { FeTransferDrawer } from "./fe-transfer-drawer";
-import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
-import { EditableCellButton } from "../components/editable-cell-button";
-import { DeleteRowButton } from "../components/delete-row-button";
+import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
+import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 
 type Props = {
     readonly: boolean;

@@ -16,7 +16,7 @@ import { FeTransferForm } from "../types/fe-transfer-form";
 import { calculateFeTransferFormTotals } from "../lib/calculate-fe-transfer-form";
 import { createEmptyFeTransferForm } from "../lib/create-empty-fe-transfer-form";
 import { createFeTransferFormSchema } from "../schemas/create-fe-transfer-form-schema";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { DayInput } from "../form-fields/day-input";
 import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 

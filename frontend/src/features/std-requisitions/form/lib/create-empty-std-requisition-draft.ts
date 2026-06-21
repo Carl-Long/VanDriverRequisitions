@@ -31,6 +31,7 @@ export function createEmptyStdRequisitionDraft(): StdRequisitionDraft {
 
         collectionChargesBanksAndBins: [],
         collectionVanPacks: [],
+        pickups: [],
 
         submissionHistory: [],
     };

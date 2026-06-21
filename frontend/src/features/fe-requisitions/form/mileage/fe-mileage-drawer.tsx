@@ -16,7 +16,7 @@ import { FeMileageForm } from "../types/fe-mileage-form";
 import { calculateFeMileageFormTotals } from "../lib/calculate-fe-mileage-form";
 import { createEmptyFeMileageForm } from "../lib/create-empty-fe-mileage-form";
 import { createFeMileageFormSchema } from "../schemas/create-fe-mileage-form-schema";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { DayInput } from "../form-fields/day-input";
 
 type Props = {

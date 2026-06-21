@@ -40,7 +40,7 @@ export function mapStdRequisitionDraftToSaveRequest(
 
             return {
                 id: row.id,
-                date: toRequiredDateOnlyString(row.date,"Banks & Bins collection date is required."), 
+                date: toRequiredDateOnlyString(row.date, "Banks & Bins collection date is required."),
                 collectionTypeId: row.collectionTypeId,
                 locationId: row.locationId,
                 numberOfBags: row.numberOfBags,
@@ -71,9 +71,34 @@ export function mapStdRequisitionDraftToSaveRequest(
             return {
                 id: row.id,
                 deliveryDate: toRequiredDateOnlyString(row.deliveryDate, "Van Pack delivery date is required."),
-                postCodeZone: normaliseUkPostcodeOutwardCode(row.postCodeZone), 
+                postCodeZone: normaliseUkPostcodeOutwardCode(row.postCodeZone),
                 vanPacksOut: row.vanPacksOut,
                 filledBags: row.filledBags,
+            };
+        }),
+
+        pickups: draft.pickups.map((row) => {
+            if (!row.date) {
+                throw new Error("Pickup date is required.");
+            }
+
+            if (row.numberOfBags === null) {
+                throw new Error("Pickup bags are required.");
+            }
+
+            if (row.numberOfHouseholds === null) {
+                throw new Error("Pickup households are required.");
+            }
+
+            return {
+                id: row.id,
+                date: toRequiredDateOnlyString(row.date, "Pickup date is required."),
+                numberOfBags: row.numberOfBags,
+                numberOfHouseholds: row.numberOfHouseholds,
+                chargeType: row.chargeType,
+                miles: row.chargeType === "Mileage" ? row.miles : null,
+                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
+                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
             };
         }),
     };

@@ -17,52 +17,60 @@ import {
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
-import type { StdCollectionVanPackDraft } from "../types/std-collection-van-pack-draft";
-import type { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
-import { mapStdCollectionVanPackDraftToForm } from "../lib/map-std-collection-van-pack-draft-to-form";
-import { StdCollectionVanPackDrawer } from "./std-collection-van-pack-drawer";
-import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 
+import { getStdChargeTypeLabel } from "../../constants/std-charge-type.constants";
+import type { StdPickupDraft } from "../types/std-pickup-draft";
+import type { StdPickupForm } from "../types/std-pickup-form";
+import { mapStdPickupDraftToForm } from "../lib/map-std-pickup-draft-to-form";
+import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
+import { StdPickupDrawer } from "./std-pickup-drawer";
+
 type Props = {
     readonly: boolean;
-    rows: StdCollectionVanPackDraft[];
-    vanPackLimitRule?: RequisitionLimitRuleSummary;
-    onAdd: (form: StdCollectionVanPackForm, ratePerVanPack: number) => void;
-    onUpdate: (
-        clientId: string,
-        form: StdCollectionVanPackForm,
-        ratePerVanPack: number,
-    ) => void;
+    rows: StdPickupDraft[];
+    mileageLimitRule?: RequisitionLimitRuleSummary;
+    flatChargeLimitRule?: RequisitionLimitRuleSummary;
+    onAdd: (form: StdPickupForm) => void;
+    onUpdate: (clientId: string, form: StdPickupForm) => void;
     onDelete: (clientId: string) => void;
 };
 
-export function StdCollectionVanPackWorkspace({
+export function StdPickupWorkspace({
     readonly,
     rows,
-    vanPackLimitRule,
+    mileageLimitRule,
+    flatChargeLimitRule,
     onAdd,
     onUpdate,
     onDelete,
 }: Readonly<Props>) {
     const [open, setOpen] = useState(false);
-    const [editingRow, setEditingRow] = useState<StdCollectionVanPackDraft | null>(
-        null,
-    );
+    const [editingRow, setEditingRow] = useState<StdPickupDraft | null>(null);
 
     const subtotal = rows.reduce((total, row) => total + row.totalValue, 0);
-    const totalVanPacksOut = rows.reduce(
-        (total, row) => total + (row.vanPacksOut ?? 0),
-        0,
-    );
-    const totalFilledBags = rows.reduce(
-        (total, row) => total + (row.filledBags ?? 0),
+
+    const totalBags = rows.reduce(
+        (total, row) => total + (row.numberOfBags ?? 0),
         0,
     );
 
-    function openEditDrawer(row: StdCollectionVanPackDraft) {
+    const totalHouseholds = rows.reduce(
+        (total, row) => total + (row.numberOfHouseholds ?? 0),
+        0,
+    );
+
+    const totalMiles = rows.reduce(
+        (total, row) =>
+            total + (row.chargeType === "Mileage" ? row.miles ?? 0 : 0),
+        0,
+    );
+
+    const canAddRows = !!mileageLimitRule || !!flatChargeLimitRule;
+
+    function openEditDrawer(row: StdPickupDraft) {
         if (readonly) {
             return;
         }
@@ -71,15 +79,11 @@ export function StdCollectionVanPackWorkspace({
         setOpen(true);
     }
 
-    function saveRow(form: StdCollectionVanPackForm) {
-        if (!vanPackLimitRule) {
-            return;
-        }
-
+    function saveRow(form: StdPickupForm) {
         if (editingRow) {
-            onUpdate(editingRow.clientId, form, vanPackLimitRule.maxRate);
+            onUpdate(editingRow.clientId, form);
         } else {
-            onAdd(form, vanPackLimitRule.maxRate);
+            onAdd(form);
         }
     }
 
@@ -87,69 +91,66 @@ export function StdCollectionVanPackWorkspace({
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-md font-semibold">Van Pack Collections</h2>
+                    <h2 className="text-md font-semibold">Pickup Collections</h2>
 
                     <p className="text-sm text-muted-foreground">
-                        Manage van pack collection entries
+                        Manage pickup collection entries
                     </p>
 
                     <p className="text-sm text-muted-foreground">
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
-                        {totalVanPacksOut} van packs out •{" "}
-                        {formatCurrencyGB(subtotal)}
+                        {totalBags} bags • {totalHouseholds} households •{" "}
+                        {totalMiles} miles • {formatCurrencyGB(subtotal)}
                     </p>
                 </div>
 
                 {!readonly && (
                     <Button
                         type="button"
-                        disabled={!vanPackLimitRule}
+                        disabled={!canAddRows}
                         onClick={() => {
                             setEditingRow(null);
                             setOpen(true);
                         }}
                     >
                         <Plus size={14} />
-                        Add Van Pack Collection
+                        Add Pickup
                     </Button>
                 )}
             </div>
 
-            {!vanPackLimitRule && !readonly && (
+            {!canAddRows && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
-                    No STD van pack pricing rule is configured. Rows cannot be added until
-                    this is configured.
+                    No STD mileage or flat charge limit rules are configured. Rows
+                    cannot be added until at least one charge rule is configured.
                 </div>
             )}
 
             {rows.length === 0 ? (
-                <EmptyState title="No Van Pack Collections" />
+                <EmptyState title="No Pickup Collections" />
             ) : (
-                <VanPackTable
+                <PickupTable
                     readonly={readonly}
                     rows={rows}
-                    vanPackLimitRule={vanPackLimitRule}
-                    totalVanPacksOut={totalVanPacksOut}
-                    totalFilledBags={totalFilledBags}
+                    mileageLimitRule={mileageLimitRule}
+                    flatChargeLimitRule={flatChargeLimitRule}
+                    totalBags={totalBags}
+                    totalHouseholds={totalHouseholds}
+                    totalMiles={totalMiles}
                     subtotal={subtotal}
                     onEdit={openEditDrawer}
                     onDelete={onDelete}
                 />
             )}
 
-            <StdCollectionVanPackDrawer
+            <StdPickupDrawer
                 key={editingRow ? editingRow.clientId : "new"}
                 open={open}
-                title={
-                    editingRow
-                        ? "Edit Van Pack Collection"
-                        : "Add Van Pack Collection"
-                }
-                vanPackLimitRule={vanPackLimitRule}
+                title={editingRow ? "Edit Pickup" : "Add Pickup"}
+                mileageLimitRule={mileageLimitRule}
+                flatChargeLimitRule={flatChargeLimitRule}
                 initialValues={
-                    editingRow
-                        ? mapStdCollectionVanPackDraftToForm(editingRow)
-                        : undefined
+                    editingRow ? mapStdPickupDraftToForm(editingRow) : undefined
                 }
                 onClose={() => {
                     setOpen(false);
@@ -163,21 +164,25 @@ export function StdCollectionVanPackWorkspace({
 
 type TableProps = {
     readonly: boolean;
-    rows: StdCollectionVanPackDraft[];
-    vanPackLimitRule?: RequisitionLimitRuleSummary;
-    totalVanPacksOut: number;
-    totalFilledBags: number;
+    rows: StdPickupDraft[];
+    mileageLimitRule?: RequisitionLimitRuleSummary;
+    flatChargeLimitRule?: RequisitionLimitRuleSummary;
+    totalBags: number;
+    totalHouseholds: number;
+    totalMiles: number;
     subtotal: number;
-    onEdit: (row: StdCollectionVanPackDraft) => void;
+    onEdit: (row: StdPickupDraft) => void;
     onDelete: (clientId: string) => void;
 };
 
-function VanPackTable({
+function PickupTable({
     readonly,
     rows,
-    vanPackLimitRule,
-    totalVanPacksOut,
-    totalFilledBags,
+    mileageLimitRule,
+    flatChargeLimitRule,
+    totalBags,
+    totalHouseholds,
+    totalMiles,
     subtotal,
     onEdit,
     onDelete,
@@ -189,34 +194,45 @@ function VanPackTable({
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
-                                Delivery Date
+                                Date
+                            </TableHeaderCell>
+
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Bags
+                            </TableHeaderCell>
+
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Households
                             </TableHeaderCell>
 
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
-                                Postcode Zone
+                                Charge Type
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Van Packs Out
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Miles
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Filled Bags
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
+                                Rate / Flat
                             </TableHeaderCell>
 
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Unused
-                            </TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Returned
-                            </TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
-                                Fixed Price
-                            </TableHeaderCell>
-
-                            <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated" align="right">
+                            <TableHeaderCell
+                                className="sticky top-0 z-20 bg-surface-elevated"
+                                align="right"
+                            >
                                 Total
                             </TableHeaderCell>
 
@@ -234,11 +250,14 @@ function VanPackTable({
 
                     <TableBody>
                         {rows.map((row) => {
-                            const limitStatus = getStdCollectionVanPackLimitStatus(
+                            const limitStatus = getStdPickupLimitStatus(
                                 row,
-                                vanPackLimitRule,
+                                mileageLimitRule,
+                                flatChargeLimitRule,
                             );
-                            const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+
+                            const hasLimitIssue =
+                                !readonly && limitStatus.state !== "ok";
 
                             return (
                                 <TableRow
@@ -253,11 +272,11 @@ function VanPackTable({
                                         <div>
                                             <EditableCellButton
                                                 readonly={readonly}
-                                                ariaLabel="Edit van pack collection row"
+                                                ariaLabel="Edit pickup row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.deliveryDate
-                                                    ? row.deliveryDate.toLocaleDateString()
+                                                {row.date
+                                                    ? row.date.toLocaleDateString()
                                                     : "-"}
                                             </EditableCellButton>
 
@@ -265,42 +284,48 @@ function VanPackTable({
                                                 <div className="mt-1 space-y-1">
                                                     <div className="text-xs font-medium text-warning">
                                                         {limitStatus.state === "missing-limit"
-                                                            ? "Missing price"
-                                                            : "Exceeds price"}
+                                                            ? "Missing limit"
+                                                            : "Exceeds limit"}
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>
-                                                                {message}
-                                                            </li>
-                                                        ))}
+                                                        {limitStatus.messages.map(
+                                                            (message, index) => (
+                                                                <li
+                                                                    key={`${message}-${index}`}
+                                                                >
+                                                                    {message}
+                                                                </li>
+                                                            ),
+                                                        )}
                                                     </ul>
                                                 </div>
                                             )}
                                         </div>
                                     </TableCell>
 
-                                    <TableCell>{row.postCodeZone ?? "-"}</TableCell>
-
                                     <TableCell align="right" className="tabular-nums">
-                                        {row.vanPacksOut ?? "-"}
+                                        {row.numberOfBags ?? "-"}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
-                                        {row.filledBags ?? "-"}
+                                        {row.numberOfHouseholds ?? "-"}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {getStdChargeTypeLabel(row.chargeType)}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
-                                        {row.unusedVanPacks}
+                                        {row.chargeType === "Mileage"
+                                            ? row.miles ?? "-"
+                                            : "-"}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
-                                        {row.percentReturned.toFixed(2)}%
-                                    </TableCell>
-
-                                    <TableCell align="right" className="tabular-nums">
-                                        {formatCurrencyGB(row.ratePerVanPack)}
+                                        {row.chargeType === "Mileage"
+                                            ? formatCurrencyGB(row.ratePerMile ?? 0)
+                                            : formatCurrencyGB(row.flatCharge ?? 0)}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">
@@ -310,7 +335,7 @@ function VanPackTable({
                                     {!readonly && (
                                         <TableCell align="right">
                                             <DeleteRowButton
-                                                ariaLabel="Delete van pack collection row"
+                                                ariaLabel="Delete pickup row"
                                                 onDelete={() => onDelete(row.clientId)}
                                             />
                                         </TableCell>
@@ -323,19 +348,27 @@ function VanPackTable({
                     <TableFooter>
                         <TableRow className="bg-surface-elevated font-semibold">
                             <TableCell>Totals</TableCell>
-                            <TableCell />
+
                             <TableCell align="right" className="tabular-nums">
-                                {totalVanPacksOut}
+                                {totalBags}
                             </TableCell>
+
                             <TableCell align="right" className="tabular-nums">
-                                {totalFilledBags}
+                                {totalHouseholds}
                             </TableCell>
+
                             <TableCell />
+
+                            <TableCell align="right" className="tabular-nums">
+                                {totalMiles}
+                            </TableCell>
+
                             <TableCell />
-                            <TableCell />
+
                             <TableCell align="right" className="tabular-nums">
                                 {formatCurrencyGB(subtotal)}
                             </TableCell>
+
                             {!readonly && <TableCell />}
                         </TableRow>
                     </TableFooter>

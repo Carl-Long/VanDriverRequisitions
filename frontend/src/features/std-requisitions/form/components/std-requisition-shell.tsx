@@ -9,7 +9,7 @@ import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
 import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
-import { mapZodErrors } from "@/features/fe-requisitions/form/lib/map-zod-errors";
+import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
@@ -30,6 +30,8 @@ import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-colle
 import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collection-van-pack-rate-change-message";
+import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
+import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -71,6 +73,9 @@ export function StdRequisitionShell({
         addCollectionVanPack,
         updateCollectionVanPack,
         removeCollectionVanPack,
+        addPickup,
+        updatePickup,
+        removePickup,
     } = useStdRequisitionDraft(initialDraft);
 
     const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
@@ -129,6 +134,21 @@ export function StdRequisitionShell({
                 getStdCollectionVanPackLimitStatus(
                     row,
                     stdVanPackLimitRule,
+                ).state !== "ok",
+        );
+    }
+
+    function pickupsHasWarning() {
+        if (isReadonly) {
+            return false;
+        }
+
+        return draft.pickups.some(
+            (row) =>
+                getStdPickupLimitStatus(
+                    row,
+                    stdMileageLimitRule,
+                    stdFlatChargeLimitRule,
                 ).state !== "ok",
         );
     }
@@ -399,6 +419,8 @@ export function StdRequisitionShell({
                 onActiveKeyChange={setActiveKey}
                 submissionHistoryCount={draft.submissionHistory.length}
                 collectionChargesBanksAndBinsHasWarning={collectionChargesBanksAndBinsHasWarning()}
+                collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
+                pickupsHasWarning={pickupsHasWarning()}
                 details={
                     <StdRequisitionDetailsTab
                         readonly={isReadonly}
@@ -445,7 +467,23 @@ export function StdRequisitionShell({
                         onDelete={removeCollectionVanPack}
                     />
                 }
-                collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
+                pickups={
+                    <StdPickupWorkspace
+                        readonly={isReadonly}
+                        rows={draft.pickups}
+                        mileageLimitRule={stdMileageLimitRule}
+                        flatChargeLimitRule={stdFlatChargeLimitRule}
+                        onAdd={(form) => {
+                            addPickup(form);
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updatePickup(clientId, form);
+                            clearError("form");
+                        }}
+                        onDelete={removePickup}
+                    />
+                }
                 submissionHistory={
                     <StdSubmissionHistoryTab
                         submissions={draft.submissionHistory}

@@ -19,6 +19,11 @@ export function buildStdRequisitionTabs(
             key: "collection-van-packs",
             label: "Van Pack Collections",
         },
+        {
+            type: "pickups",
+            key: "pickups",
+            label: "Pickup Collections"
+        },
     ];
 
     if (submissionHistoryCount > 0) {

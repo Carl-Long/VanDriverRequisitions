@@ -20,7 +20,7 @@ import {
     calculateStdCollectionVanPackUnusedVanPacks,
 } from "../lib/calculate-std-collection-van-pack-form";
 import { createStdCollectionVanPackFormSchema } from "../schemas/create-std-collection-van-pack-form-schema";
-import { mapZodErrors } from "@/features/fe-requisitions/form/lib/map-zod-errors";
+import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
 
 type Props = {
     open: boolean;
