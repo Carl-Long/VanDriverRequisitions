@@ -200,6 +200,103 @@ const pickupRowSchema = z
         }
     });
 
+const transferRowSchema = z
+    .object({
+        clientId: z.string(),
+        id: z.string().nullable(),
+
+        date: z
+            .date()
+            .nullable()
+            .refine((value) => value !== null, "Date is required"),
+
+        shopIdFrom: z.string().nullable(),
+        shopLabelFrom: z.string().nullable(),
+        shopCodeFrom: z.string().nullable(),
+        shopNameFrom: z.string().nullable(),
+
+        shopIdTo: z.string().nullable(),
+        shopLabelTo: z.string().nullable(),
+        shopCodeTo: z.string().nullable(),
+        shopNameTo: z.string().nullable(),
+
+        numberOfBags: z
+            .number()
+            .int("Must be a whole number")
+            .min(0, "Cannot be negative")
+            .nullable(),
+
+        numberOfBoxes: z
+            .number()
+            .int("Must be a whole number")
+            .min(0, "Cannot be negative")
+            .nullable(),
+
+        chargeType: z.enum(["Mileage", "FlatCharge"]),
+
+        miles: z
+            .number()
+            .int("Must be a whole number")
+            .min(0, "Cannot be negative")
+            .nullable(),
+
+        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
+        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+
+        totalValue: z.number().min(0),
+    })
+    .superRefine((row, ctx) => {
+        if (!row.shopIdFrom) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["shopIdFrom"],
+                message: "From shop is required",
+            });
+        }
+
+        if (!row.shopIdTo) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["shopIdTo"],
+                message: "To shop is required",
+            });
+        }
+
+        if (row.shopIdFrom && row.shopIdTo && row.shopIdFrom === row.shopIdTo) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["shopIdTo"],
+                message: "From shop and to shop must be different",
+            });
+        }
+
+        if (row.chargeType === "Mileage") {
+            if (row.miles === null || row.miles <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["miles"],
+                    message: "Miles are required",
+                });
+            }
+
+            if (row.ratePerMile === null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["ratePerMile"],
+                    message: "Rate per mile is required",
+                });
+            }
+        }
+
+        if (row.chargeType === "FlatCharge" && row.flatCharge === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["flatCharge"],
+                message: "Flat charge is required",
+            });
+        }
+    });
+
 export function createStdRequisitionSchema() {
     return z
         .object({
@@ -226,10 +323,12 @@ export function createStdRequisitionSchema() {
             collectionChargesBanksAndBins: z.array(banksAndBinsRowSchema),
             collectionVanPacks: z.array(vanPackRowSchema),
             pickups: z.array(pickupRowSchema),
+            transfers: z.array(transferRowSchema),
         })
         .superRefine((data, ctx) => {
             const totalRows =
                 data.pickups.length +
+                data.transfers.length +
                 data.collectionChargesBanksAndBins.length +
                 data.collectionVanPacks.length;
 

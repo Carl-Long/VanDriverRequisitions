@@ -51,6 +51,7 @@ export type StdRequisitionDetail = {
     collectionChargesBanksAndBins: StdCollectionChargeBanksAndBins[];
     collectionVanPacks: StdCollectionVanPack[];
     pickups: StdPickup[];
+    transfers: StdTransfer[];
 
     submittedByNameSnapshot: string | null;
     submittedAtUtc: string | null;
@@ -110,5 +111,29 @@ export type StdPickup = {
     miles: number | null;
     ratePerMile: number | null;
     flatCharge: number | null;
+    totalValue: number;
+};
+
+export type StdTransfer = {
+    id: string;
+    date: string;
+
+    shopIdFrom: string;
+    shopCodeFrom: string;
+    shopNameFrom: string;
+
+    shopIdTo: string;
+    shopCodeTo: string;
+    shopNameTo: string;
+
+    numberOfBags: number | null;
+    numberOfBoxes: number | null;
+
+    chargeType: StdChargeType;
+
+    miles: number | null;
+    ratePerMile: number | null;
+    flatCharge: number | null;
+
     totalValue: number;
 };

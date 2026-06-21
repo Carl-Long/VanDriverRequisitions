@@ -101,5 +101,31 @@ export function mapStdRequisitionDraftToSaveRequest(
                 flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
             };
         }),
+
+        transfers: draft.transfers.map((row) => {
+            if (!row.shopIdFrom) {
+                throw new Error("Transfer from shop is required.");
+            }
+
+            if (!row.shopIdTo) {
+                throw new Error("Transfer to shop is required.");
+            }
+
+            return {
+                id: row.id,
+                date: toRequiredDateOnlyString(
+                    row.date,
+                    "Transfer date is required.",
+                ),
+                shopIdFrom: row.shopIdFrom,
+                shopIdTo: row.shopIdTo,
+                numberOfBags: row.numberOfBags,
+                numberOfBoxes: row.numberOfBoxes,
+                chargeType: row.chargeType,
+                miles: row.chargeType === "Mileage" ? row.miles : null,
+                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
+                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+            };
+        }),
     };
 }

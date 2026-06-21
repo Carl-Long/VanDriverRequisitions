@@ -95,6 +95,34 @@ export function mapStdRequisitionDetailToDraft(
             totalValue: row.totalValue,
         })),
 
+        transfers: requisition.transfers.map((row) => ({
+            clientId: row.id,
+            id: row.id,
+
+            date: parseDateOnly(row.date),
+
+            shopIdFrom: row.shopIdFrom,
+            shopLabelFrom: `${row.shopCodeFrom} — ${row.shopNameFrom}`,
+            shopCodeFrom: row.shopCodeFrom,
+            shopNameFrom: row.shopNameFrom,
+
+            shopIdTo: row.shopIdTo,
+            shopLabelTo: `${row.shopCodeTo} — ${row.shopNameTo}`,
+            shopCodeTo: row.shopCodeTo,
+            shopNameTo: row.shopNameTo,
+
+            numberOfBags: row.numberOfBags,
+            numberOfBoxes: row.numberOfBoxes,
+
+            chargeType: row.chargeType,
+
+            miles: row.miles,
+            ratePerMile: row.ratePerMile,
+            flatCharge: row.flatCharge,
+
+            totalValue: row.totalValue,
+        })),
+
         submissionHistory: requisition.submissionHistory,
     };
 }
