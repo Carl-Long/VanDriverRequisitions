@@ -5,6 +5,7 @@ import type { StdSubmissionHistoryDraft } from "./std-submission-history-draft";
 import type { StdCollectionVanPackDraft } from "./std-collection-van-pack-draft";
 import { StdPickupDraft } from "./std-pickup-draft";
 import { StdTransferDraft } from "./std-transfer-draft";
+import { StdAdditionalCostDraft } from "./std-additional-cost-draft";
 
 export type StdRequisitionDraft = {
     requisitionId: string | null;
@@ -38,6 +39,7 @@ export type StdRequisitionDraft = {
     collectionVanPacks: StdCollectionVanPackDraft[];
     pickups: StdPickupDraft[];
     transfers: StdTransferDraft[];
+    additionalCosts: StdAdditionalCostDraft[];
 
     submissionHistory: StdSubmissionHistoryDraft[];
 };

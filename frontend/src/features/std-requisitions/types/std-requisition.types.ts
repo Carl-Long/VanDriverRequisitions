@@ -52,6 +52,7 @@ export type StdRequisitionDetail = {
     collectionVanPacks: StdCollectionVanPack[];
     pickups: StdPickup[];
     transfers: StdTransfer[];
+    additionalCosts: StdAdditionalCost[];
 
     submittedByNameSnapshot: string | null;
     submittedAtUtc: string | null;
@@ -128,6 +129,24 @@ export type StdTransfer = {
 
     numberOfBags: number | null;
     numberOfBoxes: number | null;
+
+    chargeType: StdChargeType;
+
+    miles: number | null;
+    ratePerMile: number | null;
+    flatCharge: number | null;
+
+    totalValue: number;
+};
+
+export type StdAdditionalCost = {
+    id: string;
+    date: string;
+
+    reasonId: string;
+    reasonName: string;
+
+    numberOfBags: number;
 
     chargeType: StdChargeType;
 

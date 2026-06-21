@@ -123,6 +123,26 @@ export function mapStdRequisitionDetailToDraft(
             totalValue: row.totalValue,
         })),
 
+        additionalCosts: requisition.additionalCosts.map((row) => ({
+            clientId: row.id,
+            id: row.id,
+
+            date: parseDateOnly(row.date),
+
+            reasonId: row.reasonId,
+            reasonName: row.reasonName,
+
+            numberOfBags: row.numberOfBags,
+
+            chargeType: row.chargeType,
+
+            miles: row.miles,
+            ratePerMile: row.ratePerMile,
+            flatCharge: row.flatCharge,
+
+            totalValue: row.totalValue,
+        })),
+
         submissionHistory: requisition.submissionHistory,
     };
 }

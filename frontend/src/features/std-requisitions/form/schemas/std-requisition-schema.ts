@@ -297,6 +297,97 @@ const transferRowSchema = z
         }
     });
 
+const additionalCostRowSchema = z
+    .object({
+        clientId: z.string(),
+        id: z.string().nullable(),
+
+        date: z
+            .date()
+            .nullable()
+            .refine((value) => value !== null, "Date is required"),
+
+        reasonId: z
+            .string()
+            .nullable()
+            .refine((value) => value !== null, "Reason is required"),
+
+        reasonName: z.string().nullable(),
+
+        numberOfBags: z
+            .number()
+            .int("Must be a whole number")
+            .min(1, "Number of bags must be greater than zero")
+            .nullable(),
+
+        chargeType: z.enum(["Mileage", "FlatCharge"]),
+
+        miles: z
+            .number()
+            .int("Must be a whole number")
+            .min(0, "Cannot be negative")
+            .nullable(),
+
+        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
+
+        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+
+        totalValue: z.number().min(0),
+    })
+    .superRefine((row, ctx) => {
+        if (row.numberOfBags === null) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["numberOfBags"],
+                message: "Number of bags is required",
+            });
+        }
+
+        if (row.chargeType === "Mileage") {
+            if (row.miles === null || row.miles <= 0) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["miles"],
+                    message: "Miles are required",
+                });
+            }
+
+            if (row.ratePerMile === null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["ratePerMile"],
+                    message: "Rate per mile is required",
+                });
+            }
+
+            if (row.flatCharge !== null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["form"],
+                    message: "Flat charge must be empty for mileage charges",
+                });
+            }
+        }
+
+        if (row.chargeType === "FlatCharge") {
+            if (row.flatCharge === null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["flatCharge"],
+                    message: "Flat charge is required",
+                });
+            }
+
+            if (row.miles !== null || row.ratePerMile !== null) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["form"],
+                    message: "Mileage fields must be empty for flat charges",
+                });
+            }
+        }
+    });
+
 export function createStdRequisitionSchema() {
     return z
         .object({
@@ -324,14 +415,16 @@ export function createStdRequisitionSchema() {
             collectionVanPacks: z.array(vanPackRowSchema),
             pickups: z.array(pickupRowSchema),
             transfers: z.array(transferRowSchema),
+            additionalCosts: z.array(additionalCostRowSchema),
         })
         .superRefine((data, ctx) => {
             const totalRows =
                 data.pickups.length +
                 data.transfers.length +
                 data.collectionChargesBanksAndBins.length +
-                data.collectionVanPacks.length;
-
+                data.collectionVanPacks.length +
+                data.additionalCosts.length;
+                
             if (totalRows === 0) {
                 ctx.addIssue({
                     code: "custom",

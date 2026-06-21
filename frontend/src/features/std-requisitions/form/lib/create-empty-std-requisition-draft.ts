@@ -33,6 +33,7 @@ export function createEmptyStdRequisitionDraft(): StdRequisitionDraft {
         collectionVanPacks: [],
         pickups: [],
         transfers: [],
+        additionalCosts: [],
 
         submissionHistory: [],
     };

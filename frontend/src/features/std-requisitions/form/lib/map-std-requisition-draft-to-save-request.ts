@@ -127,5 +127,29 @@ export function mapStdRequisitionDraftToSaveRequest(
                 flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
             };
         }),
+
+        additionalCosts: draft.additionalCosts.map((row) => {
+            if (!row.reasonId) {
+                throw new Error("Additional cost reason is required.");
+            }
+
+            if (row.numberOfBags === null) {
+                throw new Error("Additional cost number of bags is required.");
+            }
+
+            return {
+                id: row.id,
+                date: toRequiredDateOnlyString(
+                    row.date,
+                    "Additional cost date is required.",
+                ),
+                reasonId: row.reasonId,
+                numberOfBags: row.numberOfBags,
+                chargeType: row.chargeType,
+                miles: row.chargeType === "Mileage" ? row.miles : null,
+                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
+                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+            };
+        }),
     };
 }

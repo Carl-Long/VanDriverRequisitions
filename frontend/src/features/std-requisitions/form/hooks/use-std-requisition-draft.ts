@@ -24,6 +24,9 @@ import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import { calculateStdTransferFormTotal } from "../lib/calculate-std-transfer-form";
 import { createStdTransferDraftFromForm } from "../lib/create-std-transfer-draft-from-form";
 import { StdTransferForm } from "../types/std-transfer-form";
+import { calculateStdAdditionalCostFormTotal } from "../lib/calculate-std-additional-cost-form";
+import { createStdAdditionalCostDraftFromForm } from "../lib/create-std-additional-cost-draft-from-form";
+import { StdAdditionalCostForm } from "../types/std-additional-cost-form";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -283,7 +286,60 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         }));
     }
 
+    function addAdditionalCost(form: StdAdditionalCostForm) {
+        const row = createStdAdditionalCostDraftFromForm(form);
 
+        setDraft((prev) => ({
+            ...prev,
+            additionalCosts: [...prev.additionalCosts, row],
+        }));
+    }
+
+    function updateAdditionalCost(clientId: string, form: StdAdditionalCostForm) {
+        setDraft((prev) => ({
+            ...prev,
+            additionalCosts: prev.additionalCosts.map((row) =>
+                row.clientId === clientId
+                    ? {
+                        ...row,
+
+                        date: form.date,
+
+                        reasonId: form.reasonId,
+                        reasonName: form.reasonName,
+
+                        numberOfBags: form.numberOfBags,
+
+                        chargeType: form.chargeType,
+
+                        miles:
+                            form.chargeType === STD_CHARGE_TYPE.Mileage
+                                ? form.miles
+                                : null,
+                        ratePerMile:
+                            form.chargeType === STD_CHARGE_TYPE.Mileage
+                                ? form.ratePerMile
+                                : null,
+                        flatCharge:
+                            form.chargeType === STD_CHARGE_TYPE.FlatCharge
+                                ? form.flatCharge
+                                : null,
+
+                        totalValue: calculateStdAdditionalCostFormTotal(form),
+                    }
+                    : row,
+            ),
+        }));
+    }
+
+    function removeAdditionalCost(clientId: string) {
+        setDraft((prev) => ({
+            ...prev,
+            additionalCosts: prev.additionalCosts.filter(
+                (row) => row.clientId !== clientId,
+            ),
+        }));
+    }
 
     function replaceDraft(nextDraft: StdRequisitionDraft) {
         setDraft(nextDraft);
@@ -315,5 +371,9 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         addTransfer,
         updateTransfer,
         removeTransfer,
+
+        addAdditionalCost,
+        updateAdditionalCost,
+        removeAdditionalCost,
     };
 }
