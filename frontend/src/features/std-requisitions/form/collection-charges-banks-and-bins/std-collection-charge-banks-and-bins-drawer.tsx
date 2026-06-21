@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Info, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
@@ -9,7 +9,6 @@ import { DatePicker } from "@/components/ui/date/date-picker";
 import { AppDrawer } from "@/components/ui/drawer";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
-import { formatCurrencyGB } from "@/lib/format/currency";
 
 import { calculateStdCollectionChargeBanksAndBinsFormTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
 import { createEmptyStdCollectionChargeBanksAndBinsForm } from "../lib/create-empty-std-collection-charge-banks-and-bins-form";
@@ -18,7 +17,7 @@ import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collectio
 import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
 import { StdCollectionTypeField } from "@/features/std-collection-types/std-collection-type-field";
 import { StdLocationField } from "@/features/std-locations/std-location-field";
-import { StdChargeType, STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { StdChargeFields } from "../components/std-charge-fields";
 import { StdChargeLimitSummary } from "../components/std-charge-limit-summary";

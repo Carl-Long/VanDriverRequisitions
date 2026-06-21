@@ -13,6 +13,7 @@ import {
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 import type { StdCollectionVanPackSnapshot } from "../types/std-requisition-submission.types";
+import { SubmissionSectionCard } from "@/features/requisitions-shared/components/submission-section-card";
 
 type Props = {
     rows: StdCollectionVanPackSnapshot[];
@@ -45,137 +46,130 @@ export function StdSubmissionVanPacksTable({ rows }: Readonly<Props>) {
     );
 
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
-            <div className="mb-6 print-section-heading">
-                <h2 className="text-lg font-semibold">Van Pack Collections</h2>
-
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Submitted van pack collection charges
-                </p>
-
-                <p className="text-sm text-muted-foreground">
+        <SubmissionSectionCard
+            title="Van Pack Collections"
+            description="Submitted van pack collection charges"
+            summary={
+                <>
                     {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
                     {totals.totalVanPacksOut} van packs out •{" "}
                     {totals.totalFilledBags} filled bags •{" "}
                     {formatCurrencyGB(totals.subtotal)}
-                </p>
-            </div>
+                </>
+            }
+        >
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface print-table-wrapper">
-                <div className="overflow-x-auto print-table-scroll">
-                    <Table>
-                        <TableHeader>
-                            <TableHeaderRow>
-                                <TableHeaderCell nowrap className="print-col-week">
-                                    Delivery Date
-                                </TableHeaderCell>
+            <Table>
+                <TableHeader>
+                    <TableHeaderRow>
+                        <TableHeaderCell nowrap className="print-col-week">
+                            Delivery Date
+                        </TableHeaderCell>
 
-                                <TableHeaderCell nowrap>
-                                    Postcode Zone
-                                </TableHeaderCell>
+                        <TableHeaderCell nowrap>
+                            Postcode Zone
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Van Packs Out
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Van Packs Out
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Filled Bags
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Filled Bags
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Unused
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Unused
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Returned
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Returned
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap className="print-col-rate">
-                                    Fixed Price
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap className="print-col-rate">
+                            Fixed Price
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap className="print-col-value">
-                                    Value
-                                </TableHeaderCell>
-                            </TableHeaderRow>
-                        </TableHeader>
+                        <TableHeaderCell align="right" nowrap className="print-col-value">
+                            Value
+                        </TableHeaderCell>
+                    </TableHeaderRow>
+                </TableHeader>
 
-                        <TableBody>
-                            {orderedRows.map((row, index) => (
-                                <TableRow key={`${row.deliveryDate}-${row.postCodeZone}-${index}`}>
-                                    <TableCell nowrap className="print-col-week">
-                                        {formatDateGB(row.deliveryDate)}
-                                    </TableCell>
+                <TableBody>
+                    {orderedRows.map((row, index) => (
+                        <TableRow key={`${row.deliveryDate}-${row.postCodeZone}-${index}`}>
+                            <TableCell nowrap className="print-col-week">
+                                {formatDateGB(row.deliveryDate)}
+                            </TableCell>
 
-                                    <TableCell>
-                                        <span className="font-medium">
-                                            {row.postCodeZone}
-                                        </span>
-                                    </TableCell>
+                            <TableCell>
+                                <span className="font-medium">
+                                    {row.postCodeZone}
+                                </span>
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.vanPacksOut}
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.vanPacksOut}
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.filledBags}
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.filledBags}
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.unusedVanPacks}
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.unusedVanPacks}
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.percentReturned.toFixed(2)}%
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.percentReturned.toFixed(2)}%
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums print-col-rate">
-                                        {formatCurrencyGB(row.ratePerVanPack)}
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums print-col-rate">
+                                {formatCurrencyGB(row.ratePerVanPack)}
+                            </TableCell>
 
-                                    <TableCell
-                                        align="right"
-                                        className="font-semibold tabular-nums print-col-value"
-                                    >
-                                        {formatCurrencyGB(row.totalValue)}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                            <TableCell
+                                align="right"
+                                className="font-semibold tabular-nums print-col-value"
+                            >
+                                {formatCurrencyGB(row.totalValue)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
 
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell className="print-col-week">Totals</TableCell>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell className="print-col-week">Totals</TableCell>
 
-                                <TableCell />
+                        <TableCell />
 
-                                <TableCell align="right" className="tabular-nums">
-                                    {totals.totalVanPacksOut}
-                                </TableCell>
+                        <TableCell align="right" className="tabular-nums">
+                            {totals.totalVanPacksOut}
+                        </TableCell>
 
-                                <TableCell align="right" className="tabular-nums">
-                                    {totals.totalFilledBags}
-                                </TableCell>
+                        <TableCell align="right" className="tabular-nums">
+                            {totals.totalFilledBags}
+                        </TableCell>
 
-                                <TableCell align="right" className="tabular-nums">
-                                    {totals.totalUnusedVanPacks}
-                                </TableCell>
+                        <TableCell align="right" className="tabular-nums">
+                            {totals.totalUnusedVanPacks}
+                        </TableCell>
 
-                                <TableCell />
+                        <TableCell />
 
-                                <TableCell className="print-col-rate" />
+                        <TableCell className="print-col-rate" />
 
-                                <TableCell
-                                    align="right"
-                                    className="font-semibold tabular-nums print-col-value"
-                                >
-                                    {formatCurrencyGB(totals.subtotal)}
-                                </TableCell>
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </div>
-            </div>
-        </div>
+                        <TableCell
+                            align="right"
+                            className="font-semibold tabular-nums print-col-value"
+                        >
+                            {formatCurrencyGB(totals.subtotal)}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
+        </SubmissionSectionCard>
     );
 }
