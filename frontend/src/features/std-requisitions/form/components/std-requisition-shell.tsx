@@ -32,6 +32,8 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collection-van-pack-rate-change-message";
 import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
 import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
+import { getStdTransferLimitStatus } from "../lib/get-std-transfer-limit-status";
+import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -76,6 +78,9 @@ export function StdRequisitionShell({
         addPickup,
         updatePickup,
         removePickup,
+        addTransfer,
+        updateTransfer,
+        removeTransfer,
     } = useStdRequisitionDraft(initialDraft);
 
     const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
@@ -146,6 +151,21 @@ export function StdRequisitionShell({
         return draft.pickups.some(
             (row) =>
                 getStdPickupLimitStatus(
+                    row,
+                    stdMileageLimitRule,
+                    stdFlatChargeLimitRule,
+                ).state !== "ok",
+        );
+    }
+
+    function transfersHasWarning() {
+        if (isReadonly) {
+            return false;
+        }
+
+        return draft.transfers.some(
+            (row) =>
+                getStdTransferLimitStatus(
                     row,
                     stdMileageLimitRule,
                     stdFlatChargeLimitRule,
@@ -421,6 +441,7 @@ export function StdRequisitionShell({
                 collectionChargesBanksAndBinsHasWarning={collectionChargesBanksAndBinsHasWarning()}
                 collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
                 pickupsHasWarning={pickupsHasWarning()}
+                transfersHasWarning={transfersHasWarning()}
                 details={
                     <StdRequisitionDetailsTab
                         readonly={isReadonly}
@@ -482,6 +503,23 @@ export function StdRequisitionShell({
                             clearError("form");
                         }}
                         onDelete={removePickup}
+                    />
+                }
+                transfers={
+                    <StdTransferWorkspace
+                        readonly={isReadonly}
+                        rows={draft.transfers}
+                        mileageLimitRule={stdMileageLimitRule}
+                        flatChargeLimitRule={stdFlatChargeLimitRule}
+                        onAdd={(form) => {
+                            addTransfer(form);
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateTransfer(clientId, form);
+                            clearError("form");
+                        }}
+                        onDelete={removeTransfer}
                     />
                 }
                 submissionHistory={

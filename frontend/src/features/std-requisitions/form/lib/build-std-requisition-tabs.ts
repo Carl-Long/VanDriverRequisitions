@@ -24,6 +24,11 @@ export function buildStdRequisitionTabs(
             key: "pickups",
             label: "Pickup Collections"
         },
+        {
+            type: "transfers",
+            key: "transfers",
+            label: "Transfers"
+        }
     ];
 
     if (submissionHistoryCount > 0) {

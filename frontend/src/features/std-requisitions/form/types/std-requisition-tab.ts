@@ -20,6 +20,11 @@ export type StdRequisitionTab =
         label: "Pickup Collections";
     }
     | {
+        type: "transfers";
+        key: "transfers";
+        label: "Transfers";
+    }
+    | {
         type: "submission-history";
         key: "submission-history";
         label: string;

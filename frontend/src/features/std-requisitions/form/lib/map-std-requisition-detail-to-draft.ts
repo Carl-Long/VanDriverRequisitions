@@ -102,12 +102,12 @@ export function mapStdRequisitionDetailToDraft(
             date: parseDateOnly(row.date),
 
             shopIdFrom: row.shopIdFrom,
-            shopLabelFrom: `${row.shopCodeFrom} — ${row.shopNameFrom}`,
+            shopLabelFrom: `${row.shopCodeFrom} - ${row.shopNameFrom}`,
             shopCodeFrom: row.shopCodeFrom,
             shopNameFrom: row.shopNameFrom,
 
             shopIdTo: row.shopIdTo,
-            shopLabelTo: `${row.shopCodeTo} — ${row.shopNameTo}`,
+            shopLabelTo: `${row.shopCodeTo} - ${row.shopNameTo}`,
             shopCodeTo: row.shopCodeTo,
             shopNameTo: row.shopNameTo,
 
