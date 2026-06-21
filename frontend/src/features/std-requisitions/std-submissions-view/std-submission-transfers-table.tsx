@@ -92,7 +92,7 @@ export function StdSubmissionTransfersTable({ rows }: Readonly<Props>) {
                                 </TableHeaderCell>
 
                                 <TableHeaderCell align="right" nowrap className="print-col-rate">
-                                    Rate / Flat
+                                    Rate / Charge
                                 </TableHeaderCell>
 
                                 <TableHeaderCell align="right" nowrap className="print-col-value">

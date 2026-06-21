@@ -226,7 +226,7 @@ function PickupTable({
                                 className="sticky top-0 z-20 bg-surface-elevated"
                                 align="right"
                             >
-                                Rate / Flat
+                                Rate / Charge
                             </TableHeaderCell>
 
                             <TableHeaderCell

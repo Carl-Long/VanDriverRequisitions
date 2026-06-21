@@ -216,7 +216,7 @@ function TransfersTable({
                             </TableHeaderCell>
 
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
-                                Basis
+                                Charge Type
                             </TableHeaderCell>
 
                             <TableHeaderCell
@@ -230,7 +230,7 @@ function TransfersTable({
                                 className="sticky top-0 z-20 bg-surface-elevated"
                                 align="right"
                             >
-                                Rate / Flat
+                                Rate / Charge
                             </TableHeaderCell>
 
                             <TableHeaderCell
@@ -276,7 +276,6 @@ function TransfersTable({
                                         {transfer.date
                                             ? formatDateGB(transfer.date)
                                             : "-"}
-                                            
                                         {hasLimitIssue && (
                                             <div className="mt-2 space-y-1">
                                                 <div className="text-xs font-medium text-warning">
