@@ -3,7 +3,7 @@ using VanDriverRequisitions.Application.Features.Users.Dtos;
 
 namespace VanDriverRequisitions.Application.Features.Users.Services;
 
-public interface IFeRequisitionUserService
+public interface IRequisitionUserService
 {
     Task<PagedResult<RequisitionUserLookupDto>> SearchAsync(RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default);
 }

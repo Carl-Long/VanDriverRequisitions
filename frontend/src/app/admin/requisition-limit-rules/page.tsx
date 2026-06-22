@@ -15,10 +15,7 @@ import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Alert } from "@/components/ui/alert";
 import { RequisitionLimitRuleFormModal } from "@/features/requisition-limit-rules/requisition-limit-rule-form-modal";
 import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/requisition-limit-rule-table";
-import {
-    RequisitionLimitRuleSummary,
-    requisitionLimitRulesApi,
-} from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, RequisitionLimitRuleSummary, requisitionLimitRulesApi, } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -79,11 +76,11 @@ export default function RequisitionLimitRulesPage() {
 
         const results = query
             ? rules.filter(
-                  (rule) =>
-                      rule.categoryName.toLowerCase().includes(query) ||
-                      rule.fasciaName.toLowerCase().includes(query) ||
-                      (rule.feTaskTypeName?.toLowerCase().includes(query) ?? false),
-              )
+                (rule) =>
+                    rule.categoryName.toLowerCase().includes(query) ||
+                    rule.fasciaName.toLowerCase().includes(query) ||
+                    (rule.feTaskTypeName?.toLowerCase().includes(query) ?? false),
+            )
             : rules;
 
         return [...results].sort((a, b) => {
@@ -116,8 +113,8 @@ export default function RequisitionLimitRulesPage() {
     }
 
     async function handleSubmit(data: {
-        category: number;
-        fascia: number;
+        category: RequisitionLimitRuleCategory;
+        fascia: RequisitionLimitRuleFascia;
         feTaskTypeId: string | null;
         maxQuantity: number;
         maxRate: number;
@@ -138,15 +135,15 @@ export default function RequisitionLimitRulesPage() {
 
     const emptyState = search.trim()
         ? {
-              icon: Search,
-              title: "No rules found",
-              description: "Try adjusting your search terms.",
-          }
+            icon: Search,
+            title: "No rules found",
+            description: "Try adjusting your search terms.",
+        }
         : {
-              icon: SlidersHorizontal,
-              title: "No requisition limit rules yet",
-              description: "Create your first rule to define limits for requisitions.",
-          };
+            icon: SlidersHorizontal,
+            title: "No requisition limit rules yet",
+            description: "Create your first rule to define limits for requisitions.",
+        };
 
     return (
         <PageContainer>

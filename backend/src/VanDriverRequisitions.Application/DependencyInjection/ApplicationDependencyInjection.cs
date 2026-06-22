@@ -28,7 +28,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IFeRequisitionService, FeRequisitionService>();
         services.AddScoped<IFeTaskTypeService, FeTaskTypeService>();
         services.AddScoped<IFeReasonService, FeReasonService>();
-        services.AddScoped<IFeRequisitionUserService, FeRequisitionUserService>();
+        services.AddScoped<IRequisitionUserService, RequisitionUserService>();
         services.AddScoped<IFeRequisitionSaveDataBuilder, FeRequisitionSaveDataBuilder>();
         services.AddScoped<IFeRequisitionLimitValidator, FeRequisitionLimitValidator>();
         
