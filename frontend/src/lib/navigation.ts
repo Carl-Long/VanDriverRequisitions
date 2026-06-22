@@ -29,8 +29,13 @@ export const navigation = [
 
 export const approvalNavigation = [
     {
-        title: "Approvals",
+        title: "Home Approvals",
         href: "/home-van-drivers/approvals",
+        icon: ClipboardCheck,
+    },
+    {
+        title: "Standard Approvals",
+        href: "/standard-van-drivers/approvals",
         icon: ClipboardCheck,
     },
 ];
