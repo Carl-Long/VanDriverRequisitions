@@ -1,4 +1,4 @@
 export const FASCIAS = {
-    FE: 0,
-    STD: 1,
+    FE: "Fe",
+    STD: "Std",
 } as const;
