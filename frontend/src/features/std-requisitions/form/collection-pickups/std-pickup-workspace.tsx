@@ -301,7 +301,7 @@ function PickupTable({
                                     <StdMilesCell row={row} />
                                     <StdRateChargeCell row={row} />
 
-                                    <TableCell align="right" className="tabular-nums">
+                                    <TableCell align="right"  className="font-semibold tabular-nums">
                                         {formatCurrencyGB(row.totalValue)}
                                     </TableCell>
 
