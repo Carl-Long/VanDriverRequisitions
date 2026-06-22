@@ -300,7 +300,7 @@ export function FeGeneralTaskDrawer({
                     <div className="max-w-[200px]">
                         <Input
                             type="number"
-                            min={0}
+                            min="0.01"
                             step="0.01"
                             value={form.ratePerJob ?? ""}
                             state={errors["ratePerJob"] ? "error" : "default"}

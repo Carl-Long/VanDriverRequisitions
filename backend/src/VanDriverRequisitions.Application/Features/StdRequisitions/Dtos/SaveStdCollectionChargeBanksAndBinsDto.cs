@@ -3,7 +3,7 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 
-public sealed class SaveStdCollectionChargeBanksAndBinsDto
+public sealed class SaveStdCollectionChargeBanksAndBinsDto : IStdChargeDto
 {
     public Guid? Id { get; init; }
 

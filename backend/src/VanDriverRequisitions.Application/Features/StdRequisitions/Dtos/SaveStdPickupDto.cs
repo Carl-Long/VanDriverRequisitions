@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
+using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 
-public sealed record SaveStdPickupDto
+public sealed record SaveStdPickupDto : IStdChargeDto
 {
     public Guid? Id { get; init; }
     public DateOnly Date { get; init; }

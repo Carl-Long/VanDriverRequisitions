@@ -1,4 +1,5 @@
 using FluentValidation;
+using VanDriverRequisitions.Application.Common.Validation;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
@@ -15,7 +16,10 @@ public sealed class SaveFeGeneralTaskDtoValidator
             .NotEmpty();
 
         RuleFor(x => x.RatePerJob)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.RatePerJob.HasValue);
+            .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)
+            .When(x => x.RatePerJob.HasValue)
+            .WithMessage("Rate per job must be at least £0.01.")
+            .Must(x => x is null || MoneyValidationRules.HasMaxTwoDecimalPlaces(x.Value))
+            .WithMessage("Rate per job can have a maximum of 2 decimal places.");
     }
 }

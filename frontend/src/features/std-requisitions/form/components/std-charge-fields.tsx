@@ -29,7 +29,7 @@ export function StdChargeFields({
                 <Field label="Miles" required error={errors.miles}>
                     <Input
                         type="number"
-                        min={0}
+                        min={1}
                         step={1}
                         value={charge.miles ?? ""}
                         state={errors.miles ? "error" : "default"}
@@ -48,7 +48,7 @@ export function StdChargeFields({
                 >
                     <Input
                         type="number"
-                        min={0}
+                        min="0.01"
                         step="0.01"
                         value={charge.ratePerMile ?? ""}
                         state={errors.ratePerMile ? "error" : "default"}
@@ -69,7 +69,7 @@ export function StdChargeFields({
         <Field label="Flat Charge" required error={errors.flatCharge}>
             <Input
                 type="number"
-                min={0}
+                min="0.01"
                 step="0.01"
                 value={charge.flatCharge ?? ""}
                 state={errors.flatCharge ? "error" : "default"}

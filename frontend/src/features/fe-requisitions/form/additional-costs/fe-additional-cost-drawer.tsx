@@ -299,7 +299,7 @@ function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFi
             <Field label="Total Number" required error={errors["totalNumber"]}>
                 <Input
                     type="number"
-                    min={0}
+                    min={1}
                     step={1}
                     value={form.totalNumber ?? ""}
                     state={errors["totalNumber"] ? "error" : "default"}
@@ -318,7 +318,7 @@ function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFi
             <Field label="Rate Per Job (£)" required error={errors["ratePerJob"]}>
                 <Input
                     type="number"
-                    min={0}
+                    min="0.01"
                     step="0.01"
                     value={form.ratePerJob ?? ""}
                     state={errors["ratePerJob"] ? "error" : "default"}
@@ -343,7 +343,7 @@ function MileageFields({ form, errors, setForm, clearError }: Readonly<Condition
             <Field label="Miles" required error={errors["miles"]}>
                 <Input
                     type="number"
-                    min={0}
+                    min={1}
                     step={1}
                     value={form.miles ?? ""}
                     state={errors["miles"] ? "error" : "default"}
@@ -362,7 +362,7 @@ function MileageFields({ form, errors, setForm, clearError }: Readonly<Condition
             <Field label="Rate Per Mile (£)" required error={errors["ratePerMile"]}>
                 <Input
                     type="number"
-                    min={0}
+                    min="0.01"
                     step="0.01"
                     value={form.ratePerMile ?? ""}
                     state={errors["ratePerMile"] ? "error" : "default"}

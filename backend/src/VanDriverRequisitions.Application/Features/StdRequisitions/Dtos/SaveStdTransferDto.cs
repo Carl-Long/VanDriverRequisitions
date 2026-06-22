@@ -3,7 +3,7 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 
-public sealed record SaveStdTransferDto
+public sealed record SaveStdTransferDto : IStdChargeDto
 {
     public Guid? Id { get; init; }
     public DateOnly Date { get; init; }

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
+import { MIN_MONEY_AMOUNT, hasMaxTwoDecimalPlaces } from "@/lib/validation/money";
 
 type Params = {
     mileageLimitRule?: RequisitionLimitRuleSummary;
@@ -51,9 +52,23 @@ export function createStdTransferFormSchema({
                 .min(0, "Cannot be negative")
                 .nullable(),
 
-            ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
-
-            flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+            ratePerMile: z
+                .number()
+                .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+                .refine(
+                    hasMaxTwoDecimalPlaces,
+                    "Rate per mile can have a maximum of 2 decimal places",
+                )
+                .nullable(),
+                
+            flatCharge: z
+                .number()
+                .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")
+                .refine(
+                    hasMaxTwoDecimalPlaces,
+                    "Flat charge can have a maximum of 2 decimal places",
+                )
+                .nullable(),
         })
         .superRefine((form, ctx) => {
             if (!form.shopIdFrom) {

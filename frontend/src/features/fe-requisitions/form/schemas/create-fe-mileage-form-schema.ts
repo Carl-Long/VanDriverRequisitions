@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
+import { MIN_MONEY_AMOUNT, hasMaxTwoDecimalPlaces } from "@/lib/validation/money";
 
 export function createFeMileageFormSchema(limitRule?: RequisitionLimitRuleSummary) {
     return z
@@ -21,9 +22,12 @@ export function createFeMileageFormSchema(limitRule?: RequisitionLimitRuleSummar
             }),
 
             ratePerMile: z
-                .number({
-                    error: "Rate per mile is required",
-                })
+                .number()
+                .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+                .refine(
+                    hasMaxTwoDecimalPlaces,
+                    "Rate per mile can have a maximum of 2 decimal places",
+                )
                 .nullable(),
         })
         .superRefine((form, ctx) => {

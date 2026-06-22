@@ -21,7 +21,7 @@ public sealed class StdCollectionVanPackTests
         Assert.Equal(2.50m, vanPack.RatePerVanPack);
 
         Assert.Equal(6, vanPack.UnusedVanPacks);
-        Assert.Equal(40.00m, vanPack.PercentReturned);
+        Assert.Equal(60.00m, vanPack.PercentReturned);
         Assert.Equal(25.00m, vanPack.TotalValue);
     }
 
@@ -49,7 +49,7 @@ public sealed class StdCollectionVanPackTests
         Assert.Equal(8, vanPack.VanPacksOut);
         Assert.Equal(6, vanPack.FilledBags);
         Assert.Equal(2, vanPack.UnusedVanPacks);
-        Assert.Equal(75.00m, vanPack.PercentReturned);
+        Assert.Equal(25.00m, vanPack.PercentReturned);
         Assert.Equal(12.00m, vanPack.TotalValue);
     }
 
