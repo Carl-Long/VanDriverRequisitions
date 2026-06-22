@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
@@ -10,7 +8,7 @@ public sealed record SaveStdPickupDto : IStdChargeDto
     public DateOnly Date { get; init; }
     public int NumberOfBags { get; init; }
     public int NumberOfHouseholds { get; init; }
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+
     public StdChargeType ChargeType { get; init; }
     public int? Miles { get; init; }
     public decimal? RatePerMile { get; init; }
