@@ -17,6 +17,7 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
@@ -128,7 +129,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -366,7 +367,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                             )}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div >
     );

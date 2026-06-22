@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
+import { Table, TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdCollectionChargeBanksAndBinsDraft } from "../types/std-collection-charge-banks-and-bins-draft";
@@ -164,7 +164,7 @@ function BanksAndBinsTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -352,7 +352,7 @@ function BanksAndBinsTable({
                             {!readonly && <TableCell />}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );

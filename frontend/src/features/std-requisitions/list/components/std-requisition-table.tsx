@@ -7,6 +7,7 @@ import {
     TableHeaderCell,
     TableRow,
     TableCell,
+    Table,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
@@ -24,7 +25,7 @@ type Props = {
 export function StdRequisitionTable({ items, getHref, onRowClick }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <Table className="w-full text-left">
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Requisition</TableHeaderCell>
@@ -136,7 +137,7 @@ export function StdRequisitionTable({ items, getHref, onRowClick }: Readonly<Pro
                         );
                     })}
                 </tbody>
-            </table>
+            </Table>
         </Surface>
     );
 }

@@ -12,6 +12,7 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -135,7 +136,7 @@ function TransfersTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
 
@@ -339,7 +340,7 @@ function TransfersTable({
                             )}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );
