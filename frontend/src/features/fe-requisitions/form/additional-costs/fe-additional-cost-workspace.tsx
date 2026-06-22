@@ -26,6 +26,7 @@ import { FeAdditionalCostDrawer } from "./fe-additional-cost-drawer";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -204,7 +205,7 @@ function AdditionalCostsTable({
                                     })}
                                 >
                                     <TableCell>
-                                        {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
+                                        {formatDateGB(row.weekEndingDate) ?? "-"}
                                     </TableCell>
 
                                     <TableCell>

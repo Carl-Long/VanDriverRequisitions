@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -255,7 +256,7 @@ function BanksAndBinsTable({
                                                 ariaLabel="Edit Banks & Bins row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.date ? row.date.toLocaleDateString() : "-"}
+                                                {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

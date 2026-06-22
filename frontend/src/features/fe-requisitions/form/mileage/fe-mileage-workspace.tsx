@@ -26,6 +26,7 @@ import { getMileageLimitStatus } from "../lib/get-fe-mileage-limit-status";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -216,7 +217,7 @@ function MileageTable({
                                                 ariaLabel="Edit mileage row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
+                                                {formatDateGB(row.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

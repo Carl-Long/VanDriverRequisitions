@@ -28,6 +28,7 @@ import { StdPickupDrawer } from "./std-pickup-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -276,9 +277,7 @@ function PickupTable({
                                                 ariaLabel="Edit pickup row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.date
-                                                    ? row.date.toLocaleDateString()
-                                                    : "-"}
+                                                {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

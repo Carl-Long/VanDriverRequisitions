@@ -24,6 +24,7 @@ import { FeTransferDrawer } from "./fe-transfer-drawer";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -215,7 +216,7 @@ function TransfersTable({
                                     })}
                                 >
                                     <TableCell>
-                                        {transfer.weekEndingDate ? transfer.weekEndingDate.toLocaleDateString() : "-"}
+                                        {formatDateGB(transfer.weekEndingDate) ?? "-"}
                                     </TableCell>
 
                                     <TableCell>

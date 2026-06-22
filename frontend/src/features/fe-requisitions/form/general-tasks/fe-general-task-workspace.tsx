@@ -23,6 +23,7 @@ import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-stat
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -229,7 +230,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                                 ariaLabel="Edit general task row"
                                                 onEdit={() => onEdit(task)}
                                             >
-                                                {task.weekEndingDate ? task.weekEndingDate.toLocaleDateString() : "-"}
+                                                {formatDateGB(task.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

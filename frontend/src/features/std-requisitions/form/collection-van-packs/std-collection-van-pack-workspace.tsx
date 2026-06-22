@@ -17,6 +17,7 @@ import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-va
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -248,9 +249,7 @@ function VanPackTable({
                                                 ariaLabel="Edit van pack collection row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.deliveryDate
-                                                    ? row.deliveryDate.toLocaleDateString()
-                                                    : "-"}
+                                               {formatDateGB(row.deliveryDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
