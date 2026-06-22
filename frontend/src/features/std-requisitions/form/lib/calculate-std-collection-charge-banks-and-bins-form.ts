@@ -1,14 +1,11 @@
-import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 import type { StdCollectionChargeBanksAndBinsDraft } from "../types/std-collection-charge-banks-and-bins-draft";
+import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
+import { calculateStdChargeTotal } from "./calculate-std-charge-total";
 
 export function calculateStdCollectionChargeBanksAndBinsFormTotal(
     form: StdCollectionChargeBanksAndBinsForm,
 ) {
-    if (form.chargeType === "Mileage") {
-        return (form.miles ?? 0) * (form.ratePerMile ?? 0);
-    }
-
-    return form.flatCharge ?? 0;
+    return calculateStdChargeTotal(form);
 }
 
 export function calculateStdCollectionChargeBanksAndBinsRowsTotal(

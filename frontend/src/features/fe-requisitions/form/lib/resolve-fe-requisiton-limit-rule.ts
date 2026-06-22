@@ -4,15 +4,14 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 
 type Params = {
     rules: RequisitionLimitRuleSummary[];
-    categoryId: number;
+    category: RequisitionLimitRuleSummary["category"];
     taskTypeId?: string | null;
 };
-
-export function resolveFeRequisitionLimitRule({ rules, categoryId, taskTypeId }: Params) {
+export function resolveFeRequisitionLimitRule({ rules, category, taskTypeId }: Params) {
     const exact = rules.find(
         (x) =>
-            x.fasciaId === FASCIAS.FE &&
-            x.categoryId === categoryId &&
+            x.fascia === FASCIAS.FE &&
+            x.category === category &&
             x.feTaskTypeId === taskTypeId,
     );
 
@@ -21,6 +20,6 @@ export function resolveFeRequisitionLimitRule({ rules, categoryId, taskTypeId }:
     }
 
     return rules.find(
-        (x) => x.fasciaId === FASCIAS.FE && x.categoryId === categoryId && x.feTaskTypeId == null,
+        (x) => x.fascia === FASCIAS.FE && x.category === category && x.feTaskTypeId == null,
     );
 }

@@ -24,18 +24,14 @@ import { RequisitionApproveModal } from "@/features/requisitions-shared/componen
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
-import { getStdBanksAndBinsLimitStatus } from "../lib/get-std-banks-and-bins-limit-status";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
-import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-van-pack-limit-status";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collection-van-pack-rate-change-message";
-import { getStdPickupLimitStatus } from "../lib/get-std-pickup-limit-status";
 import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
-import { getStdTransferLimitStatus } from "../lib/get-std-transfer-limit-status";
 import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
-import { getStdAdditionalCostLimitStatus } from "../lib/get-std-additional-cost-limit-status";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
+import { useStdRequisitionTabWarnings } from "../hooks/use-std-requisition-tab-warnings";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -59,9 +55,9 @@ export function StdRequisitionShell({
 
     const router = useRouter();
     const initialDraft = useMemo(() => (stdRequisition ? mapStdRequisitionDetailToDraft(stdRequisition) : undefined), [stdRequisition]);
-    const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
-    const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
-    const stdVanPackLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, categoryId: STD_REQUISITION_ROW_CATEGORIES.VAN_PACK, });
+    const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, category: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
+    const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, category: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
+    const stdVanPackLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, category: STD_REQUISITION_ROW_CATEGORIES.VAN_PACK, });
 
     const {
         draft,
@@ -119,79 +115,13 @@ export function StdRequisitionShell({
 
     const vanPackRateChangeMessage = getStdCollectionVanPackRateChangeMessage(draft.collectionVanPacks, stdVanPackLimitRule,);
 
-    function collectionChargesBanksAndBinsHasWarning() {
-        if (isReadonly) {
-            return false;
-        }
-
-        return draft.collectionChargesBanksAndBins.some(
-            (row) =>
-                getStdBanksAndBinsLimitStatus(
-                    row,
-                    stdMileageLimitRule,
-                    stdFlatChargeLimitRule,
-                ).state !== "ok",
-        );
-    }
-
-    function collectionVanPacksHasWarning() {
-        if (isReadonly) {
-            return false;
-        }
-
-        return draft.collectionVanPacks.some(
-            (row) =>
-                getStdCollectionVanPackLimitStatus(
-                    row,
-                    stdVanPackLimitRule,
-                ).state !== "ok",
-        );
-    }
-
-    function pickupsHasWarning() {
-        if (isReadonly) {
-            return false;
-        }
-
-        return draft.pickups.some(
-            (row) =>
-                getStdPickupLimitStatus(
-                    row,
-                    stdMileageLimitRule,
-                    stdFlatChargeLimitRule,
-                ).state !== "ok",
-        );
-    }
-
-    function transfersHasWarning() {
-        if (isReadonly) {
-            return false;
-        }
-
-        return draft.transfers.some(
-            (row) =>
-                getStdTransferLimitStatus(
-                    row,
-                    stdMileageLimitRule,
-                    stdFlatChargeLimitRule,
-                ).state !== "ok",
-        );
-    }
-
-    function additionalCostsHasWarning() {
-        if (isReadonly) {
-            return false;
-        }
-
-        return draft.additionalCosts.some(
-            (row) =>
-                getStdAdditionalCostLimitStatus(
-                    row,
-                    stdMileageLimitRule,
-                    stdFlatChargeLimitRule,
-                ).state !== "ok",
-        );
-    }
+    const tabWarnings = useStdRequisitionTabWarnings({
+        draft,
+        isReadonly,
+        stdMileageLimitRule,
+        stdFlatChargeLimitRule,
+        stdVanPackLimitRule,
+    });
 
     async function saveRequisition(
         continueEditing: boolean = false,
@@ -408,15 +338,6 @@ export function StdRequisitionShell({
         }
     }
 
-    const title =
-        mode === "create"
-            ? "Create New Requisition"
-            : mode === "edit"
-                ? "Editing Requisition"
-                : mode === "approval"
-                    ? "Reviewing Requisition"
-                    : "Viewing Requisition";
-
     return (
         <div className="space-y-4">
             <StdRequisitionHeader
@@ -458,11 +379,11 @@ export function StdRequisitionShell({
                 activeKey={activeKey}
                 onActiveKeyChange={setActiveKey}
                 submissionHistoryCount={draft.submissionHistory.length}
-                collectionChargesBanksAndBinsHasWarning={collectionChargesBanksAndBinsHasWarning()}
-                collectionVanPacksHasWarning={collectionVanPacksHasWarning()}
-                pickupsHasWarning={pickupsHasWarning()}
-                transfersHasWarning={transfersHasWarning()}
-                additionalCostsHasWarning={additionalCostsHasWarning()}
+                collectionChargesBanksAndBinsHasWarning={tabWarnings.collectionChargesBanksAndBinsHasWarning}
+                collectionVanPacksHasWarning={tabWarnings.collectionVanPacksHasWarning}
+                pickupsHasWarning={tabWarnings.pickupsHasWarning}
+                transfersHasWarning={tabWarnings.transfersHasWarning}
+                additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
                     <StdRequisitionDetailsTab
                         readonly={isReadonly}

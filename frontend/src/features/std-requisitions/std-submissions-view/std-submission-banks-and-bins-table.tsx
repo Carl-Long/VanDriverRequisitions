@@ -14,6 +14,7 @@ import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 import { getStdChargeTypeLabel } from "../constants/std-charge-type.constants";
 import type { StdCollectionChargeBanksAndBinsSnapshot } from "../types/std-requisition-submission.types";
+import { SubmissionSectionCard } from "@/features/requisitions-shared/components/submission-section-card";
 
 type Props = {
     rows: StdCollectionChargeBanksAndBinsSnapshot[];
@@ -45,147 +46,140 @@ export function StdSubmissionBanksAndBinsTable({ rows }: Readonly<Props>) {
     );
 
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6 print-card print-table-card">
-            <div className="mb-6 print-section-heading">
-                <h2 className="text-lg font-semibold">Collection Charges — Banks & Bins</h2>
+        <SubmissionSectionCard
+            title="Collection Charges — Banks & Bins"
+            description="Submitted collection charges for banks and bins"
+            summary={
+                <>
+                    {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
+                    {totals.totalBags} bags • {totals.totalMiles} miles •{" "}
+                    {formatCurrencyGB(totals.subtotal)}
+                </>
+            }
+        >
+            <Table>
+                <TableHeader>
+                    <TableHeaderRow>
+                        <TableHeaderCell nowrap className="print-col-week">
+                            Date
+                        </TableHeaderCell>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Submitted collection charges for banks and bins
-                </p>
+                        <TableHeaderCell className="min-w-[180px]">
+                            Collection Type
+                        </TableHeaderCell>
 
-                <p className="text-sm text-muted-foreground">
-                    {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {totals.totalBags} bags •{" "}
-                    {totals.totalMiles} miles • {formatCurrencyGB(totals.subtotal)}
-                </p>
-            </div>
+                        <TableHeaderCell className="min-w-[220px]">
+                            Location
+                        </TableHeaderCell>
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface print-table-wrapper">
-                <div className="overflow-x-auto print-table-scroll">
-                    <Table>
-                        <TableHeader>
-                            <TableHeaderRow>
-                                <TableHeaderCell nowrap className="print-col-week">
-                                    Date
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Bags
+                        </TableHeaderCell>
 
-                                <TableHeaderCell className="min-w-[180px]">
-                                    Collection Type
-                                </TableHeaderCell>
+                        <TableHeaderCell nowrap>Charge Type</TableHeaderCell>
 
-                                <TableHeaderCell className="min-w-[220px]">
-                                    Location
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap>
+                            Miles
+                        </TableHeaderCell>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Bags
-                                </TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap className="print-col-rate">
+                            Rate / Charge
+                        </TableHeaderCell>
 
-                                <TableHeaderCell nowrap>Charge Type</TableHeaderCell>
+                        <TableHeaderCell align="right" nowrap className="print-col-value">
+                            Value
+                        </TableHeaderCell>
+                    </TableHeaderRow>
+                </TableHeader>
 
-                                <TableHeaderCell align="right" nowrap>
-                                    Miles
-                                </TableHeaderCell>
+                <TableBody>
+                    {orderedRows.map((row, index) => (
+                        <TableRow key={`${row.date}-${row.collectionTypeId}-${row.locationId}-${index}`}>
+                            <TableCell nowrap className="print-col-week">
+                                {formatDateGB(row.date)}
+                            </TableCell>
 
-                                <TableHeaderCell align="right" nowrap className="print-col-rate">
-                                    Rate / Charge
-                                </TableHeaderCell>
+                            <TableCell>
+                                <div className="flex flex-col leading-tight">
+                                    <span className="font-medium">
+                                        {row.collectionTypeName}
+                                    </span>
 
-                                <TableHeaderCell align="right" nowrap className="print-col-value">
-                                    Value
-                                </TableHeaderCell>
-                            </TableHeaderRow>
-                        </TableHeader>
+                                    <span className="text-xs text-muted-foreground">
+                                        {row.collectionTypeCode}
+                                    </span>
+                                </div>
+                            </TableCell>
 
-                        <TableBody>
-                            {orderedRows.map((row, index) => (
-                                <TableRow key={`${row.date}-${row.collectionTypeId}-${row.locationId}-${index}`}>
-                                    <TableCell nowrap className="print-col-week">
-                                        {formatDateGB(row.date)}
-                                    </TableCell>
+                            <TableCell>
+                                <div className="flex flex-col leading-tight">
+                                    <span className="font-medium">
+                                        {row.locationName}
+                                    </span>
 
-                                    <TableCell>
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="font-medium">
-                                                {row.collectionTypeName}
-                                            </span>
+                                    {row.locationPostCode && (
+                                        <span className="text-xs text-muted-foreground">
+                                            {row.locationPostCode}
+                                        </span>
+                                    )}
+                                </div>
+                            </TableCell>
 
-                                            <span className="text-xs text-muted-foreground">
-                                                {row.collectionTypeCode}
-                                            </span>
-                                        </div>
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.numberOfBags ?? "-"}
+                            </TableCell>
 
-                                    <TableCell>
-                                        <div className="flex flex-col leading-tight">
-                                            <span className="font-medium">
-                                                {row.locationName}
-                                            </span>
+                            <TableCell>{getStdChargeTypeLabel(row.chargeType)}</TableCell>
 
-                                            {row.locationPostCode && (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {row.locationPostCode}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums">
+                                {row.chargeType === "Mileage" ? row.miles ?? "-" : "-"}
+                            </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.numberOfBags ?? "-"}
-                                    </TableCell>
+                            <TableCell align="right" className="tabular-nums print-col-rate">
+                                {row.chargeType === "Mileage"
+                                    ? formatCurrencyGB(row.ratePerMile ?? 0)
+                                    : formatCurrencyGB(row.flatCharge ?? 0)}
+                            </TableCell>
 
-                                    <TableCell>{getStdChargeTypeLabel(row.chargeType)}</TableCell>
+                            <TableCell
+                                align="right"
+                                className="font-semibold tabular-nums print-col-value"
+                            >
+                                {formatCurrencyGB(row.totalValue ?? 0)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
 
-                                    <TableCell align="right" className="tabular-nums">
-                                        {row.chargeType === "Mileage" ? row.miles ?? "-" : "-"}
-                                    </TableCell>
+                <TableFooter>
+                    <TableRow>
+                        <TableCell className="print-col-week">Totals</TableCell>
 
-                                    <TableCell align="right" className="tabular-nums print-col-rate">
-                                        {row.chargeType === "Mileage"
-                                            ? formatCurrencyGB(row.ratePerMile ?? 0)
-                                            : formatCurrencyGB(row.flatCharge ?? 0)}
-                                    </TableCell>
+                        <TableCell />
 
-                                    <TableCell
-                                        align="right"
-                                        className="font-semibold tabular-nums print-col-value"
-                                    >
-                                        {formatCurrencyGB(row.totalValue ?? 0)}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                        <TableCell />
 
-                        <TableFooter>
-                            <TableRow>
-                                <TableCell className="print-col-week">Totals</TableCell>
+                        <TableCell align="right" className="tabular-nums">
+                            {totals.totalBags}
+                        </TableCell>
 
-                                <TableCell />
+                        <TableCell />
 
-                                <TableCell />
+                        <TableCell align="right" className="tabular-nums">
+                            {totals.totalMiles}
+                        </TableCell>
 
-                                <TableCell align="right" className="tabular-nums">
-                                    {totals.totalBags}
-                                </TableCell>
+                        <TableCell className="print-col-rate" />
 
-                                <TableCell />
-
-                                <TableCell align="right" className="tabular-nums">
-                                    {totals.totalMiles}
-                                </TableCell>
-
-                                <TableCell className="print-col-rate" />
-
-                                <TableCell
-                                    align="right"
-                                    className="font-semibold tabular-nums print-col-value"
-                                >
-                                    {formatCurrencyGB(totals.subtotal)}
-                                </TableCell>
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
-                </div>
-            </div>
-        </div>
+                        <TableCell
+                            align="right"
+                            className="font-semibold tabular-nums print-col-value"
+                        >
+                            {formatCurrencyGB(totals.subtotal)}
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
+        </SubmissionSectionCard>
     );
 }

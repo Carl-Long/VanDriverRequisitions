@@ -1,12 +1,9 @@
 import type { StdTransferDraft } from "../types/std-transfer-draft";
 import type { StdTransferForm } from "../types/std-transfer-form";
+import { calculateStdChargeTotal } from "./calculate-std-charge-total";
 
 export function calculateStdTransferFormTotal(form: StdTransferForm) {
-    if (form.chargeType === "Mileage") {
-        return (form.miles ?? 0) * (form.ratePerMile ?? 0);
-    }
-
-    return form.flatCharge ?? 0;
+    return calculateStdChargeTotal(form);
 }
 
 export function calculateStdTransferRowsTotal(rows: StdTransferDraft[]) {

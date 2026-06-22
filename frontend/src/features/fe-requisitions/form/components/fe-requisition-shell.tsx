@@ -213,7 +213,7 @@ export function FeRequisitionShell({
 
         const limitRule = resolveFeRequisitionLimitRule({
             rules: limitRules,
-            categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+            category: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
             taskTypeId,
         });
 
@@ -397,7 +397,7 @@ export function FeRequisitionShell({
                     <FeMileageWorkspace
                         limitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
                         readonly={isReadonly}
                         rows={draft.feMileages}
@@ -418,7 +418,7 @@ export function FeRequisitionShell({
                     <FeTransferWorkspace
                         limitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.TRANSFER,
+                            category: REQUISITION_ROW_CATEGORIES.TRANSFER,
                         })}
                         readonly={isReadonly}
                         transfers={draft.feTransfers}
@@ -441,11 +441,11 @@ export function FeRequisitionShell({
                         rows={draft.feAdditionalCosts}
                         additionalCostLimitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
+                            category: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
                         })}
                         mileageLimitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
                         onAdd={addAdditionalCost}
                         onUpdate={updateAdditionalCost}
@@ -471,7 +471,7 @@ export function FeRequisitionShell({
                         <FeGeneralTaskWorkspace
                             limitRule={resolveFeRequisitionLimitRule({
                                 rules: limitRules,
-                                categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+                                category: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
                                 taskTypeId: taskType.id,
                             })}
                             readonly={isReadonly}

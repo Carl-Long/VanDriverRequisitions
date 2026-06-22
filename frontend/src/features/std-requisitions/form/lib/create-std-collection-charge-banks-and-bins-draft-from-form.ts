@@ -1,6 +1,7 @@
 import type { StdCollectionChargeBanksAndBinsDraft } from "../types/std-collection-charge-banks-and-bins-draft";
 import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 import { calculateStdCollectionChargeBanksAndBinsFormTotal } from "./calculate-std-collection-charge-banks-and-bins-form";
+import { normaliseStdChargeFields } from "./normalise-std-charge-fields";
 
 type Args = {
     form: StdCollectionChargeBanksAndBinsForm;
@@ -9,6 +10,8 @@ type Args = {
 export function createStdCollectionChargeBanksAndBinsDraftFromForm({
     form,
 }: Args): StdCollectionChargeBanksAndBinsDraft {
+    const chargeFields = normaliseStdChargeFields(form);
+
     return {
         clientId: crypto.randomUUID(),
         id: null,
@@ -25,11 +28,7 @@ export function createStdCollectionChargeBanksAndBinsDraftFromForm({
 
         numberOfBags: form.numberOfBags,
 
-        chargeType: form.chargeType,
-
-        miles: form.chargeType === "Mileage" ? form.miles : null,
-        ratePerMile: form.chargeType === "Mileage" ? form.ratePerMile : null,
-        flatCharge: form.chargeType === "FlatCharge" ? form.flatCharge : null,
+        ...chargeFields,
 
         totalValue: calculateStdCollectionChargeBanksAndBinsFormTotal(form),
     };

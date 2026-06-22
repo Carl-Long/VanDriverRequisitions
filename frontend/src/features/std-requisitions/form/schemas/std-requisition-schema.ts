@@ -1,3 +1,4 @@
+import { hasMaxTwoDecimalPlaces, MIN_MONEY_AMOUNT } from "@/lib/validation/money";
 import { isUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
 import { z } from "zod";
 
@@ -26,8 +27,23 @@ const banksAndBinsRowSchema = z
         chargeType: z.enum(["Mileage", "FlatCharge"]),
 
         miles: z.number().int().min(0).nullable(),
-        ratePerMile: z.number().min(0).nullable(),
-        flatCharge: z.number().min(0).nullable(),
+        ratePerMile: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Rate per mile can have a maximum of 2 decimal places",
+            )
+            .nullable(),
+
+        flatCharge: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Flat charge can have a maximum of 2 decimal places",
+            )
+            .nullable(),
 
         totalValue: z.number().nullable(),
     })
@@ -93,7 +109,7 @@ const vanPackRowSchema = z
         unusedVanPacks: z.number(),
         percentReturned: z.number(),
 
-        ratePerVanPack: z.number().min(0),
+        ratePerVanPack: z.number().gt(0, "Rate per van pack must be greater than zero"),
         totalValue: z.number().min(0),
     })
     .superRefine((row, ctx) => {
@@ -151,8 +167,23 @@ const pickupRowSchema = z
         chargeType: z.enum(["Mileage", "FlatCharge"]),
 
         miles: z.number().int("Must be a whole number").min(0, "Cannot be negative").nullable(),
-        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
-        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+        ratePerMile: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Rate per mile can have a maximum of 2 decimal places",
+            )
+            .nullable(),
+
+        flatCharge: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Flat charge can have a maximum of 2 decimal places",
+            )
+            .nullable(),
 
         totalValue: z.number().min(0),
     })
@@ -240,8 +271,23 @@ const transferRowSchema = z
             .min(0, "Cannot be negative")
             .nullable(),
 
-        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
-        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+        ratePerMile: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Rate per mile can have a maximum of 2 decimal places",
+            )
+            .nullable(),
+
+        flatCharge: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Flat charge can have a maximum of 2 decimal places",
+            )
+            .nullable(),
 
         totalValue: z.number().min(0),
     })
@@ -328,9 +374,23 @@ const additionalCostRowSchema = z
             .min(0, "Cannot be negative")
             .nullable(),
 
-        ratePerMile: z.number().min(0, "Cannot be negative").nullable(),
+        ratePerMile: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Rate per mile must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Rate per mile can have a maximum of 2 decimal places",
+            )
+            .nullable(),
 
-        flatCharge: z.number().min(0, "Cannot be negative").nullable(),
+        flatCharge: z
+            .number()
+            .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")
+            .refine(
+                hasMaxTwoDecimalPlaces,
+                "Flat charge can have a maximum of 2 decimal places",
+            )
+            .nullable(),
 
         totalValue: z.number().min(0),
     })
@@ -424,7 +484,7 @@ export function createStdRequisitionSchema() {
                 data.collectionChargesBanksAndBins.length +
                 data.collectionVanPacks.length +
                 data.additionalCosts.length;
-                
+
             if (totalRows === 0) {
                 ctx.addIssue({
                     code: "custom",

@@ -5,15 +5,7 @@ import { Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import {
-    TableHeader,
-    TableHeaderCell,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableRow,
-    TableHeaderRow,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
@@ -266,7 +258,7 @@ function VanPackTable({
                                                     <div className="text-xs font-medium text-warning">
                                                         {limitStatus.state === "missing-limit"
                                                             ? "Missing price"
-                                                            : "Exceeds price"}
+                                                            : "Exceeds limit"}
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
@@ -303,7 +295,7 @@ function VanPackTable({
                                         {formatCurrencyGB(row.ratePerVanPack)}
                                     </TableCell>
 
-                                    <TableCell align="right" className="tabular-nums">
+                                    <TableCell align="right" className="font-semibold tabular-nums">
                                         {formatCurrencyGB(row.totalValue)}
                                     </TableCell>
 

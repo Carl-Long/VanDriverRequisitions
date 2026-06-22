@@ -1,5 +1,5 @@
 export const STD_REQUISITION_ROW_CATEGORIES = {
-    MILEAGE: 1,
-    FLAT_CHARGE: 4,
-    VAN_PACK: 5,
+    MILEAGE: "Mileage",
+    FLAT_CHARGE: "FlatCharge",
+    VAN_PACK: "VanPack",
 } as const;

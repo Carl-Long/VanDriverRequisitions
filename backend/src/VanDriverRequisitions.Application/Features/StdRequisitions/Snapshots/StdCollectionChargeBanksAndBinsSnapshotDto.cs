@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
@@ -16,8 +15,7 @@ public sealed class StdCollectionChargeBanksAndBinsSnapshotDto
     public string LocationPostCode { get; init; } = string.Empty;
 
     public int? NumberOfBags { get; init; }
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    
     public StdChargeType ChargeType { get; init; }
 
     public int? Miles { get; init; }

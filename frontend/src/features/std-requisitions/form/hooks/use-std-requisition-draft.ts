@@ -1,32 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
 import type { VanDriverLookup } from "@/lib/api/van-drivers";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 import { createEmptyStdRequisitionDraft } from "../lib/create-empty-std-requisition-draft";
 import { calculateStdRequisitionSubtotal } from "../lib/calculate-std-requisition-subtotal";
 import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 import { createStdCollectionChargeBanksAndBinsDraftFromForm } from "../lib/create-std-collection-charge-banks-and-bins-draft-from-form";
-import { calculateStdCollectionChargeBanksAndBinsFormTotal } from "../lib/calculate-std-collection-charge-banks-and-bins-form";
-import {
-    calculateStdCollectionVanPackUnusedVanPacks,
-    calculateStdCollectionVanPackPercentReturned,
-    calculateStdCollectionVanPackFormTotal,
-} from "../lib/calculate-std-collection-van-pack-form";
 import { createStdCollectionVanPackDraftFromForm } from "../lib/create-std-collection-van-pack-draft-from-form";
 import { StdCollectionVanPackForm } from "../types/std-collection-van-pack-form";
-import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
-import { calculateStdPickupFormTotal } from "../lib/calculate-std-pickup-form";
 import { createStdPickupDraftFromForm } from "../lib/create-std-pickup-draft-from-form";
 import { StdPickupForm } from "../types/std-pickup-form";
-import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
-import { calculateStdTransferFormTotal } from "../lib/calculate-std-transfer-form";
 import { createStdTransferDraftFromForm } from "../lib/create-std-transfer-draft-from-form";
 import { StdTransferForm } from "../types/std-transfer-form";
-import { calculateStdAdditionalCostFormTotal } from "../lib/calculate-std-additional-cost-form";
 import { createStdAdditionalCostDraftFromForm } from "../lib/create-std-additional-cost-draft-from-form";
 import { StdAdditionalCostForm } from "../types/std-additional-cost-form";
+import { updateStdCollectionChargeBanksAndBinsDraftFromForm } from "../lib/update-std-collection-charge-banks-and-bins-draft-from-form";
+import { updateStdCollectionVanPackDraftFromForm } from "../lib/update-std-collection-van-pack-draft-from-form";
+import { updateStdPickupDraftFromForm } from "../lib/update-std-pickup-draft-from-form";
+import { updateStdTransferDraftFromForm } from "../lib/update-std-transfer-draft-from-form";
+import { updateStdAdditionalCostDraftFromForm } from "../lib/update-std-additional-cost-draft-from-form";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -90,43 +83,14 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
         }));
     }
 
-    function updateCollectionChargeBanksAndBins(
-        clientId: string,
-        form: StdCollectionChargeBanksAndBinsForm,
-    ) {
-        const totalValue = calculateStdCollectionChargeBanksAndBinsFormTotal(form);
-
+    function updateCollectionChargeBanksAndBins(clientId: string, form: StdCollectionChargeBanksAndBinsForm) {
         setDraft((prev) => ({
             ...prev,
-            collectionChargesBanksAndBins: prev.collectionChargesBanksAndBins.map((row) => {
-                if (row.clientId !== clientId) {
-                    return row;
-                }
-
-                return {
-                    ...row,
-
-                    date: form.date,
-
-                    collectionTypeId: form.collectionTypeId,
-                    collectionTypeLabel: form.collectionTypeLabel,
-                    collectionTypeCode: form.collectionTypeCode,
-
-                    locationId: form.locationId,
-                    locationLabel: form.locationLabel,
-                    locationPostCode: form.locationPostCode,
-
-                    numberOfBags: form.numberOfBags,
-
-                    chargeType: form.chargeType,
-
-                    miles: form.chargeType === "Mileage" ? form.miles : null,
-                    ratePerMile: form.chargeType === "Mileage" ? form.ratePerMile : null,
-                    flatCharge: form.chargeType === "FlatCharge" ? form.flatCharge : null,
-
-                    totalValue,
-                };
-            }),
+            collectionChargesBanksAndBins: prev.collectionChargesBanksAndBins.map((row) =>
+                row.clientId === clientId
+                    ? updateStdCollectionChargeBanksAndBinsDraftFromForm(row, form)
+                    : row,
+            ),
         }));
     }
 
@@ -160,16 +124,11 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
             ...prev,
             collectionVanPacks: prev.collectionVanPacks.map((row) =>
                 row.clientId === clientId
-                    ? {
-                        ...row,
-                        deliveryDate: form.deliveryDate,
-                        postCodeZone: normaliseUkPostcodeOutwardCode(form.postCodeZone), vanPacksOut: form.vanPacksOut,
-                        filledBags: form.filledBags,
-                        unusedVanPacks: calculateStdCollectionVanPackUnusedVanPacks(form),
-                        percentReturned: calculateStdCollectionVanPackPercentReturned(form),
+                    ? updateStdCollectionVanPackDraftFromForm(
+                        row,
+                        form,
                         ratePerVanPack,
-                        totalValue: calculateStdCollectionVanPackFormTotal(form, ratePerVanPack),
-                    }
+                    )
                     : row,
             ),
         }));
@@ -196,28 +155,11 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
             ...prev,
             pickups: prev.pickups.map((row) =>
                 row.clientId === clientId
-                    ? {
-                        ...row,
-                        date: form.date,
-
-                        numberOfBags: form.numberOfBags,
-                        numberOfHouseholds: form.numberOfHouseholds,
-
-                        chargeType: form.chargeType,
-
-                        miles: form.chargeType === "Mileage" ? form.miles : null,
-                        ratePerMile:
-                            form.chargeType === "Mileage" ? form.ratePerMile : null,
-                        flatCharge:
-                            form.chargeType === "FlatCharge" ? form.flatCharge : null,
-
-                        totalValue: calculateStdPickupFormTotal(form),
-                    }
+                    ? updateStdPickupDraftFromForm(row, form)
                     : row,
             ),
         }));
     }
-
     function removePickup(clientId: string) {
         setDraft((prev) => ({
             ...prev,
@@ -239,41 +181,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
             ...prev,
             transfers: prev.transfers.map((row) =>
                 row.clientId === clientId
-                    ? {
-                        ...row,
-
-                        date: form.date,
-
-                        shopIdFrom: form.shopIdFrom,
-                        shopLabelFrom: form.shopLabelFrom,
-                        shopCodeFrom: form.shopCodeFrom,
-                        shopNameFrom: form.shopNameFrom,
-
-                        shopIdTo: form.shopIdTo,
-                        shopLabelTo: form.shopLabelTo,
-                        shopCodeTo: form.shopCodeTo,
-                        shopNameTo: form.shopNameTo,
-
-                        numberOfBags: form.numberOfBags,
-                        numberOfBoxes: form.numberOfBoxes,
-
-                        chargeType: form.chargeType,
-
-                        miles:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.miles
-                                : null,
-                        ratePerMile:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.ratePerMile
-                                : null,
-                        flatCharge:
-                            form.chargeType === STD_CHARGE_TYPE.FlatCharge
-                                ? form.flatCharge
-                                : null,
-
-                        totalValue: calculateStdTransferFormTotal(form),
-                    }
+                    ? updateStdTransferDraftFromForm(row, form)
                     : row,
             ),
         }));
@@ -300,33 +208,7 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
             ...prev,
             additionalCosts: prev.additionalCosts.map((row) =>
                 row.clientId === clientId
-                    ? {
-                        ...row,
-
-                        date: form.date,
-
-                        reasonId: form.reasonId,
-                        reasonName: form.reasonName,
-
-                        numberOfBags: form.numberOfBags,
-
-                        chargeType: form.chargeType,
-
-                        miles:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.miles
-                                : null,
-                        ratePerMile:
-                            form.chargeType === STD_CHARGE_TYPE.Mileage
-                                ? form.ratePerMile
-                                : null,
-                        flatCharge:
-                            form.chargeType === STD_CHARGE_TYPE.FlatCharge
-                                ? form.flatCharge
-                                : null,
-
-                        totalValue: calculateStdAdditionalCostFormTotal(form),
-                    }
+                    ? updateStdAdditionalCostDraftFromForm(row, form)
                     : row,
             ),
         }));

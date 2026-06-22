@@ -18,7 +18,7 @@ import type { StdRequisitionSummary } from "@/features/std-requisitions/types/st
 import { useAuth } from "@/providers/auth-provider";
 import { getApiErrorMessage } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
-import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requsiiton-table-skeleton";
+import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 
 export default function StdRequisitionApprovalsPage() {
     const router = useRouter();

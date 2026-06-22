@@ -24,7 +24,7 @@ import { StdRequisitionTable } from "@/features/std-requisitions/list/components
 
 import { buildStdRequisitionQuery } from "@/features/std-requisitions/list/lib/build-std-requisition-query";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, } from "@/features/std-requisitions/list/lib/url-state";
-import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requsiiton-table-skeleton";
+import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 
 export default function StandardDriversPage() {
     const { user } = useAuth();

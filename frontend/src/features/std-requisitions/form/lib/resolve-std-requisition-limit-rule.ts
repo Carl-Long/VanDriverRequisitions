@@ -3,9 +3,9 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 
 type Params = {
     rules: RequisitionLimitRuleSummary[];
-    categoryId: number;
+    category: RequisitionLimitRuleSummary["category"];
 };
 
-export function resolveStdRequisitionLimitRule({ rules, categoryId }: Params) {
-    return rules.find((x) => x.fasciaId === FASCIAS.STD && x.categoryId === categoryId);
+export function resolveStdRequisitionLimitRule({ rules, category }: Params) {
+    return rules.find((x) => x.fascia === FASCIAS.STD && x.category === category);
 }

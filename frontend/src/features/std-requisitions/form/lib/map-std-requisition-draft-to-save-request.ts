@@ -2,6 +2,7 @@ import { toRequiredDateOnlyString } from "@/lib/format/date";
 import type { SaveStdRequisition } from "../../types/std-requisition-save.types";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 import { normaliseUkPostcodeOutwardCode } from "@/lib/validation/uk-postcode";
+import { normaliseStdChargeFields } from "./normalise-std-charge-fields";
 
 export function mapStdRequisitionDraftToSaveRequest(
     draft: StdRequisitionDraft,
@@ -44,10 +45,7 @@ export function mapStdRequisitionDraftToSaveRequest(
                 collectionTypeId: row.collectionTypeId,
                 locationId: row.locationId,
                 numberOfBags: row.numberOfBags,
-                chargeType: row.chargeType,
-                miles: row.chargeType === "Mileage" ? row.miles : null,
-                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
-                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+                ...normaliseStdChargeFields(row),
             };
         }),
 
@@ -95,10 +93,7 @@ export function mapStdRequisitionDraftToSaveRequest(
                 date: toRequiredDateOnlyString(row.date, "Pickup date is required."),
                 numberOfBags: row.numberOfBags,
                 numberOfHouseholds: row.numberOfHouseholds,
-                chargeType: row.chargeType,
-                miles: row.chargeType === "Mileage" ? row.miles : null,
-                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
-                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+                ...normaliseStdChargeFields(row),
             };
         }),
 
@@ -121,10 +116,7 @@ export function mapStdRequisitionDraftToSaveRequest(
                 shopIdTo: row.shopIdTo,
                 numberOfBags: row.numberOfBags,
                 numberOfBoxes: row.numberOfBoxes,
-                chargeType: row.chargeType,
-                miles: row.chargeType === "Mileage" ? row.miles : null,
-                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
-                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+                ...normaliseStdChargeFields(row),
             };
         }),
 
@@ -145,10 +137,7 @@ export function mapStdRequisitionDraftToSaveRequest(
                 ),
                 reasonId: row.reasonId,
                 numberOfBags: row.numberOfBags,
-                chargeType: row.chargeType,
-                miles: row.chargeType === "Mileage" ? row.miles : null,
-                ratePerMile: row.chargeType === "Mileage" ? row.ratePerMile : null,
-                flatCharge: row.chargeType === "FlatCharge" ? row.flatCharge : null,
+                ...normaliseStdChargeFields(row),
             };
         }),
     };
