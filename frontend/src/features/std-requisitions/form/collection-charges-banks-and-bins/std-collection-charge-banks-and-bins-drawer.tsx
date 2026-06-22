@@ -285,6 +285,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                         ratePerMile: errors.ratePerMile,
                         flatCharge: errors.flatCharge,
                     }}
+                    defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     onChange={updateChargeFields}
                 />
 

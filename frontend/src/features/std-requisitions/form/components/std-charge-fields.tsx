@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/field/input";
 
 import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdChargeFields } from "../types/std-charge-fields";
+import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
 
 type ChargeFieldErrors = Partial<
     Record<"miles" | "ratePerMile" | "flatCharge", string>
@@ -11,9 +12,9 @@ type ChargeFieldErrors = Partial<
 type Props = {
     charge: StdChargeFields;
     errors: ChargeFieldErrors;
+    defaultRatePerMile?: number | null;
     onChange: (patch: Partial<StdChargeFields>) => void;
 };
-
 function parseNumberInput(value: string) {
     return value === "" ? null : Number(value);
 }
@@ -21,6 +22,7 @@ function parseNumberInput(value: string) {
 export function StdChargeFields({
     charge,
     errors,
+    defaultRatePerMile,
     onChange,
 }: Readonly<Props>) {
     if (charge.chargeType === STD_CHARGE_TYPE.Mileage) {
@@ -41,26 +43,16 @@ export function StdChargeFields({
                     />
                 </Field>
 
-                <Field
-                    label="Rate Per Mile"
-                    required
+                <RatePerMileField
+                    value={charge.ratePerMile}
+                    defaultValue={defaultRatePerMile ?? null}
                     error={errors.ratePerMile}
-                >
-                    <Input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={charge.ratePerMile ?? ""}
-                        state={errors.ratePerMile ? "error" : "default"}
-                        onChange={(event) => {
-                            onChange({
-                                ratePerMile: parseNumberInput(
-                                    event.target.value,
-                                ),
-                            });
-                        }}
-                    />
-                </Field>
+                    onChange={(ratePerMile) => {
+                        onChange({
+                            ratePerMile,
+                        });
+                    }}
+                />
             </div>
         );
     }

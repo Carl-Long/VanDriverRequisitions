@@ -260,9 +260,10 @@ export function StdPickupDrawer({
                         ratePerMile: errors.ratePerMile,
                         flatCharge: errors.flatCharge,
                     }}
+                    defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     onChange={updateChargeFields}
                 />
-
+                
                 {errors.form && <Alert tone="danger">{errors.form}</Alert>}
 
                 <StdTotalValueCard value={totalValue} />

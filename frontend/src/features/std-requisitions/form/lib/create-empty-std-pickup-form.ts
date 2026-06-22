@@ -1,3 +1,4 @@
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdPickupForm } from "../types/std-pickup-form";
 
 export function createEmptyStdPickupForm(
@@ -7,7 +8,7 @@ export function createEmptyStdPickupForm(
         date: date ?? new Date(),
         numberOfBags: null,
         numberOfHouseholds: null,
-        chargeType: "Mileage",
+        chargeType: STD_CHARGE_TYPE.FlatCharge,
         miles: null,
         ratePerMile: null,
         flatCharge: null,

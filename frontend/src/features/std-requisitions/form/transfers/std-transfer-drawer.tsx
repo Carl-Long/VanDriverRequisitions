@@ -177,6 +177,22 @@ export function StdTransferDrawer({
 
                 {errors.form && <Alert tone="danger">{errors.form}</Alert>}
 
+
+                <Field label="Date" required error={errors.date}>
+                    <DatePicker
+                        value={form.date ?? undefined}
+                        state={errors.date ? "error" : "default"}
+                        onChange={(date) => {
+                            setForm((prev) => ({
+                                ...prev,
+                                date: date ?? null,
+                            }));
+
+                            clearError("date");
+                        }}
+                    />
+                </Field>
+
                 <div className="space-y-4">
                     <ShopFilterField
                         required
@@ -221,21 +237,6 @@ export function StdTransferDrawer({
                         }}
                     />
                 </div>
-
-                <Field label="Date" required error={errors.date}>
-                    <DatePicker
-                        value={form.date ?? undefined}
-                        state={errors.date ? "error" : "default"}
-                        onChange={(date) => {
-                            setForm((prev) => ({
-                                ...prev,
-                                date: date ?? null,
-                            }));
-
-                            clearError("date");
-                        }}
-                    />
-                </Field>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field label="Number of Bags" error={errors.numberOfBags}>
@@ -293,7 +294,8 @@ export function StdTransferDrawer({
 
                 <StdChargeFields
                     charge={form}
-                    errors={{ miles: errors.miles, ratePerMile: errors.ratePerMile, flatCharge: errors.flatCharge }}
+                    errors={{ miles: errors.miles, ratePerMile: errors.ratePerMile, flatCharge: errors.flatCharge, }}
+                    defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     onChange={updateChargeFields}
                 />
 

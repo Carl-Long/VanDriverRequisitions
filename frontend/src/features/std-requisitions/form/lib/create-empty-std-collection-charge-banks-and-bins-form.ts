@@ -1,3 +1,4 @@
+import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdCollectionChargeBanksAndBinsForm } from "../types/std-collection-charge-banks-and-bins-form";
 
 export function createEmptyStdCollectionChargeBanksAndBinsForm(
@@ -16,7 +17,7 @@ export function createEmptyStdCollectionChargeBanksAndBinsForm(
 
         numberOfBags: null,
 
-        chargeType: "Mileage",
+        chargeType: STD_CHARGE_TYPE.FlatCharge,
 
         miles: null,
         ratePerMile: null,

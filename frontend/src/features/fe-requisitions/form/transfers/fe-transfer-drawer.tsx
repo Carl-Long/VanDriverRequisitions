@@ -153,6 +153,20 @@ export function FeTransferDrawer({
                     </div>
                 )}
 
+                <Field label="Week Ending" required error={errors["weekEndingDate"]}>
+                    <DatePicker
+                        value={form.weekEndingDate ?? undefined}
+                        onChange={(date) => {
+                            setForm((prev) => ({
+                                ...prev,
+                                weekEndingDate: date ?? null,
+                            }));
+
+                            clearError("weekEndingDate");
+                        }}
+                    />
+                </Field>
+
                 <div className="space-y-4">
                     <ShopFilterField
                         required
@@ -193,20 +207,6 @@ export function FeTransferDrawer({
                         }}
                     />
                 </div>
-
-                <Field label="Week Ending" required error={errors["weekEndingDate"]}>
-                    <DatePicker
-                        value={form.weekEndingDate ?? undefined}
-                        onChange={(date) => {
-                            setForm((prev) => ({
-                                ...prev,
-                                weekEndingDate: date ?? null,
-                            }));
-
-                            clearError("weekEndingDate");
-                        }}
-                    />
-                </Field>
 
                 <div className="grid grid-cols-7 gap-3">
                     <DayInput

@@ -20,6 +20,7 @@ import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { FeReasonField } from "../form-fields/fe-reason-field";
 import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
+import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
 
 type Props = {
     open: boolean;
@@ -221,6 +222,7 @@ export function FeAdditionalCostDrawer({
                         errors={errors}
                         setForm={setForm}
                         clearError={clearError}
+                        defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     />
                 )}
 
@@ -291,6 +293,7 @@ type ConditionalFieldsProps = {
     errors: Record<string, string>;
     setForm: Dispatch<SetStateAction<FeAdditionalCostForm>>;
     clearError: (field: string) => void;
+    defaultRatePerMile?: number | null;
 };
 
 function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFieldsProps>) {
@@ -337,7 +340,13 @@ function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFi
     );
 }
 
-function MileageFields({ form, errors, setForm, clearError }: Readonly<ConditionalFieldsProps>) {
+function MileageFields({
+    form,
+    errors,
+    setForm,
+    clearError,
+    defaultRatePerMile,
+}: Readonly<ConditionalFieldsProps>) {
     return (
         <div className="grid grid-cols-2 gap-4">
             <Field label="Miles" required error={errors["miles"]}>
@@ -359,24 +368,21 @@ function MileageFields({ form, errors, setForm, clearError }: Readonly<Condition
                 />
             </Field>
 
-            <Field label="Rate Per Mile (£)" required error={errors["ratePerMile"]}>
-                <Input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={form.ratePerMile ?? ""}
-                    state={errors["ratePerMile"] ? "error" : "default"}
-                    onChange={(e) => {
-                        setForm((prev) => ({
-                            ...prev,
-                            ratePerMile: e.target.value ? Number(e.target.value) : null,
-                        }));
-
-                        clearError("ratePerMile");
-                        clearError("form");
-                    }}
-                />
-            </Field>
+            <RatePerMileField
+                value={form.ratePerMile}
+                defaultValue={defaultRatePerMile ?? null}
+                error={errors["ratePerMile"]}
+                onChange={(ratePerMile) => {
+                    setForm((prev) => ({
+                        ...prev,
+                        ratePerMile,
+                    }));
+                }}
+                onClearError={() => {
+                    clearError("ratePerMile");
+                    clearError("form");
+                }}
+            />
         </div>
     );
 }
