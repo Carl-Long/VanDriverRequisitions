@@ -12,6 +12,7 @@ import {
     TableBody,
     TableRow,
     TableCell,
+    Table,
 } from "@/components/ui/table/table";
 
 type Props = {
@@ -23,7 +24,7 @@ type Props = {
 export function FeReasonsTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <Table className="w-full">
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Reason</TableHeaderCell>
@@ -91,7 +92,7 @@ export function FeReasonsTable({ items, onEdit, onToggleActive }: Readonly<Props
                         );
                     })}
                 </TableBody>
-            </table>
+            </Table>
         </Surface>
     );
 }

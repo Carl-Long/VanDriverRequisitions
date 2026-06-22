@@ -10,6 +10,7 @@ import {
     TableBody,
     TableRow,
     TableCell,
+    Table,
 } from "@/components/ui/table/table";
 import { Toggle } from "@/components/ui/toggle";
 
@@ -22,7 +23,7 @@ type Props = {
 export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <Table className="w-full">
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Name</TableHeaderCell>
@@ -86,7 +87,7 @@ export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>
                         );
                     })}
                 </TableBody>
-            </table>
+            </Table>
         </Surface>
     );
 }

@@ -12,6 +12,7 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 
@@ -25,6 +26,7 @@ import { getMileageLimitStatus } from "../lib/get-fe-mileage-limit-status";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -135,7 +137,7 @@ function MileageTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -215,7 +217,7 @@ function MileageTable({
                                                 ariaLabel="Edit mileage row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
+                                                {formatDateGB(row.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
@@ -321,7 +323,7 @@ function MileageTable({
                             )}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );

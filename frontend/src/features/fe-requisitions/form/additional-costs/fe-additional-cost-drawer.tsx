@@ -5,7 +5,7 @@ import { Info, Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
-import { AppDrawer } from "@/components/ui/drawer";
+import { AppDrawer, DrawerFormActions } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
@@ -20,6 +20,7 @@ import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { FeReasonField } from "../form-fields/fe-reason-field";
 import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
+import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
 
 type Props = {
     open: boolean;
@@ -112,35 +113,6 @@ export function FeAdditionalCostDrawer({
             open={open}
             title={title}
             onClose={onClose}
-            footer={
-                <div className="flex items-center justify-between">
-                    <Button type="button" tone="accent" onClick={onClose}>
-                        Cancel
-                    </Button>
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            type="button"
-                            className="min-w-[160px]"
-                            variant="outline"
-                            onClick={() => saveForm("close")}
-                        >
-                            {isEditMode ? "Update & Close" : "Add & Close"}
-                        </Button>
-
-                        {!isEditMode && (
-                            <Button
-                                form="additional-cost-drawer-form"
-                                type="submit"
-                                className="min-w-[160px]"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add & Create Another
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            }
         >
             <form
                 id="additional-cost-drawer-form"
@@ -221,6 +193,7 @@ export function FeAdditionalCostDrawer({
                         errors={errors}
                         setForm={setForm}
                         clearError={clearError}
+                        defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     />
                 )}
 
@@ -232,6 +205,33 @@ export function FeAdditionalCostDrawer({
                         <span className="font-medium">{formatCurrencyGB(totals.totalValue)}</span>
                     </div>
                 </div>
+
+                <DrawerFormActions>
+                    <Button type="button" tone="accent" onClick={onClose}>
+                        Cancel
+                    </Button>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                        <Button
+                            type="button"
+                            className="min-w-[160px]"
+                            variant="outline"
+                            onClick={() => saveForm("close")}
+                        >
+                            {isEditMode ? "Update & Close" : "Add & Close"}
+                        </Button>
+
+                        {!isEditMode && (
+                            <Button
+                                type="submit"
+                                className="min-w-[160px]"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add & Create Another
+                            </Button>
+                        )}
+                    </div>
+                </DrawerFormActions>
             </form>
         </AppDrawer>
     );
@@ -291,6 +291,7 @@ type ConditionalFieldsProps = {
     errors: Record<string, string>;
     setForm: Dispatch<SetStateAction<FeAdditionalCostForm>>;
     clearError: (field: string) => void;
+    defaultRatePerMile?: number | null;
 };
 
 function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFieldsProps>) {
@@ -337,7 +338,13 @@ function JobFields({ form, errors, setForm, clearError }: Readonly<ConditionalFi
     );
 }
 
-function MileageFields({ form, errors, setForm, clearError }: Readonly<ConditionalFieldsProps>) {
+function MileageFields({
+    form,
+    errors,
+    setForm,
+    clearError,
+    defaultRatePerMile,
+}: Readonly<ConditionalFieldsProps>) {
     return (
         <div className="grid grid-cols-2 gap-4">
             <Field label="Miles" required error={errors["miles"]}>
@@ -359,24 +366,21 @@ function MileageFields({ form, errors, setForm, clearError }: Readonly<Condition
                 />
             </Field>
 
-            <Field label="Rate Per Mile (£)" required error={errors["ratePerMile"]}>
-                <Input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={form.ratePerMile ?? ""}
-                    state={errors["ratePerMile"] ? "error" : "default"}
-                    onChange={(e) => {
-                        setForm((prev) => ({
-                            ...prev,
-                            ratePerMile: e.target.value ? Number(e.target.value) : null,
-                        }));
-
-                        clearError("ratePerMile");
-                        clearError("form");
-                    }}
-                />
-            </Field>
+            <RatePerMileField
+                value={form.ratePerMile}
+                defaultValue={defaultRatePerMile ?? null}
+                error={errors["ratePerMile"]}
+                onChange={(ratePerMile) => {
+                    setForm((prev) => ({
+                        ...prev,
+                        ratePerMile,
+                    }));
+                }}
+                onClearError={() => {
+                    clearError("ratePerMile");
+                    clearError("form");
+                }}
+            />
         </div>
     );
 }

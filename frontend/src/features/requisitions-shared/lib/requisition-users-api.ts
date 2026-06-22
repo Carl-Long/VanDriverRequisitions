@@ -8,10 +8,13 @@ export type RequisitionUserLookup = {
     name: string;
 };
 
+export type RequisitionUserFascia = "Fe" | "Std";
+
 export type RequisitionUserSearchQuery = {
     search?: string;
     page?: number;
     pageSize?: number;
+    fascia?: RequisitionUserFascia;
 };
 
 export const requisitionUsersApi = {
@@ -22,8 +25,11 @@ export const requisitionUsersApi = {
             params.set("search", query.search);
         }
 
-        params.set("page", String(query.page ?? 1));
+        if (query.fascia) {
+            params.set("fascia", query.fascia);
+        }
 
+        params.set("page", String(query.page ?? 1));
         params.set("pageSize", String(query.pageSize ?? 20));
 
         return apiFetch<PagedResult<RequisitionUserLookup>>(`${BASE}?${params}`);

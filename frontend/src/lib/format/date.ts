@@ -1,8 +1,22 @@
 export type TimeString = `${string}:${string}`;
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 export function toDate(value?: string | Date | null): Date | null {
     if (!value) return null;
-    const d = value instanceof Date ? value : new Date(value);
+
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    if (DATE_ONLY_REGEX.test(value)) {
+        const [year, month, day] = value.split("-").map(Number);
+
+        return new Date(year, month - 1, day);
+    }
+
+    const d = new Date(value);
+
     return Number.isNaN(d.getTime()) ? null : d;
 }
 

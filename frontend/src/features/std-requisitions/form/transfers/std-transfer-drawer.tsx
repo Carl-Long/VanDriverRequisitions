@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
-import { AppDrawer } from "@/components/ui/drawer";
+import { AppDrawer, DrawerFormActions } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
@@ -130,35 +130,6 @@ export function StdTransferDrawer({
             open={open}
             title={title}
             onClose={onClose}
-            footer={
-                <div className="flex items-center justify-between">
-                    <Button type="button" tone="accent" onClick={onClose}>
-                        Cancel
-                    </Button>
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            type="button"
-                            className="min-w-[160px]"
-                            variant="outline"
-                            onClick={() => saveForm("close")}
-                        >
-                            {isEditMode ? "Update & Close" : "Add & Close"}
-                        </Button>
-
-                        {!isEditMode && (
-                            <Button
-                                form="std-transfer-drawer-form"
-                                type="submit"
-                                className="min-w-[180px]"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add & Create Another
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            }
         >
             <form
                 id="std-transfer-drawer-form"
@@ -176,6 +147,22 @@ export function StdTransferDrawer({
                 />
 
                 {errors.form && <Alert tone="danger">{errors.form}</Alert>}
+
+
+                <Field label="Date" required error={errors.date}>
+                    <DatePicker
+                        value={form.date ?? undefined}
+                        state={errors.date ? "error" : "default"}
+                        onChange={(date) => {
+                            setForm((prev) => ({
+                                ...prev,
+                                date: date ?? null,
+                            }));
+
+                            clearError("date");
+                        }}
+                    />
+                </Field>
 
                 <div className="space-y-4">
                     <ShopFilterField
@@ -221,21 +208,6 @@ export function StdTransferDrawer({
                         }}
                     />
                 </div>
-
-                <Field label="Date" required error={errors.date}>
-                    <DatePicker
-                        value={form.date ?? undefined}
-                        state={errors.date ? "error" : "default"}
-                        onChange={(date) => {
-                            setForm((prev) => ({
-                                ...prev,
-                                date: date ?? null,
-                            }));
-
-                            clearError("date");
-                        }}
-                    />
-                </Field>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <Field label="Number of Bags" error={errors.numberOfBags}>
@@ -293,11 +265,39 @@ export function StdTransferDrawer({
 
                 <StdChargeFields
                     charge={form}
-                    errors={{ miles: errors.miles, ratePerMile: errors.ratePerMile, flatCharge: errors.flatCharge }}
+                    errors={{ miles: errors.miles, ratePerMile: errors.ratePerMile, flatCharge: errors.flatCharge, }}
+                    defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     onChange={updateChargeFields}
                 />
 
                 <StdTotalValueCard value={totalValue} />
+
+                <DrawerFormActions>
+                    <Button type="button" tone="accent" onClick={onClose}>
+                        Cancel
+                    </Button>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                        <Button
+                            type="button"
+                            className="min-w-[160px]"
+                            variant="outline"
+                            onClick={() => saveForm("close")}
+                        >
+                            {isEditMode ? "Update & Close" : "Add & Close"}
+                        </Button>
+
+                        {!isEditMode && (
+                            <Button
+                                type="submit"
+                                className="min-w-[160px]"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add & Create Another
+                            </Button>
+                        )}
+                    </div>
+                </DrawerFormActions>
             </form>
         </AppDrawer>
     );

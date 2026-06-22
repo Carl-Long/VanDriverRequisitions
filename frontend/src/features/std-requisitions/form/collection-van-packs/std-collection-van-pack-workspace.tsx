@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, } from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
@@ -17,6 +17,7 @@ import { getStdCollectionVanPackLimitStatus } from "../lib/get-std-collection-va
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -177,7 +178,7 @@ function VanPackTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -248,9 +249,7 @@ function VanPackTable({
                                                 ariaLabel="Edit van pack collection row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.deliveryDate
-                                                    ? row.deliveryDate.toLocaleDateString()
-                                                    : "-"}
+                                               {formatDateGB(row.deliveryDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
@@ -331,7 +330,7 @@ function VanPackTable({
                             {!readonly && <TableCell />}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );

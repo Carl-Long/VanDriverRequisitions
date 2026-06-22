@@ -68,6 +68,7 @@ export function StdRequisitionFiltersToolbar({
                     <div className="min-w-[260px] flex-1">
                         <CreatedByUserFilterField
                             hideLabel
+                            fascia="Std"
                             value={filters.createdBy}
                             onChange={(value) => {
                                 onFiltersChange({

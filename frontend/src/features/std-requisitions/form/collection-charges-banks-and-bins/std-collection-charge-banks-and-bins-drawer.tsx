@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
 import { DatePicker } from "@/components/ui/date/date-picker";
-import { AppDrawer } from "@/components/ui/drawer";
+import { AppDrawer, DrawerFormActions } from "@/components/ui/drawer";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 
@@ -141,35 +141,6 @@ export function StdCollectionChargeBanksAndBinsDrawer({
             open={open}
             title={title}
             onClose={onClose}
-            footer={
-                <div className="flex items-center justify-between">
-                    <Button type="button" tone="accent" onClick={onClose}>
-                        Cancel
-                    </Button>
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            type="button"
-                            className="min-w-[160px]"
-                            variant="outline"
-                            onClick={() => saveForm("close")}
-                        >
-                            {isEditMode ? "Update & Close" : "Add & Close"}
-                        </Button>
-
-                        {!isEditMode && (
-                            <Button
-                                form="std-banks-bins-drawer-form"
-                                type="submit"
-                                className="min-w-[180px]"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add & Create Another
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            }
         >
             <form
                 id="std-banks-bins-drawer-form"
@@ -285,12 +256,40 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                         ratePerMile: errors.ratePerMile,
                         flatCharge: errors.flatCharge,
                     }}
+                    defaultRatePerMile={mileageLimitRule?.maxRate ?? null}
                     onChange={updateChargeFields}
                 />
 
                 {errors.form && <Alert tone="danger">{errors.form}</Alert>}
 
                 <StdTotalValueCard value={totalValue} />
+
+                <DrawerFormActions>
+                    <Button type="button" tone="accent" onClick={onClose}>
+                        Cancel
+                    </Button>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                        <Button
+                            type="button"
+                            className="min-w-[160px]"
+                            variant="outline"
+                            onClick={() => saveForm("close")}
+                        >
+                            {isEditMode ? "Update & Close" : "Add & Close"}
+                        </Button>
+
+                        {!isEditMode && (
+                            <Button
+                                type="submit"
+                                className="min-w-[160px]"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add & Create Another
+                            </Button>
+                        )}
+                    </div>
+                </DrawerFormActions>
             </form>
         </AppDrawer>
     );

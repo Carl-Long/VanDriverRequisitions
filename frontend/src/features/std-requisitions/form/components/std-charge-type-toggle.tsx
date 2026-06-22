@@ -20,16 +20,6 @@ export function StdChargeTypeToggle({
                 <Button
                     type="button"
                     variant={
-                        value === STD_CHARGE_TYPE.Mileage ? "solid" : "outline"
-                    }
-                    onClick={() => onChange(STD_CHARGE_TYPE.Mileage)}
-                >
-                    Mileage
-                </Button>
-
-                <Button
-                    type="button"
-                    variant={
                         value === STD_CHARGE_TYPE.FlatCharge
                             ? "solid"
                             : "outline"
@@ -37,6 +27,16 @@ export function StdChargeTypeToggle({
                     onClick={() => onChange(STD_CHARGE_TYPE.FlatCharge)}
                 >
                     Flat charge
+                </Button>
+
+                <Button
+                    type="button"
+                    variant={
+                        value === STD_CHARGE_TYPE.Mileage ? "solid" : "outline"
+                    }
+                    onClick={() => onChange(STD_CHARGE_TYPE.Mileage)}
+                >
+                    Mileage
                 </Button>
             </div>
         </Field>

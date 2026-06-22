@@ -1,9 +1,8 @@
 "use client";
 
 import { Field } from "@/components/ui/field/field";
-
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
-import { requisitionUsersApi } from "../../lib/requisition-users-api";
+import { RequisitionUserFascia, requisitionUsersApi } from "../../lib/requisition-users-api";
 
 export type CreatedByFilter =
     | { type: "any" }
@@ -21,14 +20,21 @@ const STATIC_OPTIONS: ComboboxOption[] = [
         label: "Anyone",
     },
 ];
+
 type Props = {
     value: CreatedByFilter;
     hideLabel?: boolean;
-
+    fascia: RequisitionUserFascia;
     onChange: (value: CreatedByFilter) => void;
 };
 
-export function CreatedByUserFilterField({ value, onChange, hideLabel = false }: Readonly<Props>) {
+export function CreatedByUserFilterField({
+    value,
+    onChange,
+    fascia,
+    hideLabel = false,
+}: Readonly<Props>) {
+
     const selectedValue =
         value.type === "any" ? "__ANY__" : value.type === "me" ? "__ME__" : value.userId;
 
@@ -50,6 +56,7 @@ export function CreatedByUserFilterField({ value, onChange, hideLabel = false }:
                 const res = await requisitionUsersApi.search({
                     search,
                     pageSize: 20,
+                    fascia,
                 });
 
                 return res.items.map((x) => ({

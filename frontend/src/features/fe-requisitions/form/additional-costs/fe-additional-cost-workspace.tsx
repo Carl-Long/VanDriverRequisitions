@@ -12,6 +12,7 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 
@@ -25,6 +26,7 @@ import { FeAdditionalCostDrawer } from "./fe-additional-cost-drawer";
 import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -142,7 +144,7 @@ function AdditionalCostsTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
 
@@ -203,7 +205,7 @@ function AdditionalCostsTable({
                                     })}
                                 >
                                     <TableCell>
-                                        {row.weekEndingDate ? row.weekEndingDate.toLocaleDateString() : "-"}
+                                        {formatDateGB(row.weekEndingDate) ?? "-"}
                                     </TableCell>
 
                                     <TableCell>
@@ -299,7 +301,7 @@ function AdditionalCostsTable({
                             )}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );

@@ -13,6 +13,7 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -27,6 +28,7 @@ import { StdPickupDrawer } from "./std-pickup-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -190,7 +192,7 @@ function PickupTable({
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -275,9 +277,7 @@ function PickupTable({
                                                 ariaLabel="Edit pickup row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.date
-                                                    ? row.date.toLocaleDateString()
-                                                    : "-"}
+                                                {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
@@ -345,7 +345,7 @@ function PickupTable({
                             {!readonly && <TableCell />}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div>
     );

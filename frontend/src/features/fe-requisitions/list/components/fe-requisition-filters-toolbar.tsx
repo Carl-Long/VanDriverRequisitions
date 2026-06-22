@@ -81,6 +81,7 @@ export function FeRequisitionFiltersToolbar({
                     <div className="min-w-[260px] flex-1">
                         <CreatedByUserFilterField
                             hideLabel
+                            fascia="Fe"
                             value={filters.createdBy}
                             onChange={(value) => {
                                 onFiltersChange({

@@ -19,6 +19,8 @@ import { useAuth } from "@/providers/auth-provider";
 import { getApiErrorMessage } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
 import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
+import { useDebounce } from "@/hooks/use-debounce";
+import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 
 export default function StdRequisitionApprovalsPage() {
     const router = useRouter();
@@ -27,6 +29,8 @@ export default function StdRequisitionApprovalsPage() {
     const { user, loading: authLoading } = useAuth();
 
     const page = pageFromSearchParams(searchParams);
+    const requisitionNumber = searchParams.get("requisitionNumber") ?? "";
+    const debouncedReqNumber = useDebounce(requisitionNumber, 400);
 
     const [data, setData] = useState<PagedResult<StdRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
@@ -48,6 +52,7 @@ export default function StdRequisitionApprovalsPage() {
                     page,
                     pageSize: 10,
                     status: "Submitted",
+                    requisitionNumber: debouncedReqNumber,
                 });
 
                 if (!cancelled) {
@@ -69,9 +74,37 @@ export default function StdRequisitionApprovalsPage() {
         return () => {
             cancelled = true;
         };
-    }, [page, authLoading, canApprove]);
+    }, [page, authLoading, canApprove, debouncedReqNumber]);
 
     const items = data?.items ?? [];
+
+    function updateSearchParams(nextRequisitionNumber: string, nextPage = 1) {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextRequisitionNumber.trim()) {
+            params.set("requisitionNumber", nextRequisitionNumber);
+        } else {
+            params.delete("requisitionNumber");
+        }
+
+        if (nextPage > 1) {
+            params.set("page", String(nextPage));
+        } else {
+            params.delete("page");
+        }
+
+        const queryString = params.toString();
+
+        return queryString ? `${pathname}?${queryString}` : pathname;
+    }
+
+    function handleRequisitionNumberChange(value: string) {
+        router.replace(updateSearchParams(value));
+    }
+
+    function resetSearch() {
+        router.replace(pathname);
+    }
 
     if (authLoading) {
         return (
@@ -92,6 +125,12 @@ export default function StdRequisitionApprovalsPage() {
                 description="Review submitted STD requisitions awaiting approval."
             />
 
+            <RequisitionApprovalsSearchToolbar
+                requisitionNumber={requisitionNumber}
+                onRequisitionNumberChange={handleRequisitionNumberChange}
+                onReset={resetSearch}
+            />
+
             {error && <Alert tone="danger">{error}</Alert>}
 
             {loading && <StdRequisitionTableSkeleton />}
@@ -100,7 +139,11 @@ export default function StdRequisitionApprovalsPage() {
                 <EmptyState
                     icon={ClipboardCheck}
                     title="No approvals waiting"
-                    description="There are no submitted requisitions awaiting approval."
+                    description={
+                        requisitionNumber
+                            ? "No submitted STD requisitions match that requisition number."
+                            : "There are no submitted requisitions awaiting approval."
+                    }
                 />
             )}
 
@@ -117,10 +160,7 @@ export default function StdRequisitionApprovalsPage() {
                     page={data.page}
                     totalPages={data.totalPages}
                     onPageChange={(nextPage) => {
-                        const params = new URLSearchParams();
-                        params.set("page", String(nextPage));
-
-                        router.push(`${pathname}?${params.toString()}`);
+                        router.push(updateSearchParams(requisitionNumber, nextPage));
                     }}
                     className="mt-6"
                 />

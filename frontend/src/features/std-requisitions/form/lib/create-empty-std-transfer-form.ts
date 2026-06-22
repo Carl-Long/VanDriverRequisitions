@@ -20,7 +20,7 @@ export function createEmptyStdTransferForm(
         numberOfBags: null,
         numberOfBoxes: null,
 
-        chargeType: STD_CHARGE_TYPE.Mileage,
+        chargeType: STD_CHARGE_TYPE.FlatCharge,
 
         miles: null,
         ratePerMile: null,
