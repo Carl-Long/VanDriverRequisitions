@@ -10,6 +10,7 @@ import {
     TableBody,
     TableRow,
     TableCell,
+    Table,
 } from "@/components/ui/table/table";
 import { SubmitWindow, SubmitWindowFilter } from "../types/submit-window.types";
 import { getWindowStatus, WindowStatus } from "../utils/get-window-status";
@@ -61,7 +62,7 @@ export function SubmitWindowTable({ items, filter, onEdit, onDelete }: Readonly<
 
     return (
         <Surface className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <Table className="w-full">
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Open From</TableHeaderCell>
@@ -144,7 +145,7 @@ export function SubmitWindowTable({ items, filter, onEdit, onDelete }: Readonly<
                         );
                     })}
                 </TableBody>
-            </table>
+            </Table>
         </Surface>
     );
 }
