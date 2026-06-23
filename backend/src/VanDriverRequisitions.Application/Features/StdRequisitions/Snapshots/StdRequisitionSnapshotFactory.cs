@@ -100,13 +100,14 @@ public static class StdRequisitionSnapshotFactory
             
             AdditionalCosts = requisition.AdditionalCosts
                 .OrderBy(x => x.Date)
-                .ThenBy(x => x.ReasonNameSnapshot)
+                .ThenBy(x => x.ReasonTextSnapshot)
                 .Select(x => new StdAdditionalCostSnapshotDto
                 {
                     Date = x.Date,
 
                     ReasonId = x.ReasonId,
-                    ReasonName = x.ReasonNameSnapshot,
+                    ReasonCode = x.ReasonCodeSnapshot,
+                    ReasonText = x.ReasonTextSnapshot,
 
                     NumberOfBags = x.NumberOfBags,
 

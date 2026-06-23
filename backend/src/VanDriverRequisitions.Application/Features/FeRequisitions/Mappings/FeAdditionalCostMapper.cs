@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 
@@ -6,12 +7,13 @@ namespace VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 
 public static class FeAdditionalCostMapper
 {
-    public static FeAdditionalCostUpdateModel ToUpdateModel(SaveFeAdditionalCostDto saveFeAdditionalCostDto, FeReason reason)
+    public static FeAdditionalCostUpdateModel ToUpdateModel(SaveFeAdditionalCostDto saveFeAdditionalCostDto, CostReason reason)
     {
         return new FeAdditionalCostUpdateModel(
             saveFeAdditionalCostDto.Id,
             saveFeAdditionalCostDto.WeekEndingDate,
             reason.Id,
+            reason.Code,
             reason.Reason,
             saveFeAdditionalCostDto.ChargingOption,
             saveFeAdditionalCostDto.TotalNumber,
@@ -19,8 +21,8 @@ public static class FeAdditionalCostMapper
             saveFeAdditionalCostDto.Miles,
             saveFeAdditionalCostDto.RatePerMile);
     }
-    
-    public static FeAdditionalCostDetailDto ToDetailDto(FeAdditionalCost cost)
+
+    public static FeAdditionalCostDetailDto ToDetailDto(FeAdditionalCost cost, bool isReasonActive)
     {
         return new FeAdditionalCostDetailDto
         {
@@ -28,7 +30,9 @@ public static class FeAdditionalCostMapper
             WeekEndingDate = cost.WeekEndingDate,
 
             ReasonId = cost.ReasonId,
-            ReasonText = cost.ReasonText,
+            ReasonCode = cost.ReasonCodeSnapshot,
+            ReasonText = cost.ReasonTextSnapshot,
+            IsReasonActive = isReasonActive,
 
             ChargingOption = cost.ChargingOption,
 
@@ -42,5 +46,3 @@ public static class FeAdditionalCostMapper
         };
     }
 }
-
-

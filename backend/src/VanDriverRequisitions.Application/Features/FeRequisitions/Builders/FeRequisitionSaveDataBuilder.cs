@@ -8,9 +8,11 @@ using VanDriverRequisitions.Application.Features.Shops.Dtos;
 using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
+using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
+using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
 
@@ -87,7 +89,7 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }
 
-    private async Task<Dictionary<Guid, FeReason>> LoadReasonMapAsync(
+    private async Task<Dictionary<Guid, CostReason>> LoadReasonMapAsync(
         IEnumerable<SaveFeAdditionalCostDto> additionalCosts,
         CancellationToken cancellationToken)
     {
@@ -96,7 +98,7 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
             .Distinct()
             .ToList();
 
-        return await context.FeReasons
+        return await context.CostReasons
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
@@ -136,13 +138,27 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
 
     private static List<FeAdditionalCostUpdateModel> BuildAdditionalCostModels(
         IEnumerable<SaveFeAdditionalCostDto> additionalCosts,
-        IReadOnlyDictionary<Guid, FeReason> reasonMap)
+        IReadOnlyDictionary<Guid, CostReason> reasonMap)
     {
-        return additionalCosts
-            .Select(dto => !reasonMap.TryGetValue(dto.ReasonId, out var reason) 
-                ? throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.") 
-                : FeAdditionalCostMapper.ToUpdateModel(dto, reason))
-            .ToList();
+        {
+            return additionalCosts
+                .Select(dto =>
+                {
+                    if (!reasonMap.TryGetValue(dto.ReasonId, out var reason))
+                    {
+                        throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.");
+                    }
+
+                    if (reason.Scope is not CostReasonScope.Fe and not CostReasonScope.Shared)
+                    {
+                        throw new BadRequestException(
+                            $"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for FE requisitions.");
+                    }
+
+                    return FeAdditionalCostMapper.ToUpdateModel(dto, reason);
+                })
+                .ToList();
+        }
     }
 
     private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)

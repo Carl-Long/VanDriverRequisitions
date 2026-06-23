@@ -11,7 +11,7 @@ public interface IApplicationDbContext
     DbSet<FeRequisition> FeRequisitions { get; }
     DbSet<FeRequisitionSubmission> FeRequisitionSubmissions { get; }
     DbSet<FeTaskType> FeTaskTypes { get; }
-    DbSet<FeReason> FeReasons { get; }
+    DbSet<CostReason> CostReasons { get; }
 
     DbSet<StdRequisition> StdRequisitions { get; }
     DbSet<StdRequisitionSubmission> StdRequisitionSubmissions { get; }

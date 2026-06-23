@@ -24,9 +24,13 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
         builder.Property(x => x.ReasonId)
             .IsRequired();
 
-        builder.Property(x => x.ReasonText)
+        builder.Property(x => x.ReasonCodeSnapshot)
             .IsRequired()
-            .HasMaxLength(500);
+            .HasMaxLength(20);
+
+        builder.Property(x => x.ReasonTextSnapshot)
+            .IsRequired()
+            .HasMaxLength(100);
 
         builder.Property(x => x.Miles);
 
@@ -48,6 +52,7 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
         // Indexes
         builder.HasIndex(x => x.FeRequisitionId);
         builder.HasIndex(x => x.ReasonId);
+        builder.HasIndex(x => x.ReasonCodeSnapshot);
         builder.HasIndex(x => x.WeekEndingDate);
         builder.HasIndex(x => x.ChargingOption);
 

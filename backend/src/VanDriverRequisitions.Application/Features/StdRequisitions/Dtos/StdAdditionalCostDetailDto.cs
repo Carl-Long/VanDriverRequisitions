@@ -8,7 +8,9 @@ public sealed record StdAdditionalCostDetailDto
     public DateOnly Date { get; init; }
     
     public Guid ReasonId { get; init; }
-    public required string ReasonName { get; init; }
+    public required string ReasonCode { get; init; }
+    public required string ReasonText { get; init; }
+    public bool IsReasonActive { get; init; }
 
     public int NumberOfBags { get; init; }
 

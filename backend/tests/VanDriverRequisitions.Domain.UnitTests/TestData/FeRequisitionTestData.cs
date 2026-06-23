@@ -12,6 +12,15 @@ public static class FeRequisitionTestData
 
     public static readonly DateOnly RequisitionDate = new(2026, 6, 13);
     public static readonly DateOnly WeekEndingDate = new(2026, 6, 13);
+    
+    public static readonly Guid ParkingReasonId = new("f0000001-0001-0001-0001-000000000001");
+    public static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
+
+    public const string ParkingReasonCode = "10001";
+    public const string ParkingReasonText = "Parking";
+
+    public const string ExtraMileageReasonCode = "10004";
+    public const string ExtraMileageReasonText = "Extra mileage";
 
     // Default CreateUpdateModel totals:
     // General task: 7 jobs * £10.00 = £70.00
@@ -116,14 +125,16 @@ public static class FeRequisitionTestData
         Guid? id = null,
         DateOnly? weekEndingDate = null,
         Guid? reasonId = null,
-        string reasonText = "Parking",
+        string reasonCode = ParkingReasonCode,
+        string reasonText = ParkingReasonText,
         int? totalNumber = 2,
         decimal? ratePerJob = 12m)
     {
         return new FeAdditionalCostUpdateModel(
             id,
             weekEndingDate ?? WeekEndingDate,
-            reasonId ?? Guid.NewGuid(),
+            reasonId ?? ParkingReasonId,
+            reasonCode,
             reasonText,
             ChargingOption.Job,
             totalNumber,
@@ -136,14 +147,16 @@ public static class FeRequisitionTestData
         Guid? id = null,
         DateOnly? weekEndingDate = null,
         Guid? reasonId = null,
-        string reasonText = "Extra mileage",
+        string reasonCode = ExtraMileageReasonCode,
+        string reasonText = ExtraMileageReasonText,
         int? miles = 10,
         decimal? ratePerMile = 0.45m)
     {
         return new FeAdditionalCostUpdateModel(
             id,
             weekEndingDate ?? WeekEndingDate,
-            reasonId ?? Guid.NewGuid(),
+            reasonId ?? ExtraMileageReasonId,
+            reasonCode,
             reasonText,
             ChargingOption.Mileage,
             TotalNumber: null,

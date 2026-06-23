@@ -10,6 +10,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
+using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.STD;
@@ -101,14 +102,16 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }
     
-    private async Task<Dictionary<Guid, FeReason>> LoadReasonMapAsync(IEnumerable<SaveStdAdditionalCostDto> additionalCosts, CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, CostReason>> LoadReasonMapAsync(
+        IEnumerable<SaveStdAdditionalCostDto> additionalCosts,
+        CancellationToken cancellationToken)
     {
         var reasonIds = additionalCosts
             .Select(x => x.ReasonId)
             .Distinct()
             .ToList();
 
-        return await context.FeReasons
+        return await context.CostReasons
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
@@ -221,11 +224,16 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
             .ToList();
     }
 
-    private static FeReason MapAdditionalCostReason(Guid reasonId, IReadOnlyDictionary<Guid, FeReason> reasonMap)
+    private static CostReason MapAdditionalCostReason(Guid reasonId, IReadOnlyDictionary<Guid, CostReason> reasonMap)
     {
-        return reasonMap.TryGetValue(reasonId, out var reason)
-            ? reason
-            : throw new NotFoundException($"Additional cost reason '{reasonId}' was not found.");
+        if (!reasonMap.TryGetValue(reasonId, out var reason))
+        {
+            throw new NotFoundException($"Additional cost reason '{reasonId}' was not found.");
+        }
+
+        return reason.Scope is not CostReasonScope.Std and not CostReasonScope.Shared 
+            ? throw new BadRequestException($"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for STD requisitions.") 
+            : reason;
     }
     
     private static StdCollectionType MapCollectionType(Guid collectionTypeId, IReadOnlyDictionary<Guid, StdCollectionType> collectionTypeMap)

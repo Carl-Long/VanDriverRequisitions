@@ -13,7 +13,10 @@ public static class StdRequisitionMapper
     public static StdRequisitionDetailDto MapRequisitionToDetailDto(
         StdRequisition requisition,
         VanDriverLookupDto vanDriverSummary,
-        bool isShopActive)
+        bool isShopActive,
+        IReadOnlyDictionary<Guid, bool> additionalCostReasonActiveMap,
+        IReadOnlyDictionary<Guid, bool> collectionTypeActiveMap,
+        IReadOnlyDictionary<Guid, bool> locationActiveMap)
     {
         return new StdRequisitionDetailDto
         {
@@ -50,7 +53,10 @@ public static class StdRequisitionMapper
                 .ThenBy(x => x.LocationNameSnapshot)
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
-                .Select(StdCollectionChargeBanksAndBinsMapper.ToDetailDto)
+                .Select(x => StdCollectionChargeBanksAndBinsMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(collectionTypeActiveMap, x.CollectionTypeId),
+                    IsLookupActive(locationActiveMap, x.LocationId)))
                 .ToList(),
             
             CollectionVanPacks = requisition.CollectionVanPacks
@@ -74,9 +80,11 @@ public static class StdRequisitionMapper
             
             AdditionalCosts = requisition.AdditionalCosts
                 .OrderBy(x => x.Date)
-                .ThenBy(x => x.ReasonNameSnapshot)
+                .ThenBy(x => x.ReasonTextSnapshot)
                 .ThenBy(x => x.ChargeType)
-                .Select(StdAdditionalCostMapper.ToDetailDto)
+                .Select(x => StdAdditionalCostMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(additionalCostReasonActiveMap, x.ReasonId)))
                 .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
@@ -119,5 +127,10 @@ public static class StdRequisitionMapper
                 RejectionNotes = x.RejectionNotes
             })
             .ToList();
+    }
+    
+    private static bool IsLookupActive(IReadOnlyDictionary<Guid, bool> activeMap, Guid id)
+    {
+        return activeMap.TryGetValue(id, out var isActive) && isActive;
     }
 }

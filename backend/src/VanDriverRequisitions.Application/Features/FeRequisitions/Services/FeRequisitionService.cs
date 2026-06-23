@@ -238,8 +238,28 @@ public class FeRequisitionService(
     {
         driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
         var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
-        
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
+        var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
+    {
+        var reasonIds = requisition.FeAdditionalCosts
+            .Select(x => x.ReasonId)
+            .Distinct()
+            .ToList();
+
+        if (reasonIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        return await context.CostReasons
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => reasonIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
     }
     
     private AuditUser GetAuditUser(string actionName)

@@ -15,7 +15,8 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
     public DateOnly Date { get; private set; }
 
     public Guid ReasonId { get; private set; }
-    public string ReasonNameSnapshot { get; private set; } = string.Empty;
+    public string ReasonCodeSnapshot { get; private set; } = string.Empty;
+    public string ReasonTextSnapshot { get; private set; } = string.Empty;
 
     public int NumberOfBags { get; private set; }
 
@@ -48,7 +49,8 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Reason is required.");
         }
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonCodeSnapshot);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonTextSnapshot);
 
         if (model.NumberOfBags < 1)
         {
@@ -57,7 +59,8 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
 
         Date = model.Date;
         ReasonId = model.ReasonId;
-        ReasonNameSnapshot = model.ReasonName.Trim();
+        ReasonCodeSnapshot = model.ReasonCodeSnapshot.Trim();
+        ReasonTextSnapshot = model.ReasonTextSnapshot.Trim();
         NumberOfBags = model.NumberOfBags;
 
         ChargeType = model.ChargeType;

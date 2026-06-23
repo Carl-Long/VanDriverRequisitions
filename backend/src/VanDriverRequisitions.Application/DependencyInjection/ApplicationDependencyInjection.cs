@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Validation;
-using VanDriverRequisitions.Application.Features.FeReasons.Services;
+using VanDriverRequisitions.Application.Features.CostReasons.Services;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
@@ -27,7 +27,7 @@ public static class ApplicationDependencyInjection
         
         services.AddScoped<IFeRequisitionService, FeRequisitionService>();
         services.AddScoped<IFeTaskTypeService, FeTaskTypeService>();
-        services.AddScoped<IFeReasonService, FeReasonService>();
+        services.AddScoped<ICostReasonService, CostReasonService>();
         services.AddScoped<IRequisitionUserService, RequisitionUserService>();
         services.AddScoped<IFeRequisitionSaveDataBuilder, FeRequisitionSaveDataBuilder>();
         services.AddScoped<IFeRequisitionLimitValidator, FeRequisitionLimitValidator>();

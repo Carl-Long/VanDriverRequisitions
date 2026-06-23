@@ -19,7 +19,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 public static class DevDataSeeder
 {
     // ─────────────────────────────────────────────
-    // FE Task Types / Reasons (lookup only)
+    // FE Task Types / Cost Reasons (lookup only)
     // ─────────────────────────────────────────────
 
     private static readonly Guid CollectionsTaskTypeId = new("c0000001-0001-0001-0001-000000000001");
@@ -31,6 +31,7 @@ public static class DevDataSeeder
     private static readonly Guid TollReasonId = new("f0000001-0001-0001-0001-000000000002");
     private static readonly Guid WaitingTimeReasonId = new("f0000001-0001-0001-0001-000000000003");
     private static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
+    private static readonly Guid OldParkingReasonId = new("f0000001-0001-0001-0001-000000000005");
     
     // ─────────────────────────────────────────────
     // STD Collection Types
@@ -48,7 +49,7 @@ public static class DevDataSeeder
     public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
-        var hasReasons = await context.FeReasons.AnyAsync();
+        var hasReasons = await context.CostReasons.AnyAsync();
         var hasRules = await context.RequisitionLimitRules.AnyAsync();
         var hasShops = await context.Shops.AnyAsync();
         var hasDrivers = await context.VanDrivers.AnyAsync();
@@ -83,16 +84,18 @@ public static class DevDataSeeder
         
         if (!hasReasons)
         {
-            context.FeReasons.AddRange(
-                new FeReason { Id = ParkingReasonId, Reason = "Parking" },
-                new FeReason { Id = TollReasonId, Reason = "Toll charge" },
-                new FeReason { Id = WaitingTimeReasonId, Reason = "Waiting time" },
-                new FeReason { Id = ExtraMileageReasonId, Reason = "Extra mileage" }
+            context.CostReasons.AddRange(
+                new CostReason { Id = ParkingReasonId, Reason = "Parking", Code = "10001", Scope = CostReasonScope.Shared, IsActive = true },
+                new CostReason { Id = TollReasonId, Reason = "Toll charge", Code = "10002", Scope = CostReasonScope.Shared, IsActive = true },
+                new CostReason { Id = WaitingTimeReasonId, Reason = "Waiting time", Code = "10003", Scope = CostReasonScope.Shared, IsActive = true },
+                new CostReason { Id = ExtraMileageReasonId, Reason = "Extra mileage", Code = "10004", Scope = CostReasonScope.Std, IsActive = true },
+                new CostReason { Id = OldParkingReasonId, Reason = "Old parking reason", Code = "10099", Scope = CostReasonScope.Shared, IsActive = false }
             );
 
             await context.SaveChangesAsync();
-            logger?.LogInformation("Seeded FeReasons");
+            logger?.LogInformation("Seeded CostReasons");
         }
+
         
         if (!hasStdCollectionTypes)
         {
@@ -478,7 +481,11 @@ public static class DevDataSeeder
         var rng = new Random(123);
 
         var taskTypes = await context.FeTaskTypes.ToListAsync();
-        var reasons = await context.FeReasons.ToListAsync();
+
+        var reasons = await context.CostReasons
+            .Where(x => x.IsActive)
+            .Where(x => x.Scope == CostReasonScope.Fe || x.Scope == CostReasonScope.Shared)
+            .ToListAsync();
 
         var shops = await context.Shops
             .Where(x => x.IsActive)
@@ -709,7 +716,7 @@ public static class DevDataSeeder
         ];
     }
     
-    private static List<FeAdditionalCostUpdateModel> BuildSeedAdditionalCosts(Random rng, List<FeReason> reasons, DateOnly requisitionDate)
+    private static List<FeAdditionalCostUpdateModel> BuildSeedAdditionalCosts(Random rng, List<CostReason> reasons, DateOnly requisitionDate)
     {
         var includeAdditionalCost = rng.Next(0, 2) == 1;
 
@@ -731,6 +738,7 @@ public static class DevDataSeeder
                     null,
                     weekEndingDate,
                     reason.Id,
+                    reason.Code,
                     reason.Reason,
                     ChargingOption.Mileage,
                     null,
@@ -746,6 +754,7 @@ public static class DevDataSeeder
                 null,
                 weekEndingDate,
                 reason.Id,
+                reason.Code,
                 reason.Reason,
                 ChargingOption.Job,
                 rng.Next(1, 11),

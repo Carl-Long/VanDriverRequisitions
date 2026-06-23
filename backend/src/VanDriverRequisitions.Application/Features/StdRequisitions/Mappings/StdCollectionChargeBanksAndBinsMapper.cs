@@ -30,7 +30,9 @@ public static class StdCollectionChargeBanksAndBinsMapper
     }
 
     public static StdCollectionChargeBanksAndBinsDetailDto ToDetailDto(
-        StdCollectionChargeBanksAndBins collectionCharge)
+        StdCollectionChargeBanksAndBins collectionCharge,
+        bool isCollectionTypeActive,
+        bool isLocationActive)
     {
         return new StdCollectionChargeBanksAndBinsDetailDto
         {
@@ -40,10 +42,12 @@ public static class StdCollectionChargeBanksAndBinsMapper
             CollectionTypeId = collectionCharge.CollectionTypeId,
             CollectionTypeName = collectionCharge.CollectionTypeNameSnapshot,
             CollectionTypeCode = collectionCharge.CollectionTypeCodeSnapshot,
+            IsCollectionTypeActive = isCollectionTypeActive,
 
             LocationId = collectionCharge.LocationId,
             LocationName = collectionCharge.LocationNameSnapshot,
             LocationPostCode = collectionCharge.LocationPostCodeSnapshot,
+            IsLocationActive = isLocationActive,
 
             NumberOfBags = collectionCharge.NumberOfBags,
 

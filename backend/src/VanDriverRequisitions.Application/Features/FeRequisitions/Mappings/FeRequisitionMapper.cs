@@ -13,7 +13,8 @@ public static class FeRequisitionMapper
     public static FeRequisitionDetailDto MapRequisitionToDetailDto(
         FeRequisition requisition,
         VanDriverLookupDto vanDriverSummary,
-        bool isShopActive)
+        bool isShopActive,
+        IReadOnlyDictionary<Guid, bool> reasonActiveMap)
     {
         return new FeRequisitionDetailDto
         {
@@ -65,10 +66,12 @@ public static class FeRequisitionMapper
 
             FeAdditionalCosts = requisition.FeAdditionalCosts
                 .OrderBy(x => x.WeekEndingDate)
-                .ThenBy(x => x.ReasonText)
+                .ThenBy(x => x.ReasonTextSnapshot)
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
-                .Select(FeAdditionalCostMapper.ToDetailDto)
+                .Select(x => FeAdditionalCostMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(reasonActiveMap, x.ReasonId)))
                 .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
@@ -111,5 +114,10 @@ public static class FeRequisitionMapper
                 RejectionNotes = x.RejectionNotes
             })
             .ToList();
+    }
+    
+    private static bool IsLookupActive(IReadOnlyDictionary<Guid, bool> activeMap, Guid id)
+    {
+        return activeMap.TryGetValue(id, out var isActive) && isActive;
     }
 }
