@@ -232,6 +232,8 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
                     reasonId: form.reasonId,
                     reasonText: form.reasonText,
+                    reasonCode: form.reasonCode,
+                    isReasonActive: form.isReasonActive,
 
                     chargingOption: form.chargingOption,
 

@@ -1,22 +1,9 @@
 "use client";
 
-import {
-    Table,
-    TableHeader,
-    TableHeaderRow,
-    TableHeaderCell,
-    TableBody,
-    TableRow,
-    TableCell,
-    TableFooter,
-} from "@/components/ui/table/table";
+import { Table, TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell, TableFooter, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
-
-import {
-    getStdChargeTypeLabel,
-    STD_CHARGE_TYPE,
-} from "../constants/std-charge-type.constants";
+import { getStdChargeTypeLabel, STD_CHARGE_TYPE, } from "../constants/std-charge-type.constants";
 import type { StdAdditionalCostSnapshot } from "../types/std-requisition-submission.types";
 import { SubmissionSectionCard } from "@/features/requisitions-shared/components/submission-section-card";
 
@@ -32,7 +19,7 @@ export function StdSubmissionAdditionalCostsTable({ rows }: Readonly<Props>) {
     const orderedRows = [...rows].sort(
         (a, b) =>
             new Date(a.date).getTime() - new Date(b.date).getTime() ||
-            a.reasonName.localeCompare(b.reasonName),
+            a.reasonText.localeCompare(b.reasonText)
     );
 
     const totals = orderedRows.reduce(
@@ -114,7 +101,9 @@ export function StdSubmissionAdditionalCostsTable({ rows }: Readonly<Props>) {
 
                             <TableCell>
                                 <span className="font-medium">
-                                    {row.reasonName}
+                                    {row.reasonCode && row.reasonText
+                                        ? `${row.reasonCode} - ${row.reasonText}`
+                                        : row.reasonText}
                                 </span>
                             </TableCell>
 

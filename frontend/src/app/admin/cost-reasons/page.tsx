@@ -3,30 +3,31 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MessageSquare, Plus, Search } from "lucide-react";
 
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Surface } from "@/components/ui/surface";
-import { Toggle } from "@/components/ui/toggle";
-import { Alert } from "@/components/ui/alert";
-import { EmptyState } from "@/components/ui/empty-state";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
-import { FeReason, feReasonsApi } from "@/features/fe-reasons/fe-reasons-api";
-import { ReasonFormModal } from "@/features/fe-reasons/reason-form-modal";
-import { FeReasonsTable } from "@/features/fe-reasons/fe-reason-table";
+import { Toggle } from "@/components/ui/toggle";
+import { CostReasonFormModal } from "@/features/cost-reasons/cost-reason-form-modal";
+import { CostReasonTable } from "@/features/cost-reasons/cost-reason-table";
 import { getApiErrorMessage } from "@/lib/api/client";
-import { useToast } from "@/providers/toast-provider";
 import { useCrudModal } from "@/hooks/use-crud-modal";
+import { useToast } from "@/providers/toast-provider";
+import { CostReason, CreateCostReason } from "@/features/cost-reasons/cost-reason.types";
+import { costReasonsApi } from "@/features/cost-reasons/cost-reasons-api";
 
-export default function FeReasonsPage() {
-    const [reasons, setReasons] = useState<FeReason[]>([]);
+export default function CostReasonsPage() {
+    const [reasons, setReasons] = useState<CostReason[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
-    const modal = useCrudModal<FeReason>();
+    const modal = useCrudModal<CostReason>();
 
     const toast = useToast();
 
@@ -35,10 +36,10 @@ export default function FeReasonsPage() {
         setError(null);
 
         try {
-            const data = await feReasonsApi.getAll(showInactive);
+            const data = await costReasonsApi.getAll(showInactive);
             setReasons(data);
         } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to load reasons."));
+            setError(getApiErrorMessage(err, "Failed to load cost reasons."));
         } finally {
             setLoading(false);
         }
@@ -52,62 +53,78 @@ export default function FeReasonsPage() {
         if (!search.trim()) return reasons;
 
         const query = search.toLowerCase();
-        return reasons.filter((r) => r.reason.toLowerCase().includes(query));
+
+        return reasons.filter((reason) => {
+            return (
+                reason.code.toLowerCase().includes(query) ||
+                reason.reason.toLowerCase().includes(query) ||
+                reason.scope.toLowerCase().includes(query)
+            );
+        });
     }, [reasons, search]);
 
-    async function handleSubmit(data: { reason: string }) {
+    async function handleSubmit(data: CreateCostReason) {
         if (modal.editing) {
-            await feReasonsApi.update(modal.editing.id, data);
+            await costReasonsApi.update(modal.editing.id, data);
         } else {
-            await feReasonsApi.create(data);
+            await costReasonsApi.create(data);
         }
 
+        costReasonsApi.clearLookupCache();
+
         toast.success(
-            modal.editing ? `Reason "${data.reason}" updated` : `Reason "${data.reason}" created`,
+            modal.editing
+                ? `Cost reason "${data.code} - ${data.reason}" updated`
+                : `Cost reason "${data.code} - ${data.reason}" created`,
         );
 
         modal.close();
         await load();
     }
 
-    async function handleToggleActive(reason: FeReason) {
+    async function handleToggleActive(reason: CostReason) {
         try {
             if (reason.isActive) {
-                await feReasonsApi.deactivate(reason.id);
+                await costReasonsApi.deactivate(reason.id);
             } else {
-                await feReasonsApi.activate(reason.id);
+                await costReasonsApi.activate(reason.id);
             }
 
+            costReasonsApi.clearLookupCache();
+
             toast.success(
-                reason.isActive ? `${reason.reason} deactivated` : `${reason.reason} activated`,
+                reason.isActive
+                    ? `${reason.code} - ${reason.reason} deactivated`
+                    : `${reason.code} - ${reason.reason} activated`,
             );
+
             await load();
         } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to upadate reason."));
+            setError(getApiErrorMessage(err, "Failed to update cost reason."));
         }
     }
 
     const emptyState = search.trim()
         ? {
               icon: Search,
-              title: "No reasons found",
+              title: "No cost reasons found",
               description: "Try adjusting your search terms.",
           }
         : {
               icon: MessageSquare,
-              title: "No reasons yet",
-              description: "Create your first reason to get started.",
+              title: "No cost reasons yet",
+              description: "Create your first cost reason to get started.",
           };
 
     return (
         <PageContainer>
             <PageHeader
-                title="FE Reasons"
-                description="Manage reason codes used across FE store requisitions."
+                title="Cost Reasons"
+                description="Manage additional cost reason codes for FE, STD, or shared requisition use."
             >
                 <Button onClick={modal.openCreate}>
                     <Plus size={16} />
-                    New Reason
+                    New Cost Reason
                 </Button>
             </PageHeader>
 
@@ -115,7 +132,7 @@ export default function FeReasonsPage() {
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search by reason..."
+                    placeholder="Search by code, reason, or scope..."
                     className="w-full lg:w-[32rem]"
                 />
 
@@ -125,14 +142,14 @@ export default function FeReasonsPage() {
                     <Toggle
                         checked={showInactive}
                         onChange={() => setShowInactive((active) => !active)}
-                        ariaLabel="Toggle inactive reasons"
+                        ariaLabel="Toggle inactive cost reasons"
                     />
                 </Surface>
             </div>
 
             {error && <Alert>{error}</Alert>}
 
-            {loading && <TableSkeleton rows={6} columns={4} />}
+            {loading && <TableSkeleton rows={6} columns={6} />}
 
             {!loading && filtered.length === 0 && (
                 <EmptyState
@@ -143,14 +160,14 @@ export default function FeReasonsPage() {
             )}
 
             {!loading && filtered.length > 0 && (
-                <FeReasonsTable
+                <CostReasonTable
                     items={filtered}
                     onEdit={modal.openEdit}
                     onToggleActive={handleToggleActive}
                 />
             )}
 
-            <ReasonFormModal
+            <CostReasonFormModal
                 key={modal.editing?.id ?? "new"}
                 open={modal.open}
                 onClose={modal.close}

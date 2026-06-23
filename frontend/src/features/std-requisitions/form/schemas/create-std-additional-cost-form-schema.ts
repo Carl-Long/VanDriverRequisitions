@@ -26,7 +26,9 @@ export function createStdAdditionalCostFormSchema({
                 .nullable()
                 .refine((value) => value !== null, "Reason is required"),
 
-            reasonName: z.string().nullable(),
+            reasonCode: z.string().nullable(),
+            reasonText: z.string().nullable(),
+            isReasonActive: z.boolean(),
 
             numberOfBags: z
                 .number()

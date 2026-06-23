@@ -21,6 +21,7 @@ import { FeReasonField } from "../form-fields/fe-reason-field";
 import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
+import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
 
 type Props = {
     open: boolean;
@@ -143,16 +144,21 @@ export function FeAdditionalCostDrawer({
                     />
                 </Field>
 
-                <FeReasonField
+                <CostReasonField
+                    fascia="Fe"
                     required
                     value={form.reasonId}
-                    label={form.reasonText}
+                    reasonCode={form.reasonCode}
+                    reasonText={form.reasonText}
+                    isReasonActive={form.isReasonActive}
                     error={errors["reasonId"]}
-                    onChange={(value, label) => {
+                    onChange={(value, reason) => {
                         setForm((prev) => ({
                             ...prev,
                             reasonId: value,
-                            reasonText: label,
+                            reasonCode: reason?.code ?? null,
+                            reasonText: reason?.reason ?? null,
+                            isReasonActive: true,
                         }));
 
                         clearError("reasonId");

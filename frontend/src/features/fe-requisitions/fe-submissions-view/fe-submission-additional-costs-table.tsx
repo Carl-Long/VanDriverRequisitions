@@ -103,7 +103,9 @@ export function FeSubmissionAdditionalCostsTable({ rows }: Readonly<Props>) {
 
                                         <TableCell>
                                             <div className="font-medium">
-                                                {row.reasonText ?? "-"}
+                                                {row.reasonCode && row.reasonText
+                                                    ? `${row.reasonCode} - ${row.reasonText}`
+                                                    : row.reasonText ?? "-"}
                                             </div>
                                         </TableCell>
 

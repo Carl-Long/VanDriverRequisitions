@@ -130,7 +130,9 @@ export function mapStdRequisitionDetailToDraft(
             date: parseDateOnly(row.date),
 
             reasonId: row.reasonId,
-            reasonName: row.reasonName,
+            reasonCode: row.reasonCode,
+            reasonText: row.reasonText,
+            isReasonActive: row.isReasonActive,
 
             numberOfBags: row.numberOfBags,
 

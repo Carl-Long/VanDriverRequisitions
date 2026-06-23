@@ -136,8 +136,9 @@ export type StdAdditionalCostSnapshot = {
     date: string;
 
     reasonId: string;
-    reasonName: string;
-
+    reasonCode: string;
+    reasonText: string;
+    
     numberOfBags: number;
 
     chargeType: StdChargeType;

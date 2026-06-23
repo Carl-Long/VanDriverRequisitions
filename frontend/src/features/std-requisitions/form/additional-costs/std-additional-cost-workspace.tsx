@@ -281,7 +281,15 @@ function AdditionalCostsTable({
                                                 onEdit={() => onEdit(row)}
                                                 className="font-medium"
                                             >
-                                                {row.reasonName ?? "-"}
+                                                {row.reasonCode && row.reasonText
+                                                    ? `${row.reasonCode} - ${row.reasonText}`
+                                                    : row.reasonText ?? "-"}
+
+                                                {row.isReasonActive === false && (
+                                                    <div className="mt-1 text-xs font-medium text-warning">
+                                                        Inactive reason
+                                                    </div>
+                                                )}
                                             </EditableCellButton>
                                         </div>
                                     </TableCell>

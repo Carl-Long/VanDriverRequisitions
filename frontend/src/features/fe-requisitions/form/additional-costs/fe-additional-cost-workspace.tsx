@@ -4,16 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import {
-    TableHeader,
-    TableHeaderCell,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableRow,
-    TableHeaderRow,
-    Table,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -216,7 +207,15 @@ function AdditionalCostsTable({
                                                 onEdit={() => onEdit(row)}
                                                 className="font-medium"
                                             >
-                                                {row.reasonText ?? "-"}
+                                                {row.reasonCode && row.reasonText
+                                                    ? `${row.reasonCode} - ${row.reasonText}`
+                                                    : row.reasonText ?? "-"}
+
+                                                {row.isReasonActive === false && (
+                                                    <div className="mt-1 text-xs font-medium text-warning">
+                                                        Inactive reason
+                                                    </div>
+                                                )}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

@@ -55,8 +55,8 @@ export const adminNavigation = [
                 icon: ListChecks,
             },
             {
-                title: "Reasons",
-                href: "/admin/reasons",
+                title: "Cost Reasons",
+                href: "/admin/cost-reasons",
                 icon: Tags,
             },
             {

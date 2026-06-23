@@ -144,8 +144,10 @@ export type StdAdditionalCost = {
     date: string;
 
     reasonId: string;
-    reasonName: string;
-
+    reasonCode: string;
+    reasonText: string;
+    isReasonActive: boolean;
+    
     numberOfBags: number;
 
     chargeType: StdChargeType;

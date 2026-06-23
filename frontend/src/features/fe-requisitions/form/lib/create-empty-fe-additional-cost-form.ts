@@ -8,7 +8,9 @@ export function createEmptyFeAdditionalCostForm(
         weekEndingDate: weekEndingDate ?? getUpcomingSaturday(),
 
         reasonId: null,
+        reasonCode: null,
         reasonText: null,
+        isReasonActive: true,
 
         chargingOption: "Job",
 
