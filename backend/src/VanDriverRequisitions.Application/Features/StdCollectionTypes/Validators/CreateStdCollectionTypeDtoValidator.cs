@@ -10,7 +10,7 @@ public sealed class CreateStdCollectionTypeDtoValidator : AbstractValidator<Crea
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches("^[0-9]+$").WithMessage("Code must contain numbers only.");
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
@@ -25,8 +25,8 @@ public sealed class UpdateStdCollectionTypeDtoValidator : AbstractValidator<Upda
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches("^[0-9]+$").WithMessage("Code must contain numbers only.");
-
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
+        
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
             .Length(1, 100).WithMessage("Name must be between 1 and 100 characters.");

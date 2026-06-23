@@ -24,15 +24,9 @@ const taskTypeSchema = z.object({
     code: z
         .string()
         .trim()
-        .transform((v) => v.toUpperCase())
-        .pipe(
-            z
-                .string()
-                .regex(
-                    /^[A-Z0-9_-]+$/,
-                    "Code must contain only uppercase letters, numbers, hyphens, and underscores.",
-                ),
-        ),
+        .min(1, "Code is required.")
+        .max(20, "Code must be between 1 and 20 characters.")
+        .regex(/^\d+$/, "Code must contain numbers only."),
 });
 
 type TaskTypeFormData = z.infer<typeof taskTypeSchema>;
@@ -53,7 +47,6 @@ export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly
         handleSubmit,
         reset,
         setError,
-        setValue,
         formState: { errors, isSubmitting },
     } = useForm<TaskTypeFormData>({
         resolver: zodResolver(taskTypeSchema),
@@ -131,19 +124,13 @@ export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly
                 <Field
                     label="Code"
                     error={errors.code?.message}
-                    hint="Uppercase letters, numbers, hyphens, and underscores only."
+                    hint="Numbers only."
                     required
                 >
                     <Input
                         {...register("code")}
-                        onChange={(e) => {
-                            setValue("code", e.target.value.toUpperCase(), {
-                                shouldValidate: true,
-                                shouldDirty: true,
-                            });
-                        }}
                         state={errors.code ? "error" : "default"}
-                        placeholder="e.g. COLLECTIONS"
+                        placeholder="e.g. 23707"
                     />
                 </Field>
 

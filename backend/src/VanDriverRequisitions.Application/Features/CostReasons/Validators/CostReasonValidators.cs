@@ -10,7 +10,7 @@ public class CreateCostReasonDtoValidator : AbstractValidator<CreateCostReasonDt
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches("^[0-9]+$").WithMessage("Code must contain numbers only.");
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
 
         RuleFor(x => x.Reason)
             .NotEmpty().WithMessage("Reason is required.")
@@ -29,7 +29,7 @@ public class UpdateCostReasonDtoValidator : AbstractValidator<UpdateCostReasonDt
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches("^[0-9]+$").WithMessage("Code must contain numbers only.");
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
 
         RuleFor(x => x.Reason)
             .NotEmpty().WithMessage("Reason is required.")
