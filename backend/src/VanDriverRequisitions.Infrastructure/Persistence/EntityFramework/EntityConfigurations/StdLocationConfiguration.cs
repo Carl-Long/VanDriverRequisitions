@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.STD;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.EntityConfigurations;
@@ -16,7 +15,7 @@ public class StdLocationConfiguration : IEntityTypeConfiguration<StdLocation>
         builder.Property(x => x.CollectionTypeId)
             .IsRequired();
 
-        builder.HasOne<StdCollectionType>()
+        builder.HasOne(x => x.CollectionType)
             .WithMany()
             .HasForeignKey(x => x.CollectionTypeId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -24,7 +23,7 @@ public class StdLocationConfiguration : IEntityTypeConfiguration<StdLocation>
         builder.Property(x => x.ShopId)
             .IsRequired();
 
-        builder.HasOne<Shop>()
+        builder.HasOne(x => x.Shop)
             .WithMany()
             .HasForeignKey(x => x.ShopId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -48,10 +47,6 @@ public class StdLocationConfiguration : IEntityTypeConfiguration<StdLocation>
         builder.HasIndex(x => x.IsActive);
         builder.HasIndex(x => new { x.ShopId, x.CollectionTypeId, x.IsActive });
         builder.HasIndex(x => new { x.ShopId, x.CollectionTypeId, x.LocationName, x.PostCode }).IsUnique();
-        builder.HasIndex(x => new { x.ShopId, x.IsActive });
-        builder.HasIndex(x => new { x.CollectionTypeId, x.IsActive });
-        builder.HasIndex(x => new { x.ShopId, x.CollectionTypeId, x.LocationName });
-        builder.HasIndex(x => new { x.ShopId, x.CollectionTypeId, x.PostCode });
 
         builder.ApplyAuditableConfiguration();
     }

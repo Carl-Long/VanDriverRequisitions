@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
-import { StdLocationLookup, stdLocationsApi } from "./std-locations-api";
+import { stdLocationsApi } from "./std-locations-api";
+import { StdLocationLookup } from "./std-location.types";
 
 
 type Props = {
@@ -36,6 +37,16 @@ export function StdLocationField({
     const [loading, setLoading] = useState(false);
 
     const canLoad = Boolean(shopId && collectionTypeId);
+
+    let placeholder = "Select location";
+
+    if (!shopId) {
+        placeholder = "Select a shop first";
+    } else if (!collectionTypeId) {
+        placeholder = "Select a collection type first";
+    } else if (loading) {
+        placeholder = "Loading locations...";
+    }
 
     useEffect(() => {
         if (!shopId || !collectionTypeId) {
@@ -90,15 +101,7 @@ export function StdLocationField({
                 value={value}
                 label={label}
                 options={options}
-                placeholder={
-                    !shopId
-                        ? "Select a shop first"
-                        : !collectionTypeId
-                            ? "Select a collection type first"
-                            : loading
-                                ? "Loading locations..."
-                                : "Select location"
-                }
+                placeholder={placeholder}
                 noMatchesText="No matching location found"
                 emptyStateText="No active locations for this shop and collection type"
                 state={error ? "error" : "default"}

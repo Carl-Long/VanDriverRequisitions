@@ -15,4 +15,28 @@ public static class StdLocationProjections
             LocationName = x.LocationName,
             PostCode = x.PostCode
         };
+
+    public static Expression<Func<StdLocation, StdLocationSummaryDto>> AsSummaryDto =>
+        x => new StdLocationSummaryDto
+        {
+            Id = x.Id,
+
+            ShopId = x.ShopId,
+            ShopCode = x.Shop.Code,
+            ShopName = x.Shop.Name,
+
+            CollectionTypeId = x.CollectionTypeId,
+            CollectionTypeCode = x.CollectionType.Code,
+            CollectionTypeName = x.CollectionType.Name,
+
+            LocationName = x.LocationName,
+            PostCode = x.PostCode,
+
+            IsActive = x.IsActive,
+
+            CreatedAtUtc = x.CreatedAtUtc,
+            CreatedByNameSnapshot = x.CreatedByNameSnapshot,
+            UpdatedAtUtc = x.UpdatedAtUtc,
+            UpdatedByNameSnapshot = x.UpdatedByNameSnapshot
+        };
 }

@@ -45,9 +45,11 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
     [ProducesResponseType(typeof(StdLocationSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<StdLocationSummaryDto>> Create([FromBody] CreateStdLocationDto createStdLocationDto, CancellationToken cancellationToken)
+    public async Task<ActionResult<StdLocationSummaryDto>> Create(
+        [FromBody] CreateStdLocationDto dto,
+        CancellationToken cancellationToken)
     {
-        var created = await stdLocationService.CreateAsync(createStdLocationDto, cancellationToken);
+        var created = await stdLocationService.CreateAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -58,8 +60,8 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<StdLocationSummaryDto>> Update(
-        [FromRoute] Guid id, 
-        [FromBody] UpdateStdLocationDto updateStdLocationDto, 
+        [FromRoute] Guid id,
+        [FromBody] UpdateStdLocationDto updateStdLocationDto,
         CancellationToken cancellationToken)
     {
         var updated = await stdLocationService.UpdateAsync(id, updateStdLocationDto, cancellationToken);

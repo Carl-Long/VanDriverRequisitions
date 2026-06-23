@@ -6,51 +6,31 @@ using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdLocations.Dtos;
+using VanDriverRequisitions.Application.Features.StdLocations.Extensions;
 using VanDriverRequisitions.Application.Features.StdLocations.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.STD;
 
 namespace VanDriverRequisitions.Application.Features.StdLocations.Services;
 
-public sealed class StdLocationService(IApplicationDbContext context, IValidatorService validator) : IStdLocationService
+public sealed class StdLocationService(IApplicationDbContext context, IValidatorService validator) : IStdLocationService 
 {
     public async Task<PagedResult<StdLocationSummaryDto>> GetAllAsync(StdLocationAdminQueryDto query, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(query, cancellationToken);
 
-        var filteredQuery = BuildAdminQuery(query);
+        var locations = context.StdLocations
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .ApplyAdminFilters(query);
 
-        var totalCount = await filteredQuery.CountAsync(cancellationToken);
+        var totalCount = await locations.CountAsync(cancellationToken);
 
-        var items = await filteredQuery
-            .OrderBy(x => x.Shop.Code)
-            .ThenBy(x => x.CollectionType.Code)
-            .ThenBy(x => x.Location.LocationName)
-            .ThenBy(x => x.Location.PostCode)
+        var items = await locations
+            .ApplyAdminOrdering()
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(x => new StdLocationSummaryDto
-            {
-                Id = x.Location.Id,
-
-                ShopId = x.Shop.Id,
-                ShopCode = x.Shop.Code,
-                ShopName = x.Shop.Name,
-
-                CollectionTypeId = x.CollectionType.Id,
-                CollectionTypeCode = x.CollectionType.Code,
-                CollectionTypeName = x.CollectionType.Name,
-
-                LocationName = x.Location.LocationName,
-                PostCode = x.Location.PostCode,
-
-                IsActive = x.Location.IsActive,
-
-                CreatedAtUtc = x.Location.CreatedAtUtc,
-                CreatedByNameSnapshot = x.Location.CreatedByNameSnapshot,
-                UpdatedAtUtc = x.Location.UpdatedAtUtc,
-                UpdatedByNameSnapshot = x.Location.UpdatedByNameSnapshot
-            })
+            .Select(StdLocationProjections.AsSummaryDto)
             .ToListAsync(cancellationToken);
 
         return new PagedResult<StdLocationSummaryDto>
@@ -64,34 +44,14 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
 
     public async Task<StdLocationSummaryDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await BuildJoinedQuery(includeInactive: true)
-            .Where(x => x.Location.Id == id)
-            .Select(x => new StdLocationSummaryDto
-            {
-                Id = x.Location.Id,
-
-                ShopId = x.Shop.Id,
-                ShopCode = x.Shop.Code,
-                ShopName = x.Shop.Name,
-
-                CollectionTypeId = x.CollectionType.Id,
-                CollectionTypeCode = x.CollectionType.Code,
-                CollectionTypeName = x.CollectionType.Name,
-
-                LocationName = x.Location.LocationName,
-                PostCode = x.Location.PostCode,
-
-                IsActive = x.Location.IsActive,
-
-                CreatedAtUtc = x.Location.CreatedAtUtc,
-                CreatedByNameSnapshot = x.Location.CreatedByNameSnapshot,
-                UpdatedAtUtc = x.Location.UpdatedAtUtc,
-                UpdatedByNameSnapshot = x.Location.UpdatedByNameSnapshot
-            })
+        var location = await context.StdLocations
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(StdLocationProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return result
-            ?? throw new NotFoundException($"STD Location with ID '{id}' was not found.");
+        return location ?? throw new NotFoundException($"STD Location with ID '{id}' was not found.");
     }
 
     public async Task<List<StdLocationLookupDto>> GetActiveLookupsAsync(StdLocationLookupQueryDto query, CancellationToken cancellationToken = default)
@@ -116,14 +76,7 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
         await EnsureShopExistsAsync(createStdLocationDto.ShopId, cancellationToken);
         await EnsureCollectionTypeExistsAsync(createStdLocationDto.CollectionTypeId, cancellationToken);
 
-        var location = new StdLocation
-        {
-            ShopId = createStdLocationDto.ShopId,
-            CollectionTypeId = createStdLocationDto.CollectionTypeId,
-            LocationName = createStdLocationDto.LocationName.Trim(),
-            PostCode = NormalisePostCode(createStdLocationDto.PostCode),
-            IsActive = true
-        };
+        var location = StdLocation.Create(createStdLocationDto.ShopId, createStdLocationDto.CollectionTypeId, createStdLocationDto.LocationName, createStdLocationDto.PostCode);
 
         context.StdLocations.Add(location);
 
@@ -132,8 +85,7 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
         return await GetByIdAsync(location.Id, cancellationToken);
     }
 
-    public async Task<StdLocationSummaryDto> UpdateAsync(Guid id, UpdateStdLocationDto updateStdLocationDto,
-        CancellationToken cancellationToken = default)
+    public async Task<StdLocationSummaryDto> UpdateAsync(Guid id, UpdateStdLocationDto updateStdLocationDto, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(updateStdLocationDto, cancellationToken);
 
@@ -142,10 +94,7 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
 
         var location = await LoadForUpdateAsync(id, cancellationToken);
 
-        location.ShopId = updateStdLocationDto.ShopId;
-        location.CollectionTypeId = updateStdLocationDto.CollectionTypeId;
-        location.LocationName = updateStdLocationDto.LocationName.Trim();
-        location.PostCode = NormalisePostCode(updateStdLocationDto.PostCode);
+        location.UpdateDetails(updateStdLocationDto.ShopId, updateStdLocationDto.CollectionTypeId, updateStdLocationDto.LocationName, updateStdLocationDto.PostCode);
 
         await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
 
@@ -155,68 +104,17 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
     public async Task ActivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var location = await LoadForUpdateAsync(id, cancellationToken);
-        location.IsActive = true;
+        location.Activate();
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeactivateAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var location = await LoadForUpdateAsync(id, cancellationToken);
-        location.IsActive = false;
+        location.Deactivate();
         await context.SaveChangesAsync(cancellationToken);
     }
-
-    private IQueryable<JoinedStdLocation> BuildAdminQuery(StdLocationAdminQueryDto query)
-    {
-        var joinedQuery = BuildJoinedQuery(query.IncludeInactive);
-
-        if (query.ShopId.HasValue)
-        {
-            joinedQuery = joinedQuery.Where(x => x.Location.ShopId == query.ShopId.Value);
-        }
-
-        if (query.CollectionTypeId.HasValue)
-        {
-            joinedQuery = joinedQuery.Where(x => x.Location.CollectionTypeId == query.CollectionTypeId.Value);
-        }
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var term = query.Search.Trim();
-
-            joinedQuery = joinedQuery.Where(x =>
-                x.Location.LocationName.Contains(term) ||
-                x.Location.PostCode.Contains(term) ||
-                x.Shop.Code.Contains(term) ||
-                x.Shop.Name.Contains(term) ||
-                x.CollectionType.Code.Contains(term) ||
-                x.CollectionType.Name.Contains(term));
-        }
-
-        return joinedQuery;
-    }
-
-    private IQueryable<JoinedStdLocation> BuildJoinedQuery(bool includeInactive)
-    {
-        var locations = includeInactive
-            ? context.StdLocations.IgnoreQueryFilters().AsNoTracking()
-            : context.StdLocations.AsNoTracking();
-
-        var shops = context.Shops
-            .IgnoreQueryFilters()
-            .AsNoTracking();
-
-        var collectionTypes = context.StdCollectionTypes
-            .IgnoreQueryFilters()
-            .AsNoTracking();
-
-        return
-            from location in locations
-            join shop in shops on location.ShopId equals shop.Id
-            join collectionType in collectionTypes on location.CollectionTypeId equals collectionType.Id
-            select new JoinedStdLocation(location, shop, collectionType);
-    }
-
+    
     private async Task<StdLocation> LoadForUpdateAsync(Guid id, CancellationToken cancellationToken)
     {
         return await context.StdLocations
@@ -265,11 +163,4 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
             ]);
         }
     }
-
-    private static string NormalisePostCode(string value)
-    {
-        return value.Trim().ToUpperInvariant();
-    }
-
-    private sealed record JoinedStdLocation(StdLocation Location, Shop Shop, StdCollectionType CollectionType);
 }

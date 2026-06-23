@@ -6,12 +6,24 @@ import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
 import { StdCollectionTypeLookup, stdCollectionTypesApi } from "./std-collection-types-api";
 
+const ALL_COLLECTION_TYPES_VALUE = "__ALL__";
+
+const STATIC_OPTIONS = [
+    {
+        value: ALL_COLLECTION_TYPES_VALUE,
+        label: "All collection types",
+    },
+] as ComboboxOption<StdCollectionTypeLookup>[];
+
 type Props = {
     value: string | null;
     label: string | null;
     error?: string;
     required?: boolean;
     disabled?: boolean;
+    includeAllOption?: boolean;
+    prefixLabel?: boolean;
+    hideLabel?: boolean;
     onChange: (
         value: string | null,
         label: string | null,
@@ -25,6 +37,9 @@ export function StdCollectionTypeField({
     error,
     required = false,
     disabled = false,
+    includeAllOption = false,
+    prefixLabel = false,
+    hideLabel = false,
     onChange,
 }: Readonly<Props>) {
     const [items, setItems] = useState<StdCollectionTypeLookup[]>([]);
@@ -64,21 +79,38 @@ export function StdCollectionTypeField({
         }));
     }, [items]);
 
+    const selectedLabel = label ?? "All collection types";
+    const displayLabel = prefixLabel ? `Collection type: ${selectedLabel}` : label;
+
+    const combobox = (
+        <Combobox<StdCollectionTypeLookup>
+            disabled={disabled || loading}
+            value={value}
+            label={displayLabel}
+            options={options}
+            pinnedOptions={includeAllOption ? STATIC_OPTIONS : []}
+            placeholder={loading ? "Loading collection types..." : "Select collection type"}
+            noMatchesText="No matching collection type found"
+            emptyStateText="No active collection types"
+            state={error ? "error" : "default"}
+            onChange={(nextValue, option) => {
+                if (nextValue === ALL_COLLECTION_TYPES_VALUE) {
+                    onChange(null, null, null);
+                    return;
+                }
+
+                onChange(nextValue, option?.label ?? null, option?.data ?? null);
+            }}
+        />
+    );
+
+    if (hideLabel) {
+        return combobox;
+    }
+
     return (
-        <Field label="Collection Type" error={error} required={required}>
-            <Combobox<StdCollectionTypeLookup>
-                disabled={disabled || loading}
-                value={value}
-                label={label}
-                options={options}
-                placeholder={loading ? "Loading collection types..." : "Select collection type"}
-                noMatchesText="No matching collection type found"
-                emptyStateText="No active collection types"
-                state={error ? "error" : "default"}
-                onChange={(nextValue, option) => {
-                    onChange(nextValue, option?.label ?? null, option?.data ?? null);
-                }}
-            />
+        <Field label="Collection Type" required={required} error={error}>
+            {combobox}
         </Field>
     );
 }

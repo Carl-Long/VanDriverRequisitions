@@ -354,17 +354,10 @@ public static class DevDataSeeder
             foreach (var collectionType in collectionTypes)
             {
                 var locationName = StdLocationNames[locationIndex % StdLocationNames.Length];
+                var location = StdLocation.Create(shop.Id, collectionType.Id, locationName, shop.Postcode);
+                location.Id = BuildStdLocationId(locationIndex);
+                locations.Add(location);
                 
-                locations.Add(new StdLocation
-                {
-                    Id = BuildStdLocationId(locationIndex),
-                    ShopId = shop.Id,
-                    CollectionTypeId = collectionType.Id,
-                    LocationName = locationName,
-                    PostCode = shop.Postcode,
-                    IsActive = true
-                });
-
                 locationIndex++;
             }
         }
