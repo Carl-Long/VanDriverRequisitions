@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
+using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 
 namespace VanDriverRequisitions.Api.Controllers.FE;
 

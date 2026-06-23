@@ -12,11 +12,11 @@ public static class RequisitionLimitRuleMapper
         return new RequisitionLimitRuleSummaryDto
         {
             Id = entity.Id,
-            CategoryId = (int)entity.Category,
+            Category = entity.Category,
             CategoryName = entity.Category.GetDisplayName(),
             FeTaskTypeId = entity.FeTaskTypeId,
             FeTaskTypeName = entity.FeTaskType?.Name,
-            FasciaId = (int)entity.Fascia,
+            Fascia = entity.Fascia,
             FasciaName = entity.Fascia.GetDisplayName(),
             MaxQuantity = entity.MaxQuantity,
             MaxRate = entity.MaxRate,

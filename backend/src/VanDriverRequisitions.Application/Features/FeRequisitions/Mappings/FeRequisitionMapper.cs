@@ -1,10 +1,10 @@
 using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
+using VanDriverRequisitions.Application.Features.Shops.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 
@@ -13,7 +13,8 @@ public static class FeRequisitionMapper
     public static FeRequisitionDetailDto MapRequisitionToDetailDto(
         FeRequisition requisition,
         VanDriverLookupDto vanDriverSummary,
-        bool isShopActive)
+        bool isShopActive,
+        IReadOnlyDictionary<Guid, bool> reasonActiveMap)
     {
         return new FeRequisitionDetailDto
         {
@@ -65,10 +66,12 @@ public static class FeRequisitionMapper
 
             FeAdditionalCosts = requisition.FeAdditionalCosts
                 .OrderBy(x => x.WeekEndingDate)
-                .ThenBy(x => x.ReasonText)
+                .ThenBy(x => x.ReasonTextSnapshot)
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
-                .Select(FeAdditionalCostMapper.ToDetailDto)
+                .Select(x => FeAdditionalCostMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(reasonActiveMap, x.ReasonId)))
                 .ToList(),
 
             SubmissionHistory = MapSubmissionHistory(requisition.Submissions)
@@ -111,5 +114,10 @@ public static class FeRequisitionMapper
                 RejectionNotes = x.RejectionNotes
             })
             .ToList();
+    }
+    
+    private static bool IsLookupActive(IReadOnlyDictionary<Guid, bool> activeMap, Guid id)
+    {
+        return activeMap.TryGetValue(id, out var isActive) && isActive;
     }
 }

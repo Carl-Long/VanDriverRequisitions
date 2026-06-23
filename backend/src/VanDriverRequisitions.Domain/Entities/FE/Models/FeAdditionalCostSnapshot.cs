@@ -7,7 +7,8 @@ public sealed class FeAdditionalCostSnapshot
     public DateOnly WeekEndingDate { get; init; }
 
     public Guid ReasonId { get; init; }
-    public string ReasonText { get; init; } = string.Empty;
+    public required string ReasonCode { get; init; }
+    public required string ReasonText { get; init; }
 
     public ChargingOption ChargingOption { get; init; }
 

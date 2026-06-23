@@ -87,6 +87,7 @@ export type FeTransferSnapshot = {
 export type FeAdditionalCostSnapshot = {
     weekEndingDate: string;
     reasonId: string;
+    reasonCode: string;
     reasonText: string;
     chargingOption: ChargingOption;
     totalNumber: number | null;

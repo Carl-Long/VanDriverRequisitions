@@ -1,9 +1,5 @@
+import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
 import { RequisitionStatus } from "../constants/fe-requisition-status.constants";
-
-export type CreatedByFilter =
-    | { type: "any" }
-    | { type: "me" }
-    | { type: "user"; userId: string; label: string };
 
 export type FeRequisitionFilters = {
     requisitionNumber: string;

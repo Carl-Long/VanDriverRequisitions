@@ -4,7 +4,9 @@ export type FeAdditionalCostForm = {
     weekEndingDate: Date | null;
 
     reasonId: string | null;
+    reasonCode: string | null;
     reasonText: string | null;
+    isReasonActive: boolean;
 
     chargingOption: ChargingOption;
 

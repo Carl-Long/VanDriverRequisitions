@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
@@ -9,9 +8,10 @@ public sealed class FeAdditionalCostDetailDto
     public DateOnly WeekEndingDate { get; init; }
 
     public Guid ReasonId { get; init; }
+    public string ReasonCode { get; init; } = string.Empty;
     public string ReasonText { get; init; } = string.Empty;
-
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public bool IsReasonActive { get; init; }
+    
     public ChargingOption ChargingOption { get; init; }
 
     public int? TotalNumber { get; init; }

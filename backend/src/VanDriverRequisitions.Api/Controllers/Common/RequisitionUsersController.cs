@@ -10,7 +10,7 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 [ApiController]
 [Route("api/v{version:apiVersion}/requisition-users")]
 [Authorize]
-public class RequisitionUsersController(IFeRequisitionUserService requisitionUserService ) : ControllerBase
+public class RequisitionUsersController(IRequisitionUserService requisitionUserService ) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]

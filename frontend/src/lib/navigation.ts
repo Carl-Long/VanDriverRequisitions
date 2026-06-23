@@ -1,12 +1,15 @@
 import {
     HeartHandshake,
     CalendarClock,
-    ListChecks,
-    Tags,
     Sofa,
     Shirt,
     Gauge,
     ClipboardCheck,
+    ListTodo,
+    PackageCheck,
+    MapPinned,
+    ReceiptText,
+    BadgeCheck,
 } from "lucide-react";
 
 export const navigation = [
@@ -17,7 +20,7 @@ export const navigation = [
     },
     {
         title: "Standard Van Drivers",
-        href: "/standard-drivers",
+        href: "/standard-van-drivers",
         icon: Shirt,
     },
     {
@@ -29,9 +32,14 @@ export const navigation = [
 
 export const approvalNavigation = [
     {
-        title: "Approvals",
+        title: "Home Approvals",
         href: "/home-van-drivers/approvals",
         icon: ClipboardCheck,
+    },
+    {
+        title: "Standard Approvals",
+        href: "/standard-van-drivers/approvals",
+        icon: BadgeCheck,
     },
 ];
 
@@ -47,12 +55,22 @@ export const adminNavigation = [
             {
                 title: "FE Task Types",
                 href: "/admin/fe-task-types",
-                icon: ListChecks,
+                icon: ListTodo,
             },
             {
-                title: "Reasons",
-                href: "/admin/reasons",
-                icon: Tags,
+                title: "STD Collection Types",
+                href: "/admin/std-collection-types",
+                icon: PackageCheck,
+            },
+            {
+                title: "STD Locations",
+                href: "/admin/std-locations",
+                icon: MapPinned
+            },
+            {
+                title: "Cost Reasons",
+                href: "/admin/cost-reasons",
+                icon: ReceiptText,
             },
             {
                 title: "Limit Rules",

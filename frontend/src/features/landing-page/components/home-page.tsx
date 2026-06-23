@@ -18,7 +18,7 @@ const cards: LaunchCardProps[] = [
     {
         title: "Standard Van Drivers",
         description: "Raise and view requisitions for home and fashion stores",
-        href: "/standard-drivers",
+        href: "/standard-van-drivers",
         icon: Shirt,
     },
     {
@@ -36,13 +36,19 @@ export function HomePage() {
         ...(canCreateRequisitions(user) ? cards : []),
         ...(canApproveRequisitions(user)
             ? [
-                  {
-                      title: "Home Van Driver Approvals",
-                      description: "Review submitted FE requisitions awaiting approval",
-                      href: "/home-van-drivers/approvals",
-                      icon: ClipboardCheck,
-                  },
-              ]
+                {
+                    title: "Home Van Driver Approvals",
+                    description: "Review submitted FE requisitions awaiting approval",
+                    href: "/home-van-drivers/approvals",
+                    icon: ClipboardCheck,
+                },
+                {
+                    title: "Standard Van Driver Approvals",
+                    description: "Review submitted STD requisitions awaiting approval",
+                    href: "/standard-van-drivers/approvals",
+                    icon: ClipboardCheck,
+                },
+            ]
             : []),
     ];
 

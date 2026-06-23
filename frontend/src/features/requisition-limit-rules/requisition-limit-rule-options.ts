@@ -1,11 +1,27 @@
-export const categoryOptions = [
-    { value: "0", label: "General Task" },
-    { value: "1", label: "Mileage" },
-    { value: "2", label: "Transfer" },
-    { value: "3", label: "Additional Cost" },
-] as const;
+import type {
+    RequisitionLimitRuleCategory,
+} from "./requisition-limit-rules-api";
 
-export const fasciaOptions = [
-    { value: "0", label: "FE" },
-    { value: "1", label: "STD" },
-] as const;
+export const requisitionLimitRuleCategories = [
+    "GeneralTask",
+    "Mileage",
+    "Transfer",
+    "AdditionalCost",
+    "FlatCharge",
+    "VanPack",
+] as const satisfies readonly RequisitionLimitRuleCategory[];
+
+
+export const categoryOptions = [
+    { value: "GeneralTask", label: "General Task" },
+    { value: "Mileage", label: "Mileage" },
+    { value: "Transfer", label: "Transfer" },
+    { value: "AdditionalCost", label: "Additional Cost" },
+    { value: "FlatCharge", label: "Flat Charge" },
+    { value: "VanPack", label: "Van Pack" },
+] as const satisfies ReadonlyArray<{
+    value: RequisitionLimitRuleCategory;
+    label: string;
+}>;
+
+export {REQUISITION_FASCIAS as requisitionLimitRuleFascias, FASCIA_OPTIONS as fasciaOptions} from "@/lib/constants/fascias";

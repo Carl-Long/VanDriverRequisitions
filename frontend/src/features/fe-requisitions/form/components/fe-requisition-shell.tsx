@@ -12,7 +12,7 @@ import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/
 import { useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
@@ -30,6 +30,7 @@ import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisi
 import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
+import { useFeRequisitionTabWarnings } from "../hooks/use-fe-requisition-tab-warnings";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -106,6 +107,8 @@ export function FeRequisitionShell({
     const [isSaving, setIsSaving] = useState(false);
 
     const isReadonly = mode === "readonly" || mode === "approval";
+
+    const tabWarnings = useFeRequisitionTabWarnings({ draft, isReadonly, limitRules, });
 
     const router = useRouter();
     const toast = useToast();
@@ -202,22 +205,6 @@ export function FeRequisitionShell({
         } finally {
             setIsSaving(false);
         }
-    }
-
-    function getTaskTypeTabHasWarning(taskTypeId: string) {
-        if (isReadonly) {
-            return false;
-        }
-
-        const tasks = draft.feGeneralTasks.filter((task) => task.taskTypeId === taskTypeId);
-
-        const limitRule = resolveFeRequisitionLimitRule({
-            rules: limitRules,
-            categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
-            taskTypeId,
-        });
-
-        return tasks.some((task) => getGeneralTaskLimitStatus(task, limitRule).state !== "ok");
     }
 
     async function handleSaveDraft() {
@@ -368,7 +355,7 @@ export function FeRequisitionShell({
             {errors.form && (
                 <Alert tone="danger">
                     <ul className="list-disc space-y-1 pl-5">
-                        {errors.form.split("\n").map((message) => (
+                        {[...new Set(errors.form.split("\n").filter(Boolean))].map((message) => (
                             <li key={message}>{message}</li>
                         ))}
                     </ul>
@@ -380,7 +367,10 @@ export function FeRequisitionShell({
                 onActiveKeyChange={setActiveKey}
                 taskTypes={taskTypes}
                 submissionHistoryCount={draft.submissionHistory.length}
-                getTaskTypeTabHasWarning={getTaskTypeTabHasWarning}
+                getTaskTypeTabHasWarning={tabWarnings.getTaskTypeTabHasWarning}
+                mileageHasWarning={tabWarnings.mileageHasWarning}
+                transfersHasWarning={tabWarnings.transfersHasWarning}
+                additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
                     <FeRequisitionDetailsTab
                         readonly={isReadonly}
@@ -397,7 +387,7 @@ export function FeRequisitionShell({
                     <FeMileageWorkspace
                         limitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
                         readonly={isReadonly}
                         rows={draft.feMileages}
@@ -418,7 +408,7 @@ export function FeRequisitionShell({
                     <FeTransferWorkspace
                         limitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.TRANSFER,
+                            category: REQUISITION_ROW_CATEGORIES.TRANSFER,
                         })}
                         readonly={isReadonly}
                         transfers={draft.feTransfers}
@@ -441,11 +431,11 @@ export function FeRequisitionShell({
                         rows={draft.feAdditionalCosts}
                         additionalCostLimitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
+                            category: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
                         })}
                         mileageLimitRule={resolveFeRequisitionLimitRule({
                             rules: limitRules,
-                            categoryId: REQUISITION_ROW_CATEGORIES.MILEAGE,
+                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
                         onAdd={addAdditionalCost}
                         onUpdate={updateAdditionalCost}
@@ -457,7 +447,7 @@ export function FeRequisitionShell({
                         submissions={draft.submissionHistory}
                         returnTo={backHref}
                     />
-                } 
+                }
                 renderTaskTypeTab={(taskTypeId) => {
                     const taskType = taskTypes.find((x) => x.id === taskTypeId);
 
@@ -471,7 +461,7 @@ export function FeRequisitionShell({
                         <FeGeneralTaskWorkspace
                             limitRule={resolveFeRequisitionLimitRule({
                                 rules: limitRules,
-                                categoryId: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
+                                category: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
                                 taskTypeId: taskType.id,
                             })}
                             readonly={isReadonly}

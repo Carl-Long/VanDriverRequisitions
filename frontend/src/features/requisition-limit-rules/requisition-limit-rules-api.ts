@@ -1,14 +1,25 @@
 import { apiFetch } from "@/lib/api/client";
+import { RequisitionFascia } from "@/lib/constants/fascias";
 
 const BASE = "/api/v1/requisition-limit-rules";
 
+export type RequisitionLimitRuleCategory =
+    | "GeneralTask"
+    | "Mileage"
+    | "Transfer"
+    | "AdditionalCost"
+    | "FlatCharge"
+    | "VanPack";
+
+export type RequisitionLimitRuleFascia = RequisitionFascia
+
 export type RequisitionLimitRuleSummary = {
     id: string;
-    categoryId: number;
+    category: RequisitionLimitRuleCategory;
     categoryName: string;
     feTaskTypeId: string | null;
     feTaskTypeName: string | null;
-    fasciaId: number;
+    fascia: RequisitionLimitRuleFascia;
     fasciaName: string;
     maxQuantity: number;
     maxRate: number;
@@ -19,17 +30,17 @@ export type RequisitionLimitRuleSummary = {
 };
 
 export type CreateRequisitionLimitRule = {
-    category: number;
+    category: RequisitionLimitRuleCategory;
     feTaskTypeId?: string | null;
-    fascia: number;
+    fascia: RequisitionLimitRuleFascia;
     maxQuantity: number;
     maxRate: number;
 };
 
 export type UpdateRequisitionLimitRule = {
-    category: number;
+    category: RequisitionLimitRuleCategory;
     feTaskTypeId?: string | null;
-    fascia: number;
+    fascia: RequisitionLimitRuleFascia;
     maxQuantity: number;
     maxRate: number;
 };

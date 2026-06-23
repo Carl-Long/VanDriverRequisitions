@@ -9,6 +9,8 @@ export function mapFeAdditionalCostDraftToForm(
 
         reasonId: row.reasonId,
         reasonText: row.reasonText,
+        reasonCode: row.reasonCode,
+        isReasonActive: row.isReasonActive,
 
         chargingOption: row.chargingOption,
 

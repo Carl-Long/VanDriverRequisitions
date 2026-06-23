@@ -22,7 +22,7 @@ public class FeRequisitionService(
     IValidatorService validator,
     IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator,
-    IRequisitionNumberGenerator feRequisitionNumberGenerator,
+    IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
     IFeRequisitionSaveDataBuilder saveDataBuilder) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -137,7 +137,7 @@ public class FeRequisitionService(
         }
         else
         {
-            var requisitionNumber = await context.NextFeRequisitionNumberAsync(cancellationToken);
+            var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
             requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
             
             context.FeRequisitions.Add(requisition);
@@ -238,8 +238,28 @@ public class FeRequisitionService(
     {
         driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
         var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
-        
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
+        var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
+
+        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
+    {
+        var reasonIds = requisition.FeAdditionalCosts
+            .Select(x => x.ReasonId)
+            .Distinct()
+            .ToList();
+
+        if (reasonIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        return await context.CostReasons
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => reasonIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
     }
     
     private AuditUser GetAuditUser(string actionName)

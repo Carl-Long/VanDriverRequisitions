@@ -9,7 +9,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
-import { useRequisitionLimitRules } from "@/features/fe-requisitions/form/hooks/use-requisition-limit-rules";
+import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { useSearchParams } from "next/navigation";
 
 export default function NewRequisitionPage() {

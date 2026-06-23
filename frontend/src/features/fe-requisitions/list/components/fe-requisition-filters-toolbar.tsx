@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
-import { CreatedByUserFilterField } from "../filter-fields/created-by-user-filter-field";
-import { ShopFilterField } from "../filter-fields/shop-filter-field";
-import { StatusFilterField } from "../filter-fields/status-filter-field";
+import { CreatedByUserFilterField } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
+import { StatusFilterField } from "@/features/fe-requisitions/list/filter-fields/status-filter-field";
+
 
 type Props = {
     filters: FeRequisitionFilters;
@@ -80,6 +81,7 @@ export function FeRequisitionFiltersToolbar({
                     <div className="min-w-[260px] flex-1">
                         <CreatedByUserFilterField
                             hideLabel
+                            fascia="Fe"
                             value={filters.createdBy}
                             onChange={(value) => {
                                 onFiltersChange({

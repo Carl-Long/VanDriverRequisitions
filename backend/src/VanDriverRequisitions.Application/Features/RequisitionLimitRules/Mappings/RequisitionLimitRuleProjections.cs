@@ -11,11 +11,11 @@ public static class RequisitionLimitRuleProjections
         x => new RequisitionLimitRuleSummaryDto
         {
             Id = x.Id,
-            CategoryId = (int)x.Category,
+            Category = x.Category,
             CategoryName = x.Category.GetDisplayName(),
             FeTaskTypeId = x.FeTaskTypeId,
             FeTaskTypeName = x.FeTaskType != null ? x.FeTaskType.Name : null,
-            FasciaId = (int)x.Fascia,
+            Fascia = x.Fascia,
             FasciaName = x.Fascia.GetDisplayName(),
             MaxQuantity = x.MaxQuantity,
             MaxRate = x.MaxRate,

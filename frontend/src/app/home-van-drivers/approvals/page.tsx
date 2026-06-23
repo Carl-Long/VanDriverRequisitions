@@ -18,6 +18,8 @@ import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requis
 import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
 import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
+import { useDebounce } from "@/hooks/use-debounce";
+import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
@@ -26,6 +28,8 @@ export default function FeRequisitionApprovalsPage() {
     const { user, loading: authLoading } = useAuth();
 
     const page = pageFromSearchParams(searchParams);
+    const requisitionNumber = searchParams.get("requisitionNumber") ?? "";
+    const debouncedReqNumber = useDebounce(requisitionNumber, 400);
 
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
 
@@ -48,6 +52,7 @@ export default function FeRequisitionApprovalsPage() {
                     page,
                     pageSize: 10,
                     status: "Submitted",
+                    requisitionNumber: debouncedReqNumber,
                 });
 
                 if (!cancelled) {
@@ -69,9 +74,37 @@ export default function FeRequisitionApprovalsPage() {
         return () => {
             cancelled = true;
         };
-    }, [page, authLoading, canApprove]);
+    }, [page, authLoading, canApprove, debouncedReqNumber]);
 
     const items = data?.items ?? [];
+
+    function updateSearchParams(nextRequisitionNumber: string, nextPage = 1) {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextRequisitionNumber.trim()) {
+            params.set("requisitionNumber", nextRequisitionNumber);
+        } else {
+            params.delete("requisitionNumber");
+        }
+
+        if (nextPage > 1) {
+            params.set("page", String(nextPage));
+        } else {
+            params.delete("page");
+        }
+
+        const queryString = params.toString();
+
+        return queryString ? `${pathname}?${queryString}` : pathname;
+    }
+
+    function handleRequisitionNumberChange(value: string) {
+        router.replace(updateSearchParams(value));
+    }
+
+    function resetSearch() {
+        router.replace(pathname);
+    }
 
     if (authLoading) {
         return (
@@ -92,6 +125,12 @@ export default function FeRequisitionApprovalsPage() {
                 description="Review submitted FE requisitions awaiting approval."
             />
 
+            <RequisitionApprovalsSearchToolbar
+                requisitionNumber={requisitionNumber}
+                onRequisitionNumberChange={handleRequisitionNumberChange}
+                onReset={resetSearch}
+            />
+
             {error && <Alert>{error}</Alert>}
 
             {loading && <FeRequisitionTableSkeleton />}
@@ -100,13 +139,18 @@ export default function FeRequisitionApprovalsPage() {
                 <EmptyState
                     icon={ClipboardCheck}
                     title="No approvals waiting"
-                    description="There are no submitted requisitions awaiting approval."
+                    description={
+                        requisitionNumber
+                            ? "No submitted requisitions match that requisition number."
+                            : "There are no submitted requisitions awaiting approval."
+                    }
                 />
             )}
 
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
+                    getHref={(req) => `/home-van-drivers/approvals/${req.id}`}
                     onRowClick={(req) => router.push(`/home-van-drivers/approvals/${req.id}`)}
                 />
             )}
@@ -116,10 +160,7 @@ export default function FeRequisitionApprovalsPage() {
                     page={data.page}
                     totalPages={data.totalPages}
                     onPageChange={(nextPage) => {
-                        const params = new URLSearchParams();
-                        params.set("page", String(nextPage));
-
-                        router.push(`${pathname}?${params.toString()}`);
+                        router.push(updateSearchParams(requisitionNumber, nextPage));
                     }}
                     className="mt-6"
                 />

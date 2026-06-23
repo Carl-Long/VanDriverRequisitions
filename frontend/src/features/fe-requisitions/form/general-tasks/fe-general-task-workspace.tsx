@@ -17,11 +17,13 @@ import {
     TableFooter,
     TableRow,
     TableHeaderRow,
+    Table,
 } from "@/components/ui/table/table";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
-import { getEditableTableRowClassName } from "../lib/get-editable-table-row-class-name";
-import { EditableCellButton } from "../components/editable-cell-button";
-import { DeleteRowButton } from "../components/delete-row-button";
+import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/get-editable-table-row-class-name";
+import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
+import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
+import { formatDateGB } from "@/lib/format/date";
 
 type Props = {
     readonly: boolean;
@@ -128,7 +130,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
     return (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface">
             <div className="max-h-[55vh] overflow-auto">
-                <table className="min-w-full">
+                <Table className="min-w-full">
                     <TableHeader>
                         <TableHeaderRow>
                             <TableHeaderCell className="sticky top-0 z-20 bg-surface-elevated">
@@ -228,7 +230,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                                 ariaLabel="Edit general task row"
                                                 onEdit={() => onEdit(task)}
                                             >
-                                                {task.weekEndingDate ? task.weekEndingDate.toLocaleDateString() : "-"}
+                                                {formatDateGB(task.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
@@ -238,8 +240,8 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                                     </div>
 
                                                     <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message) => (
-                                                            <li key={message}>{message}</li>
+                                                        {limitStatus.messages.map((message, index) => (
+                                                            <li key={`${message}-${index}`}>{message}</li>
                                                         ))}
                                                     </ul>
                                                 </div>
@@ -366,7 +368,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                             )}
                         </TableRow>
                     </TableFooter>
-                </table>
+                </Table>
             </div>
         </div >
     );

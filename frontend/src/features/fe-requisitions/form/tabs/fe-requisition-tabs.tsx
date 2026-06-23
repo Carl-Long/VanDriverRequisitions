@@ -13,8 +13,11 @@ type Props = {
     details: React.ReactNode;
     renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
     mileage: React.ReactNode;
+    mileageHasWarning?: boolean;
     transfers: React.ReactNode;
+    transfersHasWarning?: boolean;
     additionalCosts: React.ReactNode;
+    additionalCostsHasWarning?: boolean;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
     getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
@@ -32,6 +35,9 @@ export function FeRequisitionTabs({
     submissionHistory,
     submissionHistoryCount,
     getTaskTypeTabHasWarning,
+    mileageHasWarning,
+    transfersHasWarning,
+    additionalCostsHasWarning,
 }: Readonly<Props>) {
     const tabs = useMemo(
         () => buildFeRequisitionTabs(taskTypes, submissionHistoryCount),
@@ -41,7 +47,23 @@ export function FeRequisitionTabs({
     const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
 
     function tabHasWarning(tab: (typeof tabs)[number]) {
-        return tab.type === "general-task" && getTaskTypeTabHasWarning?.(tab.taskTypeId);
+        if (tab.type === "general-task") {
+            return getTaskTypeTabHasWarning?.(tab.taskTypeId) ?? false;
+        }
+
+        if (tab.type === "mileage") {
+            return mileageHasWarning ?? false;
+        }
+
+        if (tab.type === "transfers") {
+            return transfersHasWarning ?? false;
+        }
+
+        if (tab.type === "additional-costs") {
+            return additionalCostsHasWarning ?? false;
+        }
+
+        return false;
     }
 
     return (
@@ -103,14 +125,14 @@ function TabButton({ active, hasWarning, onClick, children }: Readonly<TabButton
 
             {hasWarning && (
                 <span
-                    title="This tab has limit warnings"
+                    title="This tab has warnings"
                     className={cn(
                         "inline-flex h-5 w-5 items-center justify-center rounded-full",
                         active ? "bg-warning/15 text-warning" : "bg-warning/10 text-warning",
                     )}
                 >
                     <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="sr-only">This tab has limit warnings</span>
+                    <span className="sr-only">This tab has warnings</span>
                 </span>
             )}
         </button>

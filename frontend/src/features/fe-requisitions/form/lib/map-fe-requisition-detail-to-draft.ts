@@ -102,7 +102,9 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             weekEndingDate: new Date(cost.weekEndingDate),
 
             reasonId: cost.reasonId,
+            reasonCode: cost.reasonCode,
             reasonText: cost.reasonText,
+            isReasonActive: cost.isReasonActive,
 
             chargingOption: cost.chargingOption,
 

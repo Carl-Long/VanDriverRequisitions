@@ -5,7 +5,7 @@ import { Info, Plus } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
-import { AppDrawer } from "@/components/ui/drawer";
+import { AppDrawer, DrawerFormActions } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
@@ -15,7 +15,7 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
 import { createEmptyFeGeneralTaskForm } from "../lib/create-empty-fe-general-task-form";
-import { mapZodErrors } from "../lib/map-zod-errors";
+import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 import { DayInput } from "../form-fields/day-input";
 
@@ -89,38 +89,10 @@ export function FeGeneralTaskDrawer({
             open={open}
             title={title}
             onClose={onClose}
-            footer={
-                <div className="flex items-center justify-between">
-                    <Button type="button" tone="accent" onClick={onClose}>
-                        Cancel
-                    </Button>
-
-                    <div className="flex items-center gap-4">
-                        <Button
-                            type="button"
-                            className="min-w-[160px]"
-                            variant="outline"
-                            onClick={() => saveForm("close")}
-                        >
-                            {isEditMode ? "Update & Close" : "Add & Close"}
-                        </Button>
-
-                        {!isEditMode && (
-                            <Button
-                                form="general-task-drawer-form"
-                                type="submit"
-                                className="min-w-[160px]"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add & Create Another
-                            </Button>
-                        )}
-                    </div>
-                </div>
-            }
         >
             <form
                 id="general-task-drawer-form"
+                noValidate
                 className="space-y-6"
                 onSubmit={(event) => {
                     event.preventDefault();
@@ -299,7 +271,7 @@ export function FeGeneralTaskDrawer({
                     <div className="max-w-[200px]">
                         <Input
                             type="number"
-                            min={0}
+                            min="0.01"
                             step="0.01"
                             value={form.ratePerJob ?? ""}
                             state={errors["ratePerJob"] ? "error" : "default"}
@@ -330,6 +302,33 @@ export function FeGeneralTaskDrawer({
                         </span>
                     </div>
                 </div>
+
+                <DrawerFormActions>
+                    <Button type="button" tone="accent" onClick={onClose}>
+                        Cancel
+                    </Button>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                        <Button
+                            type="button"
+                            className="min-w-[160px]"
+                            variant="outline"
+                            onClick={() => saveForm("close")}
+                        >
+                            {isEditMode ? "Update & Close" : "Add & Close"}
+                        </Button>
+
+                        {!isEditMode && (
+                            <Button
+                                type="submit"
+                                className="min-w-[160px]"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add & Create Another
+                            </Button>
+                        )}
+                    </div>
+                </DrawerFormActions>
             </form>
         </AppDrawer>
     );

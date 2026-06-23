@@ -14,5 +14,11 @@ public enum RequisitionRowCategory
     Transfer = 2,
 
     [Display(Name = "Additional Cost")]
-    AdditionalCost = 3
+    AdditionalCost = 3,
+    
+    [Display(Name = "Flat Charge")]
+    FlatCharge = 4,
+    
+    [Display(Name = "Van Pack")]
+    VanPack = 5,
 }

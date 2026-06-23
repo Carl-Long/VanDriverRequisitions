@@ -5,14 +5,15 @@ import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
-import { FeVanDriverField } from "../form-fields/fe-van-driver-field";
-import { VanDriverSummaryCard } from "../details/van-driver-summary-card";
+import { VanDriverSummaryCard } from "../../../van-drivers/components/van-driver-summary-card";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 
 import { Alert } from "@/components/ui/alert";
 import { StatusPill } from "../../list/components/status-pill";
-import { ShopFilterField } from "../../list/filter-fields/shop-filter-field";
+import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
+import { VanDriverField } from "@/features/van-drivers/components/van-driver-field";
+
 
 type Props = {
     readonly: boolean;
@@ -70,46 +71,31 @@ export function FeRequisitionDetailsTab({
                             />
                         </Field>
 
-                        <div className="space-y-2">
-                            <ShopFilterField
-                                required
-                                disabled={readonly}
-                                error={errors.shopId}
-                                value={draft.shopId}
-                                label={draft.shopLabel}
-                                onChange={(value, label) => {
-                                    onShopChange({ id: value, label });
-                                    clearError("shopId");
-                                }}
-                            />
+                        <ShopFilterField
+                            required
+                            disabled={readonly}
+                            error={errors.shopId}
+                            value={draft.shopId}
+                            label={draft.shopLabel}
+                            isShopActive={draft.isShopActive}
+                            onChange={(value, label) => {
+                                onShopChange({ id: value, label });
+                                clearError("shopId");
+                            }}
+                        />
 
-                            {!readonly && draft.isShopActive === false && (
-                                <Alert tone="warning">
-                                    This shop is inactive. If changed, it cannot be selected again.
-                                </Alert>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <FeVanDriverField
-                                disabled={readonly}
-                                error={errors.vanDriverId}
-                                value={draft.vanDriverId}
-                                label={draft.vanDriverLabel}
-                                onChange={(params) => {
-                                    onVanDriverChange(params);
-                                    clearError("vanDriverId");
-                                    clearError("vanDriverName");
-                                }}
-                            />
-
-                            {!readonly && draft.vanDriverSummary?.isActive === false && (
-                                <Alert tone="warning">
-                                    This van driver is inactive. If changed, they cannot be selected
-                                    again.
-                                </Alert>
-                            )}
-                        </div>
+                        <VanDriverField
+                            disabled={readonly}
+                            error={errors.vanDriverId}
+                            value={draft.vanDriverId}
+                            label={draft.vanDriverLabel}
+                            selectedVanDriver={draft.vanDriverSummary}
+                            onChange={(params) => {
+                                onVanDriverChange(params);
+                                clearError("vanDriverId");
+                                clearError("vanDriverName");
+                            }}
+                        />
 
                         <Field label="Driver Name" error={errors.vanDriverName} required>
                             <Input

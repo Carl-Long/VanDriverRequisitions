@@ -12,7 +12,8 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     public Guid FeRequisitionId { get; private set; }
     public DateOnly WeekEndingDate { get; private set; }
     public Guid ReasonId { get; private set; }
-    public string ReasonText { get; private set; } = string.Empty;
+    public string ReasonTextSnapshot { get; private set; } = string.Empty;
+    public string ReasonCodeSnapshot { get; private set; } = string.Empty;
     public ChargingOption ChargingOption { get; private set; }
     public int? Miles { get; private set; }
     public decimal? RatePerMile { get; private set; }
@@ -23,7 +24,8 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     public static FeAdditionalCost Create(
         DateOnly weekEndingDate,
         Guid reasonId,
-        string reasonText,
+        string reasonCodeSnapshot,
+        string reasonTextSnapshot,
         ChargingOption chargingOption,
         int? totalNumber,
         decimal? ratePerJob,
@@ -35,7 +37,8 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
         cost.Update(
             weekEndingDate,
             reasonId,
-            reasonText,
+            reasonCodeSnapshot,
+            reasonTextSnapshot,
             chargingOption,
             totalNumber,
             ratePerJob,
@@ -48,18 +51,26 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     public void Update(
         DateOnly weekEndingDate,
         Guid reasonId,
-        string reasonText,
+        string reasonCodeSnapshot,
+        string reasonTextSnapshot,
         ChargingOption chargingOption,
         int? totalNumber,
         decimal? ratePerJob,
         int? miles,
         decimal? ratePerMile)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(reasonText);
+        if (reasonId == Guid.Empty)
+        {
+            throw new InvalidOperationException("Reason is required.");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(reasonCodeSnapshot);
+        ArgumentException.ThrowIfNullOrWhiteSpace(reasonTextSnapshot);
 
         WeekEndingDate = weekEndingDate;
         ReasonId = reasonId;
-        ReasonText = reasonText.Trim();
+        ReasonCodeSnapshot = reasonCodeSnapshot.Trim();
+        ReasonTextSnapshot = reasonTextSnapshot.Trim();
 
         switch (chargingOption)
         {
@@ -72,10 +83,7 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(
-                    nameof(chargingOption),
-                    chargingOption,
-                    "Unknown charging option.");
+                throw new ArgumentOutOfRangeException(nameof(chargingOption), chargingOption, "Unknown charging option.");
         }
     }
 
