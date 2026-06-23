@@ -47,11 +47,17 @@ public static partial class DevDataSeeder
         "Community Site",
     ];
 
-    private static async Task SeedStdLocationsAsync(VanDriverDbContext context, ILogger? logger)
+    private static async Task SeedStdLocationsAsync(
+        VanDriverDbContext context,
+        ILogger? logger)
     {
+        const int shopsToUse = 250;
+        const int locationsPerShop = 4;
+
         var shops = await context.Shops
             .Where(x => x.IsActive)
             .OrderBy(x => x.Code)
+            .Take(shopsToUse)
             .ToListAsync();
 
         var collectionTypes = await context.StdCollectionTypes
@@ -69,28 +75,45 @@ public static partial class DevDataSeeder
             return;
         }
 
-        var locations = new List<StdLocation>(StdLocationSeedCount);
+        var locations = new List<StdLocation>(shops.Count * locationsPerShop);
         var locationNameCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-        for (var i = 0; i < StdLocationSeedCount; i++)
+        var locationIndex = 0;
+
+        for (var shopIndex = 0; shopIndex < shops.Count; shopIndex++)
         {
-            var shop = shops[i % shops.Count];
-            var shopCycle = i / shops.Count;
-            var collectionType = collectionTypes[(i + shopCycle) % collectionTypes.Count];
+            var shop = shops[shopIndex];
 
-            var baseLocationName = BuildStdLocationName(shop, collectionType, i);
-            var uniqueLocationName = BuildUniqueStdLocationName(baseLocationName, locationNameCounts);
-
-            var location = StdLocation.Create(shop.Id, collectionType.Id, uniqueLocationName, BuildNearbyLocationPostcode(shop.Postcode, i));
-
-            location.Id = BuildStdLocationId(i);
-
-            if (i % 25 == 0)
+            for (var locationNumberForShop = 0; locationNumberForShop < locationsPerShop; locationNumberForShop++)
             {
-                location.Deactivate();
-            }
+                var collectionType = collectionTypes[
+                    (shopIndex + locationNumberForShop) % collectionTypes.Count];
 
-            locations.Add(location);
+                var baseLocationName = BuildStdLocationName(
+                    shop,
+                    collectionType,
+                    locationIndex);
+
+                var uniqueLocationName = BuildUniqueStdLocationName(
+                    baseLocationName,
+                    locationNameCounts);
+
+                var location = StdLocation.Create(
+                    shop.Id,
+                    collectionType.Id,
+                    uniqueLocationName,
+                    BuildNearbyLocationPostcode(shop.Postcode, locationIndex));
+
+                location.Id = BuildStdLocationId(locationIndex);
+
+                if (locationIndex % 25 == 0)
+                {
+                    location.Deactivate();
+                }
+
+                locations.Add(location);
+                locationIndex++;
+            }
         }
 
         context.StdLocations.AddRange(locations);
@@ -98,16 +121,14 @@ public static partial class DevDataSeeder
         await context.SaveChangesAsync();
 
         logger?.LogInformation(
-            "Seeded {Count} STD locations ({Active} active, {Inactive} inactive).",
+            "Seeded {Count} STD locations across {ShopCount} shops ({Active} active, {Inactive} inactive).",
             locations.Count,
+            shops.Count,
             locations.Count(x => x.IsActive),
             locations.Count(x => !x.IsActive));
     }
 
-    private static string BuildStdLocationName(
-        Shop shop,
-        StdCollectionType collectionType,
-        int index)
+    private static string BuildStdLocationName(Shop shop, StdCollectionType collectionType, int index)
     {
         var town = string.IsNullOrWhiteSpace(shop.Town)
             ? "Local"
@@ -119,9 +140,7 @@ public static partial class DevDataSeeder
         return $"{town} {siteName} {collectionType.Name} {suffix}";
     }
 
-    private static string BuildNearbyLocationPostcode(
-        string shopPostcode,
-        int index)
+    private static string BuildNearbyLocationPostcode(string shopPostcode, int index)
     {
         var outwardCode = ExtractOutwardPostcode(shopPostcode);
 

@@ -23,10 +23,9 @@ export function StdLocationTable({
             <Table className="w-full">
                 <TableHeader>
                     <TableHeaderRow>
-                        <TableHeaderCell>Shop</TableHeaderCell>
-                        <TableHeaderCell>Collection Type</TableHeaderCell>
                         <TableHeaderCell>Location</TableHeaderCell>
-                        <TableHeaderCell>Postcode</TableHeaderCell>
+                        <TableHeaderCell>Collection Type</TableHeaderCell>
+                        <TableHeaderCell>Shop</TableHeaderCell>
                         <TableHeaderCell align="center">Active</TableHeaderCell>
                         <TableHeaderCell>Last Activity</TableHeaderCell>
                         <TableHeaderCell align="right" nowrap>
@@ -38,29 +37,33 @@ export function StdLocationTable({
                 <TableBody>
                     {items.map((item) => (
                         <TableRow key={item.id} className="hover:bg-surface-hover">
+
                             <TableCell>
-                                <div className="font-medium text-foreground">
-                                    {item.shopCode}
+                                <div className="text-foreground">
+                                    {item.locationName}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {item.shopName}
+                                <div className="text-xs font-medium text-muted-foreground">
+                                    {item.postCode}
                                 </div>
                             </TableCell>
 
                             <TableCell>
-                                <div className="font-medium text-foreground">
-                                    {item.collectionTypeCode}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-foreground">
                                     {item.collectionTypeName}
                                 </div>
+                                <div className="text-xs font-medium text-muted-foreground">
+                                    {item.collectionTypeCode}
+                                </div>
                             </TableCell>
 
-                            <TableCell className="font-medium text-foreground">
-                                {item.locationName}
+                            <TableCell>
+                                <div className="text-foreground">
+                                    {item.collectionTypeName}
+                                </div>
+                                <div className="text-xs font-medium text-muted-foreground">
+                                    {item.collectionTypeCode}
+                                </div>
                             </TableCell>
-
-                            <TableCell>{item.postCode}</TableCell>
 
                             <TableCell align="center">
                                 <div className="flex justify-center">
