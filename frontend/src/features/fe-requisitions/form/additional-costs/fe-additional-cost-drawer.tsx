@@ -22,6 +22,7 @@ import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
 import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
 import { FASCIAS } from "@/lib/constants/fascias";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -158,7 +159,11 @@ export function FeAdditionalCostDrawer({
                             reasonId: value,
                             reasonCode: reason?.code ?? null,
                             reasonText: reason?.reason ?? null,
-                            isReasonActive: true,
+                            isReasonActive: resolveSelectedLookupActiveState({
+                                previousId: prev.reasonId,
+                                previousIsActive: prev.isReasonActive,
+                                nextId: value,
+                            }),
                         }));
 
                         clearError("reasonId");

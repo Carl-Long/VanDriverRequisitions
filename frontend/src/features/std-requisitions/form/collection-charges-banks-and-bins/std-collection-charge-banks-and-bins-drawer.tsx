@@ -23,6 +23,7 @@ import { StdChargeFields } from "../components/std-charge-fields";
 import { StdChargeLimitSummary } from "../components/std-charge-limit-summary";
 import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 
 type Props = {
@@ -184,19 +185,32 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     required
                     value={form.collectionTypeId}
                     label={form.collectionTypeLabel}
+                    collectionTypeCode={form.collectionTypeCode}
+                    isCollectionTypeActive={form.isCollectionTypeActive}
                     error={errors.collectionTypeId}
                     onChange={(value, label, collectionType) => {
-                        setForm((prev) => ({
-                            ...prev,
-                            collectionTypeId: value,
-                            collectionTypeLabel: collectionType?.name ?? label,
-                            collectionTypeCode: collectionType?.code ?? null,
+                        setForm((prev) => {
+                            const collectionTypeChanged = value !== prev.collectionTypeId;
 
-                            // Locations depend on collection type.
-                            locationId: null,
-                            locationLabel: null,
-                            locationPostCode: null,
-                        }));
+                            return {
+                                ...prev,
+                                collectionTypeId: value,
+                                collectionTypeLabel: collectionType?.name ?? label,
+                                collectionTypeCode: collectionType?.code ?? null,
+                                isCollectionTypeActive: resolveSelectedLookupActiveState({
+                                    previousId: prev.collectionTypeId,
+                                    previousIsActive: prev.isCollectionTypeActive,
+                                    nextId: value,
+                                }),
+
+                                locationId: collectionTypeChanged ? null : prev.locationId,
+                                locationLabel: collectionTypeChanged ? null : prev.locationLabel,
+                                locationPostCode: collectionTypeChanged ? null : prev.locationPostCode,
+                                isLocationActive: collectionTypeChanged
+                                    ? true
+                                    : prev.isLocationActive,
+                            };
+                        });
 
                         clearError("collectionTypeId");
                         clearError("locationId");
@@ -210,6 +224,8 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                     collectionTypeId={form.collectionTypeId}
                     value={form.locationId}
                     label={form.locationLabel}
+                    postCode={form.locationPostCode}
+                    isLocationActive={form.isLocationActive}
                     error={errors.locationId}
                     onChange={(value, label, location) => {
                         setForm((prev) => ({
@@ -217,6 +233,11 @@ export function StdCollectionChargeBanksAndBinsDrawer({
                             locationId: value,
                             locationLabel: location?.locationName ?? label,
                             locationPostCode: location?.postCode ?? null,
+                            isLocationActive: resolveSelectedLookupActiveState({
+                                previousId: prev.locationId,
+                                previousIsActive: prev.isLocationActive,
+                                nextId: value,
+                            }),
                         }));
 
                         clearError("locationId");

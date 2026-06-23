@@ -19,6 +19,8 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { Alert } from "@/components/ui/alert";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { cn } from "@/lib/utils";
 
 type Props = {
     readonly: boolean;
@@ -185,16 +187,21 @@ function AdditionalCostsTable({
                                 mileageLimitRule,
                             );
 
+                            const hasInactiveLookup = row.isReasonActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+                            const hasIssue = hasLimitIssue || hasInactiveLookup;
 
                             return (
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={getEditableTableRowClassName({
-                                        readonly,
-                                        hasIssue: hasLimitIssue,
-                                    })}
+                                    className={cn(
+                                        getEditableTableRowClassName({
+                                            readonly,
+                                            hasIssue,
+                                        }),
+                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
+                                    )}
                                 >
                                     <TableCell>
                                         {formatDateGB(row.weekEndingDate) ?? "-"}
@@ -213,9 +220,7 @@ function AdditionalCostsTable({
                                                     : row.reasonText ?? "-"}
 
                                                 {row.isReasonActive === false && (
-                                                    <div className="text-xs font-medium text-warning mt-1">
-                                                        Inactive reason. If changed, it cannot be selected again.
-                                                    </div>
+                                                    <InactiveLookupWarning label="reason" />
                                                 )}
                                             </EditableCellButton>
 

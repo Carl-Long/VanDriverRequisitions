@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Alert } from "@/components/ui/alert";
 import { Field } from "@/components/ui/field/field";
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { CostReasonLookup } from "./cost-reason.types";
 import { costReasonsApi } from "./cost-reasons-api";
 import { RequisitionFascia } from "@/lib/constants/fascias";
+import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 
 
 type ReasonOptionData = CostReasonLookup;
@@ -121,9 +121,7 @@ export function CostReasonField({
             />
 
             {showInactiveWarning && (
-                <Alert tone="warning">
-                    This reason is inactive. If changed, it cannot be selected again.
-                </Alert>
+                <InactiveLookupWarning label="reason" variant="field" />
             )}
         </div>
     );

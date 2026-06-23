@@ -43,10 +43,12 @@ export function mapStdRequisitionDetailToDraft(
             collectionTypeId: row.collectionTypeId,
             collectionTypeLabel: row.collectionTypeName,
             collectionTypeCode: row.collectionTypeCode,
+            isCollectionTypeActive: row.isCollectionTypeActive,
 
             locationId: row.locationId,
             locationLabel: row.locationName,
             locationPostCode: row.locationPostCode,
+            isLocationActive: row.isLocationActive,
 
             numberOfBags: row.numberOfBags,
 

@@ -10,10 +10,12 @@ export function createEmptyStdCollectionChargeBanksAndBinsForm(
         collectionTypeId: null,
         collectionTypeLabel: null,
         collectionTypeCode: null,
+        isCollectionTypeActive: true,
 
         locationId: null,
         locationLabel: null,
         locationPostCode: null,
+        isLocationActive: true,
 
         numberOfBags: null,
 

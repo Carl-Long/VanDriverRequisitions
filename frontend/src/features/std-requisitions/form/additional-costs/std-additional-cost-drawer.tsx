@@ -23,6 +23,7 @@ import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
 import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
 import { FASCIAS } from "@/lib/constants/fascias";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -182,7 +183,11 @@ export function StdAdditionalCostDrawer({
                             reasonId: value,
                             reasonCode: reason?.code ?? null,
                             reasonText: reason?.reason ?? null,
-                            isReasonActive: true,
+                            isReasonActive: resolveSelectedLookupActiveState({
+                                previousId: prev.reasonId,
+                                previousIsActive: prev.isReasonActive,
+                                nextId: value,
+                            }),
                         }));
 
                         clearError("reasonId");

@@ -20,6 +20,7 @@ import { updateStdCollectionVanPackDraftFromForm } from "../lib/update-std-colle
 import { updateStdPickupDraftFromForm } from "../lib/update-std-pickup-draft-from-form";
 import { updateStdTransferDraftFromForm } from "../lib/update-std-transfer-draft-from-form";
 import { updateStdAdditionalCostDraftFromForm } from "../lib/update-std-additional-cost-draft-from-form";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     const [draft, setDraft] = useState<StdRequisitionDraft>(
@@ -63,15 +64,25 @@ export function useStdRequisitionDraft(initialDraft?: StdRequisitionDraft) {
     }
 
     function setShop(params: { id: string | null; label: string | null }) {
-        setDraft((x) => ({
-            ...x,
-            shopId: params.id,
-            shopLabel: params.label,
-            isShopActive: true,
+        setDraft((prev) => {
+            const shopChanged = params.id !== prev.shopId;
 
-            // Important later: locations are shop-specific.
-            collectionChargesBanksAndBins: [],
-        }));
+            return {
+                ...prev,
+                shopId: params.id,
+                shopLabel: params.label,
+                isShopActive: resolveSelectedLookupActiveState({
+                    previousId: prev.shopId,
+                    previousIsActive: prev.isShopActive,
+                    nextId: params.id,
+                }),
+
+                // Locations are shop-specific.
+                collectionChargesBanksAndBins: shopChanged
+                    ? []
+                    : prev.collectionChargesBanksAndBins,
+            };
+        });
     }
 
     function addCollectionChargeBanksAndBins(form: StdCollectionChargeBanksAndBinsForm) {

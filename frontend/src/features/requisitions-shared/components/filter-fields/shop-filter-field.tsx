@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Field } from "@/components/ui/field/field";
 import { Combobox } from "@/components/ui/field/combobox";
 import { shopsApi } from "@/lib/api/shops";
 import { toShopOptions, type ShopOption } from "@/lib/options/shop-options";
+import { InactiveLookupWarning } from "../inactive-lookup-warning";
 
 type Props = {
     required?: boolean;
@@ -17,6 +18,7 @@ type Props = {
     placeholder?: string;
     includeAllOption?: boolean;
     prefixLabel?: boolean;
+    isShopActive?: boolean | null;
     onChange: (value: string | null, label: string | null) => void;
 };
 
@@ -38,6 +40,7 @@ export function ShopFilterField({
     placeholder = "Select Shop",
     includeAllOption = false,
     prefixLabel = false,
+    isShopActive,
     onChange,
 }: Readonly<Props>) {
     const [options, setOptions] = useState<ShopOption[]>([]);
@@ -69,36 +72,63 @@ export function ShopFilterField({
         };
     }, []);
 
+    const showInactiveWarning = Boolean(value && isShopActive === false);
+
+    const inactiveSelectedOptions = useMemo<ShopOption[]>(() => {
+        if (!value || !label || isShopActive !== false) {
+            return [];
+        }
+
+        return [
+            {
+                value,
+                label,
+            },
+        ];
+    }, [value, label, isShopActive]);
+
+    const pinnedOptions = useMemo<ShopOption[]>(() => {
+        return [
+            ...(includeAllOption ? STATIC_OPTIONS : []),
+            ...inactiveSelectedOptions,
+        ];
+    }, [includeAllOption, inactiveSelectedOptions]);
+
     const combobox = (
-        <Combobox
-            disabled={disabled || loading}
-            state={error ? "error" : "default"}
-            value={value}
-            label={
-                label
-                    ? prefixLabel
-                        ? `Shop: ${label}`
-                        : label
-                    : prefixLabel
-                        ? "Shop: All shops"
-                        : null
-            }
-            options={options}
-            emptyStateText={loading ? "Loading shops..." : "No shops available"}
-            noMatchesText="No matching shops found"
-            pinnedOptions={includeAllOption ? STATIC_OPTIONS : []}
-            placeholder={loading ? "Loading shops..." : placeholder}
-            onChange={(value, option) => {
-                if (value === "__ALL__") {
-                    onChange(null, null);
-                    return;
+        <div className="space-y-2">
+            <Combobox
+                disabled={disabled || loading}
+                state={error ? "error" : "default"}
+                value={value}
+                label={
+                    label
+                        ? prefixLabel
+                            ? `Shop: ${label}`
+                            : label
+                        : prefixLabel
+                            ? "Shop: All shops"
+                            : null
                 }
+                options={options}
+                emptyStateText={loading ? "Loading shops..." : "No shops available"}
+                noMatchesText="No matching shops found"
+                pinnedOptions={pinnedOptions}
+                placeholder={loading ? "Loading shops..." : placeholder}
+                onChange={(value, option) => {
+                    if (value === "__ALL__") {
+                        onChange(null, null);
+                        return;
+                    }
 
-                onChange(value, option?.label ?? null);
-            }}
-        />
+                    onChange(value, option?.label ?? null);
+                }}
+            />
+
+            {showInactiveWarning && (
+                <InactiveLookupWarning label="shop" variant="field" />
+            )}
+        </div>
     );
-
     if (hideLabel) {
         return combobox;
     }

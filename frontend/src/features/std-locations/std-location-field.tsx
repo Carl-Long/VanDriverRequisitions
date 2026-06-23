@@ -6,6 +6,8 @@ import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
 import { stdLocationsApi } from "./std-locations-api";
 import { StdLocationLookup } from "./std-location.types";
+import { Alert } from "@/components/ui/alert";
+import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 
 
 type Props = {
@@ -16,6 +18,8 @@ type Props = {
     error?: string;
     required?: boolean;
     disabled?: boolean;
+    postCode?: string | null;
+    isLocationActive?: boolean | null;
     onChange: (
         value: string | null,
         label: string | null,
@@ -31,10 +35,17 @@ export function StdLocationField({
     error,
     required = false,
     disabled = false,
+    postCode,
+    isLocationActive,
     onChange,
 }: Readonly<Props>) {
     const [items, setItems] = useState<StdLocationLookup[]>([]);
     const [loading, setLoading] = useState(false);
+
+    const showInactiveWarning = Boolean(value && isLocationActive === false);
+    const displayLabel = label && postCode
+        ? `${label} - ${postCode}`
+        : label;
 
     const canLoad = Boolean(shopId && collectionTypeId);
 
@@ -47,6 +58,26 @@ export function StdLocationField({
     } else if (loading) {
         placeholder = "Loading locations...";
     }
+
+    const pinnedOptions = useMemo<ComboboxOption<StdLocationLookup>[]>(() => {
+        if (!value || !label || isLocationActive !== false) {
+            return [];
+        }
+
+        return [
+            {
+                value,
+                label: postCode ? `${label} - ${postCode}` : label,
+                data: {
+                    id: value,
+                    shopId: shopId ?? "",
+                    collectionTypeId: collectionTypeId ?? "",
+                    locationName: label,
+                    postCode: postCode ?? "",
+                },
+            },
+        ];
+    }, [value, label, postCode, shopId, collectionTypeId, isLocationActive]);
 
     useEffect(() => {
         if (!shopId || !collectionTypeId) {
@@ -96,19 +127,26 @@ export function StdLocationField({
 
     return (
         <Field label="Location" error={error} required={required}>
-            <Combobox<StdLocationLookup>
-                disabled={disabled || loading || !canLoad}
-                value={value}
-                label={label}
-                options={options}
-                placeholder={placeholder}
-                noMatchesText="No matching location found"
-                emptyStateText="No active locations for this shop and collection type"
-                state={error ? "error" : "default"}
-                onChange={(nextValue, option) => {
-                    onChange(nextValue, option?.label ?? null, option?.data ?? null);
-                }}
-            />
+            <div className="space-y-2">
+                <Combobox<StdLocationLookup>
+                    disabled={disabled || loading || !canLoad}
+                    value={value}
+                    label={displayLabel}
+                    options={options}
+                    pinnedOptions={pinnedOptions}
+                    placeholder={placeholder}
+                    noMatchesText="No matching location found"
+                    emptyStateText="No active locations for this shop and collection type"
+                    state={error ? "error" : "default"}
+                    onChange={(nextValue, option) => {
+                        onChange(nextValue, option?.label ?? null, option?.data ?? null);
+                    }}
+                />
+
+                {showInactiveWarning && (
+                    <InactiveLookupWarning label="location" variant="field" />
+                )}
+            </div>
         </Field>
     );
 }

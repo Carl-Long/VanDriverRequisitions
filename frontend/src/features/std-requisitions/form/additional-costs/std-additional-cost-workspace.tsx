@@ -19,6 +19,8 @@ import { StdAdditionalCostDrawer } from "./std-additional-cost-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { cn } from "@/lib/utils";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 
 
 type Props = {
@@ -242,17 +244,21 @@ function AdditionalCostsTable({
                                 flatChargeLimitRule,
                             );
 
-                            const hasLimitIssue =
-                                !readonly && limitStatus.state !== "ok";
+                            const hasInactiveLookup = row.isReasonActive === false;
+                            const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+                            const hasIssue = hasLimitIssue || hasInactiveLookup;
 
                             return (
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={getEditableTableRowClassName({
-                                        readonly,
-                                        hasIssue: hasLimitIssue,
-                                    })}
+                                    className={cn(
+                                        getEditableTableRowClassName({
+                                            readonly,
+                                            hasIssue,
+                                        }),
+                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
+                                    )}
                                 >
                                     <TableCell>
                                         {row.date ? formatDateGB(row.date) : "-"}
@@ -276,9 +282,7 @@ function AdditionalCostsTable({
                                                     : row.reasonText ?? "-"}
 
                                                 {row.isReasonActive === false && (
-                                                    <div className="text-xs font-medium text-warning mt-1">
-                                                        Inactive reason. If changed, it cannot be selected again.
-                                                    </div>
+                                                    <InactiveLookupWarning label="reason" />
                                                 )}
                                             </EditableCellButton>
                                         </div>

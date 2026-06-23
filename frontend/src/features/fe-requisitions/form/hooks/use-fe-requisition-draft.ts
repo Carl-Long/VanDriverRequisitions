@@ -20,6 +20,7 @@ import { FeTransferForm } from "../types/fe-transfer-form";
 import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { createFeAdditionalCostDraftFromForm } from "../lib/create-fe-additional-cost-draft-from-form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     const [draft, setDraft] = useState<FeRequisitionDraft>(
@@ -52,7 +53,6 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
             vanDriverId: params.id,
             vanDriverLabel: params.label,
             vanDriverSummary: params.summary,
-            isVanDriverActive: true,
         }));
     }
 
@@ -64,11 +64,15 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }
 
     function setShop(params: { id: string | null; label: string | null }) {
-        setDraft((x) => ({
-            ...x,
+        setDraft((prev) => ({
+            ...prev,
             shopId: params.id,
             shopLabel: params.label,
-            isShopActive: true,
+            isShopActive: resolveSelectedLookupActiveState({
+                previousId: prev.shopId,
+                previousIsActive: prev.isShopActive,
+                nextId: params.id,
+            }),
         }));
     }
 

@@ -46,13 +46,14 @@ export function useStdRequisitionTabWarnings({
             collectionChargesBanksAndBinsHasWarning:
                 draft.collectionChargesBanksAndBins.some(
                     (row) =>
+                        row.isCollectionTypeActive === false ||
+                        row.isLocationActive === false ||
                         getStdChargeLimitStatus(
                             row,
                             stdMileageLimitRule,
                             stdFlatChargeLimitRule,
                         ).state !== "ok",
                 ),
-
             collectionVanPacksHasWarning: draft.collectionVanPacks.some(
                 (row) =>
                     getStdCollectionVanPackLimitStatus(
@@ -81,6 +82,7 @@ export function useStdRequisitionTabWarnings({
 
             additionalCostsHasWarning: draft.additionalCosts.some(
                 (row) =>
+                    row.isReasonActive === false ||
                     getStdChargeLimitStatus(
                         row,
                         stdMileageLimitRule,

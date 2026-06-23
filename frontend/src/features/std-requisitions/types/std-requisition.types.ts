@@ -75,10 +75,12 @@ export type StdCollectionChargeBanksAndBins = {
     collectionTypeId: string;
     collectionTypeName: string;
     collectionTypeCode: string;
+    isCollectionTypeActive: boolean;
 
     locationId: string;
     locationName: string;
     locationPostCode: string;
+    isLocationActive: boolean;
 
     numberOfBags: number | null;
 
