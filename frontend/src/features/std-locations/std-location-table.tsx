@@ -37,7 +37,6 @@ export function StdLocationTable({
                 <TableBody>
                     {items.map((item) => (
                         <TableRow key={item.id} className="hover:bg-surface-hover">
-
                             <TableCell>
                                 <div className="text-foreground">
                                     {item.locationName}
@@ -58,10 +57,10 @@ export function StdLocationTable({
 
                             <TableCell>
                                 <div className="text-foreground">
-                                    {item.collectionTypeName}
+                                    {item.shopName}
                                 </div>
                                 <div className="text-xs font-medium text-muted-foreground">
-                                    {item.collectionTypeCode}
+                                    {item.shopCode}
                                 </div>
                             </TableCell>
 
