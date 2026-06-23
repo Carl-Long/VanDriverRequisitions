@@ -4,6 +4,7 @@ using VanDriverRequisitions.Api.Middleware.Dev;
 using VanDriverRequisitions.Application.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.DependencyInjection;
 using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
+using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
