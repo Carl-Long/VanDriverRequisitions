@@ -1323,15 +1323,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.HasIndex("ShopId");
 
-                    b.HasIndex("CollectionTypeId", "IsActive");
-
-                    b.HasIndex("ShopId", "IsActive");
-
                     b.HasIndex("ShopId", "CollectionTypeId", "IsActive");
-
-                    b.HasIndex("ShopId", "CollectionTypeId", "LocationName");
-
-                    b.HasIndex("ShopId", "CollectionTypeId", "PostCode");
 
                     b.HasIndex("ShopId", "CollectionTypeId", "LocationName", "PostCode")
                         .IsUnique();
@@ -1998,17 +1990,21 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdLocation", b =>
                 {
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", "CollectionType")
                         .WithMany()
                         .HasForeignKey("CollectionTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", "Shop")
                         .WithMany()
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CollectionType");
+
+                    b.Navigation("Shop");
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdPickup", b =>
