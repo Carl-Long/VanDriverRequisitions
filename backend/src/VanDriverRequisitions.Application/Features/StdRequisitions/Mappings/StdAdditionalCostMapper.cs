@@ -1,5 +1,5 @@
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
-using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 
@@ -7,45 +7,46 @@ namespace VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 
 public static class StdAdditionalCostMapper
 {
-    public static StdAdditionalCostUpdateModel ToUpdateModel(
-        SaveStdAdditionalCostDto dto,
-        FeReason reason)
+    public static StdAdditionalCostUpdateModel ToUpdateModel(SaveStdAdditionalCostDto saveStdAdditionalCostDto, CostReason reason)
     {
-        ArgumentNullException.ThrowIfNull(dto);
+        ArgumentNullException.ThrowIfNull(saveStdAdditionalCostDto);
         ArgumentNullException.ThrowIfNull(reason);
 
         return new StdAdditionalCostUpdateModel(
-            dto.Id,
-            dto.Date,
+            saveStdAdditionalCostDto.Id,
+            saveStdAdditionalCostDto.Date,
             reason.Id,
+            reason.Code,
             reason.Reason,
-            dto.NumberOfBags,
-            dto.ChargeType,
-            dto.Miles,
-            dto.RatePerMile,
-            dto.FlatCharge);
+            saveStdAdditionalCostDto.NumberOfBags,
+            saveStdAdditionalCostDto.ChargeType,
+            saveStdAdditionalCostDto.Miles,
+            saveStdAdditionalCostDto.RatePerMile,
+            saveStdAdditionalCostDto.FlatCharge);
     }
 
-    public static StdAdditionalCostDetailDto ToDetailDto(StdAdditionalCost row)
+    public static StdAdditionalCostDetailDto ToDetailDto(StdAdditionalCost cost, bool isReasonActive)
     {
-        ArgumentNullException.ThrowIfNull(row);
+        ArgumentNullException.ThrowIfNull(cost);
 
         return new StdAdditionalCostDetailDto
         {
-            Id = row.Id,
-            Date = row.Date,
+            Id = cost.Id,
+            Date = cost.Date,
 
-            ReasonId = row.ReasonId,
-            ReasonName = row.ReasonNameSnapshot,
+            ReasonId = cost.ReasonId,
+            ReasonCode = cost.ReasonCodeSnapshot,
+            ReasonText = cost.ReasonTextSnapshot,
+            IsReasonActive = isReasonActive,
 
-            NumberOfBags = row.NumberOfBags,
+            NumberOfBags = cost.NumberOfBags,
 
-            ChargeType = row.ChargeType,
-            Miles = row.Miles,
-            RatePerMile = row.RatePerMile,
-            FlatCharge = row.FlatCharge,
+            ChargeType = cost.ChargeType,
+            Miles = cost.Miles,
+            RatePerMile = cost.RatePerMile,
+            FlatCharge = cost.FlatCharge,
 
-            TotalValue = row.TotalValue ?? 0m,
+            TotalValue = cost.TotalValue ?? 0m,
         };
     }
 }

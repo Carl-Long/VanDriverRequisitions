@@ -8,7 +8,9 @@ public sealed class FeAdditionalCostDetailDto
     public DateOnly WeekEndingDate { get; init; }
 
     public Guid ReasonId { get; init; }
+    public string ReasonCode { get; init; } = string.Empty;
     public string ReasonText { get; init; } = string.Empty;
+    public bool IsReasonActive { get; init; }
     
     public ChargingOption ChargingOption { get; init; }
 

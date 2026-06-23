@@ -23,6 +23,7 @@ import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { formatDateGB } from "@/lib/format/date";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 
 type Props = {
     readonly: boolean;
@@ -240,13 +241,16 @@ function BanksAndBinsTable({
                             );
 
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+                            const hasInactiveLookup = row.isCollectionTypeActive === false || row.isLocationActive === false;
+                            const hasIssue = hasLimitIssue || hasInactiveLookup;
 
                             return (
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={cn(getEditableTableRowClassName({ readonly, hasIssue: hasLimitIssue }),
-                                        hasLimitIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
+                                    className={cn(
+                                        getEditableTableRowClassName({ readonly, hasIssue }),
+                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
                                     )}
                                 >
                                     <TableCell>
@@ -285,6 +289,9 @@ function BanksAndBinsTable({
                                                         {row.collectionTypeCode}
                                                     </span>
                                                 )}
+                                                {row.isCollectionTypeActive === false && (
+                                                    <InactiveLookupWarning label="collection type" />
+                                                )}
                                             </span>
                                         </EditableCellButton>
                                     </TableCell>
@@ -299,6 +306,10 @@ function BanksAndBinsTable({
                                                 <span className="text-xs text-muted-foreground">
                                                     {row.locationPostCode}
                                                 </span>
+                                            )}
+
+                                            {row.isLocationActive === false && (
+                                                <InactiveLookupWarning label="location" />
                                             )}
                                         </div>
                                     </TableCell>

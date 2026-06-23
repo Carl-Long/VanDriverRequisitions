@@ -24,6 +24,9 @@ export function createFeAdditionalCostFormSchema({
                 .nullable()
                 .refine((x) => x !== null, "Reason is required"),
 
+            reasonCode: z.string().nullable(),
+            isReasonActive: z.boolean(),
+
             reasonText: z.string().nullable(),
 
             chargingOption: z.enum(["Job", "Mileage"]),

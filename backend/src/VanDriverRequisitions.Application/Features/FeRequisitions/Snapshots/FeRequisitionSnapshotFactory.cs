@@ -130,7 +130,8 @@ public static class FeRequisitionSnapshotFactory
         {
             WeekEndingDate = cost.WeekEndingDate,
             ReasonId = cost.ReasonId,
-            ReasonText = cost.ReasonText,
+            ReasonCode = cost.ReasonCodeSnapshot,
+            ReasonText = cost.ReasonTextSnapshot,
             ChargingOption = cost.ChargingOption,
             TotalNumber = cost.TotalNumber,
             RatePerJob = cost.RatePerJob,

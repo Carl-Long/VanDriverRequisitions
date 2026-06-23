@@ -241,7 +241,78 @@ public sealed class StdRequisitionService(
         driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
         var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
 
-        return StdRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive);
+        var additionalCostReasonActiveMap =
+            await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
+
+        var collectionTypeActiveMap =
+            await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
+
+        var locationActiveMap =
+            await LoadLocationActiveMapAsync(requisition, cancellationToken);
+
+        return StdRequisitionMapper.MapRequisitionToDetailDto(
+            requisition,
+            driverSummary,
+            shopActive,
+            additionalCostReasonActiveMap,
+            collectionTypeActiveMap,
+            locationActiveMap);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
+    {
+        var reasonIds = requisition.AdditionalCosts
+            .Select(x => x.ReasonId)
+            .Distinct()
+            .ToList();
+
+        if (reasonIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        return await context.CostReasons
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => reasonIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+
+    private async Task<Dictionary<Guid, bool>> LoadCollectionTypeActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
+    {
+        var collectionTypeIds = requisition.CollectionChargesBanksAndBins
+            .Select(x => x.CollectionTypeId)
+            .Distinct()
+            .ToList();
+
+        if (collectionTypeIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        return await context.StdCollectionTypes
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => collectionTypeIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+
+    private async Task<Dictionary<Guid, bool>> LoadLocationActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken) {
+        var locationIds = requisition.CollectionChargesBanksAndBins
+            .Select(x => x.LocationId)
+            .Distinct()
+            .ToList();
+
+        if (locationIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        return await context.StdLocations
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(x => locationIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
     }
 
     private void SetOriginalRowVersion(StdRequisition requisition, byte[]? rowVersion)

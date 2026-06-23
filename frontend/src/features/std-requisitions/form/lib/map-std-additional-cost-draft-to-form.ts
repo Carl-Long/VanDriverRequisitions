@@ -8,7 +8,9 @@ export function mapStdAdditionalCostDraftToForm(
         date: row.date,
 
         reasonId: row.reasonId,
-        reasonName: row.reasonName,
+        reasonCode: row.reasonCode,
+        reasonText: row.reasonText,
+        isReasonActive: row.isReasonActive,
 
         numberOfBags: row.numberOfBags,
 

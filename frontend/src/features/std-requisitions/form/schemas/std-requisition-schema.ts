@@ -17,10 +17,19 @@ const banksAndBinsRowSchema = z
             .nullable()
             .refine((value) => value !== null, "Collection type is required"),
 
+        collectionTypeLabel: z.string().nullable(),
+        collectionTypeCode: z.string().nullable(),
+        isCollectionTypeActive: z.boolean(),
+
         locationId: z
             .string()
             .nullable()
             .refine((value) => value !== null, "Location is required"),
+
+
+        locationLabel: z.string().nullable(),
+        locationPostCode: z.string().nullable(),
+        isLocationActive: z.boolean(),
 
         numberOfBags: z.number().int().min(0).nullable(),
 
@@ -358,7 +367,9 @@ const additionalCostRowSchema = z
             .nullable()
             .refine((value) => value !== null, "Reason is required"),
 
-        reasonName: z.string().nullable(),
+        reasonCode: z.string().nullable(),
+        reasonText: z.string().nullable(),
+        isReasonActive: z.boolean(),
 
         numberOfBags: z
             .number()

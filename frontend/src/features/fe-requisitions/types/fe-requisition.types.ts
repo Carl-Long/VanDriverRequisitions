@@ -113,7 +113,9 @@ export type FeAdditionalCost = {
     id: string | null;
     weekEndingDate: string;
     reasonId: string;
+    reasonCode: string;
     reasonText: string;
+    isReasonActive: boolean;
     chargingOption: ChargingOption;
     totalNumber: number | null;
     ratePerJob: number | null;

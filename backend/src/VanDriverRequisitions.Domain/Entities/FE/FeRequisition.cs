@@ -325,7 +325,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 existing.Update(
                     incoming.WeekEndingDate,
                     incoming.ReasonId,
-                    incoming.ReasonText,
+                    incoming.ReasonCodeSnapshot,
+                    incoming.ReasonTextSnapshot,
                     incoming.ChargingOption,
                     incoming.TotalNumber,
                     incoming.RatePerJob,
@@ -337,13 +338,14 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 var additionalCost = FeAdditionalCost.Create(
                     incoming.WeekEndingDate,
                     incoming.ReasonId,
-                    incoming.ReasonText,
+                    incoming.ReasonCodeSnapshot,
+                    incoming.ReasonTextSnapshot,
                     incoming.ChargingOption,
                     incoming.TotalNumber,
                     incoming.RatePerJob,
                     incoming.Miles,
                     incoming.RatePerMile);
-
+                
                 _feAdditionalCosts.Add(additionalCost);
             }
         }

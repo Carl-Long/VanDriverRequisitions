@@ -8,7 +8,9 @@ export function createEmptyStdAdditionalCostForm(
         date: date ?? new Date(),
 
         reasonId: null,
-        reasonName: null,
+        reasonCode: null,
+        reasonText: null,
+        isReasonActive: true,
 
         numberOfBags: null,
 

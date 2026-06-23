@@ -17,10 +17,12 @@ import type { ChargingOption } from "@/features/fe-requisitions/types/fe-requisi
 import { createEmptyFeAdditionalCostForm } from "../lib/create-empty-fe-additional-cost-form";
 import { createFeAdditionalCostFormSchema } from "../schemas/create-fe-additional-cost-form-schema";
 import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
-import { FeReasonField } from "../form-fields/fe-reason-field";
 import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
+import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
+import { FASCIAS } from "@/lib/constants/fascias";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -143,16 +145,25 @@ export function FeAdditionalCostDrawer({
                     />
                 </Field>
 
-                <FeReasonField
+                <CostReasonField
+                    fascia={FASCIAS.FE}
                     required
                     value={form.reasonId}
-                    label={form.reasonText}
+                    reasonCode={form.reasonCode}
+                    reasonText={form.reasonText}
+                    isReasonActive={form.isReasonActive}
                     error={errors["reasonId"]}
-                    onChange={(value, label) => {
+                    onChange={(value, reason) => {
                         setForm((prev) => ({
                             ...prev,
                             reasonId: value,
-                            reasonText: label,
+                            reasonCode: reason?.code ?? null,
+                            reasonText: reason?.reason ?? null,
+                            isReasonActive: resolveSelectedLookupActiveState({
+                                previousId: prev.reasonId,
+                                previousIsActive: prev.isReasonActive,
+                                nextId: value,
+                            }),
                         }));
 
                         clearError("reasonId");

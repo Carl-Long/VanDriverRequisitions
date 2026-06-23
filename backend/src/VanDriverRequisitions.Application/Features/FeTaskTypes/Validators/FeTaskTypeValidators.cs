@@ -14,7 +14,7 @@ public class CreateFeTaskTypeDtoValidator : AbstractValidator<CreateFeTaskTypeDt
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches(@"^[A-Z0-9_-]+$").WithMessage("Code must contain only uppercase letters, numbers, hyphens, and underscores.");
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
     }
 }
 
@@ -29,6 +29,6 @@ public class UpdateFeTaskTypeDtoValidator : AbstractValidator<UpdateFeTaskTypeDt
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Code is required.")
             .Length(1, 20).WithMessage("Code must be between 1 and 20 characters.")
-            .Matches(@"^[A-Z0-9_-]+$").WithMessage("Code must contain only uppercase letters, numbers, hyphens, and underscores.");
+            .Matches(@"^\d+$").WithMessage("Code must contain numbers only.");
     }
 }

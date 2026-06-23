@@ -25,6 +25,7 @@ export function createStdCollectionChargeBanksAndBinsFormSchema({
 
             collectionTypeLabel: z.string().nullable(),
             collectionTypeCode: z.string().nullable(),
+            isCollectionTypeActive: z.boolean(),
 
             locationId: z
                 .string()
@@ -33,6 +34,7 @@ export function createStdCollectionChargeBanksAndBinsFormSchema({
 
             locationLabel: z.string().nullable(),
             locationPostCode: z.string().nullable(),
+            isLocationActive: z.boolean(),
 
             numberOfBags: z
                 .number()
@@ -52,7 +54,7 @@ export function createStdCollectionChargeBanksAndBinsFormSchema({
                     "Rate per mile can have a maximum of 2 decimal places",
                 )
                 .nullable(),
-                
+
             flatCharge: z
                 .number()
                 .min(MIN_MONEY_AMOUNT, "Flat charge must be at least £0.01")

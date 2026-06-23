@@ -13,7 +13,9 @@ export function updateStdAdditionalCostDraftFromForm(
         date: form.date,
 
         reasonId: form.reasonId,
-        reasonName: form.reasonName,
+        reasonCode: form.reasonCode,
+        reasonText: form.reasonText,
+        isReasonActive: form.isReasonActive,
 
         numberOfBags: form.numberOfBags,
 

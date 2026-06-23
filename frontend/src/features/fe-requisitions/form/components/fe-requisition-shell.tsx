@@ -30,6 +30,7 @@ import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisi
 import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
+import { useFeRequisitionTabWarnings } from "../hooks/use-fe-requisition-tab-warnings";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -106,6 +107,8 @@ export function FeRequisitionShell({
     const [isSaving, setIsSaving] = useState(false);
 
     const isReadonly = mode === "readonly" || mode === "approval";
+
+    const tabWarnings = useFeRequisitionTabWarnings({ draft, isReadonly, limitRules, });
 
     const router = useRouter();
     const toast = useToast();
@@ -202,22 +205,6 @@ export function FeRequisitionShell({
         } finally {
             setIsSaving(false);
         }
-    }
-
-    function getTaskTypeTabHasWarning(taskTypeId: string) {
-        if (isReadonly) {
-            return false;
-        }
-
-        const tasks = draft.feGeneralTasks.filter((task) => task.taskTypeId === taskTypeId);
-
-        const limitRule = resolveFeRequisitionLimitRule({
-            rules: limitRules,
-            category: REQUISITION_ROW_CATEGORIES.GENERAL_TASK,
-            taskTypeId,
-        });
-
-        return tasks.some((task) => getGeneralTaskLimitStatus(task, limitRule).state !== "ok");
     }
 
     async function handleSaveDraft() {
@@ -380,7 +367,10 @@ export function FeRequisitionShell({
                 onActiveKeyChange={setActiveKey}
                 taskTypes={taskTypes}
                 submissionHistoryCount={draft.submissionHistory.length}
-                getTaskTypeTabHasWarning={getTaskTypeTabHasWarning}
+                getTaskTypeTabHasWarning={tabWarnings.getTaskTypeTabHasWarning}
+                mileageHasWarning={tabWarnings.mileageHasWarning}
+                transfersHasWarning={tabWarnings.transfersHasWarning}
+                additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
                     <FeRequisitionDetailsTab
                         readonly={isReadonly}

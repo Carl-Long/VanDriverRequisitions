@@ -4,16 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import {
-    TableHeader,
-    TableHeaderCell,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableRow,
-    TableHeaderRow,
-    Table,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -27,6 +18,9 @@ import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/g
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
+import { Alert } from "@/components/ui/alert";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { cn } from "@/lib/utils";
 
 type Props = {
     readonly: boolean;
@@ -193,16 +187,21 @@ function AdditionalCostsTable({
                                 mileageLimitRule,
                             );
 
+                            const hasInactiveLookup = row.isReasonActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+                            const hasIssue = hasLimitIssue || hasInactiveLookup;
 
                             return (
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={getEditableTableRowClassName({
-                                        readonly,
-                                        hasIssue: hasLimitIssue,
-                                    })}
+                                    className={cn(
+                                        getEditableTableRowClassName({
+                                            readonly,
+                                            hasIssue,
+                                        }),
+                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
+                                    )}
                                 >
                                     <TableCell>
                                         {formatDateGB(row.weekEndingDate) ?? "-"}
@@ -216,7 +215,13 @@ function AdditionalCostsTable({
                                                 onEdit={() => onEdit(row)}
                                                 className="font-medium"
                                             >
-                                                {row.reasonText ?? "-"}
+                                                {row.reasonCode && row.reasonText
+                                                    ? `${row.reasonCode} - ${row.reasonText}`
+                                                    : row.reasonText ?? "-"}
+
+                                                {row.isReasonActive === false && (
+                                                    <InactiveLookupWarning label="reason" />
+                                                )}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

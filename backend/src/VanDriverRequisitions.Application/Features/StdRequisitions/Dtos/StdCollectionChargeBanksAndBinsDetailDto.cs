@@ -10,10 +10,12 @@ public sealed class StdCollectionChargeBanksAndBinsDetailDto
     public Guid CollectionTypeId { get; init; }
     public required string CollectionTypeName { get; init; }
     public required string CollectionTypeCode { get; init; }
-
+    public bool IsCollectionTypeActive { get; init; }
+    
     public Guid LocationId { get; init; }
     public required string LocationName { get; init; }
     public required string LocationPostCode { get; init; }
+    public bool IsLocationActive { get; init; }
 
     public int? NumberOfBags { get; init; }
 

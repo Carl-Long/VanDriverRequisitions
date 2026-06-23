@@ -24,7 +24,11 @@ public class StdAdditionalCostConfiguration : IEntityTypeConfiguration<StdAdditi
         builder.Property(x => x.ReasonId)
             .IsRequired();
 
-        builder.Property(x => x.ReasonNameSnapshot)
+        builder.Property(x => x.ReasonCodeSnapshot)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(x => x.ReasonTextSnapshot)
             .IsRequired()
             .HasMaxLength(100);
 

@@ -43,10 +43,12 @@ export function mapStdRequisitionDetailToDraft(
             collectionTypeId: row.collectionTypeId,
             collectionTypeLabel: row.collectionTypeName,
             collectionTypeCode: row.collectionTypeCode,
+            isCollectionTypeActive: row.isCollectionTypeActive,
 
             locationId: row.locationId,
             locationLabel: row.locationName,
             locationPostCode: row.locationPostCode,
+            isLocationActive: row.isLocationActive,
 
             numberOfBags: row.numberOfBags,
 
@@ -130,7 +132,9 @@ export function mapStdRequisitionDetailToDraft(
             date: parseDateOnly(row.date),
 
             reasonId: row.reasonId,
-            reasonName: row.reasonName,
+            reasonCode: row.reasonCode,
+            reasonText: row.reasonText,
+            isReasonActive: row.isReasonActive,
 
             numberOfBags: row.numberOfBags,
 

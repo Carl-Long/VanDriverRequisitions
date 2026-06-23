@@ -6,10 +6,12 @@ export type StdCollectionChargeBanksAndBinsForm = {
     collectionTypeId: string | null;
     collectionTypeLabel: string | null;
     collectionTypeCode: string | null;
+    isCollectionTypeActive: boolean;
 
     locationId: string | null;
     locationLabel: string | null;
     locationPostCode: string | null;
+    isLocationActive: boolean;
 
     numberOfBags: number | null;
 

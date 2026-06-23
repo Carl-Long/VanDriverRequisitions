@@ -29,6 +29,70 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.HasSequence("StdRequisitionNumber");
 
+            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.CostReason", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatedByNameSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UpdatedByNameSnapshot")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Reason");
+
+                    b.HasIndex("Scope");
+
+                    b.HasIndex("Scope", "IsActive");
+
+                    b.ToTable("CostReasons", (string)null);
+                });
+
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.Common.RequisitionLimitRule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -304,13 +368,18 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ReasonCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<Guid>("ReasonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ReasonText")
+                    b.Property<string>("ReasonTextSnapshot")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("TotalNumber")
                         .HasColumnType("int");
@@ -337,6 +406,8 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     b.HasIndex("ChargingOption");
 
                     b.HasIndex("FeRequisitionId");
+
+                    b.HasIndex("ReasonCodeSnapshot");
 
                     b.HasIndex("ReasonId");
 
@@ -495,52 +566,6 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                             t.HasCheckConstraint("CK_FeMileages_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
-                });
-
-            modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.FE.FeReason", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CreatedByNameSnapshot")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UpdatedByNameSnapshot")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Reason")
-                        .IsUnique();
-
-                    b.ToTable("FeReasons", (string)null);
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.FE.FeRequisition", b =>
@@ -942,10 +967,15 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ReasonCodeSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<Guid>("ReasonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ReasonNameSnapshot")
+                    b.Property<string>("ReasonTextSnapshot")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -1292,6 +1322,11 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                     b.HasIndex("PostCode");
 
                     b.HasIndex("ShopId");
+
+                    b.HasIndex("ShopId", "CollectionTypeId", "IsActive");
+
+                    b.HasIndex("ShopId", "CollectionTypeId", "LocationName", "PostCode")
+                        .IsUnique();
 
                     b.ToTable("StdLocations", (string)null);
                 });
@@ -1955,17 +1990,21 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdLocation", b =>
                 {
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", "CollectionType")
                         .WithMany()
                         .HasForeignKey("CollectionTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", "Shop")
                         .WithMany()
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CollectionType");
+
+                    b.Navigation("Shop");
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdPickup", b =>

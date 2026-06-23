@@ -10,10 +10,12 @@ export function mapStdCollectionChargeBanksAndBinsDraftToForm(
         collectionTypeId: row.collectionTypeId,
         collectionTypeLabel: row.collectionTypeLabel,
         collectionTypeCode: row.collectionTypeCode,
+        isCollectionTypeActive: row.isCollectionTypeActive,
 
         locationId: row.locationId,
         locationLabel: row.locationLabel,
         locationPostCode: row.locationPostCode,
+        isLocationActive: row.isLocationActive,
 
         numberOfBags: row.numberOfBags,
 

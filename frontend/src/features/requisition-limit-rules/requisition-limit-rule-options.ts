@@ -1,6 +1,5 @@
 import type {
     RequisitionLimitRuleCategory,
-    RequisitionLimitRuleFascia,
 } from "./requisition-limit-rules-api";
 
 export const requisitionLimitRuleCategories = [
@@ -12,10 +11,6 @@ export const requisitionLimitRuleCategories = [
     "VanPack",
 ] as const satisfies readonly RequisitionLimitRuleCategory[];
 
-export const requisitionLimitRuleFascias = [
-    "Fe",
-    "Std",
-] as const satisfies readonly RequisitionLimitRuleFascia[];
 
 export const categoryOptions = [
     { value: "GeneralTask", label: "General Task" },
@@ -29,10 +24,4 @@ export const categoryOptions = [
     label: string;
 }>;
 
-export const fasciaOptions = [
-    { value: "Fe", label: "FE" },
-    { value: "Std", label: "STD" },
-] as const satisfies ReadonlyArray<{
-    value: RequisitionLimitRuleFascia;
-    label: string;
-}>;
+export {REQUISITION_FASCIAS as requisitionLimitRuleFascias, FASCIA_OPTIONS as fasciaOptions} from "@/lib/constants/fascias";

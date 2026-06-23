@@ -21,10 +21,12 @@ export function createStdCollectionChargeBanksAndBinsDraftFromForm({
         collectionTypeId: form.collectionTypeId,
         collectionTypeLabel: form.collectionTypeLabel,
         collectionTypeCode: form.collectionTypeCode,
-
+        isCollectionTypeActive: form.isCollectionTypeActive,
+        
         locationId: form.locationId,
         locationLabel: form.locationLabel,
         locationPostCode: form.locationPostCode,
+        isLocationActive: form.isLocationActive,
 
         numberOfBags: form.numberOfBags,
 

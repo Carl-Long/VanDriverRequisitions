@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
+import { RequisitionFascia } from "@/lib/constants/fascias";
 
 const BASE = "/api/v1/requisition-limit-rules";
 
@@ -10,7 +11,7 @@ export type RequisitionLimitRuleCategory =
     | "FlatCharge"
     | "VanPack";
 
-export type RequisitionLimitRuleFascia = "Fe" | "Std";
+export type RequisitionLimitRuleFascia = RequisitionFascia
 
 export type RequisitionLimitRuleSummary = {
     id: string;

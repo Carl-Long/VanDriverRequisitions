@@ -11,6 +11,15 @@ public static class StdRequisitionTestData
 
     public static readonly DateOnly RequisitionDate = new(2026, 6, 13);
     public static readonly DateOnly RowDate = new(2026, 6, 13);
+    
+    public static readonly Guid ParkingReasonId = new("f0000001-0001-0001-0001-000000000001");
+    public static readonly Guid ExtraMileageReasonId = new("f0000001-0001-0001-0001-000000000004");
+
+    public const string ParkingReasonCode = "10001";
+    public const string ParkingReasonText = "Parking";
+
+    public const string ExtraMileageReasonCode = "10004";
+    public const string ExtraMileageReasonText = "Extra mileage";
 
     // Default model totals:
     // Pickup mileage: 10 miles * £0.50 = £5.00
@@ -231,15 +240,17 @@ public static class StdRequisitionTestData
         Guid? id = null,
         DateOnly? date = null,
         Guid? reasonId = null,
-        string reasonName = "Parking",
+        string reasonCode = ParkingReasonCode,
+        string reasonText = ParkingReasonText,
         int numberOfBags = 2,
         decimal? flatCharge = 7.50m)
     {
         return new StdAdditionalCostUpdateModel(
             id,
             date ?? RowDate,
-            reasonId ?? Guid.NewGuid(),
-            reasonName,
+            reasonId ?? ParkingReasonId,
+            reasonCode,
+            reasonText,
             numberOfBags,
             StdChargeType.FlatCharge,
             Miles: null,
@@ -251,7 +262,8 @@ public static class StdRequisitionTestData
         Guid? id = null,
         DateOnly? date = null,
         Guid? reasonId = null,
-        string reasonName = "Extra mileage",
+        string reasonCode = ExtraMileageReasonCode,
+        string reasonText = ExtraMileageReasonText,
         int numberOfBags = 2,
         int? miles = 10,
         decimal? ratePerMile = 0.45m)
@@ -259,8 +271,9 @@ public static class StdRequisitionTestData
         return new StdAdditionalCostUpdateModel(
             id,
             date ?? RowDate,
-            reasonId ?? Guid.NewGuid(),
-            reasonName,
+            reasonId ?? ExtraMileageReasonId,
+            reasonCode,
+            reasonText,
             numberOfBags,
             StdChargeType.Mileage,
             miles,

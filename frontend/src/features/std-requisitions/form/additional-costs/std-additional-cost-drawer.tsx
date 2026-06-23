@@ -11,7 +11,6 @@ import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
-import { FeReasonField } from "@/features/fe-requisitions/form/form-fields/fe-reason-field";
 
 import { STD_CHARGE_TYPE } from "../../constants/std-charge-type.constants";
 import type { StdAdditionalCostForm } from "../types/std-additional-cost-form";
@@ -22,6 +21,9 @@ import { StdChargeFields } from "../components/std-charge-fields";
 import { StdChargeLimitSummary } from "../components/std-charge-limit-summary";
 import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
+import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
+import { FASCIAS } from "@/lib/constants/fascias";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -167,16 +169,25 @@ export function StdAdditionalCostDrawer({
                     />
                 </Field>
 
-                <FeReasonField
+                <CostReasonField
+                    fascia={FASCIAS.STD}
                     required
                     value={form.reasonId}
-                    label={form.reasonName}
+                    reasonCode={form.reasonCode}
+                    reasonText={form.reasonText}
+                    isReasonActive={form.isReasonActive}
                     error={errors.reasonId}
-                    onChange={(value, label) => {
+                    onChange={(value, reason) => {
                         setForm((prev) => ({
                             ...prev,
                             reasonId: value,
-                            reasonName: label,
+                            reasonCode: reason?.code ?? null,
+                            reasonText: reason?.reason ?? null,
+                            isReasonActive: resolveSelectedLookupActiveState({
+                                previousId: prev.reasonId,
+                                previousIsActive: prev.isReasonActive,
+                                nextId: value,
+                            }),
                         }));
 
                         clearError("reasonId");
@@ -229,7 +240,7 @@ export function StdAdditionalCostDrawer({
                 />
 
                 <StdTotalValueCard value={totalValue} />
-                
+
                 <DrawerFormActions>
                     <Button type="button" tone="accent" onClick={onClose}>
                         Cancel

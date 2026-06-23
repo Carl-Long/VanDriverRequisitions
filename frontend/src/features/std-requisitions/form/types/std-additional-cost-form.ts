@@ -4,8 +4,10 @@ export type StdAdditionalCostForm = {
     date: Date | null;
 
     reasonId: string | null;
-    reasonName: string | null;
-
+    reasonCode: string | null;
+    reasonText: string | null;
+    isReasonActive: boolean;
+    
     numberOfBags: number | null;
 
     chargeType: StdChargeType;
