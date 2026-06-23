@@ -1,5 +1,6 @@
-export type CostReasonScope = "Fe" | "Std" | "Shared";
-export type CostReasonFascia = "Fe" | "Std";
+import type { RequisitionFascia } from "@/lib/constants/fascias";
+
+export type CostReasonScope = RequisitionFascia | "Shared";
 
 export type CostReason = {
     id: string;

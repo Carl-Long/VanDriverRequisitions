@@ -1,12 +1,13 @@
 import { apiFetch } from "@/lib/api/client";
-import { CostReasonFascia, CostReasonLookup, CostReason, CreateCostReason, UpdateCostReason } from "./cost-reason.types";
+import { CostReasonLookup, CostReason, CreateCostReason, UpdateCostReason } from "./cost-reason.types";
+import { RequisitionFascia } from "@/lib/constants/fascias";
 
 const BASE = "/api/v1/cost-reasons";
 
-const lookupCache: Partial<Record<CostReasonFascia, CostReasonLookup[]>> = {};
-const pendingLookupRequests: Partial<Record<CostReasonFascia, Promise<CostReasonLookup[]>>> = {};
+const lookupCache: Partial<Record<RequisitionFascia, CostReasonLookup[]>> = {};
+const pendingLookupRequests: Partial<Record<RequisitionFascia, Promise<CostReasonLookup[]>>> = {};
 
-async function getCachedLookups(fascia: CostReasonFascia) {
+async function getCachedLookups(fascia: RequisitionFascia) {
     const cached = lookupCache[fascia];
 
     if (cached) {
@@ -39,7 +40,7 @@ export const costReasonsApi = {
 
     getById: (id: string) => apiFetch<CostReason>(`${BASE}/${id}`),
 
-    getLookups: (fascia: CostReasonFascia) => getCachedLookups(fascia),
+    getLookups: (fascia: RequisitionFascia) => getCachedLookups(fascia),
 
     clearLookupCache: () => {
         lookupCache.Fe = undefined;

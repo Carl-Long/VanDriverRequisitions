@@ -18,6 +18,7 @@ import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/g
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     readonly: boolean;
@@ -212,8 +213,8 @@ function AdditionalCostsTable({
                                                     : row.reasonText ?? "-"}
 
                                                 {row.isReasonActive === false && (
-                                                    <div className="mt-1 text-xs font-medium text-warning">
-                                                        Inactive reason
+                                                    <div className="text-xs font-medium text-warning mt-1">
+                                                        Inactive reason. If changed, it cannot be selected again.
                                                     </div>
                                                 )}
                                             </EditableCellButton>

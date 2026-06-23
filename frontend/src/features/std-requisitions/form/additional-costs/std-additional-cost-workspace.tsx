@@ -2,19 +2,9 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button/button";
-import {
-    TableHeader,
-    TableHeaderCell,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableRow,
-    TableHeaderRow,
-    Table,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -29,6 +19,7 @@ import { StdAdditionalCostDrawer } from "./std-additional-cost-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+
 
 type Props = {
     readonly: boolean;
@@ -279,15 +270,14 @@ function AdditionalCostsTable({
                                                 readonly={readonly}
                                                 ariaLabel="Edit additional cost row"
                                                 onEdit={() => onEdit(row)}
-                                                className="font-medium"
                                             >
                                                 {row.reasonCode && row.reasonText
                                                     ? `${row.reasonCode} - ${row.reasonText}`
                                                     : row.reasonText ?? "-"}
 
                                                 {row.isReasonActive === false && (
-                                                    <div className="mt-1 text-xs font-medium text-warning">
-                                                        Inactive reason
+                                                    <div className="text-xs font-medium text-warning mt-1">
+                                                        Inactive reason. If changed, it cannot be selected again.
                                                     </div>
                                                 )}
                                             </EditableCellButton>

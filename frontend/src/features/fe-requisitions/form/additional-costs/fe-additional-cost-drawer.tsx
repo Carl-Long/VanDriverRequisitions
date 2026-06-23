@@ -22,6 +22,7 @@ import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additio
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { RatePerMileField } from "@/features/requisitions-shared/components/form-fields/rate-per-mile-field";
 import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
+import { FASCIAS } from "@/lib/constants/fascias";
 
 type Props = {
     open: boolean;
@@ -145,7 +146,7 @@ export function FeAdditionalCostDrawer({
                 </Field>
 
                 <CostReasonField
-                    fascia="Fe"
+                    fascia={FASCIAS.FE}
                     required
                     value={form.reasonId}
                     reasonCode={form.reasonCode}

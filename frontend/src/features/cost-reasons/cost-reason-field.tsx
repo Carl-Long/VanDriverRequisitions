@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Field } from "@/components/ui/field/field";
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
-import { CostReasonLookup, CostReasonFascia } from "./cost-reason.types";
+import { CostReasonLookup } from "./cost-reason.types";
 import { costReasonsApi } from "./cost-reasons-api";
+import { RequisitionFascia } from "@/lib/constants/fascias";
 
 
 type ReasonOptionData = CostReasonLookup;
@@ -14,7 +15,7 @@ type ReasonOptionData = CostReasonLookup;
 type ReasonOption = ComboboxOption<ReasonOptionData>;
 
 type Props = {
-    fascia: CostReasonFascia;
+    fascia: RequisitionFascia;
     required?: boolean;
     disabled?: boolean;
     value: string | null;

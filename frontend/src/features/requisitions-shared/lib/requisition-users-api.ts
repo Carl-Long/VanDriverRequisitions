@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
+import { RequisitionFascia } from "@/lib/constants/fascias";
 import type { PagedResult } from "@/lib/types";
 
 const BASE = "/api/v1/requisition-users";
@@ -8,7 +9,7 @@ export type RequisitionUserLookup = {
     name: string;
 };
 
-export type RequisitionUserFascia = "Fe" | "Std";
+export type RequisitionUserFascia = RequisitionFascia;
 
 export type RequisitionUserSearchQuery = {
     search?: string;

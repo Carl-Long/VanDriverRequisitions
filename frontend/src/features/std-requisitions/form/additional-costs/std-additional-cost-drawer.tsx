@@ -22,6 +22,7 @@ import { StdChargeLimitSummary } from "../components/std-charge-limit-summary";
 import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
 import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
+import { FASCIAS } from "@/lib/constants/fascias";
 
 type Props = {
     open: boolean;
@@ -168,7 +169,7 @@ export function StdAdditionalCostDrawer({
                 </Field>
 
                 <CostReasonField
-                    fascia="Std"
+                    fascia={FASCIAS.STD}
                     required
                     value={form.reasonId}
                     reasonCode={form.reasonCode}

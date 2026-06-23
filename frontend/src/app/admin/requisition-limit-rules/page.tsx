@@ -16,6 +16,7 @@ import { Alert } from "@/components/ui/alert";
 import { RequisitionLimitRuleFormModal } from "@/features/requisition-limit-rules/requisition-limit-rule-form-modal";
 import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/requisition-limit-rule-table";
 import { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, RequisitionLimitRuleSummary, requisitionLimitRulesApi, } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { RequisitionFascia, FASCIAS } from "@/lib/constants/fascias";
 
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
@@ -59,9 +60,9 @@ export default function RequisitionLimitRulesPage() {
         loadTaskTypes();
     }, []);
 
-    const fasciaOrder: Record<string, number> = {
-        FE: 0,
-        STD: 1,
+    const fasciaOrder: Record<RequisitionFascia, number> = {
+        [FASCIAS.FE]: 0,
+        [FASCIAS.STD]: 1,
     };
 
     const categoryOrder: Record<string, number> = {
@@ -84,8 +85,7 @@ export default function RequisitionLimitRulesPage() {
             : rules;
 
         return [...results].sort((a, b) => {
-            const fasciaCompare =
-                (fasciaOrder[a.fasciaName] ?? 999) - (fasciaOrder[b.fasciaName] ?? 999);
+            const fasciaCompare = (fasciaOrder[a.fascia] ?? 999) - (fasciaOrder[b.fascia] ?? 999);
 
             if (fasciaCompare !== 0) {
                 return fasciaCompare;
