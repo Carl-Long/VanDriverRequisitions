@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import type { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, Requisit
 import { getApiErrorMessage } from "@/lib/api/client";
 
 import { categoryOptions, fasciaOptions, requisitionLimitRuleCategories, requisitionLimitRuleFascias } from "./requisition-limit-rule-options";
+import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 
 type FormValues = {
     category: RequisitionLimitRuleCategory | "";
@@ -121,6 +122,30 @@ export function RequisitionLimitRuleFormModal({
     const isGeneralTask = category === "GeneralTask";
     const maxRateLabel = category === "VanPack" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
 
+    const visibleTaskTypes = useMemo(
+        () =>
+            taskTypes.filter(
+                (taskType) =>
+                    taskType.isActive ||
+                    (isEditing && taskType.id === initial?.feTaskTypeId),
+            ),
+        [taskTypes, isEditing, initial?.feTaskTypeId],
+    );
+
+    const selectedTaskType = useMemo(
+        () =>
+            taskTypes.find(
+                (taskType) => taskType.id === initial?.feTaskTypeId,
+            ) ?? null,
+        [taskTypes, initial?.feTaskTypeId],
+    );
+
+    const showInactiveTaskTypeWarning =
+        isGeneralTask &&
+        isEditing &&
+        Boolean(initial?.feTaskTypeId) &&
+        selectedTaskType?.isActive === false;
+
     useEffect(() => {
         if (!open) {
             return;
@@ -213,12 +238,15 @@ export function RequisitionLimitRuleFormModal({
                         >
                             <option value="">None</option>
 
-                            {taskTypes.map((taskType) => (
+                            {visibleTaskTypes.map((taskType) => (
                                 <option key={taskType.id} value={taskType.id}>
-                                    {taskType.name}
+                                    {taskType.isActive ? taskType.name : `${taskType.name} (Inactive)`}
                                 </option>
                             ))}
                         </select>
+                        {showInactiveTaskTypeWarning && (
+                            <InactiveLookupWarning label="task type" variant="field" />
+                        )}
                     </Field>
                 )}
 

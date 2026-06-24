@@ -15,6 +15,7 @@ public static class RequisitionLimitRuleProjections
             CategoryName = x.Category.GetDisplayName(),
             FeTaskTypeId = x.FeTaskTypeId,
             FeTaskTypeName = x.FeTaskType != null ? x.FeTaskType.Name : null,
+            IsFeTaskTypeActive = x.FeTaskType != null ? x.FeTaskType.IsActive : null,
             Fascia = x.Fascia,
             FasciaName = x.Fascia.GetDisplayName(),
             MaxQuantity = x.MaxQuantity,

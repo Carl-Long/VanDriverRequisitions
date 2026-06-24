@@ -51,7 +51,7 @@ export default function RequisitionLimitRulesPage() {
         async function loadTaskTypes() {
             try {
                 setTaskTypeError(null);
-                const data = await feTaskTypesApi.getAll(false);
+                const data = await feTaskTypesApi.getAll(true);
                 setTaskTypes(data);
             } catch (err) {
                 setTaskTypeError(getApiErrorMessage(err, "Failed to load task types."));

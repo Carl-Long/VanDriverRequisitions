@@ -6,15 +6,9 @@ import { Surface } from "@/components/ui/surface";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import {
-    TableHeader,
-    TableHeaderRow,
-    TableHeaderCell,
-    TableBody,
-    TableRow,
-    TableCell,
-    Table,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderRow, TableHeaderCell, TableBody, TableRow, TableCell, Table, } from "@/components/ui/table/table";
+import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
+import { cn } from "@/lib/utils";
 
 type Props = {
     items: RequisitionLimitRuleSummary[];
@@ -22,6 +16,34 @@ type Props = {
 };
 
 export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
+
+    function hasTaskTypeIssue(item: RequisitionLimitRuleSummary) {
+        return (
+            item.category === "GeneralTask" &&
+            (!item.feTaskTypeName || item.isFeTaskTypeActive === false)
+        );
+    }
+
+    function renderTaskTypeCell(item: RequisitionLimitRuleSummary) {
+        if (item.category !== "GeneralTask") {
+            return <span className="text-muted-foreground">—</span>;
+        }
+
+        if (!item.feTaskTypeName) {
+            return <span className="text-warning">Missing task type</span>;
+        }
+
+        return (
+            <div>
+                <div>{item.feTaskTypeName}</div>
+
+                {item.isFeTaskTypeActive === false && (
+                    <InactiveLookupWarning label="task type" variant="table" />
+                )}
+            </div>
+        );
+    }
+
     return (
         <Surface className="overflow-x-auto">
             <Table className="w-full">
@@ -32,7 +54,7 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
                         <TableHeaderCell>Fascia</TableHeaderCell>
                         <TableHeaderCell align="right">Max Quantity</TableHeaderCell>
                         <TableHeaderCell align="right">Max Rate</TableHeaderCell>
-                        <TableHeaderCell align="right">Last Activity</TableHeaderCell>
+                        <TableHeaderCell>Last Activity</TableHeaderCell>
                         <TableHeaderCell align="right" nowrap>
                             Actions
                         </TableHeaderCell>
@@ -41,8 +63,16 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
 
                 <TableBody>
                     {items.map((item) => {
+                        const hasIssue = hasTaskTypeIssue(item);
+
                         return (
-                            <TableRow key={item.id} className="hover:bg-surface-hover">
+                            <TableRow
+                                key={item.id}
+                                className={cn(
+                                    "hover:bg-surface-hover",
+                                    hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
+                                )}
+                            >
                                 {/* Category */}
                                 <TableCell>
                                     <div className="font-medium text-foreground">
@@ -52,7 +82,7 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
 
                                 {/* Task Type */}
                                 <TableCell className="text-foreground-subtle">
-                                    {item.feTaskTypeName ?? ""}
+                                    {renderTaskTypeCell(item)}
                                 </TableCell>
 
                                 {/* Fascia */}
@@ -71,7 +101,7 @@ export function RequisitionLimitRuleTable({ items, onEdit }: Readonly<Props>) {
                                 </TableCell>
 
                                 {/* Last Modified */}
-                                <TableCell align="right">
+                                <TableCell>
                                     <ActivityMetaCell
                                         date={item.updatedAtUtc ?? item.createdAtUtc}
                                         user={

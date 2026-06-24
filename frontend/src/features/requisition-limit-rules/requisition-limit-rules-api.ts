@@ -19,6 +19,7 @@ export type RequisitionLimitRuleSummary = {
     categoryName: string;
     feTaskTypeId: string | null;
     feTaskTypeName: string | null;
+    isFeTaskTypeActive: boolean | null;
     fascia: RequisitionLimitRuleFascia;
     fasciaName: string;
     maxQuantity: number;
