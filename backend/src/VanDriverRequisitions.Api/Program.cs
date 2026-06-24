@@ -12,6 +12,8 @@ builder.Services.AddApi();
 builder.Services.AddAppAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAppRateLimiting();
+
 
 if (builder.Environment.IsDevelopment())
 {
@@ -45,6 +47,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Services;
@@ -15,6 +17,7 @@ namespace VanDriverRequisitions.Api.Controllers.FE;
 public class FeRequisitionsController(IFeRequisitionService feRequisitionService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -22,6 +25,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         return Ok(result);
     }
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -29,8 +33,18 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         var result = await feRequisitionService.GetByIdAsync(id, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpGet("submissions/{submissionId:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
+    [ProducesResponseType(typeof(FeRequisitionSubmissionDetailDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSubmission(Guid submissionId, CancellationToken cancellationToken)
+    {
+        var result = await feRequisitionService.GetSubmissionAsync(submissionId, cancellationToken);
+        return Ok(result);
+    }
 
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
@@ -41,6 +55,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -55,6 +70,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
 
     [HttpPost("submit")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SubmitNew([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
@@ -65,6 +81,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
 
     [HttpPost("{id:guid}/submit")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -74,16 +91,9 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
         return Ok(result);
     }
 
-    [HttpGet("submissions/{submissionId:guid}")]
-    [ProducesResponseType(typeof(FeRequisitionSubmissionDetailDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSubmission(Guid submissionId, CancellationToken cancellationToken)
-    {
-        var result = await feRequisitionService.GetSubmissionAsync(submissionId, cancellationToken);
-        return Ok(result);
-    }
-
     [HttpPost("{id:guid}/approve")]
     [Authorize(Policy = Policies.CanApproveRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -97,6 +107,7 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
 
     [HttpPost("{id:guid}/reject")]
     [Authorize(Policy = Policies.CanApproveRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
@@ -14,6 +16,7 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 public class RequisitionLimitRulesController(IRequisitionLimitRuleService requisitionLimitRuleService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(List<RequisitionLimitRuleSummaryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<RequisitionLimitRuleSummaryDto>>> GetAll(CancellationToken cancellationToken)
     {
@@ -22,6 +25,7 @@ public class RequisitionLimitRulesController(IRequisitionLimitRuleService requis
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RequisitionLimitRuleSummaryDto>> GetById(
@@ -34,6 +38,7 @@ public class RequisitionLimitRulesController(IRequisitionLimitRuleService requis
 
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -48,6 +53,7 @@ public class RequisitionLimitRulesController(IRequisitionLimitRuleService requis
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

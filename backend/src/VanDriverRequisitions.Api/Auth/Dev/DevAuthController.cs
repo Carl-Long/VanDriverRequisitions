@@ -2,7 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using VanDriverRequisitions.Api.RateLimiting;
 
 namespace VanDriverRequisitions.Api.Auth.Dev;
 
@@ -11,6 +13,7 @@ namespace VanDriverRequisitions.Api.Auth.Dev;
 public class DevAuthController : ControllerBase
 {
     [HttpPost("token")]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     public IActionResult Token(DevLoginRequest request)
     {
         var user = DevUserStore.Get(request.Email);

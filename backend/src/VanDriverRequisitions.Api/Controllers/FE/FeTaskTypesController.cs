@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Dtos;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Services;
@@ -11,10 +13,10 @@ namespace VanDriverRequisitions.Api.Controllers.FE;
 [ApiController]
 [Route("api/v{version:apiVersion}/fe-task-types")]
 [Authorize]
-public class FeTaskTypesController(
-    IFeTaskTypeService feTaskTypeService) : ControllerBase
+public class FeTaskTypesController(IFeTaskTypeService feTaskTypeService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public async Task<ActionResult<List<FeTaskTypeSummaryDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
         var feTaskTypes = await feTaskTypeService.GetAllAsync(includeInactive, cancellationToken);
@@ -22,6 +24,7 @@ public class FeTaskTypesController(
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<FeTaskTypeSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -32,6 +35,7 @@ public class FeTaskTypesController(
     
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -43,6 +47,7 @@ public class FeTaskTypesController(
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(FeTaskTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -58,6 +63,7 @@ public class FeTaskTypesController(
 
     [HttpPost("{id:guid}/activate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Activate([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -67,6 +73,7 @@ public class FeTaskTypesController(
 
     [HttpPost("{id:guid}/deactivate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Deactivate([FromRoute] Guid id, CancellationToken cancellationToken)
     {

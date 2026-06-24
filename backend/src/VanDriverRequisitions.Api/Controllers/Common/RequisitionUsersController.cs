@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Features.Users.Dtos;
 using VanDriverRequisitions.Application.Features.Users.Services;
 
@@ -14,6 +16,7 @@ public class RequisitionUsersController(IRequisitionUserService requisitionUserS
 {
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public async Task<IActionResult> Search([FromQuery] RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default)
     {
         var result = await requisitionUserService.SearchAsync(query, cancellationToken);

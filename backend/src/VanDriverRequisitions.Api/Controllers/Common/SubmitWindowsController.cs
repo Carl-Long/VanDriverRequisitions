@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
@@ -14,6 +16,7 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 public class SubmitWindowsController(ISubmitWindowService submitWindowService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public async Task<IActionResult> GetAll([FromQuery] SubmitWindowQueryDto query, CancellationToken cancellationToken = default)
     {
         var result = await submitWindowService.GetAllAsync(query, cancellationToken);
@@ -21,6 +24,7 @@ public class SubmitWindowsController(ISubmitWindowService submitWindowService) :
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SubmitWindowSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -28,9 +32,19 @@ public class SubmitWindowsController(ISubmitWindowService submitWindowService) :
         var submitWindow = await submitWindowService.GetByIdAsync(id, cancellationToken);
         return Ok(submitWindow);
     }
+    
+    [HttpGet("status")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
+    [ProducesResponseType(typeof(SubmitWindowStatusDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStatus(CancellationToken cancellationToken)
+    {
+        var status = await submitWindowService.GetStatusAsync(cancellationToken);
+        return Ok(status);
+    }
 
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -43,6 +57,7 @@ public class SubmitWindowsController(ISubmitWindowService submitWindowService) :
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(SubmitWindowSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -58,19 +73,12 @@ public class SubmitWindowsController(ISubmitWindowService submitWindowService) :
 
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         await submitWindowService.DeleteAsync(id, cancellationToken);
         return NoContent();
-    }
-    
-    [HttpGet("status")]
-    [ProducesResponseType(typeof(SubmitWindowStatusDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStatus(CancellationToken cancellationToken)
-    {
-        var status = await submitWindowService.GetStatusAsync(cancellationToken);
-        return Ok(status);
     }
 }
