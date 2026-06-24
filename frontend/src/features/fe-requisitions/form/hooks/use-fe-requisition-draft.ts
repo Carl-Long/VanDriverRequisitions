@@ -260,6 +260,10 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
         }));
     }
 
+    function replaceDraft(nextDraft: FeRequisitionDraft) {
+        setDraft(nextDraft);
+    }
+
     return {
         draft,
         subtotal,
@@ -284,6 +288,8 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
 
         addAdditionalCost,
         updateAdditionalCost,
-        removeAdditionalCost
+        removeAdditionalCost,
+
+        replaceDraft,
     };
 }
