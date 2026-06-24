@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
-import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
@@ -31,6 +30,7 @@ import type { RequisitionSaveAction } from "@/features/requisitions-shared/types
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
+import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -355,15 +355,7 @@ export function FeRequisitionShell({
                 onReject={handleRejectRequest}
             />
 
-            {errors.form && (
-                <Alert tone="danger">
-                    <ul className="list-disc space-y-1 pl-5">
-                        {[...new Set(errors.form.split("\n").filter(Boolean))].map((message) => (
-                            <li key={message}>{message}</li>
-                        ))}
-                    </ul>
-                </Alert>
-            )}
+            <RequisitionFormErrorAlert message={errors.form} />
 
             <FeRequisitionTabs
                 activeKey={activeKey}

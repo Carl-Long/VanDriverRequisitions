@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Info, Plus } from "lucide-react";
-
+import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button/button";
-import { AppDrawer, DrawerFormActions } from "@/components/ui/drawer";
+import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
@@ -21,6 +19,7 @@ import {
 } from "../lib/calculate-std-collection-van-pack-form";
 import { createStdCollectionVanPackFormSchema } from "../schemas/create-std-collection-van-pack-form-schema";
 import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
+import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
 
 type Props = {
     open: boolean;
@@ -245,32 +244,12 @@ export function StdCollectionVanPackDrawer({
                         </span>
                     </div>
                 </div>
-                <DrawerFormActions>
-                    <Button type="button" tone="accent" onClick={onClose}>
-                        Cancel
-                    </Button>
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                        <Button
-                            type="button"
-                            className="min-w-[160px]"
-                            variant="outline"
-                            onClick={() => saveForm("close")}
-                        >
-                            {isEditMode ? "Update & Close" : "Add & Close"}
-                        </Button>
-
-                        {!isEditMode && (
-                            <Button
-                                type="submit"
-                                className="min-w-[160px]"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add & Create Another
-                            </Button>
-                        )}
-                    </div>
-                </DrawerFormActions>
+                <RequisitionDrawerFormActions
+                    isEditMode={isEditMode}
+                    onCancel={onClose}
+                    onSaveAndClose={() => saveForm("close")}
+                />
             </form>
         </AppDrawer>
     );

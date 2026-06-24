@@ -32,6 +32,7 @@ import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
 import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
 import { useStdRequisitionTabWarnings } from "../hooks/use-std-requisition-tab-warnings";
+import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -359,15 +360,7 @@ export function StdRequisitionShell({
                 onReject={handleRejectRequest}
             />
 
-            {errors.form && (
-                <Alert tone="danger">
-                    <ul className="list-disc space-y-1 pl-5">
-                        {[...new Set(errors.form.split("\n").filter(Boolean))].map((message) => (
-                            <li key={message}>{message}</li>
-                        ))}
-                    </ul>
-                </Alert>
-            )}
+            <RequisitionFormErrorAlert message={errors.form} />
 
             {!isReadonly && vanPackRateChangeMessage && (
                 <Alert tone="warning">
