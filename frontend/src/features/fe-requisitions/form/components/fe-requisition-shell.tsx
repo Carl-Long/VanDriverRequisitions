@@ -19,10 +19,7 @@ import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { Alert } from "@/components/ui/alert";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
-import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
-import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";
-import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
@@ -30,6 +27,10 @@ import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
 import { useFeRequisitionTabWarnings } from "../hooks/use-fe-requisition-tab-warnings";
+import type { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
+import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
+import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
+import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -42,13 +43,6 @@ type Props = {
     backHref?: string;
 };
 
-export type SaveAction =
-    | "saveAndContinue"
-    | "saveAndClose"
-    | "submit"
-    | "approve"
-    | "reject"
-    | null;
 
 export function FeRequisitionShell({
     mode,
@@ -84,7 +78,7 @@ export function FeRequisitionShell({
         setRowVersion,
     } = useFeRequisitionDraft(initialDraft);
 
-    const [activeAction, setActiveAction] = useState<SaveAction>(null);
+    const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     function clearError(field: string) {
@@ -497,7 +491,7 @@ export function FeRequisitionShell({
             />
 
             {canSubmit && (
-                <FeRequisitionSubmitModal
+                <RequisitionSubmitModal
                     open={isSubmitModalOpen}
                     loading={activeAction === "submit"}
                     onClose={() => setIsSubmitModalOpen(false)}
@@ -507,14 +501,14 @@ export function FeRequisitionShell({
 
             {mode === "approval" && (
                 <>
-                    <FeRequisitionApproveModal
+                    <RequisitionApproveModal
                         open={isApproveModalOpen}
                         loading={activeAction === "approve"}
                         onClose={() => setIsApproveModalOpen(false)}
                         onConfirm={handleApproveConfirm}
                     />
 
-                    <FeRequisitionRejectModal
+                    <RequisitionRejectModal
                         open={isRejectModalOpen}
                         loading={activeAction === "reject"}
                         onClose={() => setIsRejectModalOpen(false)}
