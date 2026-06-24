@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Alert } from "@/components/ui/alert";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
 import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
@@ -16,7 +16,6 @@ import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-
 import { stdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
-import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 import { useToast } from "@/providers/toast-provider";
 import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
@@ -33,6 +32,8 @@ import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
 import { useStdRequisitionTabWarnings } from "../hooks/use-std-requisition-tab-warnings";
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
+import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
+import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -85,13 +86,24 @@ export function StdRequisitionShell({
         removeAdditionalCost,
     } = useStdRequisitionDraft(initialDraft);
 
-    const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
-    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const {
+        activeAction,
+        setActiveAction,
+        errors,
+        setErrors,
+        clearError,
+        clearAllErrors,
+        activeKey,
+        setActiveKey,
+        isSubmitModalOpen,
+        setIsSubmitModalOpen,
+        isApproveModalOpen,
+        setIsApproveModalOpen,
+        isRejectModalOpen,
+        setIsRejectModalOpen,
+        setIsSaving,
+    } = useRequisitionShellUiState({ initialActiveTabKey });
+
 
     const toast = useToast();
 
@@ -101,18 +113,6 @@ export function StdRequisitionShell({
         draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
-
-    function clearError(field: string) {
-        setErrors((prev) => {
-            if (!prev[field]) {
-                return prev;
-            }
-
-            const next = { ...prev };
-            delete next[field];
-            return next;
-        });
-    }
 
     const vanPackRateChangeMessage = getStdCollectionVanPackRateChangeMessage(draft.collectionVanPacks, stdVanPackLimitRule,);
 
@@ -136,7 +136,7 @@ export function StdRequisitionShell({
         }
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const request = mapStdRequisitionDraftToSaveRequest(draft);
@@ -154,14 +154,11 @@ export function StdRequisitionShell({
             toast.success(`Requisition #${saved.requisitionNumber} saved`);
 
             if (continueEditing) {
-                const editHref = `/standard-van-drivers/${saved.id}${backHref ? `?returnTo=${encodeURIComponent(backHref)}` : ""
-                    }`;
-
-                router.push(editHref);
+                router.push(withReturnTo(`/standard-van-drivers/${saved.id}`, backHref));
             } else {
                 router.push(backHref ?? "/standard-van-drivers");
             }
-
+            
             return saved;
         } catch (err) {
             if (err instanceof ApiError) {
@@ -190,7 +187,7 @@ export function StdRequisitionShell({
         }
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const request = mapStdRequisitionDraftToSaveRequest(draft);
@@ -279,7 +276,7 @@ export function StdRequisitionShell({
         setActiveAction("approve");
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const approved = await stdRequisitionsApi.approve(draft.requisitionId, {
@@ -313,7 +310,7 @@ export function StdRequisitionShell({
         setActiveAction("reject");
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const rejected = await stdRequisitionsApi.reject(draft.requisitionId, {

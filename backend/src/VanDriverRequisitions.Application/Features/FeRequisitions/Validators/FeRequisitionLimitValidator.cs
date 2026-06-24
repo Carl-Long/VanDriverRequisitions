@@ -34,10 +34,13 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
         return await context.RequisitionLimitRules
             .AsNoTracking()
             .Where(x =>
-                x.Category == RequisitionRowCategory.GeneralTask ||
-                x.Category == RequisitionRowCategory.Mileage ||
-                x.Category == RequisitionRowCategory.Transfer ||
-                x.Category == RequisitionRowCategory.AdditionalCost)
+                x.Fascia == Fascia.Fe &&
+                (
+                    x.Category == RequisitionRowCategory.GeneralTask ||
+                    x.Category == RequisitionRowCategory.Mileage ||
+                    x.Category == RequisitionRowCategory.Transfer ||
+                    x.Category == RequisitionRowCategory.AdditionalCost
+                ))
             .ToListAsync(cancellationToken);
     }
 
@@ -259,7 +262,7 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
     private static void ValidateSingleQuantity(int? quantity, int maxQuantity, string propertyName, string label, List<ValidationFailure> failures)
     {
         if ((quantity ?? 0) <= maxQuantity) return;
-        
+
         failures.Add(new ValidationFailure(propertyName, $"{label} exceeds maximum quantity of {maxQuantity}."));
     }
 

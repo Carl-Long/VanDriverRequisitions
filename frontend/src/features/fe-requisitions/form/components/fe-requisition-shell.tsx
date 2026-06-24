@@ -9,7 +9,7 @@ import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limi
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
 import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
@@ -26,11 +26,13 @@ import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
 import { useFeRequisitionTabWarnings } from "../hooks/use-fe-requisition-tab-warnings";
-import type { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
+import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
+import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -75,29 +77,27 @@ export function FeRequisitionShell({
         addAdditionalCost,
         updateAdditionalCost,
         removeAdditionalCost,
-        setRowVersion,
+        replaceDraft,
     } = useFeRequisitionDraft(initialDraft);
 
-    const [activeAction, setActiveAction] = useState<RequisitionSaveAction>(null);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const {
+        activeAction,
+        setActiveAction,
+        errors,
+        setErrors,
+        clearError,
+        clearAllErrors,
+        activeKey,
+        setActiveKey,
+        isSubmitModalOpen,
+        setIsSubmitModalOpen,
+        isApproveModalOpen,
+        setIsApproveModalOpen,
+        isRejectModalOpen,
+        setIsRejectModalOpen,
+        setIsSaving,
+    } = useRequisitionShellUiState({ initialActiveTabKey });
 
-    function clearError(field: string) {
-        setErrors((prev) => {
-            if (!prev[field]) {
-                return prev;
-            }
-
-            const next = { ...prev };
-            delete next[field];
-            return next;
-        });
-    }
-
-    const [activeKey, setActiveKey] = useState(initialActiveTabKey ?? "details");
-    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
 
     const isReadonly = mode === "readonly" || mode === "approval";
 
@@ -133,27 +133,30 @@ export function FeRequisitionShell({
         }
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
-            let saved;
+            let saved: FeRequisitionDetail;
 
             if (draft.requisitionId) {
                 saved = await feRequisitionsApi.update(draft.requisitionId, request);
-                setRowVersion(saved.rowVersion);
             } else {
                 saved = await feRequisitionsApi.create(request);
             }
 
+            replaceDraft(mapFeRequisitionDetailToDraft(saved));
+
             toast.success(`Requisition #${saved.requisitionNumber} saved`);
 
             if (continueEditing) {
-                router.push(`/home-van-drivers/${saved.id}`);
+                router.push(withReturnTo(`/home-van-drivers/${saved.id}`, backHref));
             } else {
-                router.push("/home-van-drivers");
+                router.push(backHref ?? "/home-van-drivers");
             }
+
+            return saved;
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
@@ -182,7 +185,7 @@ export function FeRequisitionShell({
         }
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
@@ -192,11 +195,11 @@ export function FeRequisitionShell({
                 : await feRequisitionsApi.submitNew(request);
 
             toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
-            router.push("/home-van-drivers");
+            router.push(backHref ?? "/home-van-drivers");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(err, "Failed to save requisition"),
+                    form: getApiErrorMessage(err, "Failed to submit requisition"),
                 });
 
                 return;
@@ -270,7 +273,7 @@ export function FeRequisitionShell({
         setActiveAction("approve");
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const approved = await feRequisitionsApi.approve(draft.requisitionId, {
@@ -282,7 +285,7 @@ export function FeRequisitionShell({
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(err, "Failed to save requisition"),
+                    form: getApiErrorMessage(err, "Failed to approve requisition"),
                 });
 
                 return;
@@ -306,7 +309,7 @@ export function FeRequisitionShell({
         setActiveAction("reject");
 
         try {
-            setErrors({});
+            clearAllErrors();
             setIsSaving(true);
 
             const rejected = await feRequisitionsApi.reject(draft.requisitionId, {
@@ -319,7 +322,7 @@ export function FeRequisitionShell({
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
-                    form: getApiErrorMessage(err, "Failed to save requisition"),
+                    form: getApiErrorMessage(err, "Failed to reject requisition"),
                 });
 
                 return;
