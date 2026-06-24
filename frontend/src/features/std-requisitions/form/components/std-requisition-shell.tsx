@@ -286,7 +286,7 @@ export function StdRequisitionShell({
             });
 
             toast.success(`Requisition #${approved.requisitionNumber} approved`);
-            router.push("/standard-van-drivers/approvals");
+            router.push(backHref ?? "/standard-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
@@ -321,7 +321,7 @@ export function StdRequisitionShell({
             });
 
             toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
-            router.push("/standard-van-drivers/approvals");
+            router.push(backHref ?? "/standard-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({

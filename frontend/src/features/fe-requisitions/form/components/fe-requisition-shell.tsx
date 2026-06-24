@@ -275,7 +275,7 @@ export function FeRequisitionShell({
             });
 
             toast.success(`Requisition #${approved.requisitionNumber} approved`);
-            router.push("/home-van-drivers/approvals");
+            router.push(backHref ?? "/home-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
@@ -312,7 +312,7 @@ export function FeRequisitionShell({
             });
 
             toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
-            router.push("/home-van-drivers/approvals");
+            router.push(backHref ?? "/home-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({

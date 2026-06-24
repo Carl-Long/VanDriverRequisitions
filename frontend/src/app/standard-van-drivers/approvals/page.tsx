@@ -21,6 +21,7 @@ import type { PagedResult } from "@/lib/types";
 import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
+import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function StdRequisitionApprovalsPage() {
     const router = useRouter();
@@ -77,6 +78,7 @@ export default function StdRequisitionApprovalsPage() {
     }, [page, authLoading, canApprove, debouncedReqNumber]);
 
     const items = data?.items ?? [];
+    const currentListHref = getCurrentPathWithSearch(pathname, searchParams);
 
     function updateSearchParams(nextRequisitionNumber: string, nextPage = 1) {
         const params = new URLSearchParams(searchParams.toString());
@@ -150,8 +152,8 @@ export default function StdRequisitionApprovalsPage() {
             {!loading && items.length > 0 && (
                 <StdRequisitionTable
                     items={items}
-                    getHref={(req) => `/standard-van-drivers/approvals/${req.id}`}
-                    onRowClick={(req) => router.push(`/standard-van-drivers/approvals/${req.id}`)}
+                    getHref={(req) => withReturnTo(`/standard-van-drivers/approvals/${req.id}`, currentListHref)}
+                    onRowClick={(req) => router.push(withReturnTo(`/standard-van-drivers/approvals/${req.id}`, currentListHref))}
                 />
             )}
 

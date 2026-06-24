@@ -15,6 +15,7 @@ import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-
 import { Printer } from "lucide-react";
 import { BackLink } from "@/components/ui/navigation-back-link";
 import { Button } from "@/components/ui/button/button";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function SubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -25,22 +26,20 @@ export default function SubmissionPage() {
 
     const searchParams = useSearchParams();
 
-    const returnTo = searchParams.get("returnTo");
+    const safeReturnTo = getSafeReturnTo(searchParams.get("returnTo"), ["/home-van-drivers"], "/home-van-drivers");
 
-    const safeReturnTo =
-        returnTo && returnTo.startsWith("/home-van-drivers") && !returnTo.startsWith("//")
-            ? returnTo
-            : null;
+    const cameFromApprovals = safeReturnTo.startsWith("/home-van-drivers/approvals");
 
     const backToRequisitionParams = new URLSearchParams();
 
     backToRequisitionParams.set("tab", "submission-history");
+    backToRequisitionParams.set("returnTo", safeReturnTo);
 
-    if (safeReturnTo) {
-        backToRequisitionParams.set("returnTo", safeReturnTo);
-    }
+    const backToRequisitionBaseHref = cameFromApprovals
+        ? `/home-van-drivers/approvals/${submission?.requisitionId}`
+        : `/home-van-drivers/${submission?.requisitionId}`;
 
-    const backToRequisitionHref = `/home-van-drivers/${submission?.requisitionId}?${backToRequisitionParams.toString()}`;
+    const backToRequisitionHref = `${backToRequisitionBaseHref}?${backToRequisitionParams.toString()}`;
 
     if (loading) {
         return (

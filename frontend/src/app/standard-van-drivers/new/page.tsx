@@ -11,17 +11,13 @@ import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/co
 import { useAuth } from "@/providers/auth-provider";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function NewStdRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
     const searchParams = useSearchParams();
 
-    const returnTo = searchParams.get("returnTo");
-
-    const backHref =
-        returnTo && returnTo.startsWith("/standard-van-drivers") && !returnTo.startsWith("//")
-            ? returnTo
-            : "/standard-van-drivers";
+    const backHref = getSafeReturnTo(searchParams.get("returnTo"), ["/standard-van-drivers"], "/standard-van-drivers");
 
     const { status: submitWindowStatus, loading: submitWindowStatusLoading, error: submitWindowStatusError, } = useSubmitWindowStatus();
     const { limitRules, loading: limitRulesLoading, error: limitRulesError, } = useRequisitionLimitRules();

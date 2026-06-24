@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
@@ -14,9 +14,16 @@ import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/f
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
+    const searchParams = useSearchParams();
+
+    const backHref = getSafeReturnTo(searchParams.get("returnTo"), ["/home-van-drivers/approvals"], "/home-van-drivers/approvals");
+
+    const tabParam = searchParams.get("tab");
+    const initialActiveTabKey = tabParam === "submission-history" ? "submission-history" : undefined;
     const { user, loading: authLoading } = useAuth();
 
     const {
@@ -116,6 +123,8 @@ export default function Page() {
                 taskTypes={taskTypes}
                 submitWindowStatus={null}
                 submitWindowStatusLoading={false}
+                initialActiveTabKey={initialActiveTabKey}
+                backHref={backHref}
             />
         </PageContainer>
     );

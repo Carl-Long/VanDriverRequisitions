@@ -20,6 +20,7 @@ import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/comp
 import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
 import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
+import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
@@ -77,6 +78,7 @@ export default function FeRequisitionApprovalsPage() {
     }, [page, authLoading, canApprove, debouncedReqNumber]);
 
     const items = data?.items ?? [];
+    const currentListHref = getCurrentPathWithSearch(pathname, searchParams);
 
     function updateSearchParams(nextRequisitionNumber: string, nextPage = 1) {
         const params = new URLSearchParams(searchParams.toString());
@@ -150,8 +152,8 @@ export default function FeRequisitionApprovalsPage() {
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
-                    getHref={(req) => `/home-van-drivers/approvals/${req.id}`}
-                    onRowClick={(req) => router.push(`/home-van-drivers/approvals/${req.id}`)}
+                    getHref={(req) => withReturnTo(`/home-van-drivers/approvals/${req.id}`, currentListHref)}
+                    onRowClick={(req) => router.push(withReturnTo(`/home-van-drivers/approvals/${req.id}`, currentListHref))}
                 />
             )}
 
