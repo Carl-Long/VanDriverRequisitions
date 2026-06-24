@@ -3,11 +3,11 @@
 import type { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import type { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { StatusPill } from "../../list/components/status-pill";
-import { FeRequisitionActions } from "./fe-requisition-actions";
-import { FeRequisitionApprovalActions } from "../approval/fe-requisition-approval-actions";
 import type { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
-import type { SaveAction } from "../components/fe-requisition-shell";
 import { RequisitionHeader } from "@/features/requisitions-shared/components/requisition-header";
+import { RequisitionActions } from "@/features/requisitions-shared/components/requisition-actions";
+import { RequisitionApprovalActions } from "@/features/requisitions-shared/components/requisition-approval-actions";
+import type { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -17,7 +17,7 @@ type Props = {
     subtotal: number;
     submitWindowStatus: SubmitWindowStatus | null;
     submitStatusLoading: boolean;
-    activeAction: SaveAction;
+    activeAction: RequisitionSaveAction;
     canSubmit: boolean;
     submittedAtUtc: string | null;
     submittedByNameSnapshot: string | null;
@@ -72,7 +72,7 @@ export function FeRequisitionHeader({
 
     const actions =
         mode !== "readonly" && mode !== "approval" ? (
-            <FeRequisitionActions
+            <RequisitionActions
                 activeAction={activeAction}
                 canSubmit={canSubmit}
                 onSaveDraft={onSaveDraft}
@@ -80,7 +80,7 @@ export function FeRequisitionHeader({
                 onSubmit={onSubmit}
             />
         ) : canApproveOrReject ? (
-            <FeRequisitionApprovalActions
+            <RequisitionApprovalActions
                 activeAction={activeAction}
                 onApprove={onApprove}
                 onReject={onReject}

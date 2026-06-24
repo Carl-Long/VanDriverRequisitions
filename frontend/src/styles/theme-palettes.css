@@ -46,11 +46,11 @@
     --warning-surface-hover: 254 243 199;
     --warning-border: 253 224 71;
 
-    --danger: 225 29 72;
+    --danger: 190 24 93;
     --danger-foreground: 255 255 255;
-    --danger-surface: 255 241 242;
-    --danger-surface-hover: 255 228 230;
-    --danger-border: 254 202 202;
+    --danger-surface: 253 242 248;
+    --danger-surface-hover: 252 231 243;
+    --danger-border: 251 207 232;
 
     --border: 226 232 240;
     --border-subtle: 241 245 249;
@@ -110,11 +110,11 @@
     --warning-surface-hover: 92 52 12;
     --warning-border: 245 158 11;
 
-    --danger: 225 29 72;
+    --danger: 190 24 93;
     --danger-foreground: 255 255 255;
-    --danger-surface: 76 12 35;
-    --danger-surface-hover: 104 18 50;
-    --danger-border: 225 29 72;
+    --danger-surface: 76 5 45;
+    --danger-surface-hover: 103 8 61;
+    --danger-border: 190 24 93;
 
     --border: 42 52 68;
     --border-subtle: 55 65 81;
