@@ -9,6 +9,7 @@ export const THEMES = [
     { label: "Dark Brand", value: "dark-brand" },
     { label: "Light Mono", value: "light-mono" },
     { label: "Dark Mono", value: "dark-mono" },
+    { label: "Electric Night", value: "electric-night" },
     { label: "High Contrast", value: "high-contrast" },
 ] as const;
 
@@ -33,3 +34,14 @@ export const TEXT_SIZES = [
 export type TextSizeValue = (typeof TEXT_SIZES)[number]["value"];
 
 export const DEFAULT_TEXT_SIZE = "default";
+
+export const FONT_CHOICES = [
+    { label: "Inter", value: "inter" },
+    { label: "System", value: "system" },
+    { label: "Serif", value: "serif" },
+    { label: "Mono", value: "mono" },
+] as const;
+
+export type FontChoiceValue = (typeof FONT_CHOICES)[number]["value"];
+
+export const DEFAULT_FONT_CHOICE = "inter";

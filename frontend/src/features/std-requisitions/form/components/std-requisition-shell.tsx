@@ -13,7 +13,7 @@ import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors"
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
-import { createStdRequisitionSchema } from "../schemas/std-requisition-schema";
+import { stdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
@@ -126,7 +126,7 @@ export function StdRequisitionShell({
     async function saveRequisition(
         continueEditing: boolean = false,
     ): Promise<StdRequisitionDetail | undefined> {
-        const result = createStdRequisitionSchema().safeParse(draft);
+        const result = stdRequisitionSchema.safeParse(draft);
 
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
@@ -180,7 +180,7 @@ export function StdRequisitionShell({
     }
 
     async function submitRequisition() {
-        const result = createStdRequisitionSchema().safeParse(draft);
+        const result = stdRequisitionSchema.safeParse(draft);
 
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
@@ -286,7 +286,7 @@ export function StdRequisitionShell({
             });
 
             toast.success(`Requisition #${approved.requisitionNumber} approved`);
-            router.push("/standard-van-drivers/approvals");
+            router.push(backHref ?? "/standard-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({
@@ -321,7 +321,7 @@ export function StdRequisitionShell({
             });
 
             toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
-            router.push("/standard-van-drivers/approvals");
+            router.push(backHref ?? "/standard-van-drivers/approvals");
         } catch (err) {
             if (err instanceof ApiError) {
                 setErrors({

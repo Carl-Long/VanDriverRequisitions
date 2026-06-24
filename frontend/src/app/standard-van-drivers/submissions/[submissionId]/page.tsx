@@ -17,6 +17,7 @@ import { StdSubmissionVanPacksTable } from "@/features/std-requisitions/std-subm
 import { StdSubmissionPickupsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-pickups-table";
 import { StdSubmissionTransfersTable } from "@/features/std-requisitions/std-submissions-view/std-submission-transfers-table";
 import { StdSubmissionAdditionalCostsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-additional-costs-table";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function StdSubmissionPage() {
     const params = useParams<{ submissionId: string }>();
@@ -24,22 +25,20 @@ export default function StdSubmissionPage() {
 
     const { data: submission, loading, error, notFound } = useStdSubmission(params.submissionId);
 
-    const returnTo = searchParams.get("returnTo");
+    const safeReturnTo = getSafeReturnTo(searchParams.get("returnTo"), ["/standard-van-drivers"], "/standard-van-drivers");
 
-    const safeReturnTo =
-        returnTo && returnTo.startsWith("/standard-van-drivers") && !returnTo.startsWith("//")
-            ? returnTo
-            : null;
+    const cameFromApprovals = safeReturnTo.startsWith("/standard-van-drivers/approvals");
 
     const backToRequisitionParams = new URLSearchParams();
 
     backToRequisitionParams.set("tab", "submission-history");
+    backToRequisitionParams.set("returnTo", safeReturnTo);
 
-    if (safeReturnTo) {
-        backToRequisitionParams.set("returnTo", safeReturnTo);
-    }
+    const backToRequisitionBaseHref = cameFromApprovals
+        ? `/standard-van-drivers/approvals/${submission?.requisitionId}`
+        : `/standard-van-drivers/${submission?.requisitionId}`;
 
-    const backToRequisitionHref = `/standard-van-drivers/${submission?.requisitionId}?${backToRequisitionParams.toString()}`;
+    const backToRequisitionHref = `${backToRequisitionBaseHref}?${backToRequisitionParams.toString()}`;
 
     if (loading) {
         return (

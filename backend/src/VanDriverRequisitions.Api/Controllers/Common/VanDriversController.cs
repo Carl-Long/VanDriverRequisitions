@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Services;
 
@@ -13,6 +15,7 @@ namespace VanDriverRequisitions.Api.Controllers.Common;
 public class VanDriversController(IVanDriverService vanDriverService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     public async Task<IActionResult> Search([FromQuery] VanDriverSearchQueryDto queryDto, CancellationToken cancellationToken = default)
     {
         var result = await vanDriverService.SearchAsync(queryDto, cancellationToken);
@@ -20,6 +23,7 @@ public class VanDriversController(IVanDriverService vanDriverService) : Controll
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(VanDriverLookupDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)

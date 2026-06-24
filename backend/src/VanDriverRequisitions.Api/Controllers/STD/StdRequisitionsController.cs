@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Services;
@@ -14,6 +16,7 @@ namespace VanDriverRequisitions.Api.Controllers.STD;
 public class StdRequisitionsController(IStdRequisitionService stdRequisitionService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] StdRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -22,6 +25,7 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -29,9 +33,20 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
         var result = await stdRequisitionService.GetByIdAsync(id, cancellationToken);
         return Ok(result);
     }
+    
+    [HttpGet("submissions/{submissionId:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
+    [ProducesResponseType(typeof(StdRequisitionSubmissionDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSubmission([FromRoute] Guid submissionId, CancellationToken cancellationToken)
+    {
+        var result = await stdRequisitionService.GetSubmissionAsync(submissionId, cancellationToken);
+        return Ok(result);
+    }
 
     [HttpPost]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
@@ -42,6 +57,7 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -54,6 +70,7 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
 
     [HttpPost("submit")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SubmitNew([FromBody] SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
@@ -64,6 +81,7 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
 
     [HttpPost("{id:guid}/submit")]
     [Authorize(Policy = Policies.CanCreateRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
@@ -73,18 +91,10 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
         var result = await stdRequisitionService.SubmitAsync(id, saveStdRequisitionDto, cancellationToken);
         return Ok(result);
     }
-
-    [HttpGet("submissions/{submissionId:guid}")]
-    [ProducesResponseType(typeof(StdRequisitionSubmissionDetailDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetSubmission([FromRoute] Guid submissionId, CancellationToken cancellationToken)
-    {
-        var result = await stdRequisitionService.GetSubmissionAsync(submissionId, cancellationToken);
-        return Ok(result);
-    }
-
+    
     [HttpPost("{id:guid}/approve")]
     [Authorize(Policy = Policies.CanApproveRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -98,6 +108,7 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
 
     [HttpPost("{id:guid}/reject")]
     [Authorize(Policy = Policies.CanApproveRequisitions)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdRequisitionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

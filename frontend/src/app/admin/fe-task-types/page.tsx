@@ -18,17 +18,35 @@ import { FeTaskType, feTaskTypesApi } from "@/features/fe-task-types/fe-task-typ
 import { TaskTypeFormModal } from "@/features/fe-task-types/task-type-form-modal";
 import { TaskTypeTable } from "@/features/fe-task-types/task-type-table";
 import { useCrudModal } from "@/hooks/use-crud-modal";
+import { useOptimisticActiveToggle } from "@/features/admin-shared/use-optimistic-active-toggle";
 
 export default function FeTaskTypesPage() {
     const [taskTypes, setTaskTypes] = useState<FeTaskType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
     const [search, setSearch] = useState("");
     const [showInactive, setShowInactive] = useState(false);
     const modal = useCrudModal<FeTaskType>();
 
     const toast = useToast();
+
+    const { pendingIds, toggleActive } = useOptimisticActiveToggle({
+        setItems: setTaskTypes,
+        showInactive,
+        activate: feTaskTypesApi.activate,
+        deactivate: feTaskTypesApi.deactivate,
+        onBeforeToggle: () => setError(null),
+        onSuccess: (taskType, nextIsActive) => {
+            toast.success(
+                nextIsActive
+                    ? `${taskType.name} activated`
+                    : `${taskType.name} deactivated`,
+            );
+        },
+        onError: (err) => {
+            setError(getApiErrorMessage(err, "Failed update task type"));
+        },
+    });
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -73,33 +91,17 @@ export default function FeTaskTypesPage() {
         await load();
     }
 
-    async function handleToggleActive(taskType: FeTaskType) {
-        try {
-            if (taskType.isActive) {
-                await feTaskTypesApi.deactivate(taskType.id);
-            } else {
-                await feTaskTypesApi.activate(taskType.id);
-            }
-            toast.success(
-                taskType.isActive ? `${taskType.name} deactivated` : `${taskType.name} activated`,
-            );
-            await load();
-        } catch (err) {
-            setError(getApiErrorMessage(err, "Failed update task type"));
-        }
-    }
-
     const emptyState = search.trim()
         ? {
-              icon: Search,
-              title: "No task types found",
-              description: "Try adjusting your search terms.",
-          }
+            icon: Search,
+            title: "No task types found",
+            description: "Try adjusting your search terms.",
+        }
         : {
-              icon: Plus,
-              title: "No task types yet",
-              description: "Create your first task type to get started.",
-          };
+            icon: Plus,
+            title: "No task types yet",
+            description: "Create your first task type to get started.",
+        };
 
     return (
         <PageContainer>
@@ -144,8 +146,9 @@ export default function FeTaskTypesPage() {
             {!loading && filtered.length > 0 && (
                 <TaskTypeTable
                     items={filtered}
+                    pendingIds={pendingIds}
                     onEdit={modal.openEdit}
-                    onToggleActive={handleToggleActive}
+                    onToggleActive={toggleActive}
                 />
             )}
 

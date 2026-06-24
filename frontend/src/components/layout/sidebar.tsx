@@ -18,18 +18,22 @@ import { IconButton } from "../ui/button/icon-button";
 export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(true);
 
     const { user } = useAuth();
     const showMainNavigation = canCreateRequisitions(user);
     const showApprovals = canApproveRequisitions(user);
     const showAdmin = canManageConfiguration(user);
 
-    // Auto-collapse on small screens
+    // Auto-collapse on small screens, but only persist deliberate desktop toggles.
     useEffect(() => {
         const mq = globalThis.matchMedia("(min-width: 1024px)");
 
         const sync = () => {
-            if (mq.matches) {
+            const desktop = mq.matches;
+            setIsDesktop(desktop);
+
+            if (desktop) {
                 const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
 
                 setCollapsed(saved === "true");
@@ -45,12 +49,21 @@ export function Sidebar() {
         return () => mq.removeEventListener("change", sync);
     }, []);
 
-    // Persist desktop collapse state
-    useEffect(() => {
-        if (globalThis.matchMedia("(min-width: 1024px)").matches) {
-            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, String(collapsed));
+    const collapseSidebar = () => {
+        setCollapsed(true);
+
+        if (isDesktop) {
+            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "true");
         }
-    }, [collapsed]);
+    };
+
+    const expandSidebar = () => {
+        setCollapsed(false);
+
+        if (isDesktop) {
+            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "false");
+        }
+    };
 
     const isActive = (href: string) => pathname === href;
 
@@ -59,7 +72,7 @@ export function Sidebar() {
             className={cn(
                 "flex flex-col h-[calc(100vh-64px)]",
                 "border-r border-border bg-surface",
-                "overflow-hidden transition-all duration-300 ease-in-out",
+                "overflow-visible transition-all duration-300 ease-in-out",
                 collapsed ? "w-16" : "w-60",
             )}
         >
@@ -70,7 +83,7 @@ export function Sidebar() {
                         <IconButton
                             size="md"
                             variant="ghost"
-                            onClick={() => setCollapsed(false)}
+                            onClick={expandSidebar}
                             aria-label="Expand sidebar"
                         >
                             <PanelLeft size={18} className="rotate-180" />
@@ -94,7 +107,7 @@ export function Sidebar() {
                         <IconButton
                             size="md"
                             variant="ghost"
-                            onClick={() => setCollapsed(true)}
+                            onClick={collapseSidebar}
                             aria-label="Collapse sidebar"
                         >
                             <PanelLeft size={18} />

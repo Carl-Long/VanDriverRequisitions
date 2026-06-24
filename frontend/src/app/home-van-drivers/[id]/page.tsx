@@ -15,17 +15,13 @@ import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/f
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function Page() {
     const params = useParams<{ id: string }>();
     const { user } = useAuth();
     const searchParams = useSearchParams();
-    const returnTo = searchParams.get("returnTo");
-    const backToListHref =
-        returnTo && returnTo.startsWith("/home-van-drivers") && !returnTo.startsWith("//")
-            ? returnTo
-            : "/home-van-drivers";
-
+    const backToListHref = getSafeReturnTo(searchParams.get("returnTo"), ["/home-van-drivers"], "/home-van-drivers");
     const initialTabKey = searchParams.get("tab") ?? undefined;
 
     const {

@@ -52,7 +52,7 @@ export function NavItem({
                         "bg-surface-elevated border border-border",
                         "text-xs font-medium text-foreground",
                         "shadow-md",
-                        "opacity-0 group-hover:opacity-100",
+                        "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
                         "pointer-events-none",
                         "transition-opacity duration-200",
                         "whitespace-nowrap",

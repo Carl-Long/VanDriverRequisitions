@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 import NotFound from "@/app/not-found";
 import { PageContainer } from "@/components/layout/page-container";
@@ -14,9 +14,16 @@ import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function StdRequisitionApprovalDetailPage() {
     const params = useParams<{ id: string }>();
+    const searchParams = useSearchParams();
+
+    const backHref = getSafeReturnTo(searchParams.get("returnTo"), ["/standard-van-drivers/approvals"], "/standard-van-drivers/approvals");
+
+    const tabParam = searchParams.get("tab");
+    const initialActiveTabKey = tabParam === "submission-history" ? "submission-history" : undefined;
     const { user, loading: authLoading } = useAuth();
     const { limitRules, loading: limitRulesLoading, error: limitRulesError, } = useRequisitionLimitRules();
 
@@ -108,7 +115,8 @@ export default function StdRequisitionApprovalDetailPage() {
                 submitWindowStatus={null}
                 limitRules={limitRules}
                 submitWindowStatusLoading={false}
-                backHref="/standard-van-drivers/approvals"
+                initialActiveTabKey={initialActiveTabKey}
+                backHref={backHref}
             />
         </PageContainer>
     );

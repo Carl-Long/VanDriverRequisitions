@@ -1,19 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Check, ChevronLeft, LogOut, Palette, Type, User } from "lucide-react";
-import { useAuth } from "@/providers/auth-provider";
+import { ALargeSmall, Check, ChevronLeft, LogOut, Palette, Type, User } from "lucide-react";
 import { useTheme } from "next-themes";
-import { TEXT_SIZES, THEMES } from "@/lib/constants/constants";
+
+import { cn } from "@/lib/utils";
+import { FONT_CHOICES, TEXT_SIZES, THEMES } from "@/lib/constants/constants";
+import { useAuth } from "@/providers/auth-provider";
+import { useFontChoice } from "@/providers/font-choice-provider";
 import { useTextSize } from "@/providers/text-size-provider";
+
+type Submenu = "theme" | "text-size" | "font" | null;
+
+function getFontPreviewFamily(value: string) {
+    switch (value) {
+        case "inter":
+            return "var(--font-inter), ui-sans-serif, system-ui, sans-serif";
+        case "system":
+            return 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        case "serif":
+            return 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif';
+        case "mono":
+            return 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace';
+        default:
+            return "inherit";
+    }
+}
 
 export function UserMenu() {
     const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
-    const [submenu, setSubmenu] = useState<string | null>(null);
+    const [submenu, setSubmenu] = useState<Submenu>(null);
     const { theme, setTheme } = useTheme();
     const { textSize, setTextSize } = useTextSize();
+    const { fontChoice, setFontChoice } = useFontChoice();
 
     if (!user) return null;
 
@@ -63,7 +83,9 @@ export function UserMenu() {
                             <p className="text-sm font-medium">{user.name}</p>
                         </div>
 
-                        <p className="mt-1 truncate text-xs text-muted-foreground">{user.email}</p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                            {user.email}
+                        </p>
 
                         <div className="mt-2 flex flex-wrap gap-1.5">
                             {user.roles.map((role) => (
@@ -80,6 +102,7 @@ export function UserMenu() {
                             ))}
                         </div>
                     </div>
+
                     {/* Menu Items */}
                     {submenu === null && (
                         <div className="py-1">
@@ -101,13 +124,25 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <Type size={16} />
+                                <ALargeSmall size={16} />
                                 Text size
+                            </button>
+
+                            <button
+                                onClick={() => setSubmenu("font")}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left",
+                                )}
+                            >
+                                <Type size={16} />
+                                Font
                             </button>
 
                             <button
                                 onClick={() => {
                                     setOpen(false);
+                                    setSubmenu(null);
                                     logout();
                                 }}
                                 className={cn(
@@ -191,6 +226,46 @@ export function UserMenu() {
                                         </span>
 
                                         {textSize === size.value && <Check size={16} />}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {submenu === "font" && (
+                        <div className="py-1">
+                            <button
+                                onClick={() => setSubmenu(null)}
+                                className={cn(
+                                    "w-full flex items-center gap-2 px-4 py-2 text-sm",
+                                    "hover:bg-muted transition text-left",
+                                )}
+                            >
+                                <ChevronLeft size={16} />
+                                Back
+                            </button>
+
+                            <div className="my-1 border-t border-border/50" />
+
+                            {FONT_CHOICES.map((choice) => (
+                                <button
+                                    key={choice.value}
+                                    onClick={() => {
+                                        setFontChoice(choice.value);
+                                    }}
+                                    className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm hover:bg-muted"
+                                >
+                                    <span>{choice.label}</span>
+
+                                    <div className="flex items-center gap-3">
+                                        <span
+                                            className="text-base text-foreground-subtle"
+                                            style={{ fontFamily: getFontPreviewFamily(choice.value) }}
+                                        >
+                                            Ag 123
+                                        </span>
+
+                                        {fontChoice === choice.value && <Check size={16} />}
                                     </div>
                                 </button>
                             ))}

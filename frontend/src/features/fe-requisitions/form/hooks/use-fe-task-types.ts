@@ -15,8 +15,8 @@ export function useFeTaskTypes() {
         async function load() {
             try {
                 setError(null);
-                const result = await feTaskTypesApi.getAll();
-                setTaskTypes(result.filter((x) => x.isActive));
+                const result = await feTaskTypesApi.getAll(true);
+                setTaskTypes(result);
             } catch (err) {
                 setError(getApiErrorMessage(err, "Failed to load task types."));
             } finally {

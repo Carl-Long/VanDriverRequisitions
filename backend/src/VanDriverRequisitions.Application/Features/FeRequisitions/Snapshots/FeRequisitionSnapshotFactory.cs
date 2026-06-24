@@ -1,21 +1,19 @@
 using System.Text.Json;
 using VanDriverRequisitions.Domain.Entities.FE;
-using VanDriverRequisitions.Domain.Entities.FE.Models;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 
 public static class FeRequisitionSnapshotFactory
 {
-        
     public static string CreateJson(FeRequisition requisition)
     {
         var snapshot = Create(requisition);
         return JsonSerializer.Serialize(snapshot);
     }
     
-    private static FeRequisitionSnapshot Create(FeRequisition requisition)
+    private static FeRequisitionSnapshotDto Create(FeRequisition requisition)
     {
-        return new FeRequisitionSnapshot
+        return new FeRequisitionSnapshotDto
         {
             RequisitionNumber = requisition.RequisitionNumber,
             RequisitionDate = requisition.RequisitionDate,
@@ -45,15 +43,15 @@ public static class FeRequisitionSnapshotFactory
         };
     }
     
-    private static FeGeneralTaskSnapshot CreateGeneralTaskSnapshot(FeGeneralTask task)
+    private static FeGeneralTaskSnapshotDto CreateGeneralTaskSnapshot(FeGeneralTask task)
     {
-        return new FeGeneralTaskSnapshot
+        return new FeGeneralTaskSnapshotDto
         {
             TaskTypeCode = task.TaskTypeCode,
             TaskTypeName = task.TaskTypeName,
             WeekEndingDate = task.WeekEndingDate,
 
-            Week = new WeeklyQuantitiesSnapshot
+            Week = new WeeklyQuantitiesSnapshotDto
             {
                 Saturday = task.Week.Saturday ?? 0,
                 Sunday = task.Week.Sunday ?? 0,
@@ -65,18 +63,18 @@ public static class FeRequisitionSnapshotFactory
             },
 
             TotalNumber = task.TotalNumber,
-            RatePerJob = task.RatePerJob,
-            TotalValue = task.TotalValue
+            RatePerJob = task.RatePerJob ?? 0,
+            TotalValue = task.TotalValue ??0
         };
     }
     
-    private static FeMileageSnapshot CreateMileageSnapshot(FeMileage mileage)
+    private static FeMileageSnapshotDto CreateMileageSnapshot(FeMileage mileage)
     {
-        return new FeMileageSnapshot
+        return new FeMileageSnapshotDto
         {
             WeekEndingDate = mileage.WeekEndingDate,
 
-            Week = new WeeklyQuantitiesSnapshot
+            Week = new WeeklyQuantitiesSnapshotDto
             {
                 Saturday = mileage.Week.Saturday ?? 0,
                 Sunday = mileage.Week.Sunday ?? 0,
@@ -93,9 +91,9 @@ public static class FeRequisitionSnapshotFactory
         };
     }
     
-    private static FeTransferSnapshot CreateTransferSnapshot(FeTransfer transfer)
+    private static FeTransferSnapshotDto CreateTransferSnapshot(FeTransfer transfer)
     {
-        return new FeTransferSnapshot
+        return new FeTransferSnapshotDto
         {
             WeekEndingDate = transfer.WeekEndingDate,
 
@@ -107,7 +105,7 @@ public static class FeRequisitionSnapshotFactory
             ShopCodeTo = transfer.ShopCodeTo,
             ShopNameTo = transfer.ShopNameTo,
 
-            Week = new WeeklyQuantitiesSnapshot
+            Week = new WeeklyQuantitiesSnapshotDto
             {
                 Saturday = transfer.Week.Saturday ?? 0,
                 Sunday = transfer.Week.Sunday ?? 0,
@@ -123,10 +121,10 @@ public static class FeRequisitionSnapshotFactory
             TotalValue = transfer.TotalValue ?? 0
         };
     }
-    
-    private static FeAdditionalCostSnapshot CreateAdditionalCostSnapshot(FeAdditionalCost cost)
+
+    private static FeAdditionalCostSnapshotDto CreateAdditionalCostSnapshot(FeAdditionalCost cost)
     {
-        return new FeAdditionalCostSnapshot
+        return new FeAdditionalCostSnapshotDto
         {
             WeekEndingDate = cost.WeekEndingDate,
             ReasonId = cost.ReasonId,

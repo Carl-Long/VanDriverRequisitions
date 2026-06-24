@@ -8,6 +8,7 @@ import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 
 type Props = {
     taskTypes: FeTaskType[];
+    usedTaskTypeIds: ReadonlySet<string>;
     activeKey: string;
     onActiveKeyChange: (key: string) => void;
     details: React.ReactNode;
@@ -35,20 +36,21 @@ export function FeRequisitionTabs({
     submissionHistory,
     submissionHistoryCount,
     getTaskTypeTabHasWarning,
+    usedTaskTypeIds,
     mileageHasWarning,
     transfersHasWarning,
     additionalCostsHasWarning,
 }: Readonly<Props>) {
     const tabs = useMemo(
-        () => buildFeRequisitionTabs(taskTypes, submissionHistoryCount),
-        [taskTypes, submissionHistoryCount],
+        () => buildFeRequisitionTabs(taskTypes, usedTaskTypeIds, submissionHistoryCount),
+        [taskTypes, usedTaskTypeIds, submissionHistoryCount],
     );
 
     const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
 
     function tabHasWarning(tab: (typeof tabs)[number]) {
         if (tab.type === "general-task") {
-            return getTaskTypeTabHasWarning?.(tab.taskTypeId) ?? false;
+            return tab.isInactive || (getTaskTypeTabHasWarning?.(tab.taskTypeId) ?? false);
         }
 
         if (tab.type === "mileage") {

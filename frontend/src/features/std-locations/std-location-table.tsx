@@ -9,12 +9,14 @@ import { StdLocation } from "./std-location.types";
 
 type Props = {
     items: StdLocation[];
+    pendingIds?: ReadonlySet<string>;
     onEdit: (item: StdLocation) => void;
     onToggleActive: (item: StdLocation) => void;
 };
 
 export function StdLocationTable({
     items,
+    pendingIds,
     onEdit,
     onToggleActive,
 }: Readonly<Props>) {
@@ -68,6 +70,8 @@ export function StdLocationTable({
                                 <div className="flex justify-center">
                                     <Toggle
                                         checked={item.isActive}
+                                        loading={pendingIds?.has(item.id) ?? false}
+                                        disabled={pendingIds?.has(item.id) ?? false}
                                         onChange={() => onToggleActive(item)}
                                         ariaLabel={`Toggle active for ${item.locationName}`}
                                     />

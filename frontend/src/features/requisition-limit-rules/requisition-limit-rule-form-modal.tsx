@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,8 @@ import type { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, Requisit
 import { getApiErrorMessage } from "@/lib/api/client";
 
 import { categoryOptions, fasciaOptions, requisitionLimitRuleCategories, requisitionLimitRuleFascias } from "./requisition-limit-rule-options";
+import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
+import { hasMaxTwoDecimalPlaces, MIN_MONEY_AMOUNT } from "@/lib/validation/money";
 
 type FormValues = {
     category: RequisitionLimitRuleCategory | "";
@@ -24,6 +26,31 @@ type FormValues = {
     maxQuantity: number;
     maxRate: number;
 };
+
+const positiveIntegerInputSchema = (label: string) =>
+    z
+        .number({
+            error: `${label} is required.`,
+        })
+        .refine((value) => !Number.isNaN(value), {
+            message: `${label} is required.`,
+        })
+        .int(`${label} must be a whole number.`)
+        .gt(0, `${label} must be greater than 0.`);
+
+const positiveMoneyInputSchema = (label: string) =>
+    z
+        .number({
+            error: `${label} is required.`,
+        })
+        .refine((value) => !Number.isNaN(value), {
+            message: `${label} is required.`,
+        })
+        .min(MIN_MONEY_AMOUNT, `${label} must be at least £0.01.`)
+        .refine(
+            hasMaxTwoDecimalPlaces,
+            `${label} can have a maximum of 2 decimal places.`,
+        );
 
 const schema = z
     .object({
@@ -41,17 +68,8 @@ const schema = z
 
         feTaskTypeId: z.string().nullable(),
 
-        maxQuantity: z
-            .number({
-                error: "Max Quantity must be greater than 0.",
-            })
-            .gt(0, "Max Quantity must be greater than 0."),
-
-        maxRate: z
-            .number({
-                error: "Max Rate must be greater than 0.",
-            })
-            .gt(0, "Max Rate must be greater than 0."),
+        maxQuantity: positiveIntegerInputSchema("Max Quantity"),
+        maxRate: positiveMoneyInputSchema("Max Rate"),
     })
     .superRefine((data, ctx) => {
         const isGeneralTask = data.category === "GeneralTask";
@@ -121,6 +139,30 @@ export function RequisitionLimitRuleFormModal({
     const isGeneralTask = category === "GeneralTask";
     const maxRateLabel = category === "VanPack" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
 
+    const visibleTaskTypes = useMemo(
+        () =>
+            taskTypes.filter(
+                (taskType) =>
+                    taskType.isActive ||
+                    (isEditing && taskType.id === initial?.feTaskTypeId),
+            ),
+        [taskTypes, isEditing, initial?.feTaskTypeId],
+    );
+
+    const selectedTaskType = useMemo(
+        () =>
+            taskTypes.find(
+                (taskType) => taskType.id === initial?.feTaskTypeId,
+            ) ?? null,
+        [taskTypes, initial?.feTaskTypeId],
+    );
+
+    const showInactiveTaskTypeWarning =
+        isGeneralTask &&
+        isEditing &&
+        Boolean(initial?.feTaskTypeId) &&
+        selectedTaskType?.isActive === false;
+
     useEffect(() => {
         if (!open) {
             return;
@@ -175,7 +217,7 @@ export function RequisitionLimitRuleFormModal({
             onClose={onClose}
             title={isEditing ? "Edit Limit Rule" : "Create Limit Rule"}
         >
-            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
+            <form onSubmit={handleSubmit(onValid)} noValidate className="space-y-5">
                 {serverError && <Alert tone="danger">{serverError}</Alert>}
 
                 <Field label="Category" required error={errors.category?.message}>
@@ -213,12 +255,15 @@ export function RequisitionLimitRuleFormModal({
                         >
                             <option value="">None</option>
 
-                            {taskTypes.map((taskType) => (
+                            {visibleTaskTypes.map((taskType) => (
                                 <option key={taskType.id} value={taskType.id}>
-                                    {taskType.name}
+                                    {taskType.isActive ? taskType.name : `${taskType.name} (Inactive)`}
                                 </option>
                             ))}
                         </select>
+                        {showInactiveTaskTypeWarning && (
+                            <InactiveLookupWarning label="task type" variant="field" />
+                        )}
                     </Field>
                 )}
 
@@ -243,7 +288,6 @@ export function RequisitionLimitRuleFormModal({
                     >
                         <Input
                             type="number"
-                            min="0.01"
                             step="0.01"
                             {...register("maxRate", {
                                 valueAsNumber: true,

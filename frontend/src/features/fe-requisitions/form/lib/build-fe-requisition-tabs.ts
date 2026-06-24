@@ -3,8 +3,13 @@ import { FeRequisitionTab } from "../types/fe-requisition-tab";
 
 export function buildFeRequisitionTabs(
     taskTypes: FeTaskType[],
+    usedTaskTypeIds: ReadonlySet<string>,
     submissionHistoryCount: number,
 ): FeRequisitionTab[] {
+    const visibleTaskTypes = taskTypes.filter(
+        (taskType) => taskType.isActive || usedTaskTypeIds.has(taskType.id),
+    );
+
     const tabs: FeRequisitionTab[] = [
         {
             type: "details",
@@ -12,11 +17,12 @@ export function buildFeRequisitionTabs(
             label: "Details",
         },
 
-        ...taskTypes.map<FeRequisitionTab>((taskType) => ({
+        ...visibleTaskTypes.map<FeRequisitionTab>((taskType) => ({
             type: "general-task",
             key: `task-type-${taskType.id}`,
             taskTypeId: taskType.id,
-            label: taskType.name,
+            label: taskType.isActive ? taskType.name : `${taskType.name} (Inactive)`,
+            isInactive: !taskType.isActive,
         })),
 
         {

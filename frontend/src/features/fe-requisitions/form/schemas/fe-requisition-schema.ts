@@ -18,10 +18,10 @@ export const feRequisitionSchema = z
             .nullable()
             .refine((x) => x !== null, "Shop is required"),
 
-        feGeneralTasks: z.array(z.any()),
-        feMileages: z.array(z.any()),
-        feTransfers: z.array(z.any()),
-        feAdditionalCosts: z.array(z.any()),
+        feGeneralTasks: z.array(z.unknown()),
+        feMileages: z.array(z.unknown()),
+        feTransfers: z.array(z.unknown()),
+        feAdditionalCosts: z.array(z.unknown()),
     })
     .superRefine((data, ctx) => {
         const hasAnyRows =

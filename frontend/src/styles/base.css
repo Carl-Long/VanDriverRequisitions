@@ -1,0 +1,49 @@
+html {
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
+}
+
+body {
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
+
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    font-optical-sizing: auto;
+
+    min-height: 100vh;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+::selection {
+    background: rgb(var(--primary) / 0.2);
+}
+
+*:focus-visible {
+    outline: none;
+
+    box-shadow:
+        0 0 0 2px rgb(var(--background)),
+        0 0 0 4px rgb(var(--ring));
+}
+
+.high-contrast *:focus-visible {
+    box-shadow:
+        0 0 0 2px rgb(var(--background)),
+        0 0 0 5px rgb(var(--ring));
+}

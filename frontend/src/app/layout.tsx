@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { ToastProvider } from "@/providers/toast-provider";
 import { TextSizeProvider } from "@/providers/text-size-provider";
 import { AuthGate } from "@/features/auth/auth-gate";
+import { FontChoiceProvider } from "@/providers/font-choice-provider";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -39,13 +40,15 @@ export default function RootLayout({
                 <ErrorBoundary>
                     <ThemeProvider>
                         <TextSizeProvider>
-                            <AuthProvider>
-                                <AuthGate>
-                                    <ToastProvider>
-                                        <AppShell>{children}</AppShell>
-                                    </ToastProvider>
-                                </AuthGate>
-                            </AuthProvider>
+                            <FontChoiceProvider>
+                                <AuthProvider>
+                                    <AuthGate>
+                                        <ToastProvider>
+                                            <AppShell>{children}</AppShell>
+                                        </ToastProvider>
+                                    </AuthGate>
+                                </AuthProvider>
+                            </FontChoiceProvider>
                         </TextSizeProvider>
                     </ThemeProvider>
                 </ErrorBoundary>

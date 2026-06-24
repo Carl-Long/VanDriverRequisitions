@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.StdCollectionTypes.Dtos;
 using VanDriverRequisitions.Application.Features.StdCollectionTypes.Services;
@@ -14,6 +16,7 @@ namespace VanDriverRequisitions.Api.Controllers.STD;
 public class StdCollectionTypesController(IStdCollectionTypeService stdCollectionTypeService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(List<StdCollectionTypeSummaryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<StdCollectionTypeSummaryDto>>> GetAll([FromQuery] bool includeInactive, CancellationToken cancellationToken)
     {
@@ -22,6 +25,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
     }
 
     [HttpGet("lookups")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(List<StdCollectionTypeLookupDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<StdCollectionTypeLookupDto>>> GetActiveLookups(CancellationToken cancellationToken = default)
     {
@@ -30,6 +34,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(StdCollectionTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StdCollectionTypeSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -40,6 +45,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
 
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdCollectionTypeSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -51,6 +57,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdCollectionTypeSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -66,6 +73,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
 
     [HttpPost("{id:guid}/activate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Activate([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -75,6 +83,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
 
     [HttpPost("{id:guid}/deactivate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Deactivate([FromRoute] Guid id, CancellationToken cancellationToken)
     {

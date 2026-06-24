@@ -15,6 +15,7 @@ import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisit
 import { useAuth } from "@/providers/auth-provider";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
+import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 
 export default function StdRequisitionDetailPage() {
     const { user, loading: authLoading } = useAuth();
@@ -25,12 +26,8 @@ export default function StdRequisitionDetailPage() {
     const [requisition, setRequisition] = useState<StdRequisitionDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const returnTo = searchParams.get("returnTo");
-
-    const backHref =
-        returnTo && returnTo.startsWith("/standard-van-drivers") && !returnTo.startsWith("//")
-            ? returnTo
-            : "/standard-van-drivers";
+    
+    const backHref = getSafeReturnTo(searchParams.get("returnTo"), ["/standard-van-drivers"], "/standard-van-drivers");
 
     const tabParam = searchParams.get("tab");
     const initialActiveTabKey = tabParam === "submission-history" ? "submission-history" : undefined;

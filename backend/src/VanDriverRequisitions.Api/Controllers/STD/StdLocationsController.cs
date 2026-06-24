@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.StdLocations.Dtos;
@@ -15,6 +17,7 @@ namespace VanDriverRequisitions.Api.Controllers.STD;
 public class StdLocationsController(IStdLocationService stdLocationService) : ControllerBase
 {
     [HttpGet]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(PagedResult<StdLocationSummaryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<StdLocationSummaryDto>>> GetAll([FromQuery] StdLocationAdminQueryDto query, CancellationToken cancellationToken)
     {
@@ -23,6 +26,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
     }
 
     [HttpGet("lookups")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(List<StdLocationLookupDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<List<StdLocationLookupDto>>> GetActiveLookups([FromQuery] StdLocationLookupQueryDto query, CancellationToken cancellationToken = default)
@@ -32,6 +36,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
     }
 
     [HttpGet("{id:guid}")]
+    [EnableRateLimiting(RateLimitPolicies.Read)]
     [ProducesResponseType(typeof(StdLocationSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StdLocationSummaryDto>> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
@@ -42,6 +47,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
 
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdLocationSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
@@ -55,6 +61,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
 
     [HttpPut("{id:guid}")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(StdLocationSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -70,6 +77,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
 
     [HttpPost("{id:guid}/activate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Activate([FromRoute] Guid id, CancellationToken cancellationToken)
     {
@@ -79,6 +87,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
 
     [HttpPost("{id:guid}/deactivate")]
     [Authorize(Policy = Policies.CanManageConfiguration)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Deactivate([FromRoute] Guid id, CancellationToken cancellationToken)
     {
