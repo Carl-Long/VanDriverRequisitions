@@ -9,7 +9,7 @@ import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limi
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
 import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
@@ -23,7 +23,6 @@ import { FeRequisitionSubmitModal } from "./fe-requisition-submit-modal";
 import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { FeRequisitionApproveModal } from "../approval/fe-requisition-approve-modal";
 import { FeRequisitionRejectModal } from "../approval/fe-requisition-reject-modal";
-import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
@@ -107,6 +106,16 @@ export function FeRequisitionShell({
     const [isSaving, setIsSaving] = useState(false);
 
     const isReadonly = mode === "readonly" || mode === "approval";
+
+    const usedTaskTypeIds = useMemo(
+        () =>
+            new Set(
+                draft.feGeneralTasks
+                    .map((task) => task.taskTypeId)
+                    .filter((id): id is string => Boolean(id)),
+            ),
+        [draft.feGeneralTasks],
+    );
 
     const tabWarnings = useFeRequisitionTabWarnings({ draft, isReadonly, limitRules, });
 
@@ -366,6 +375,7 @@ export function FeRequisitionShell({
                 activeKey={activeKey}
                 onActiveKeyChange={setActiveKey}
                 taskTypes={taskTypes}
+                usedTaskTypeIds={usedTaskTypeIds}
                 submissionHistoryCount={draft.submissionHistory.length}
                 getTaskTypeTabHasWarning={tabWarnings.getTaskTypeTabHasWarning}
                 mileageHasWarning={tabWarnings.mileageHasWarning}
@@ -467,6 +477,7 @@ export function FeRequisitionShell({
                             readonly={isReadonly}
                             title={taskType.name}
                             code={taskType.code}
+                            isTaskTypeInactive={!taskType.isActive}
                             tasks={tasks}
                             onAdd={(form) => {
                                 addGeneralTask(taskType.id, taskType.name, form);

@@ -24,11 +24,13 @@ import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/g
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
+import { Alert } from "@/components/ui/alert";
 
 type Props = {
     readonly: boolean;
     title: string;
     code?: string | null;
+    isTaskTypeInactive?: boolean;
     limitRule?: RequisitionLimitRuleSummary;
     tasks: FeGeneralTaskDraft[];
     onAdd: (form: FeGeneralTaskForm) => void;
@@ -45,10 +47,13 @@ export function FeGeneralTaskWorkspace({
     onAdd,
     onUpdate,
     onDelete,
+    isTaskTypeInactive,
 }: Readonly<Props>) {
     const [open, setOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<FeGeneralTaskDraft | null>(null);
     const totals = calculateFeGeneralTaskTotals(tasks);
+    const canAddRows = !readonly && !isTaskTypeInactive;
+    const canEditRows = !readonly;
 
     return (
         <div className="space-y-6">
@@ -66,7 +71,7 @@ export function FeGeneralTaskWorkspace({
                     </p>
                 </div>
 
-                {!readonly && (
+                {canAddRows && (
                     <Button
                         type="button"
                         onClick={() => {
@@ -79,12 +84,18 @@ export function FeGeneralTaskWorkspace({
                     </Button>
                 )}
             </div>
-
+            {isTaskTypeInactive && (
+                <Alert tone="warning">
+                    This task type is inactive. Existing rows are shown for historical accuracy, but new rows
+                    cannot be added.
+                </Alert>
+            )}
+            
             {tasks.length === 0 ? (
                 <EmptyState title={`No ${title}`} />
             ) : (
                 <TasksTable
-                    readonly={readonly}
+                    readonly={!canEditRows}
                     tasks={tasks}
                     limitRule={limitRule}
                     onEdit={(task) => {

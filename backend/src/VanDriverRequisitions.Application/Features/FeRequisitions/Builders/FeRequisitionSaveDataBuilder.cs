@@ -58,9 +58,7 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
             .SingleAsync(cancellationToken);
     }
 
-    private async Task<Dictionary<Guid, FeTaskType>> LoadTaskTypeMapAsync(
-        IEnumerable<SaveFeGeneralTaskDto> tasks,
-        CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, FeTaskType>> LoadTaskTypeMapAsync(IEnumerable<SaveFeGeneralTaskDto> tasks, CancellationToken cancellationToken)
     {
         var taskTypeIds = tasks
             .Select(x => x.FeTaskTypeId)
@@ -68,13 +66,12 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
             .ToList();
 
         return await context.FeTaskTypes
+            .IgnoreQueryFilters()
             .Where(x => taskTypeIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }
 
-    private async Task<Dictionary<Guid, ShopRequisitionSnapshotDto>> LoadTransferShopMapAsync(
-        IEnumerable<SaveFeTransferDto> transfers,
-        CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, ShopRequisitionSnapshotDto>> LoadTransferShopMapAsync(IEnumerable<SaveFeTransferDto> transfers, CancellationToken cancellationToken)
     {
         var transferShopIds = transfers
             .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
@@ -105,14 +102,23 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
             .ToDictionaryAsync(x => x.Id, cancellationToken);
     }
 
-    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(
-        IEnumerable<SaveFeGeneralTaskDto> tasks,
-        IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
+    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks, IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
     {
         return tasks
-            .Select(dto => !taskTypeMap.TryGetValue(dto.FeTaskTypeId, out var taskType) 
-                ? throw new NotFoundException($"Task type '{dto.FeTaskTypeId}' was not found.") 
-                : FeGeneralTaskMapper.ToUpdateModel(dto, taskType))
+            .Select(dto =>
+            {
+                if (!taskTypeMap.TryGetValue(dto.FeTaskTypeId, out var taskType))
+                {
+                    throw new NotFoundException($"Task type '{dto.FeTaskTypeId}' was not found.");
+                }
+
+                if (!taskType.IsActive && dto.Id is null)
+                {
+                    throw new BadRequestException($"Task type '{taskType.Code} - {taskType.Name}' is inactive and cannot be added to a requisition.");
+                }
+
+                return FeGeneralTaskMapper.ToUpdateModel(dto, taskType);
+            })
             .ToList();
     }
 
@@ -163,8 +169,8 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context) 
 
     private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
     {
-        return !shopMap.TryGetValue(shopId, out var shop) 
-            ? throw new NotFoundException($"Shop '{shopId}' was not found.") 
+        return !shopMap.TryGetValue(shopId, out var shop)
+            ? throw new NotFoundException($"Shop '{shopId}' was not found.")
             : new ShopSnapshot(shop.Id, shop.Code, shop.Name);
     }
 }
