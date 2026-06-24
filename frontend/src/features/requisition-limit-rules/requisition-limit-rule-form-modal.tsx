@@ -17,6 +17,7 @@ import { getApiErrorMessage } from "@/lib/api/client";
 
 import { categoryOptions, fasciaOptions, requisitionLimitRuleCategories, requisitionLimitRuleFascias } from "./requisition-limit-rule-options";
 import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
+import { hasMaxTwoDecimalPlaces, MIN_MONEY_AMOUNT } from "@/lib/validation/money";
 
 type FormValues = {
     category: RequisitionLimitRuleCategory | "";
@@ -25,6 +26,31 @@ type FormValues = {
     maxQuantity: number;
     maxRate: number;
 };
+
+const positiveIntegerInputSchema = (label: string) =>
+    z
+        .number({
+            error: `${label} is required.`,
+        })
+        .refine((value) => !Number.isNaN(value), {
+            message: `${label} is required.`,
+        })
+        .int(`${label} must be a whole number.`)
+        .gt(0, `${label} must be greater than 0.`);
+
+const positiveMoneyInputSchema = (label: string) =>
+    z
+        .number({
+            error: `${label} is required.`,
+        })
+        .refine((value) => !Number.isNaN(value), {
+            message: `${label} is required.`,
+        })
+        .min(MIN_MONEY_AMOUNT, `${label} must be at least £0.01.`)
+        .refine(
+            hasMaxTwoDecimalPlaces,
+            `${label} can have a maximum of 2 decimal places.`,
+        );
 
 const schema = z
     .object({
@@ -42,17 +68,8 @@ const schema = z
 
         feTaskTypeId: z.string().nullable(),
 
-        maxQuantity: z
-            .number({
-                error: "Max Quantity must be greater than 0.",
-            })
-            .gt(0, "Max Quantity must be greater than 0."),
-
-        maxRate: z
-            .number({
-                error: "Max Rate must be greater than 0.",
-            })
-            .gt(0, "Max Rate must be greater than 0."),
+        maxQuantity: positiveIntegerInputSchema("Max Quantity"),
+        maxRate: positiveMoneyInputSchema("Max Rate"),
     })
     .superRefine((data, ctx) => {
         const isGeneralTask = data.category === "GeneralTask";
@@ -271,7 +288,6 @@ export function RequisitionLimitRuleFormModal({
                     >
                         <Input
                             type="number"
-                            min="0.01"
                             step="0.01"
                             {...register("maxRate", {
                                 valueAsNumber: true,
