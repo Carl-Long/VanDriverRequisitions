@@ -1,0 +1,383 @@
+.light-brand {
+    --background: 245 245 247;
+
+    --surface: 255 255 255;
+    --surface-elevated: 250 250 252;
+    --surface-hover: 245 245 248;
+    --surface-subtle: 248 250 252;
+
+    --foreground: 15 23 42;
+    --foreground-subtle: 71 85 105;
+    --muted-foreground: 100 116 139;
+
+    --primary: 237 0 45;
+    --primary-foreground: 255 255 255;
+    --primary-surface: 254 242 245;
+    --primary-surface-hover: 252 231 236;
+    --primary-border: 251 207 232;
+
+    --secondary: 140 0 50;
+    --secondary-foreground: 255 255 255;
+    --secondary-surface: 253 244 247;
+    --secondary-surface-hover: 252 231 240;
+    --secondary-border: 249 168 212;
+
+    --accent: 71 78 90;
+    --accent-foreground: 255 255 255;
+    --accent-surface: 241 245 249;
+    --accent-surface-hover: 226 232 240;
+    --accent-border: 203 213 225;
+
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+    --success-surface: 240 253 244;
+    --success-surface-hover: 220 252 231;
+    --success-border: 187 247 208;
+
+    --info: 37 99 235;
+    --info-foreground: 255 255 255;
+    --info-surface: 239 246 255;
+    --info-surface-hover: 219 234 254;
+    --info-border: 191 219 254;
+
+    --warning: 217 119 6;
+    --warning-foreground: 255 255 255;
+    --warning-surface: 255 251 235;
+    --warning-surface-hover: 254 243 199;
+    --warning-border: 253 224 71;
+
+    --danger: 190 24 93;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 255 241 242;
+    --danger-surface-hover: 255 228 230;
+    --danger-border: 254 202 202;
+
+    --border: 226 232 240;
+    --border-subtle: 241 245 249;
+
+    --muted: 241 245 249;
+
+    --ring: 237 0 45;
+
+    --skeleton: 226 232 240;
+}
+
+.dark-brand {
+    --background: 8 12 20;
+
+    --surface: 18 22 30;
+    --surface-elevated: 28 34 44;
+    --surface-hover: 32 38 50;
+    --surface-subtle: 20 24 32;
+
+    --foreground: 248 250 252;
+    --foreground-subtle: 203 213 225;
+    --muted-foreground: 148 163 184;
+
+    --primary: 237 0 45;
+    --primary-foreground: 255 255 255;
+    --primary-surface: 30 10 15;
+    --primary-surface-hover: 45 15 25;
+    --primary-border: 237 0 45;
+
+    --secondary: 140 0 50;
+    --secondary-foreground: 255 255 255;
+    --secondary-surface: 25 8 12;
+    --secondary-surface-hover: 40 12 20;
+    --secondary-border: 140 0 50;
+
+    --accent: 71 78 90;
+    --accent-foreground: 255 255 255;
+    --accent-surface: 20 24 32;
+    --accent-surface-hover: 32 38 50;
+    --accent-border: 71 78 90;
+
+    --success: 34 197 94;
+    --success-foreground: 255 255 255;
+    --success-surface: 20 38 28;
+    --success-surface-hover: 22 52 35;
+    --success-border: 34 197 94;
+
+    --info: 59 130 246;
+    --info-foreground: 255 255 255;
+    --info-surface: 15 23 42;
+    --info-surface-hover: 30 41 59;
+    --info-border: 59 130 246;
+
+    --warning: 245 158 11;
+    --warning-foreground: 15 23 42;
+    --warning-surface: 69 26 3;
+    --warning-surface-hover: 92 39 5;
+    --warning-border: 245 158 11;
+
+    --danger: 244 63 94;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 76 5 25;
+    --danger-surface-hover: 103 8 39;
+    --danger-border: 244 63 94;
+
+    --border: 42 52 68;
+    --border-subtle: 55 65 81;
+
+    --muted: 30 41 59;
+
+    --ring: 237 0 45;
+
+    --skeleton: 42 52 68;
+}
+
+.light-mono {
+    --background: 245 245 245;
+
+    --surface: 255 255 255;
+    --surface-elevated: 250 250 250;
+    --surface-hover: 240 240 242;
+    --surface-subtle: 247 247 248;
+
+    --foreground: 24 24 27;
+    --foreground-subtle: 82 82 91;
+    --muted-foreground: 113 113 122;
+
+    --primary: 24 24 27;
+    --primary-foreground: 255 255 255;
+    --primary-surface: 235 235 237;
+    --primary-surface-hover: 220 220 224;
+    --primary-border: 200 200 205;
+
+    --secondary: 82 82 91;
+    --secondary-foreground: 255 255 255;
+    --secondary-surface: 242 242 244;
+    --secondary-surface-hover: 235 235 237;
+    --secondary-border: 210 210 214;
+
+    --accent: 113 113 122;
+    --accent-foreground: 255 255 255;
+    --accent-surface: 244 244 245;
+    --accent-surface-hover: 236 236 238;
+    --accent-border: 220 220 224;
+
+    --success: 82 82 82;
+    --success-foreground: 255 255 255;
+    --success-surface: 242 242 242;
+    --success-surface-hover: 235 235 235;
+    --success-border: 212 212 212;
+
+    --info: 100 100 110;
+    --info-foreground: 255 255 255;
+    --info-surface: 242 242 244;
+    --info-surface-hover: 235 235 238;
+    --info-border: 210 210 214;
+
+    --warning: 120 120 120;
+    --warning-foreground: 255 255 255;
+    --warning-surface: 245 245 245;
+    --warning-surface-hover: 238 238 238;
+    --warning-border: 224 224 224;
+
+    --danger: 90 90 90;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 243 243 243;
+    --danger-surface-hover: 236 236 236;
+    --danger-border: 214 214 214;
+
+    --border: 228 228 231;
+    --border-subtle: 244 244 245;
+
+    --muted: 244 244 245;
+
+    --ring: 24 24 27;
+
+    --skeleton: 228 228 231;
+}
+
+.dark-mono {
+    --background: 10 10 11;
+
+    --surface: 24 24 27;
+    --surface-elevated: 39 39 42;
+    --surface-hover: 50 50 54;
+    --surface-subtle: 17 17 20;
+
+    --foreground: 250 250 250;
+    --foreground-subtle: 212 212 216;
+    --muted-foreground: 161 161 170;
+
+    --primary: 245 245 245;
+    --primary-foreground: 10 10 11;
+    --primary-surface: 32 32 35;
+    --primary-surface-hover: 45 45 50;
+    --primary-border: 70 70 75;
+
+    --secondary: 180 180 185;
+    --secondary-foreground: 10 10 11;
+    --secondary-surface: 30 30 33;
+    --secondary-surface-hover: 42 42 46;
+    --secondary-border: 65 65 70;
+
+    --accent: 150 150 155;
+    --accent-foreground: 10 10 11;
+    --accent-surface: 28 28 31;
+    --accent-surface-hover: 40 40 44;
+    --accent-border: 60 60 65;
+
+    --success: 200 200 205;
+    --success-foreground: 10 10 11;
+    --success-surface: 28 28 30;
+    --success-surface-hover: 40 40 42;
+    --success-border: 60 60 65;
+
+    --info: 170 170 175;
+    --info-foreground: 10 10 11;
+    --info-surface: 28 28 31;
+    --info-surface-hover: 40 40 44;
+    --info-border: 60 60 65;
+
+    --warning: 190 190 195;
+    --warning-foreground: 10 10 11;
+    --warning-surface: 30 30 33;
+    --warning-surface-hover: 42 42 46;
+    --warning-border: 65 65 70;
+
+    --danger: 200 200 205;
+    --danger-foreground: 10 10 11;
+    --danger-surface: 30 30 33;
+    --danger-surface-hover: 42 42 46;
+    --danger-border: 65 65 70;
+
+    --border: 50 50 54;
+    --border-subtle: 63 63 70;
+
+    --muted: 32 32 35;
+
+    --ring: 245 245 245;
+
+    --skeleton: 50 50 54;
+}
+
+.electric-night {
+    --background: 5 8 22;
+
+    --surface: 12 18 40;
+    --surface-elevated: 17 25 55;
+    --surface-hover: 23 34 74;
+    --surface-subtle: 9 14 32;
+
+    --foreground: 240 249 255;
+    --foreground-subtle: 186 230 253;
+    --muted-foreground: 125 211 252;
+
+    --primary: 34 211 238;
+    --primary-foreground: 8 15 30;
+    --primary-surface: 8 47 73;
+    --primary-surface-hover: 14 72 104;
+    --primary-border: 34 211 238;
+
+    --secondary: 217 70 239;
+    --secondary-foreground: 255 255 255;
+    --secondary-surface: 72 20 92;
+    --secondary-surface-hover: 96 28 120;
+    --secondary-border: 217 70 239;
+
+    --accent: 129 140 248;
+    --accent-foreground: 255 255 255;
+    --accent-surface: 37 33 80;
+    --accent-surface-hover: 49 46 129;
+    --accent-border: 129 140 248;
+
+    --success: 52 211 153;
+    --success-foreground: 6 35 25;
+    --success-surface: 6 78 59;
+    --success-surface-hover: 6 95 70;
+    --success-border: 52 211 153;
+
+    --info: 56 189 248;
+    --info-foreground: 8 15 30;
+    --info-surface: 12 52 86;
+    --info-surface-hover: 14 74 115;
+    --info-border: 56 189 248;
+
+    --warning: 251 191 36;
+    --warning-foreground: 30 20 5;
+    --warning-surface: 92 52 5;
+    --warning-surface-hover: 120 70 8;
+    --warning-border: 251 191 36;
+
+    --danger: 251 113 133;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 88 28 49;
+    --danger-surface-hover: 115 32 64;
+    --danger-border: 251 113 133;
+
+    --border: 45 70 110;
+    --border-subtle: 30 47 80;
+
+    --muted: 23 37 84;
+
+    --ring: 34 211 238;
+
+    --skeleton: 30 47 80;
+}
+
+.high-contrast {
+    --background: 255 255 255;
+
+    --surface: 255 255 255;
+    --surface-elevated: 255 255 255;
+    --surface-hover: 235 235 235;
+    --surface-subtle: 250 250 250;
+
+    --foreground: 0 0 0;
+    --foreground-subtle: 24 24 27;
+    --muted-foreground: 63 63 70;
+
+    --primary: 0 0 0;
+    --primary-foreground: 255 255 255;
+    --primary-surface: 242 242 242;
+    --primary-surface-hover: 228 228 228;
+    --primary-border: 0 0 0;
+
+    --secondary: 64 64 64;
+    --secondary-foreground: 255 255 255;
+    --secondary-surface: 245 245 245;
+    --secondary-surface-hover: 235 235 235;
+    --secondary-border: 64 64 64;
+
+    --accent: 0 82 204;
+    --accent-foreground: 255 255 255;
+    --accent-surface: 230 242 255;
+    --accent-surface-hover: 204 229 255;
+    --accent-border: 0 82 204;
+
+    --success: 0 102 51;
+    --success-foreground: 255 255 255;
+    --success-surface: 230 255 240;
+    --success-surface-hover: 204 255 224;
+    --success-border: 0 102 51;
+
+    --info: 0 82 204;
+    --info-foreground: 255 255 255;
+    --info-surface: 230 242 255;
+    --info-surface-hover: 204 229 255;
+    --info-border: 0 82 204;
+
+    --warning: 153 76 0;
+    --warning-foreground: 255 255 255;
+    --warning-surface: 255 245 230;
+    --warning-surface-hover: 255 235 204;
+    --warning-border: 153 76 0;
+
+    --danger: 179 0 0;
+    --danger-foreground: 255 255 255;
+    --danger-surface: 255 235 235;
+    --danger-surface-hover: 255 220 220;
+    --danger-border: 179 0 0;
+
+    --border: 0 0 0;
+    --border-subtle: 82 82 91;
+
+    --muted: 242 242 242;
+
+    --ring: 0 82 204;
+
+    --skeleton: 180 180 180;
+}
