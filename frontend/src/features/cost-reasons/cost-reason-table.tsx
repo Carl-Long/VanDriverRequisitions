@@ -9,11 +9,12 @@ import { CostReason } from "./cost-reason.types";
 
 type Props = {
     items: CostReason[];
+    pendingIds?: ReadonlySet<string>;
     onEdit: (item: CostReason) => void;
     onToggleActive: (item: CostReason) => void;
 };
 
-export function CostReasonTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
+export function CostReasonTable({ items, pendingIds, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <Table className="w-full">
@@ -45,6 +46,8 @@ export function CostReasonTable({ items, onEdit, onToggleActive }: Readonly<Prop
                                 <div className="flex justify-center">
                                     <Toggle
                                         checked={item.isActive}
+                                        loading={pendingIds?.has(item.id) ?? false}
+                                        disabled={pendingIds?.has(item.id) ?? false}
                                         onChange={() => onToggleActive(item)}
                                         ariaLabel={`Toggle active for ${item.code} - ${item.reason}`}
                                     />

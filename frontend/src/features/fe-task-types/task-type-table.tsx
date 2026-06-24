@@ -16,11 +16,12 @@ import { Toggle } from "@/components/ui/toggle";
 
 type Props = {
     items: FeTaskType[];
+    pendingIds?: ReadonlySet<string>;
     onEdit: (item: FeTaskType) => void;
     onToggleActive: (item: FeTaskType) => void;
 };
 
-export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>) {
+export function TaskTypeTable({ items, pendingIds, onEdit, onToggleActive }: Readonly<Props>) {
     return (
         <Surface className="overflow-x-auto">
             <Table className="w-full">
@@ -54,6 +55,8 @@ export function TaskTypeTable({ items, onEdit, onToggleActive }: Readonly<Props>
                                 <TableCell>
                                     <Toggle
                                         checked={item.isActive}
+                                        loading={pendingIds?.has(item.id) ?? false}
+                                        disabled={pendingIds?.has(item.id) ?? false}
                                         onChange={() => onToggleActive(item)}
                                         ariaLabel={`Toggle active for ${item.name}`}
                                     />

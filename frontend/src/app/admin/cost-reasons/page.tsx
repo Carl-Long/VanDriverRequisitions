@@ -19,6 +19,7 @@ import { useCrudModal } from "@/hooks/use-crud-modal";
 import { useToast } from "@/providers/toast-provider";
 import { CostReason, CreateCostReason } from "@/features/cost-reasons/cost-reason.types";
 import { costReasonsApi } from "@/features/cost-reasons/cost-reasons-api";
+import { useOptimisticActiveToggle } from "@/features/admin-shared/use-optimistic-active-toggle";
 
 export default function CostReasonsPage() {
     const [reasons, setReasons] = useState<CostReason[]>([]);
@@ -30,6 +31,24 @@ export default function CostReasonsPage() {
     const modal = useCrudModal<CostReason>();
 
     const toast = useToast();
+    const { pendingIds, toggleActive } = useOptimisticActiveToggle({
+        setItems: setReasons,
+        showInactive,
+        activate: costReasonsApi.activate,
+        deactivate: costReasonsApi.deactivate,
+        afterSuccess: costReasonsApi.clearLookupCache,
+        onBeforeToggle: () => setError(null),
+        onSuccess: (reason, nextIsActive) => {
+            toast.success(
+                nextIsActive
+                    ? `${reason.code} - ${reason.reason} activated`
+                    : `${reason.code} - ${reason.reason} deactivated`,
+            );
+        },
+        onError: (err) => {
+            setError(getApiErrorMessage(err, "Failed to update cost reason."));
+        },
+    });
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -82,39 +101,17 @@ export default function CostReasonsPage() {
         await load();
     }
 
-    async function handleToggleActive(reason: CostReason) {
-        try {
-            if (reason.isActive) {
-                await costReasonsApi.deactivate(reason.id);
-            } else {
-                await costReasonsApi.activate(reason.id);
-            }
-
-            costReasonsApi.clearLookupCache();
-
-            toast.success(
-                reason.isActive
-                    ? `${reason.code} - ${reason.reason} deactivated`
-                    : `${reason.code} - ${reason.reason} activated`,
-            );
-
-            await load();
-        } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to update cost reason."));
-        }
-    }
-
     const emptyState = search.trim()
         ? {
-              icon: Search,
-              title: "No cost reasons found",
-              description: "Try adjusting your search terms.",
-          }
+            icon: Search,
+            title: "No cost reasons found",
+            description: "Try adjusting your search terms.",
+        }
         : {
-              icon: MessageSquare,
-              title: "No cost reasons yet",
-              description: "Create your first cost reason to get started.",
-          };
+            icon: MessageSquare,
+            title: "No cost reasons yet",
+            description: "Create your first cost reason to get started.",
+        };
 
     return (
         <PageContainer>
@@ -162,8 +159,9 @@ export default function CostReasonsPage() {
             {!loading && filtered.length > 0 && (
                 <CostReasonTable
                     items={filtered}
+                    pendingIds={pendingIds}
                     onEdit={modal.openEdit}
-                    onToggleActive={handleToggleActive}
+                    onToggleActive={toggleActive}
                 />
             )}
 

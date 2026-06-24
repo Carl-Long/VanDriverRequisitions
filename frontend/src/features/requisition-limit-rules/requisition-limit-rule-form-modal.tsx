@@ -175,7 +175,7 @@ export function RequisitionLimitRuleFormModal({
             onClose={onClose}
             title={isEditing ? "Edit Limit Rule" : "Create Limit Rule"}
         >
-            <form onSubmit={handleSubmit(onValid)} className="space-y-5">
+            <form onSubmit={handleSubmit(onValid)} noValidate className="space-y-5">
                 {serverError && <Alert tone="danger">{serverError}</Alert>}
 
                 <Field label="Category" required error={errors.category?.message}>

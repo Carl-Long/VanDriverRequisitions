@@ -9,12 +9,14 @@ import type { StdCollectionType } from "@/features/std-collection-types/std-coll
 
 type Props = {
     items: StdCollectionType[];
+    pendingIds?: ReadonlySet<string>;
     onEdit: (item: StdCollectionType) => void;
     onToggleActive: (item: StdCollectionType) => void;
 };
 
 export function StdCollectionTypeTable({
     items,
+    pendingIds,
     onEdit,
     onToggleActive,
 }: Readonly<Props>) {
@@ -45,6 +47,8 @@ export function StdCollectionTypeTable({
                             <TableCell>
                                 <Toggle
                                     checked={item.isActive}
+                                    loading={pendingIds?.has(item.id) ?? false}
+                                    disabled={pendingIds?.has(item.id) ?? false}
                                     onChange={() => onToggleActive(item)}
                                     ariaLabel={`Toggle active for ${item.code} - ${item.name}`}
                                 />

@@ -15,9 +15,10 @@ import { Toggle } from "@/components/ui/toggle";
 import { useCrudModal } from "@/hooks/use-crud-modal";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { useToast } from "@/providers/toast-provider";
-import {    stdCollectionTypesApi,    type CreateStdCollectionType,    type StdCollectionType,} from "@/features/std-collection-types/std-collection-types-api";
+import { stdCollectionTypesApi, type CreateStdCollectionType, type StdCollectionType, } from "@/features/std-collection-types/std-collection-types-api";
 import { StdCollectionTypeFormModal } from "@/features/std-collection-types/std-collection-type-form-modal";
 import { StdCollectionTypeTable } from "@/features/std-collection-types/std-collection-type-table";
+import { useOptimisticActiveToggle } from "@/features/admin-shared/use-optimistic-active-toggle";
 
 export default function StdCollectionTypesPage() {
     const [collectionTypes, setCollectionTypes] = useState<StdCollectionType[]>([]);
@@ -30,6 +31,24 @@ export default function StdCollectionTypesPage() {
     const modal = useCrudModal<StdCollectionType>();
     const toast = useToast();
 
+    const { pendingIds, toggleActive } = useOptimisticActiveToggle({
+        setItems: setCollectionTypes,
+        showInactive,
+        activate: stdCollectionTypesApi.activate,
+        deactivate: stdCollectionTypesApi.deactivate,
+        afterSuccess: stdCollectionTypesApi.clearCache,
+        onBeforeToggle: () => setError(null),
+        onSuccess: (collectionType, nextIsActive) => {
+            toast.success(
+                nextIsActive
+                    ? `${collectionType.code} - ${collectionType.name} activated`
+                    : `${collectionType.code} - ${collectionType.name} deactivated`,
+            );
+        },
+        onError: (err) => {
+            setError(getApiErrorMessage(err, "Failed to update STD collection type."));
+        },
+    });
     const load = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -79,39 +98,17 @@ export default function StdCollectionTypesPage() {
         await load();
     }
 
-    async function handleToggleActive(item: StdCollectionType) {
-        try {
-            if (item.isActive) {
-                await stdCollectionTypesApi.deactivate(item.id);
-            } else {
-                await stdCollectionTypesApi.activate(item.id);
-            }
-
-            stdCollectionTypesApi.clearCache();
-
-            toast.success(
-                item.isActive
-                    ? `${item.code} - ${item.name} deactivated`
-                    : `${item.code} - ${item.name} activated`,
-            );
-
-            await load();
-        } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to update STD collection type."));
-        }
-    }
-
     const emptyState = search.trim()
         ? {
-              icon: Search,
-              title: "No STD collection types found",
-              description: "Try adjusting your search terms.",
-          }
+            icon: Search,
+            title: "No STD collection types found",
+            description: "Try adjusting your search terms.",
+        }
         : {
-              icon: ListChecks,
-              title: "No STD collection types yet",
-              description: "Create your first STD collection type to get started.",
-          };
+            icon: ListChecks,
+            title: "No STD collection types yet",
+            description: "Create your first STD collection type to get started.",
+        };
 
     return (
         <PageContainer>
@@ -159,8 +156,9 @@ export default function StdCollectionTypesPage() {
             {!loading && filtered.length > 0 && (
                 <StdCollectionTypeTable
                     items={filtered}
+                    pendingIds={pendingIds}
                     onEdit={modal.openEdit}
-                    onToggleActive={handleToggleActive}
+                    onToggleActive={toggleActive}
                 />
             )}
 

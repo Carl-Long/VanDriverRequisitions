@@ -26,6 +26,7 @@ import { StdLocation, CreateStdLocation } from "@/features/std-locations/std-loc
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { cn } from "@/lib/utils";
+import { useOptimisticPaginatedActiveToggle } from "@/features/admin-shared/use-optimistic-paginated-active-toggle";
 
 const PAGE_SIZE = 10;
 
@@ -46,6 +47,25 @@ export default function StdLocationsPage() {
 
     const modal = useCrudModal<StdLocation>();
     const toast = useToast();
+
+    const { pendingIds, toggleActive } = useOptimisticPaginatedActiveToggle({
+        setData,
+        showInactive: includeInactive,
+        activate: stdLocationsApi.activate,
+        deactivate: stdLocationsApi.deactivate,
+        afterSuccess: stdLocationsApi.clearCache,
+        onBeforeToggle: () => setError(null),
+        onSuccess: (location, nextIsActive) => {
+            toast.success(
+                nextIsActive
+                    ? `${location.locationName} activated`
+                    : `${location.locationName} deactivated`,
+            );
+        },
+        onError: (err) => {
+            setError(getApiErrorMessage(err, "Failed to update STD location."));
+        },
+    });
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -94,30 +114,6 @@ export default function StdLocationsPage() {
 
         modal.close();
         await load();
-    }
-
-    async function handleToggleActive(location: StdLocation) {
-        setError(null);
-
-        try {
-            if (location.isActive) {
-                await stdLocationsApi.deactivate(location.id);
-            } else {
-                await stdLocationsApi.activate(location.id);
-            }
-
-            stdLocationsApi.clearCache();
-
-            toast.success(
-                location.isActive
-                    ? `${location.locationName} deactivated`
-                    : `${location.locationName} activated`,
-            );
-
-            await load();
-        } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to update STD location."));
-        }
     }
 
     function handleResetFilters() {
@@ -253,8 +249,9 @@ export default function StdLocationsPage() {
             {!loading && data && data.items.length > 0 && (
                 <StdLocationTable
                     items={data.items}
+                    pendingIds={pendingIds}
                     onEdit={modal.openEdit}
-                    onToggleActive={handleToggleActive}
+                    onToggleActive={toggleActive}
                 />
             )}
 
