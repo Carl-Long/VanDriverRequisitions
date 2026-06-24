@@ -1,0 +1,83 @@
+.card-shadow {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 8px 24px rgb(0 0 0 / 0.06);
+}
+
+.card-shadow-hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 20px 48px rgb(0 0 0 / 0.12);
+}
+
+/* Combines default + hover shadow, including dark-theme variants */
+.card-shadow-interactive {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 8px 24px rgb(0 0 0 / 0.06);
+}
+
+.card-shadow-interactive:hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.04),
+        0 20px 48px rgb(0 0 0 / 0.12);
+}
+
+.dark-brand .card-shadow,
+.dark-mono .card-shadow,
+.electric-night .card-shadow {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 8px 32px rgb(0 0 0 / 0.35);
+}
+
+.dark-brand .card-shadow-hover,
+.dark-mono .card-shadow-hover,
+.electric-night .card-shadow-hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.dark-brand .card-shadow-interactive,
+.dark-mono .card-shadow-interactive,
+.electric-night .card-shadow-interactive {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 8px 32px rgb(0 0 0 / 0.35);
+}
+
+.dark-brand .card-shadow-interactive:hover,
+.dark-mono .card-shadow-interactive:hover,
+.electric-night .card-shadow-interactive:hover {
+    box-shadow:
+        0 1px 2px rgb(0 0 0 / 0.25),
+        0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.high-contrast .card-shadow,
+.high-contrast .card-shadow-hover,
+.high-contrast .card-shadow-interactive {
+    box-shadow: none;
+    border: 2px solid rgb(var(--border));
+}
+
+.high-contrast .card-shadow-interactive:hover {
+    box-shadow: none;
+    border: 2px solid rgb(var(--border));
+}
+
+.electric-night .card-shadow {
+    box-shadow:
+        0 0 0 1px rgb(var(--primary) / 0.12),
+        0 12px 36px rgb(0 245 255 / 0.08),
+        0 20px 60px rgb(255 0 204 / 0.08);
+}
+
+.electric-night .card-shadow-hover,
+.electric-night .card-shadow-interactive:hover {
+    box-shadow:
+        0 0 0 1px rgb(var(--primary) / 0.28),
+        0 16px 46px rgb(0 245 255 / 0.16),
+        0 24px 70px rgb(255 0 204 / 0.16);
+}
