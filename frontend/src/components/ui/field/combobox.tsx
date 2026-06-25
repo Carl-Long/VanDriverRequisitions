@@ -47,6 +47,7 @@ export function Combobox<TData = unknown>({
     const triggerRef = useRef<HTMLButtonElement>(null);
 
     const maxVisibleOptions = 50;
+    const hasSearch = search.trim().length > 0;
 
     const closeCombobox = useCallback((focusTrigger = false) => {
         setOpen(false);
@@ -256,15 +257,16 @@ export function Combobox<TData = unknown>({
                                 );
                             })}
 
-                        {!loading && pinnedOptions.length === 0 && finalOptions.length === 0 && (
-                            <div className="px-3 py-4 text-sm text-muted-foreground">
-                                {emptyStateText}
-                            </div>
-                        )}
-
-                        {!loading && pinnedOptions.length > 0 && finalOptions.length === 0 && (
-                            <div className="px-3 py-2 text-xs text-muted-foreground">
-                                {noMatchesText}
+                        {!loading && finalOptions.length === 0 && (
+                            <div
+                                className={cn(
+                                    "text-muted-foreground",
+                                    pinnedOptions.length > 0
+                                        ? "px-3 py-2 text-xs"
+                                        : "px-3 py-4 text-sm",
+                                )}
+                            >
+                                {hasSearch ? noMatchesText : emptyStateText}
                             </div>
                         )}
                     </div>
