@@ -123,8 +123,8 @@ export default function FeRequisitionApprovalsPage() {
     return (
         <PageContainer>
             <PageHeader
-                title="Approvals"
-                description="Review submitted FE requisitions awaiting approval."
+                title="Home Approvals"
+                description="Review submitted home van driver requisitions awaiting approval."
             />
 
             <RequisitionApprovalsSearchToolbar
