@@ -41,11 +41,7 @@ public sealed class FeGeneralTask : AuditableEntity, IFeRequisitionChild
     public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerJob)
     {
         ArgumentNullException.ThrowIfNull(week);
-
-        if (ratePerJob < 0)
-        {
-            throw new InvalidOperationException("Rate per job cannot be negative.");
-        }
+        MoneyGuard.EnsureOptionalMoneyAmount(ratePerJob, "Rate per job");
 
         WeekEndingDate = weekEndingDate;
         Week = week;

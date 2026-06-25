@@ -1,5 +1,6 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
+using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Domain.Entities.STD;
@@ -60,10 +61,7 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Filled bags cannot be greater than van packs out.");
         }
 
-        if (model.RatePerVanPack < 0)
-        {
-            throw new InvalidOperationException("Rate per van pack cannot be negative.");
-        }
+        MoneyGuard.EnsureMoneyAmount(model.RatePerVanPack, "Rate per van pack");
 
         DeliveryDate = model.DeliveryDate;
         PostCodeZone = model.PostCodeZone.Trim();

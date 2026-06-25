@@ -242,6 +242,20 @@ public sealed class FeTransferTests
                 CreateWeek(1, 1, 1, 1, 1, 1, 1),
                 ratePerJob: -0.01m));
     }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(0.001)]
+    public void Create_WhenRateIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerJob)
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            FeTransfer.Create(
+                CreateShopSnapshot(),
+                CreateShopSnapshot(),
+                WeekEndingDate,
+                CreateWeek(1, 1, 1, 1, 1, 1, 1),
+                ratePerJob));
+    }
 
     private static FeTransfer CreateTransfer()
     {

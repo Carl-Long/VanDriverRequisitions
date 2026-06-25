@@ -88,4 +88,15 @@ public sealed class StdCollectionVanPackTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => StdCollectionVanPack.Create(model));
     }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(0.001)]
+    public void Create_WhenRatePerVanPackIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerVanPack)
+    {
+        var model = StdRequisitionTestData.CreateCollectionVanPackModel(
+            ratePerVanPack: ratePerVanPack);
+
+        Assert.Throws<InvalidOperationException>(() => StdCollectionVanPack.Create(model));
+    }
 }

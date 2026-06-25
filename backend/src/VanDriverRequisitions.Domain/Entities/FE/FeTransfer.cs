@@ -56,17 +56,13 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
         ArgumentNullException.ThrowIfNull(fromShop);
         ArgumentNullException.ThrowIfNull(toShop);
         ArgumentNullException.ThrowIfNull(week);
+        MoneyGuard.EnsureOptionalMoneyAmount(ratePerJob, "Rate per job");
 
         if (fromShop.Id == toShop.Id)
         {
             throw new InvalidOperationException("From shop and to shop must be different.");
         }
-
-        if (ratePerJob.HasValue && ratePerJob.Value < 0)
-        {
-            throw new InvalidOperationException("Rate per job cannot be negative.");
-        }
-
+        
         ShopIdFrom = fromShop.Id;
         ShopCodeFrom = fromShop.Code;
         ShopNameFrom = fromShop.Name;

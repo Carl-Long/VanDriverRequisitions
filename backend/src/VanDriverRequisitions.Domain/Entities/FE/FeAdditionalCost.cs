@@ -94,10 +94,7 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
             throw new InvalidOperationException("Miles must be greater than zero.");
         }
 
-        if (!ratePerMile.HasValue || ratePerMile.Value < 0)
-        {
-            throw new InvalidOperationException("Rate per mile is required and cannot be negative.");
-        }
+        MoneyGuard.EnsureRequiredMoneyAmount(ratePerMile, "Rate per mile");
 
         ChargingOption = ChargingOption.Mileage;
 
@@ -117,10 +114,7 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
             throw new InvalidOperationException("Total number must be greater than zero.");
         }
 
-        if (!ratePerJob.HasValue || ratePerJob.Value < 0)
-        {
-            throw new InvalidOperationException("Rate per job is required and cannot be negative.");
-        }
+        MoneyGuard.EnsureRequiredMoneyAmount(ratePerJob, "Rate per job");
 
         ChargingOption = ChargingOption.Job;
 

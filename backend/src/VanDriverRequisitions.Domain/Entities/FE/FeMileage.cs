@@ -26,11 +26,7 @@ public sealed class FeMileage : AuditableEntity, IFeRequisitionChild
     public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerMile)
     {
         ArgumentNullException.ThrowIfNull(week);
-
-        if (ratePerMile < 0)
-        {
-            throw new InvalidOperationException("Rate per mile cannot be negative.");
-        }
+        MoneyGuard.EnsureOptionalMoneyAmount(ratePerMile, "Rate per mile");
 
         WeekEndingDate = weekEndingDate;
         Week = week;
