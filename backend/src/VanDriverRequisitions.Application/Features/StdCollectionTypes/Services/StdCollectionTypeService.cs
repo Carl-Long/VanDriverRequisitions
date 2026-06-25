@@ -1,7 +1,5 @@
-using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdCollectionTypes.Dtos;
@@ -66,7 +64,7 @@ public sealed class StdCollectionTypeService(IApplicationDbContext context, IVal
 
         context.StdCollectionTypes.Add(collectionType);
 
-        await SaveWithUniqueConstraintHandlingAsync(createStdCollectionTypeDto.Code, cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{createStdCollectionTypeDto.Code}' already exists.", cancellationToken);
 
         return StdCollectionTypeMapper.ToSummaryDto(collectionType);
     }
@@ -80,8 +78,8 @@ public sealed class StdCollectionTypeService(IApplicationDbContext context, IVal
         collectionType.Code = updateStdCollectionTypeDto.Code.Trim();
         collectionType.Name = updateStdCollectionTypeDto.Name.Trim();
 
-        await SaveWithUniqueConstraintHandlingAsync(updateStdCollectionTypeDto.Code, cancellationToken);
-
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{updateStdCollectionTypeDto.Code}' already exists.", cancellationToken);
+        
         return StdCollectionTypeMapper.ToSummaryDto(collectionType);
     }
 
@@ -109,20 +107,5 @@ public sealed class StdCollectionTypeService(IApplicationDbContext context, IVal
                    .IgnoreQueryFilters()
                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                ?? throw new NotFoundException($"STD Collection Type with ID '{id}' was not found.");
-    }
-
-    private async Task SaveWithUniqueConstraintHandlingAsync(string code, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException(
-            [
-                new ValidationFailure("Code", $"This code '{code}' already exists.")
-            ]);
-        }
     }
 }

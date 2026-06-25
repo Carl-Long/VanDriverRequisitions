@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
@@ -32,5 +34,17 @@ public static class ApplicationDbContextExtensions
         }
 
         context.Entry(entity).Property(nameof(ConcurrencyAwareEntity.RowVersion)).OriginalValue = rowVersion;
+    }
+    
+    public static async Task SaveChangesWithUniqueConstraintValidationAsync(this IApplicationDbContext context, string propertyName, string message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+        {
+            throw new ValidationException([new ValidationFailure(propertyName, message)]);
+        }
     }
 }

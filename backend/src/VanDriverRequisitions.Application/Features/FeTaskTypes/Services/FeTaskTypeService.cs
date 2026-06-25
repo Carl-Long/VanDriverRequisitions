@@ -1,7 +1,5 @@
-using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Dtos;
@@ -50,7 +48,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
 
         context.FeTaskTypes.Add(newTaskType);
 
-        await SaveWithUniqueConstraintHandlingAsync(createFeTaskTypeDto.Code, cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{createFeTaskTypeDto.Code}' already exists.", cancellationToken);
 
         return FeTaskTypeMapper.ToSummaryDto(newTaskType);
     }
@@ -64,7 +62,7 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
         existingTaskType.Name = updateFeTaskTypeDto.Name.Trim();
         existingTaskType.Code = updateFeTaskTypeDto.Code.Trim();
 
-        await SaveWithUniqueConstraintHandlingAsync(updateFeTaskTypeDto.Code, cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{updateFeTaskTypeDto.Code}' already exists.", cancellationToken);
 
         return FeTaskTypeMapper.ToSummaryDto(existingTaskType);
     }
@@ -89,20 +87,5 @@ public class FeTaskTypeService(IApplicationDbContext context, IValidatorService 
                    .IgnoreQueryFilters()
                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                ?? throw new NotFoundException($"FE Task Type with ID '{id}' was not found.");
-    }
-    
-    private async Task SaveWithUniqueConstraintHandlingAsync(string code, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException(
-            [
-                new ValidationFailure("Code", $"This code '{code}' already exists.")
-            ]);
-        }
     }
 }

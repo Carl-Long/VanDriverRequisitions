@@ -1,14 +1,12 @@
-using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdLocations.Dtos;
 using VanDriverRequisitions.Application.Features.StdLocations.Extensions;
 using VanDriverRequisitions.Application.Features.StdLocations.Mappings;
-using VanDriverRequisitions.Domain.Entities.Common;
+
 using VanDriverRequisitions.Domain.Entities.STD;
 
 namespace VanDriverRequisitions.Application.Features.StdLocations.Services;
@@ -80,7 +78,7 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
 
         context.StdLocations.Add(location);
 
-        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("LocationName", "A STD location already exists for this shop, collection type, location name and postcode.", cancellationToken);
 
         return await GetByIdAsync(location.Id, cancellationToken);
     }
@@ -96,7 +94,7 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
 
         location.UpdateDetails(updateStdLocationDto.ShopId, updateStdLocationDto.CollectionTypeId, updateStdLocationDto.LocationName, updateStdLocationDto.PostCode);
 
-        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("LocationName", "A STD location already exists for this shop, collection type, location name and postcode.", cancellationToken);
 
         return await GetByIdAsync(location.Id, cancellationToken);
     }
@@ -144,23 +142,6 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
         if (!exists)
         {
             throw new NotFoundException($"STD Collection Type with ID '{collectionTypeId}' was not found.");
-        }
-    }
-
-    private async Task SaveWithUniqueConstraintHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException(
-            [
-                new ValidationFailure(
-                    "LocationName",
-                    "A STD location already exists for this shop, collection type, location name and postcode.")
-            ]);
         }
     }
 }
