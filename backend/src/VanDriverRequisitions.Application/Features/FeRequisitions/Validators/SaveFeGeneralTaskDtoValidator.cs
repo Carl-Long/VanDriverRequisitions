@@ -4,8 +4,7 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 
-public sealed class SaveFeGeneralTaskDtoValidator
-    : AbstractValidator<SaveFeGeneralTaskDto>
+public sealed class SaveFeGeneralTaskDtoValidator : AbstractValidator<SaveFeGeneralTaskDto>
 {
     public SaveFeGeneralTaskDtoValidator()
     {
@@ -14,6 +13,10 @@ public sealed class SaveFeGeneralTaskDtoValidator
 
         RuleFor(x => x.WeekEndingDate)
             .NotEmpty();
+
+        RuleFor(x => x.Week)
+            .NotNull()
+            .SetValidator(new WeeklyQuantitiesDtoValidator());
 
         RuleFor(x => x.RatePerJob)
             .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)

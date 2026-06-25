@@ -21,7 +21,8 @@ public sealed class SaveFeTransferDtoValidator : AbstractValidator<SaveFeTransfe
             .WithMessage("From shop and to shop must be different.");
 
         RuleFor(x => x.Week)
-            .NotNull();
+            .NotNull()
+            .SetValidator(new WeeklyQuantitiesDtoValidator());
 
         RuleFor(x => x.RatePerJob)
             .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)

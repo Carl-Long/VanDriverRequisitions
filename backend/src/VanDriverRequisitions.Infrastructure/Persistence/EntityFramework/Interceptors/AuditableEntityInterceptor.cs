@@ -4,6 +4,7 @@ using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Interceptors;
@@ -33,7 +34,7 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
         if (context is null) return;
 
         var now = DateTime.UtcNow;
-        var user = currentUser.User ?? LoggedInUser.System;
+        var user = currentUser.UserOrSystem;
 
         ApplyAuditing(context, now, user);
         TouchRequisitionParents(context, now, user);
@@ -74,31 +75,44 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
 
         foreach (var entry in context.ChangeTracker.Entries<ISoftDeletable>())
         {
-            if (entry.State == EntityState.Deleted)
-            {
-                entry.State = EntityState.Modified;
+            if (entry.State != EntityState.Deleted) continue;
+            
+            entry.State = EntityState.Modified;
 
-                entry.Entity.DeletedAtUtc = now;
-                entry.Entity.DeletedById = user.Id;
-                entry.Entity.DeletedByNameSnapshot = user.Name;
-            }
+            entry.Entity.DeletedAtUtc = now;
+            entry.Entity.DeletedById = user.Id;
+            entry.Entity.DeletedByNameSnapshot = user.Name;
         }
     }
 
     private static void TouchRequisitionParents(DbContext context, DateTime now, LoggedInUser user)
     {
+        TouchTrackedRequisitionParents<IFeRequisitionChild, FeRequisition>(context, child => child.FeRequisitionId, now, user);
+        TouchTrackedRequisitionParents<IStdRequisitionChild, StdRequisition>(context, child => child.StdRequisitionId, now, user); 
+    }
+
+    private static void TouchTrackedRequisitionParents<TChild, TRequisition>(
+        DbContext context,
+        Func<TChild, Guid> requisitionIdSelector,
+        DateTime now,
+        LoggedInUser user)
+        where TChild : class
+        where TRequisition : AuditableEntity
+    {
         var affectedRequisitionIds = context.ChangeTracker
-            .Entries<IFeRequisitionChild>()
+            .Entries<TChild>()
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
-            .Select(e => e.Entity.FeRequisitionId)
+            .Select(e => requisitionIdSelector(e.Entity))
             .Distinct()
             .ToList();
 
         if (affectedRequisitionIds.Count == 0)
+        {
             return;
+        }
 
         var requisitions = context.ChangeTracker
-            .Entries<FeRequisition>()
+            .Entries<TRequisition>()
             .Where(e => affectedRequisitionIds.Contains(e.Entity.Id))
             .ToList();
 

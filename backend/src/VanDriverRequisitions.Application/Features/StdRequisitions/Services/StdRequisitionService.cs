@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
@@ -10,9 +11,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.STD;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Services;
 
@@ -24,7 +23,8 @@ public sealed class StdRequisitionService(
     IStdRequisitionNumberGenerator stdRequisitionNumberGenerator,
     IStdRequisitionSaveDataBuilder saveDataBuilder,
     IStdRequisitionLimitValidator limitValidator,
-    TimeProvider timeProvider) : IStdRequisitionService
+    TimeProvider timeProvider,
+    IRequisitionLookupLoader lookupLoader) : IStdRequisitionService
 {
     public async Task<PagedResult<StdRequisitionSummaryDto>> GetAllAsync(StdRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -57,7 +57,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -106,7 +106,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
 
@@ -114,14 +114,14 @@ public sealed class StdRequisitionService(
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<StdRequisitionDetailDto> SubmitAsync(Guid? id, SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Submission");
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
 
@@ -134,7 +134,7 @@ public sealed class StdRequisitionService(
             requisition = await LoadFullAsync(id.Value, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-            SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+            context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
             requisition.Update(saveData.UpdateModel);
         }
         else
@@ -144,58 +144,56 @@ public sealed class StdRequisitionService(
             context.StdRequisitions.Add(requisition);
         }
 
-        var now = GetUtcNow();
-
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
         var snapshotJson = StdRequisitionSnapshotFactory.CreateJson(requisition);
 
-        requisition.Submit(auditUser, now, snapshotJson);
+        requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<StdRequisitionDetailDto> ApproveAsync(Guid id, ApproveStdRequisitionDto approveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Approval");
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(approveStdRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
-        requisition.ApproveSubmission(auditUser, GetUtcNow(), poNumber);
+        requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
 
     public async Task<StdRequisitionDetailDto> RejectAsync(Guid id, RejectStdRequisitionDto rejectStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Rejection");
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(rejectStdRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
+        
+        context.SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
 
-        SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
+        requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectStdRequisitionDto.RejectionNotes);
 
-        requisition.RejectSubmission(auditUser, GetUtcNow(), rejectStdRequisitionDto.RejectionNotes);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
-
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
-
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
+        
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
 
@@ -211,44 +209,19 @@ public sealed class StdRequisitionService(
             .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
-
-    private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
-    {
-        return await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == vanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
-    }
-
-    private async Task<bool> IsShopActiveAsync(Guid shopId, CancellationToken cancellationToken)
-    {
-        return await context.Shops
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == shopId)
-            .Select(x => x.IsActive)
-            .SingleAsync(cancellationToken);
-    }
-
+    
     private async Task<StdRequisitionDetailDto> MapToDetailDtoAsync(
         StdRequisition requisition,
         VanDriverLookupDto? driverSummary,
         bool? isShopActive,
         CancellationToken cancellationToken)
     {
-        driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
-        var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
+        driverSummary ??= await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
+        var shopActive = isShopActive ?? await lookupLoader.IsShopActiveAsync(requisition.ShopId, cancellationToken);
 
-        var additionalCostReasonActiveMap =
-            await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
-
-        var collectionTypeActiveMap =
-            await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
-
-        var locationActiveMap =
-            await LoadLocationActiveMapAsync(requisition, cancellationToken);
+        var additionalCostReasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
+        var collectionTypeActiveMap = await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
+        var locationActiveMap = await LoadLocationActiveMapAsync(requisition, cancellationToken);
 
         return StdRequisitionMapper.MapRequisitionToDetailDto(
             requisition,
@@ -313,44 +286,5 @@ public sealed class StdRequisitionService(
             .AsNoTracking()
             .Where(x => locationIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
-    }
-
-    private void SetOriginalRowVersion(StdRequisition requisition, byte[]? rowVersion)
-    {
-        if (rowVersion is null)
-        {
-            return;
-        }
-
-        context.Entry(requisition)
-            .Property(nameof(StdRequisition.RowVersion))
-            .OriginalValue = rowVersion;
-    }
-
-    private AuditUser GetAuditUser(string actionName)
-    {
-        return currentUser.User is not null
-            ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
-            : throw new NotFoundException($"{actionName} must be performed by a user.");
-    }
-
-    private DateTime GetUtcNow()
-    {
-        return timeProvider.GetUtcNow().UtcDateTime;
-    }
-
-    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(
-                "This requisition has been updated by another user since you opened it. " +
-                "Refresh the page to load the latest version. " +
-                "Any changes you have made since opening the requisition will need to be re-entered.");
-        }
     }
 }

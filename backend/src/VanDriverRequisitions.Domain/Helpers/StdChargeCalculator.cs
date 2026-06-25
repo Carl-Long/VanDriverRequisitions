@@ -23,27 +23,24 @@ public static class StdChargeCalculator
             throw new InvalidOperationException("Miles must be greater than zero.");
         }
 
-        if (ratePerMile is null or < 0)
-        {
-            throw new InvalidOperationException("Rate per mile is required and cannot be negative.");
-        }
+        var validatedMiles = miles.Value;
+        var validatedRatePerMile = MoneyGuard.EnsureRequiredMoneyAmount(ratePerMile, "Rate per mile");
 
         return new StdChargeCalculation(
-            Miles: miles.Value,
-            RatePerMile: ratePerMile.Value,
+            Miles: validatedMiles,
+            RatePerMile: validatedRatePerMile,
             FlatCharge: null,
-            TotalValue: miles.Value * ratePerMile.Value);
+            TotalValue: validatedMiles * validatedRatePerMile);
     }
 
     private static StdChargeCalculation CalculateFlatCharge(decimal? flatCharge)
     {
-        if (!flatCharge.HasValue)
-        {
-            throw new InvalidOperationException("Flat charge is required.");
-        }
+        var validatedFlatCharge = MoneyGuard.EnsureRequiredMoneyAmount(flatCharge, "Flat charge");
 
-        return flatCharge.Value < 0 
-            ? throw new InvalidOperationException("Flat charge cannot be negative.") 
-            : new StdChargeCalculation(Miles: null, RatePerMile: null, FlatCharge: flatCharge.Value, TotalValue: flatCharge.Value);
+        return new StdChargeCalculation(
+            Miles: null,
+            RatePerMile: null,
+            FlatCharge: validatedFlatCharge,
+            TotalValue: validatedFlatCharge);
     }
 }

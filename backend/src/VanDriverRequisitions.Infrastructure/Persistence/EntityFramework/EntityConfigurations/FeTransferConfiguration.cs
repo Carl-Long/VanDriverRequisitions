@@ -89,8 +89,8 @@ public class FeTransferConfiguration : IEntityTypeConfiguration<FeTransfer>
             );
 
             t.HasCheckConstraint(
-                "CK_FeTransfers_RatePerJob_NonNegative",
-                "[RatePerJob] IS NULL OR [RatePerJob] >= 0"
+                "CK_FeTransfers_RatePerJob_Minimum",
+                "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01"
             );
 
             t.HasCheckConstraint(

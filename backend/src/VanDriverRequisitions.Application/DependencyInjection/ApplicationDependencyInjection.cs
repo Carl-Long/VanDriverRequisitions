@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Common.Requisitions;
 using VanDriverRequisitions.Application.Common.Validation;
 using VanDriverRequisitions.Application.Features.CostReasons.Services;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
@@ -38,6 +39,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IStdLocationService, StdLocationService>();
         services.AddScoped<IStdRequisitionLimitValidator, StdRequisitionLimitValidator>();
         
+        services.AddScoped<IRequisitionLookupLoader, RequisitionLookupLoader>();       
         services.AddScoped<ISubmitWindowService, SubmitWindowService>();
         services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();
         services.AddScoped<IShopService, ShopService>();

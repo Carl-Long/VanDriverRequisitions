@@ -4,14 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using VanDriverRequisitions.Application.Exceptions;
 namespace VanDriverRequisitions.Api.Middleware;
 
-public class GlobalExceptionHandler(
-    ILogger<GlobalExceptionHandler> logger,
-    IHostEnvironment env) : IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHostEnvironment env) : IExceptionHandler
 {
-   public async ValueTask<bool> TryHandleAsync(
-    HttpContext context,
-    Exception exception,
-    CancellationToken cancellationToken)
+   public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
 {
     logger.LogError(exception, exception.Message);
 
@@ -21,7 +16,7 @@ public class GlobalExceptionHandler(
         NotFoundException => StatusCodes.Status404NotFound,
         ConflictException => StatusCodes.Status409Conflict,
         ForbiddenException => StatusCodes.Status403Forbidden,
-        BadRequestException => StatusCodes.Status400BadRequest,
+        BadRequestException or InvalidOperationException => StatusCodes.Status400BadRequest,
         UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
         _ => StatusCodes.Status500InternalServerError
     };
@@ -58,6 +53,7 @@ public class GlobalExceptionHandler(
         ConflictException => CreateProblemDetails(context, StatusCodes.Status409Conflict, "Conflict", exception.Message),
         ForbiddenException => CreateProblemDetails(context, StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
         BadRequestException => CreateProblemDetails(context, StatusCodes.Status400BadRequest, "Bad request", exception.Message),
+        InvalidOperationException => CreateProblemDetails(context, StatusCodes.Status400BadRequest, "Bad request", exception.Message),
         UnauthorizedAccessException => CreateProblemDetails(context, StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
         _ => CreateProblemDetails(context, StatusCodes.Status500InternalServerError, "Server error", env.IsDevelopment() ? exception.Message : "An unexpected error occurred.")
     };
@@ -77,11 +73,12 @@ public class GlobalExceptionHandler(
             Status = statusCode,
             Title = title,
             Detail = detail,
-            Instance = context.Request.Path.Value
+            Instance = context.Request.Path.Value,
+            Extensions =
+            {
+                ["traceId"] = context.TraceIdentifier
+            }
         };
-
-        problemDetails.Extensions["traceId"] =
-            context.TraceIdentifier;
 
         return problemDetails;
     }

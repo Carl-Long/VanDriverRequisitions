@@ -3,30 +3,26 @@ using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
-using VanDriverRequisitions.Application.Features.Shops.Dtos;
-using VanDriverRequisitions.Application.Features.Shops.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
-using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
-using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 
-public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context) : IStdRequisitionSaveDataBuilder
+public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context, IRequisitionLookupLoader lookupLoader) : IStdRequisitionSaveDataBuilder
 {
     public async Task<StdRequisitionSaveData> BuildAsync(SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(saveStdRequisitionDto);
 
-        var driverSummary = await LoadDriverSummaryAsync(saveStdRequisitionDto.VanDriverId, cancellationToken);
-        var shop = await LoadShopSnapshotAsync(saveStdRequisitionDto.ShopId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(saveStdRequisitionDto.VanDriverId, cancellationToken, includeInactive: true);
+        var shop = await lookupLoader.LoadShopRequisitionSnapshotAsync(saveStdRequisitionDto.ShopId, cancellationToken, includeInactive: true);
+        
         var details = StdRequisitionMapper.MapToRequisitionDetails(saveStdRequisitionDto, driverSummary, shop);
 
         var collectionChargeModels = await BuildCollectionChargeModelsAsync(
@@ -51,25 +47,7 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
 
         return new StdRequisitionSaveData(driverSummary, updateModel, shop.IsActive);
     }
-
-    private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
-    {
-        return await context.VanDrivers
-            .AsNoTracking()
-            .Where(x => x.Id == vanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
-    }
-
-    private async Task<ShopRequisitionSnapshotDto> LoadShopSnapshotAsync(Guid shopId, CancellationToken cancellationToken)
-    {
-        return await context.Shops
-            .AsNoTracking()
-            .Where(x => x.Id == shopId)
-            .Select(ShopProjections.AsRequisitionSnapshotDto)
-            .SingleAsync(cancellationToken);
-    }
-
+    
     private async Task<Dictionary<Guid, StdCollectionType>> LoadCollectionTypeMapAsync(
         IEnumerable<SaveStdCollectionChargeBanksAndBinsDto> collectionCharges,
         CancellationToken cancellationToken)
@@ -187,14 +165,16 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
         CancellationToken cancellationToken)
     {
         var transferShopIds = transfers
-            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
-            .Distinct()
-            .ToList();
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo });
 
-        return await context.Shops
-            .Where(x => transferShopIds.Contains(x.Id))
-            .Select(x => new ShopSnapshot(x.Id, x.Code, x.Name))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var shops = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            transferShopIds,
+            cancellationToken,
+            includeInactive: true);
+
+        return shops.ToDictionary(
+            x => x.Key,
+            x => new ShopSnapshot(x.Value.Id, x.Value.Code, x.Value.Name));
     }
 
     private static ShopSnapshot MapTransferShop(Guid shopId, IReadOnlyDictionary<Guid, ShopSnapshot> transferShops, string direction)

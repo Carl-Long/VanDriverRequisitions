@@ -29,32 +29,48 @@ public sealed class SaveStdRequisitionDtoValidator : AbstractValidator<SaveStdRe
             .NotNull()
             .WithMessage("Collection charges are required.");
 
+        RuleFor(x => x.CollectionVanPacks)
+            .NotNull()
+            .WithMessage("Van pack collections are required.");
+
+        RuleFor(x => x.Pickups)
+            .NotNull()
+            .WithMessage("Pickup collections are required.");
+
+        RuleFor(x => x.Transfers)
+            .NotNull()
+            .WithMessage("Transfers are required.");
+
+        RuleFor(x => x.AdditionalCosts)
+            .NotNull()
+            .WithMessage("Additional costs are required.");
+
         RuleFor(x => x)
             .Must(HaveAtLeastOneRow)
             .WithMessage("At least one requisition row is required.");
 
         RuleForEach(x => x.CollectionChargesBanksAndBins)
             .SetValidator(new SaveStdCollectionChargeBanksAndBinsDtoValidator());
-        
+
         RuleForEach(x => x.CollectionVanPacks)
             .SetValidator(new SaveStdCollectionVanPackDtoValidator());
-        
+
         RuleForEach(x => x.Pickups)
             .SetValidator(new SaveStdPickupDtoValidator());
-        
+
         RuleForEach(x => x.Transfers)
             .SetValidator(new SaveStdTransferDtoValidator());
-        
+
         RuleForEach(x => x.AdditionalCosts)
             .SetValidator(new SaveStdAdditionalCostDtoValidator());
     }
 
     private static bool HaveAtLeastOneRow(SaveStdRequisitionDto dto)
     {
-        return dto.CollectionChargesBanksAndBins.Any() 
-               || dto.CollectionVanPacks.Any() 
-               || dto.Pickups.Any()
-               || dto.Transfers.Any()
-               || dto.AdditionalCosts.Any();
+        return dto.CollectionChargesBanksAndBins?.Any() == true
+               || dto.CollectionVanPacks?.Any() == true
+               || dto.Pickups?.Any() == true
+               || dto.Transfers?.Any() == true
+               || dto.AdditionalCosts?.Any() == true;
     }
 }

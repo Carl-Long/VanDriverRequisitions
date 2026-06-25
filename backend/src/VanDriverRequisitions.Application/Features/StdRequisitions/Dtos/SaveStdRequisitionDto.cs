@@ -7,9 +7,9 @@ public sealed class SaveStdRequisitionDto
     public Guid VanDriverId { get; init; }
     public required string VanDriverName { get; init; }
     public Guid ShopId { get; init; }
-    public required IReadOnlyCollection<SaveStdCollectionChargeBanksAndBinsDto> CollectionChargesBanksAndBins { get; init; }
-    public required IReadOnlyCollection<SaveStdCollectionVanPackDto> CollectionVanPacks { get; init; }
-    public required IReadOnlyCollection<SaveStdPickupDto> Pickups { get; init; }
-    public required IReadOnlyCollection<SaveStdTransferDto> Transfers { get; init; }
-    public required IReadOnlyCollection<SaveStdAdditionalCostDto> AdditionalCosts { get; init; }
+    public IReadOnlyCollection<SaveStdCollectionChargeBanksAndBinsDto> CollectionChargesBanksAndBins { get; init; } = [];
+    public IReadOnlyCollection<SaveStdCollectionVanPackDto> CollectionVanPacks { get; init; } = [];
+    public IReadOnlyCollection<SaveStdPickupDto> Pickups { get; init; } = [];
+    public IReadOnlyCollection<SaveStdTransferDto> Transfers { get; init; } = [];
+    public IReadOnlyCollection<SaveStdAdditionalCostDto> AdditionalCosts { get; init; } = [];
 }

@@ -91,7 +91,8 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
         if (!CanEdit)
         {
-            throw new InvalidOperationException("Only draft or rejected requisitions can be edited.");
+            throw new InvalidOperationException(
+                "This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
         }
 
         UpdateDetails(model.Details);
@@ -112,7 +113,8 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
         if (!CanSubmit)
         {
-            throw new InvalidOperationException("Only draft or rejected requisitions can be submitted.");
+            throw new InvalidOperationException(
+                "This requisition can no longer be submitted because it is not in Draft or Rejected status. It may have already been submitted by another user. Refresh the page to see the latest status.");
         }
 
         if (PendingSubmission is not null)
@@ -138,7 +140,8 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
 
         var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
+            ?? throw new InvalidOperationException(
+                "This requisition can no longer be approved because there is no pending submission. It may already have been approved or rejected by another user. Refresh the page to see the latest status.");
 
         submission.Approve(approvedBy, approvedAtUtc, poNumber);
 
@@ -151,7 +154,8 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
 
         var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
+            ?? throw new InvalidOperationException(
+                "This requisition can no longer be rejected because there is no pending submission. It may already have been approved or rejected by another user. Refresh the page to see the latest status.");
 
         submission.Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
 

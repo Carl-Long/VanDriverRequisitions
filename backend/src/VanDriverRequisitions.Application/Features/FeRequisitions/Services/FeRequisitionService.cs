@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
@@ -10,9 +11,7 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.FE;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 
@@ -23,7 +22,9 @@ public class FeRequisitionService(
     IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator,
     IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
-    IFeRequisitionSaveDataBuilder saveDataBuilder) : IFeRequisitionService
+    IFeRequisitionSaveDataBuilder saveDataBuilder,
+    TimeProvider timeProvider,
+    IRequisitionLookupLoader lookupLoader) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -55,7 +56,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
         
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -104,7 +105,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
         
@@ -112,14 +113,14 @@ public class FeRequisitionService(
         
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Submission");
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
@@ -132,7 +133,7 @@ public class FeRequisitionService(
             requisition = await LoadFullAsync(id.Value, cancellationToken)
                 ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-            SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+            context.SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
             requisition.Update(saveData.UpdateModel);
         }
         else
@@ -144,55 +145,54 @@ public class FeRequisitionService(
         }
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
-
-        var now = DateTime.UtcNow;
+        
         var snapshotJson = FeRequisitionSnapshotFactory.CreateJson(requisition);
+        
+        requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
-        requisition.Submit(auditUser, now, snapshotJson);
-
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Approval");
-
+        var auditUser = currentUser.RequireAuditUser();
+        
         await validator.ValidateAsync(approveFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
-        requisition.ApproveSubmission(auditUser, DateTime.UtcNow, poNumber);
+        requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
-
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
+        
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
 
     public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Rejection");
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(rejectFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
 
-        requisition.RejectSubmission(auditUser, DateTime.UtcNow, rejectFeRequisitionDto.RejectionNotes);
+        requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectFeRequisitionDto.RejectionNotes);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -208,27 +208,6 @@ public class FeRequisitionService(
             .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
-
-    private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
-    {
-        return await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == vanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
-    }
-    
-    private async Task<bool> IsShopActiveAsync(Guid shopId, CancellationToken cancellationToken)
-    {
-        return await context.Shops
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == shopId)
-            .Select(x => x.IsActive)
-            .SingleAsync(cancellationToken);
-    }
-    
     
     private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
         FeRequisition requisition,
@@ -236,8 +215,8 @@ public class FeRequisitionService(
         bool? isShopActive,
         CancellationToken cancellationToken)
     {
-        driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
-        var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
+        driverSummary ??= await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
+        var shopActive = isShopActive ?? await lookupLoader.IsShopActiveAsync(requisition.ShopId, cancellationToken);
         var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
@@ -260,34 +239,5 @@ public class FeRequisitionService(
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
-    }
-    
-    private AuditUser GetAuditUser(string actionName)
-    {
-        return currentUser.User is not null
-            ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
-            : throw new NotFoundException($"{actionName} must be performed by a user.");
-    }
-
-    private void SetOriginalRowVersion(FeRequisition requisition, byte[]? rowVersion)
-    {
-        if (rowVersion is null) return;
-        
-        context.Entry(requisition).Property(nameof(FeRequisition.RowVersion)).OriginalValue = rowVersion;
-    }
-
-    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(
-                "This requisition has been updated by another user since you opened it. " +
-                "Refresh the page to load the latest version. " +
-                "Any changes you have made since opening the requisition will need to be re-entered.");
-        }
     }
 }

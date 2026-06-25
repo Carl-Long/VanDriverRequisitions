@@ -19,7 +19,7 @@ public sealed class FeAdditionalCostTests
     private const string TollReasonCode = "10002";
     private const string TollReasonText = "Toll charge";
 
-    public static TheoryData<decimal?> MissingOrNegativeRates => [null, -0.01m];
+    public static TheoryData<decimal?> MissingOrInvalidRates => [null, 0m, 0.001m, -0.01m];
 
     [Fact]
     public void Create_WhenJobBased_SnapshotsReasonAndCalculatesTotalValue()
@@ -190,8 +190,8 @@ public sealed class FeAdditionalCostTests
     }
 
     [Theory]
-    [MemberData(nameof(MissingOrNegativeRates))]
-    public void Create_WhenJobRateIsMissingOrNegative_ThrowsInvalidOperationException(decimal? ratePerJob)
+    [MemberData(nameof(MissingOrInvalidRates))]
+    public void Create_WhenJobRateIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? ratePerJob)
     {
         Assert.Throws<InvalidOperationException>(() =>
             FeAdditionalCost.Create(
@@ -226,8 +226,8 @@ public sealed class FeAdditionalCostTests
     }
 
     [Theory]
-    [MemberData(nameof(MissingOrNegativeRates))]
-    public void Create_WhenRatePerMileIsMissingOrNegative_ThrowsInvalidOperationException(decimal? ratePerMile)
+    [MemberData(nameof(MissingOrInvalidRates))]
+    public void Create_WhenRatePerMileIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? ratePerMile)
     {
         Assert.Throws<InvalidOperationException>(() =>
             FeAdditionalCost.Create(

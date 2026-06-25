@@ -218,6 +218,21 @@ public sealed class FeGeneralTaskTests
                 CreateWeek(1, 1, 1, 1, 1, 1, 1),
                 ratePerJob: -0.01m));
     }
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(0.001)]
+    public void Create_WhenRateIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerJob)
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            FeGeneralTask.Create(
+                Guid.NewGuid(),
+                taskTypeName: "Collections",
+                taskTypeCode: "23707",
+                WeekEndingDate,
+                CreateWeek(1, 1, 1, 1, 1, 1, 1),
+                ratePerJob));
+    }
 
     private static FeGeneralTask CreateTask()
     {

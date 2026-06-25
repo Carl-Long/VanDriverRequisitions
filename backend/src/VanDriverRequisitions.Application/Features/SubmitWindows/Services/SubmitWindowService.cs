@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
@@ -10,13 +10,13 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 
-public class SubmitWindowService(IApplicationDbContext context, IValidatorService validator) : ISubmitWindowService
+public class SubmitWindowService(IApplicationDbContext context, IValidatorService validator, TimeProvider timeProvider) : ISubmitWindowService
 {
     public async Task<PagedResult<SubmitWindowSummaryDto>> GetAllAsync(SubmitWindowQueryDto query, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(query, cancellationToken);
 
-        var filteredQuery = BuildFilteredQuery(query.Filter, DateTime.UtcNow);
+        var filteredQuery = BuildFilteredQuery(query.Filter, timeProvider.GetUtcDateTime());
         var totalCount = await filteredQuery.CountAsync(cancellationToken);
 
         var items = await filteredQuery
@@ -86,7 +86,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
     
     public async Task<SubmitWindowStatusDto> GetStatusAsync(CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
+        var now = timeProvider.GetUtcDateTime();
 
         var currentWindow = await context.SubmitWindows
             .Where(x => x.OpenFrom <= now && x.OpenTo >= now)
@@ -120,7 +120,9 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .AnyAsync(x => x.Id != id && x.OpenFrom < openTo && x.OpenTo > openFrom, cancellationToken);
 
         if (overlapping)
-            throw new ValidationException("This window overlaps with an upcoming or completed submit window.");
+        {
+            throw new BadRequestException("This window overlaps with an upcoming or completed submit window.");
+        }
     }
 
     private IQueryable<SubmitWindow> BuildFilteredQuery(SubmitWindowFilter filter, DateTime now)

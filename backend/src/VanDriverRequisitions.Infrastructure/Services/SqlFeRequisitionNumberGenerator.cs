@@ -3,7 +3,7 @@ using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 
 namespace VanDriverRequisitions.Infrastructure.Services;
 
-public class SqlFeFeRequisitionNumberGenerator(VanDriverDbContext dbContext) : IFeRequisitionNumberGenerator
+public class SqlFeRequisitionNumberGenerator(VanDriverDbContext dbContext) : IFeRequisitionNumberGenerator
 {
     public Task<string> GenerateAsync(CancellationToken cancellationToken = default)
     {

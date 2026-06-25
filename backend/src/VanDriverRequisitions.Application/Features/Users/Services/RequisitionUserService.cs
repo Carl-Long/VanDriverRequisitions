@@ -12,8 +12,8 @@ public class RequisitionUserService(IApplicationDbContext context, ICurrentUserS
     public async Task<PagedResult<RequisitionUserLookupDto>> SearchAsync(RequisitionUserSearchQueryDto query, CancellationToken cancellationToken = default)
     {
         await validator.ValidateAsync(query, cancellationToken);
-
-        var userId = currentUserService.User?.Id ?? throw new UnauthorizedAccessException();
+        
+        var userId = currentUserService.RequireUser().Id;
 
         var usersQuery = query.Fascia switch
         {

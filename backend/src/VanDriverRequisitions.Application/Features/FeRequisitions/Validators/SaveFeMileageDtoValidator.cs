@@ -9,7 +9,8 @@ public sealed class SaveFeMileageDtoValidator : AbstractValidator<SaveFeMileageD
     public SaveFeMileageDtoValidator()
     {
         RuleFor(x => x.Week)
-            .NotNull();
+            .NotNull()
+            .SetValidator(new WeeklyQuantitiesDtoValidator());
 
         RuleFor(x => x.RatePerMile)
             .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)

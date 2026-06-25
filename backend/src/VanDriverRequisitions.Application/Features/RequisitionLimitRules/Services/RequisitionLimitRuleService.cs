@@ -1,7 +1,5 @@
-using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
@@ -45,8 +43,8 @@ public class RequisitionLimitRuleService(IApplicationDbContext context, IValidat
 
         context.RequisitionLimitRules.Add(rule);
 
-        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
-
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Form", "A limit rule already exists for this category, task type, and fascia combination.", cancellationToken);
+        
         return await GetByIdAsync(rule.Id, cancellationToken);
     }
 
@@ -61,7 +59,7 @@ public class RequisitionLimitRuleService(IApplicationDbContext context, IValidat
 
         rule.Update(details);
 
-        await SaveWithUniqueConstraintHandlingAsync(cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Form", "A limit rule already exists for this category, task type, and fascia combination.", cancellationToken);
 
         return await GetByIdAsync(rule.Id, cancellationToken);
     }
@@ -71,24 +69,7 @@ public class RequisitionLimitRuleService(IApplicationDbContext context, IValidat
         return await context.RequisitionLimitRules.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                ?? throw new NotFoundException($"Requisition Limit Rule with ID '{id}' was not found.");
     }
-
-    private async Task SaveWithUniqueConstraintHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException(
-            [
-                new ValidationFailure(
-                    "Form",
-                    "A limit rule already exists for this category, task type, and fascia combination.")
-            ]);
-        }
-    }
-
+    
     private async Task EnsureFeTaskTypeCanBeUsedAsync(Guid? feTaskTypeId, RequisitionLimitRule? existingRule, CancellationToken cancellationToken)
     {
         if (feTaskTypeId is null)

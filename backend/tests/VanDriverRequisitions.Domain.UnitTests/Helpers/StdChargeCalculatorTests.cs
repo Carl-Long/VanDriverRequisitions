@@ -7,9 +7,9 @@ public sealed class StdChargeCalculatorTests
 {
     public static TheoryData<int?> MissingOrNotPositiveMiles => [null, 0, -1];
 
-    public static TheoryData<decimal?> MissingOrNegativeRates => [null, -0.01m];
+    public static TheoryData<decimal?> MissingOrInvalidRates => [null, 0m, 0.001m, -0.01m];
 
-    public static TheoryData<decimal?> MissingOrNegativeFlatCharges => [null, -0.01m];
+    public static TheoryData<decimal?> MissingOrInvalidFlatCharges => [null, 0m, 0.001m, -0.01m];
 
     [Fact]
     public void Calculate_WhenMileageBased_ReturnsMileageChargeAndClearsFlatCharge()
@@ -51,8 +51,8 @@ public sealed class StdChargeCalculatorTests
     }
 
     [Theory]
-    [MemberData(nameof(MissingOrNegativeRates))]
-    public void Calculate_WhenMileageRateIsMissingOrNegative_ThrowsInvalidOperationException(decimal? ratePerMile)
+    [MemberData(nameof(MissingOrInvalidRates))]
+    public void Calculate_WhenMileageRateIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? ratePerMile)
     {
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
@@ -64,8 +64,8 @@ public sealed class StdChargeCalculatorTests
     }
 
     [Theory]
-    [MemberData(nameof(MissingOrNegativeFlatCharges))]
-    public void Calculate_WhenFlatChargeIsMissingOrNegative_ThrowsInvalidOperationException(decimal? flatCharge)
+    [MemberData(nameof(MissingOrInvalidFlatCharges))]
+    public void Calculate_WhenFlatChargeIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? flatCharge)
     {
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>

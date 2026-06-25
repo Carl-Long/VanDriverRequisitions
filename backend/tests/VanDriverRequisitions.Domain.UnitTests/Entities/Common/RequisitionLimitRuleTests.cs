@@ -8,6 +8,8 @@ public sealed class RequisitionLimitRuleTests
 {
     private static readonly Guid TaskTypeId = new("11111111-1111-1111-1111-111111111111");
     private static readonly Guid OtherTaskTypeId = new("22222222-2222-2222-2222-222222222222");
+    
+    public static TheoryData<decimal> InvalidMoneyAmounts => new() { 0m, 0.001m, -0.01m };
 
     [Fact]
     public void Create_WhenGeneralTaskHasTaskType_CreatesRule()
@@ -92,23 +94,22 @@ public sealed class RequisitionLimitRuleTests
         Assert.Equal("details", exception.ParamName);
     }
 
-    [Fact]
-    public void Create_WhenMaxQuantityIsNegative_ThrowsInvalidOperationException()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Create_WhenMaxQuantityIsNotPositive_ThrowsInvalidOperationException(int maxQuantity)
     {
-        // Arrange
-        var details = CreateGeneralTaskDetails(maxQuantity: -1);
+        var details = CreateGeneralTaskDetails(maxQuantity: maxQuantity);
 
-        // Act / Assert
         Assert.Throws<InvalidOperationException>(() => RequisitionLimitRule.Create(details));
     }
 
-    [Fact]
-    public void Create_WhenMaxRateIsNegative_ThrowsInvalidOperationException()
+    [Theory]
+    [MemberData(nameof(InvalidMoneyAmounts))]
+    public void Create_WhenMaxRateIsInvalid_ThrowsInvalidOperationException(decimal maxRate)
     {
-        // Arrange
-        var details = CreateGeneralTaskDetails(maxRate: -0.01m);
+        var details = CreateGeneralTaskDetails(maxRate: maxRate);
 
-        // Act / Assert
         Assert.Throws<InvalidOperationException>(() => RequisitionLimitRule.Create(details));
     }
 
@@ -135,28 +136,26 @@ public sealed class RequisitionLimitRuleTests
         Assert.Throws<InvalidOperationException>(() => RequisitionLimitRule.Create(details));
     }
 
-    [Fact]
-    public void Update_WhenMaxQuantityIsNegative_ThrowsInvalidOperationException()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Update_WhenMaxQuantityIsNotPositive_ThrowsInvalidOperationException(int maxQuantity)
     {
-        // Arrange
         var rule = RequisitionLimitRule.Create(CreateGeneralTaskDetails());
 
-        var details = CreateGeneralTaskDetails(maxQuantity: -1);
+        var details = CreateGeneralTaskDetails(maxQuantity: maxQuantity);
 
-        // Act / Assert
-        Assert.Throws<InvalidOperationException>(() =>
-            rule.Update(details));
+        Assert.Throws<InvalidOperationException>(() => rule.Update(details));
     }
 
-    [Fact]
-    public void Update_WhenMaxRateIsNegative_ThrowsInvalidOperationException()
+    [Theory]
+    [MemberData(nameof(InvalidMoneyAmounts))]
+    public void Update_WhenMaxRateIsInvalid_ThrowsInvalidOperationException(decimal maxRate)
     {
-        // Arrange
         var rule = RequisitionLimitRule.Create(CreateGeneralTaskDetails());
 
-        var details = CreateGeneralTaskDetails(maxRate: -0.01m);
+        var details = CreateGeneralTaskDetails(maxRate: maxRate);
 
-        // Act / Assert
         Assert.Throws<InvalidOperationException>(() => rule.Update(details));
     }
 

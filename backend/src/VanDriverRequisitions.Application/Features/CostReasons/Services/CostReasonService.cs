@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.CostReasons.Dtos;
@@ -70,7 +70,7 @@ public class CostReasonService(IApplicationDbContext context, IValidatorService 
 
         context.CostReasons.Add(newReason);
 
-        await SaveWithUniqueConstraintHandlingAsync(createCostReasonDto.Code, cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{createCostReasonDto.Code}' already exists.", cancellationToken);
 
         return CostReasonMapper.ToSummaryDto(newReason);
     }
@@ -85,7 +85,7 @@ public class CostReasonService(IApplicationDbContext context, IValidatorService 
         existingReason.Reason = updateCostReasonDto.Reason.Trim();
         existingReason.Scope = updateCostReasonDto.Scope;
 
-        await SaveWithUniqueConstraintHandlingAsync(updateCostReasonDto.Code, cancellationToken);
+        await context.SaveChangesWithUniqueConstraintValidationAsync("Code", $"This code '{updateCostReasonDto.Code}' already exists.", cancellationToken);
 
         return CostReasonMapper.ToSummaryDto(existingReason);
     }
@@ -114,22 +114,6 @@ public class CostReasonService(IApplicationDbContext context, IValidatorService 
                    .IgnoreQueryFilters()
                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
                ?? throw new NotFoundException($"Cost Reason with ID '{id}' was not found.");
-    }
-    
-
-    private async Task SaveWithUniqueConstraintHandlingAsync(string code, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
-        {
-            throw new ValidationException(
-            [
-                new ValidationFailure("Code", $"This code '{code}' already exists.")
-            ]);
-        }
     }
     
     private static Expression<Func<CostReason, bool>> BuildScopePredicate(Fascia fascia)
