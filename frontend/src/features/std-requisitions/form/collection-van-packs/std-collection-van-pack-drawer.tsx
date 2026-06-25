@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -20,6 +20,7 @@ import {
 import { createStdCollectionVanPackFormSchema } from "../schemas/create-std-collection-van-pack-form-schema";
 import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -44,6 +45,7 @@ export function StdCollectionVanPackDrawer({
         createEmptyStdCollectionVanPackForm(),
     );
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const isEditMode = initialValues !== undefined;
     const schema = createStdCollectionVanPackFormSchema(vanPackLimitRule);
@@ -101,6 +103,7 @@ export function StdCollectionVanPackDrawer({
         }
 
         setForm(createEmptyStdCollectionVanPackForm(result.data.deliveryDate));
+        focusFirstFormControl(formRef.current);
     }
 
     if (!open) {
@@ -114,6 +117,7 @@ export function StdCollectionVanPackDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="van-pack-drawer-form"
                 noValidate
                 className="space-y-6"

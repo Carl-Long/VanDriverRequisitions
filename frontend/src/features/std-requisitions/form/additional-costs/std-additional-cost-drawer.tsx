@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -22,6 +22,7 @@ import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
 import { FASCIAS } from "@/lib/constants/fascias";
 import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -48,6 +49,7 @@ export function StdAdditionalCostDrawer({
         createEmptyStdAdditionalCostForm(),
     );
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createStdAdditionalCostFormSchema({
         mileageLimitRule,
@@ -95,6 +97,7 @@ export function StdAdditionalCostDrawer({
         }
 
         setForm(createEmptyStdAdditionalCostForm(result.data.date));
+        focusFirstFormControl(formRef.current)
     }
 
     function setChargeType(chargeType: StdAdditionalCostForm["chargeType"]) {
@@ -136,6 +139,7 @@ export function StdAdditionalCostDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="std-additional-cost-drawer-form"
                 noValidate
                 className="space-y-6"

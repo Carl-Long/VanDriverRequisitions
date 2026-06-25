@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -18,6 +18,7 @@ import { calculateStdPickupFormTotal } from "../lib/calculate-std-pickup-form";
 import { createEmptyStdPickupForm } from "../lib/create-empty-std-pickup-form";
 import { createStdPickupFormSchema } from "../schemas/create-std-pickup-form-schema";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -42,6 +43,7 @@ export function StdPickupDrawer({
 }: Readonly<Props>) {
     const [form, setForm] = useState<StdPickupForm>(createEmptyStdPickupForm());
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createStdPickupFormSchema({
         mileageLimitRule,
@@ -86,6 +88,7 @@ export function StdPickupDrawer({
         }
 
         setForm(createEmptyStdPickupForm(result.data.date));
+        focusFirstFormControl(formRef.current);
     }
 
     function setChargeType(chargeType: StdPickupForm["chargeType"]) {
@@ -131,6 +134,7 @@ export function StdPickupDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="std-pickup-drawer-form"
                 noValidate
                 className="space-y-6"
