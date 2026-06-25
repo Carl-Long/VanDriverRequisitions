@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button/button";
 import {
     TableHeader,
     TableHeaderCell,
@@ -28,8 +26,9 @@ import type { StdTransferForm } from "../types/std-transfer-form";
 import { mapStdTransferDraftToForm } from "../lib/map-std-transfer-draft-to-form";
 import { StdTransferDrawer } from "./std-transfer-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
-import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -77,35 +76,24 @@ export function StdTransferWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Transfers</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage transfer entries between shops
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Transfers"
+                description="Manage transfer entries between shops"
+                summary={
+                    <>
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
                         {totalBags} bags • {totalBoxes} boxes • {totalMiles} miles •{" "}
                         {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!canAddRows}
-                        onClick={() => {
-                            setEditingTransfer(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Transfer
-                    </Button>
-                )}
-            </div>
+                    </>
+                }
+                actionLabel="Add Transfer"
+                actionHidden={readonly}
+                actionDisabled={!canAddRows}
+                onAction={() => {
+                    setEditingTransfer(null);
+                    setOpen(true);
+                }}
+            />
 
             {!canAddRows && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
@@ -272,45 +260,34 @@ function TransfersTable({
                                     })}
                                 >
                                     <TableCell>
-                                        {transfer.date
-                                            ? formatDateGB(transfer.date)
-                                            : "-"}
-                                        {hasLimitIssue && (
-                                            <StdLimitWarningBlock
-                                                status={limitStatus}
-                                                className="mt-2"
-                                            />
-                                        )}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="space-y-1">
+                                        <div>
                                             <EditableCellButton
                                                 readonly={readonly}
                                                 ariaLabel="Edit transfer row"
                                                 onEdit={() => onEdit(transfer)}
-                                                className="block w-full"
                                             >
-                                                <span className="block text-sm">
-                                                    <span className="text-muted-foreground">
-                                                        From:{" "}
-                                                    </span>
-                                                    <span className="font-medium">
-                                                        {transfer.shopLabelFrom ?? "-"}
-                                                    </span>
-                                                </span>
-
-                                                <span className="block text-sm">
-                                                    <span className="text-muted-foreground">
-                                                        To:{" "}
-                                                    </span>
-                                                    <span className="font-medium">
-                                                        {transfer.shopLabelTo ?? "-"}
-                                                    </span>
-                                                </span>
+                                                {transfer.date ? formatDateGB(transfer.date) : "-"}
                                             </EditableCellButton>
 
+                                            {hasLimitIssue && (
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
+                                            )}
                                         </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <span className="block text-sm">
+                                            <span className="text-muted-foreground">From: </span>
+                                            <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
+                                        </span>
+
+                                        <span className="block text-sm">
+                                            <span className="text-muted-foreground">To: </span>
+                                            <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
+                                        </span>
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">

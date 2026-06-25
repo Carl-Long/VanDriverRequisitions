@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button/button";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import { Modal } from "@/components/ui/modal";
@@ -13,6 +11,8 @@ import { ShopFilterField } from "@/features/requisitions-shared/components/filte
 import { StdCollectionTypeField } from "@/features/std-collection-types/std-collection-type-field";
 import { ApiError } from "@/lib/api/client";
 import { StdLocation } from "./std-location.types";
+import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
 
 const stdLocationSchema = z.object({
     shopId: z.string().min(1, "Shop is required."),
@@ -156,7 +156,8 @@ export function StdLocationFormModal({
     return (
         <Modal open={open} onClose={handleClose} title={title}>
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-                {serverError && <Alert tone="danger">{serverError}</Alert>}
+
+                <AdminFormServerError message={serverError} />
 
                 <ShopFilterField
                     required
@@ -205,21 +206,11 @@ export function StdLocationFormModal({
                     />
                 </Field>
 
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        tone="primary"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button type="submit" loading={isSubmitting} tone="primary">
-                        {isEditing ? "Save Changes" : "Create"}
-                    </Button>
-                </div>
+                <AdminModalFormActions
+                    isEditing={isEditing}
+                    isSubmitting={isSubmitting}
+                    onCancel={handleClose}
+                />
             </form>
         </Modal>
     );

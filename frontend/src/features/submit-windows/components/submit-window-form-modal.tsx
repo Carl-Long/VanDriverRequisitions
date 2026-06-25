@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
 import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button/button";
-import { Alert } from "@/components/ui/alert";
 import { DateTimePicker } from "@/components/ui/date/date-time-picker";
 import { Field } from "@/components/ui/field/field";
 import { setTime, addDays } from "@/lib/format/date";
 import { SubmitWindow } from "../types/submit-window.types";
+import { AdminFormServerError } from "@/features/admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "@/features/admin-shared/admin-modal-form-actions";
 
 const submitWindowSchema = z
     .object({
@@ -144,9 +143,8 @@ export function SubmitWindowFormModal({
             title={isEditing ? "Edit Submit Window" : "Create Submit Window"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-                {serverError && <Alert tone="danger">{serverError}</Alert>}
+                <AdminFormServerError message={serverError} />
 
-                {/* OPEN FROM */}
                 <div>
                     <Field label="Open From" error={errors.openFrom?.message} required>
                         <Controller
@@ -188,7 +186,6 @@ export function SubmitWindowFormModal({
                     </Field>
                 </div>
 
-                {/* OPEN TO */}
                 <div>
                     <Field label="Open To" error={errors.openTo?.message} required>
                         <Controller
@@ -208,21 +205,11 @@ export function SubmitWindowFormModal({
                     </Field>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        tone="primary"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button type="submit" variant="solid" tone="primary" loading={isSubmitting}>
-                        {isEditing ? "Save Changes" : "Create"}
-                    </Button>
-                </div>
+                <AdminModalFormActions
+                    isEditing={isEditing}
+                    isSubmitting={isSubmitting}
+                    onCancel={handleClose}
+                />
             </form>
         </Modal>
     );

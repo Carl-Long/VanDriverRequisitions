@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
@@ -18,12 +15,12 @@ import { EditableCellButton } from "@/features/requisitions-shared/components/ed
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 import { Alert } from "@/components/ui/alert";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-import { cn } from "@/lib/utils";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
-import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -64,32 +61,23 @@ export function StdCollectionChargeBanksAndBinsWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-md font-semibold">Banks & Bins Collection Charges</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage collection charges for banks and bins.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!shopId}
-                        onClick={() => {
-                            setEditingRow(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Banks & Bins Charge
-                    </Button>
-                )}
-            </div>
+            <RequisitionWorkspaceHeader
+                title="Banks & Bins Collection Charges"
+                description="Manage collection charges for banks and bins."
+                summary={
+                    <>
+                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
+                        {formatCurrencyGB(subtotal)}
+                    </>
+                }
+                actionLabel="Add Collection Charge"
+                actionHidden={readonly}
+                actionDisabled={!shopId}
+                onAction={() => {
+                    setEditingRow(null);
+                    setOpen(true);
+                }}
+            />
 
             {!shopId && !readonly && (
                 <Alert tone="warning">
@@ -248,10 +236,10 @@ function BanksAndBinsTable({
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={cn(
-                                        getEditableTableRowClassName({ readonly, hasIssue }),
-                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
-                                    )}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue,
+                                    })}
                                 >
                                     <TableCell>
                                         <div>
@@ -264,7 +252,7 @@ function BanksAndBinsTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <StdLimitWarningBlock
+                                                <RequisitionLimitWarningBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />
@@ -273,27 +261,21 @@ function BanksAndBinsTable({
                                     </TableCell>
 
                                     <TableCell>
-                                        <EditableCellButton
-                                            readonly={readonly}
-                                            ariaLabel="Edit Banks & Bins row"
-                                            onEdit={() => onEdit(row)}
-                                            className="text-left"
-                                        >
-                                            <span className="flex flex-col leading-tight">
-                                                <span className="font-medium">
-                                                    {row.collectionTypeLabel ?? "-"}
-                                                </span>
-
-                                                {row.collectionTypeCode && (
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {row.collectionTypeCode}
-                                                    </span>
-                                                )}
-                                                {row.isCollectionTypeActive === false && (
-                                                    <InactiveLookupWarning label="collection type" />
-                                                )}
+                                        <span className="flex flex-col leading-tight">
+                                            <span className="font-medium">
+                                                {row.collectionTypeLabel ?? "-"}
                                             </span>
-                                        </EditableCellButton>
+
+                                            {row.collectionTypeCode && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    {row.collectionTypeCode}
+                                                </span>
+                                            )}
+
+                                            {row.isCollectionTypeActive === false && (
+                                                <InactiveLookupWarning label="collection type" />
+                                            )}
+                                        </span>
                                     </TableCell>
 
                                     <TableCell>

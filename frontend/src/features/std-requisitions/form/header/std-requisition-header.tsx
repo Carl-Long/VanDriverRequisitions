@@ -55,10 +55,10 @@ export function StdRequisitionHeader({
     onReject
 }: Readonly<Props>) {
     const TITLES: Record<StdRequisitionPageMode, string> = {
-        create: "Create New STD Requisition",
-        edit: "Editing STD Requisition",
-        readonly: "Viewing STD Requisition",
-        approval: "Reviewing STD Requisition",
+        create: "Create New Requisition",
+        edit: "Editing Requisition",
+        readonly: "Viewing Requisition",
+        approval: "Reviewing Requisition",
     };
 
     const title = TITLES[mode];

@@ -1,10 +1,9 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
 import { useMemo } from "react";
-import { cn } from "@/lib/utils";
 import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
+import { RequisitionTabsFrame } from "@/features/requisitions-shared/components/requisitions-tab-frame";
 
 type Props = {
     taskTypes: FeTaskType[];
@@ -69,74 +68,19 @@ export function FeRequisitionTabs({
     }
 
     return (
-        <div className="space-y-6">
-            <div className="overflow-x-auto rounded-2xl border border-border bg-surface-elevated/70 p-1 shadow-sm">
-                <div
-                    role="tablist"
-                    aria-label="Requisition sections"
-                    className="flex min-w-max gap-1"
-                >
-                    {tabs.map((tab) => (
-                        <TabButton
-                            key={tab.key}
-                            active={tab.key === activeTab?.key}
-                            hasWarning={tabHasWarning(tab)}
-                            onClick={() => onActiveKeyChange(tab.key)}
-                        >
-                            {tab.label}
-                        </TabButton>
-                    ))}
-                </div>
-            </div>
-
-            <div role="tabpanel">
-                {activeTab?.type === "details" && details}
-                {activeTab?.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
-                {activeTab?.type === "mileage" && mileage}
-                {activeTab?.type === "transfers" && transfers}
-                {activeTab?.type === "additional-costs" && additionalCosts}
-                {activeTab?.type === "submission-history" && submissionHistory}
-            </div>
-        </div>
-    );
-}
-
-type TabButtonProps = {
-    active: boolean;
-    hasWarning?: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-};
-
-function TabButton({ active, hasWarning, onClick, children }: Readonly<TabButtonProps>) {
-    return (
-        <button
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={onClick}
-            className={cn(
-                "inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200",
-                "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 cursor-pointer",
-                active
-                    ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-                    : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
-            )}
+        <RequisitionTabsFrame
+            tabs={tabs}
+            activeKey={activeTab.key}
+            ariaLabel="Requisition sections"
+            onActiveKeyChange={onActiveKeyChange}
+            getTabHasWarning={tabHasWarning}
         >
-            <span>{children}</span>
-
-            {hasWarning && (
-                <span
-                    title="This tab has warnings"
-                    className={cn(
-                        "inline-flex h-5 w-5 items-center justify-center rounded-full",
-                        active ? "bg-warning/15 text-warning" : "bg-warning/10 text-warning",
-                    )}
-                >
-                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="sr-only">This tab has warnings</span>
-                </span>
-            )}
-        </button>
+            {activeTab.type === "details" && details}
+            {activeTab.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
+            {activeTab.type === "mileage" && mileage}
+            {activeTab.type === "transfers" && transfers}
+            {activeTab.type === "additional-costs" && additionalCosts}
+            {activeTab.type === "submission-history" && submissionHistory}
+        </RequisitionTabsFrame>
     );
 }

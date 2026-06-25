@@ -4,15 +4,14 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
-import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button/button";
 import { Field } from "@/components/ui/field/field";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { Modal } from "@/components/ui/modal";
 import { ApiError } from "@/lib/api/client";
 import { CostReason } from "./cost-reason.types";
+import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
 
 
 const scopeOptions = [
@@ -132,7 +131,7 @@ export function CostReasonFormModal({
             title={isEditing ? "Edit Cost Reason" : "Create Cost Reason"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-                {serverError && <Alert tone="danger">{serverError}</Alert>}
+                <AdminFormServerError message={serverError} />
 
                 <Field
                     label="Code"
@@ -167,21 +166,11 @@ export function CostReasonFormModal({
                     </select>
                 </Field>
 
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        tone="primary"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button type="submit" loading={isSubmitting} tone="primary">
-                        {isEditing ? "Save Changes" : "Create"}
-                    </Button>
-                </div>
+                <AdminModalFormActions
+                    isEditing={isEditing}
+                    isSubmitting={isSubmitting}
+                    onCancel={handleClose}
+                />
             </form>
         </Modal>
     );

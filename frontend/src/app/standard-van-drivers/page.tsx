@@ -127,7 +127,7 @@ export default function StandardDriversPage() {
         <PageContainer>
             <PageHeader
                 title="Standard Van Drivers"
-                description="View and manage STD requisitions."
+                description="View and manage standard van driver requisitions."
             >
                 <Button onClick={() => router.push(newRequisitionHref)}>
                     <Plus size={16} />

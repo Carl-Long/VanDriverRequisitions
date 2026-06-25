@@ -123,8 +123,8 @@ export default function StdRequisitionApprovalsPage() {
     return (
         <PageContainer>
             <PageHeader
-                title="STD Approvals"
-                description="Review submitted STD requisitions awaiting approval."
+                title="Standard Approvals"
+                description="Review submitted standard van driver requisitions awaiting approval."
             />
 
             <RequisitionApprovalsSearchToolbar

@@ -6,8 +6,6 @@ import { FeGeneralTaskDrawer } from "./fe-general-task-drawer";
 import { FeGeneralTaskForm } from "../types/fe-general-task-form";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { formatCurrencyGB } from "@/lib/format/currency";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button/button";
 import { mapFeGeneralTaskDraftToForm } from "../lib/map-fe-general-task-draft-to-form";
 import {
     TableHeader,
@@ -25,6 +23,8 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { Alert } from "@/components/ui/alert";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -57,40 +57,30 @@ export function FeGeneralTaskWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">
-                        {title} ({code})
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                        Manage {title.toLowerCase()} entries
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} • {totals.totalJobs}{" "}
-                        quantity • {formatCurrencyGB(totals.subtotal)}
-                    </p>
-                </div>
+            <RequisitionWorkspaceHeader
+                title={`${title} (${code})`}
+                description={`Manage ${title.toLowerCase()} entries`}
+                summary={
+                    <>
+                        {tasks.length} entr{tasks.length === 1 ? "y" : "ies"} •{" "}
+                        {totals.totalJobs} quantity • {formatCurrencyGB(totals.subtotal)}
+                    </>
+                }
+                actionLabel={`Add ${title}`}
+                actionHidden={!canAddRows}
+                onAction={() => {
+                    setEditingTask(null);
+                    setOpen(true);
+                }}
+            />
 
-                {canAddRows && (
-                    <Button
-                        type="button"
-                        onClick={() => {
-                            setEditingTask(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add {title}
-                    </Button>
-                )}
-            </div>
             {isTaskTypeInactive && (
                 <Alert tone="warning">
                     This task type is inactive. Existing rows are shown for historical accuracy, but new rows
                     cannot be added.
                 </Alert>
             )}
-            
+
             {tasks.length === 0 ? (
                 <EmptyState title={`No ${title}`} />
             ) : (
@@ -245,17 +235,10 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit" ? "Missing limit" : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
                                     </TableCell>

@@ -6,13 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Modal } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button/button";
 import { Input } from "@/components/ui/field/input";
 import { Field } from "@/components/ui/field/field";
 
 import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { ApiError } from "@/lib/api/client";
-import { Alert } from "@/components/ui/alert";
+import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
 
 const taskTypeSchema = z.object({
     name: z
@@ -110,7 +110,8 @@ export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly
             title={isEditing ? "Edit Task Type" : "Create Task Type"}
         >
             <form onSubmit={handleSubmit(onValid)} className="space-y-5">
-                {serverError && <Alert tone="danger">{serverError}</Alert>}
+
+                <AdminFormServerError message={serverError} />
 
                 <Field label="Name" error={errors.name?.message} required>
                     <Input
@@ -120,7 +121,6 @@ export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly
                     />
                 </Field>
 
-                {/* Code */}
                 <Field
                     label="Code"
                     error={errors.code?.message}
@@ -134,22 +134,11 @@ export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly
                     />
                 </Field>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        tone="primary"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button type="submit" loading={isSubmitting} tone="primary">
-                        {isEditing ? "Save Changes" : "Create"}
-                    </Button>
-                </div>
+                <AdminModalFormActions
+                    isEditing={isEditing}
+                    isSubmitting={isSubmitting}
+                    onCancel={handleClose}
+                />
             </form>
         </Modal>
     );
