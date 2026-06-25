@@ -5,8 +5,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button/button";
 import { Field } from "@/components/ui/field/field";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
@@ -18,6 +16,8 @@ import { getApiErrorMessage } from "@/lib/api/client";
 import { categoryOptions, fasciaOptions, requisitionLimitRuleCategories, requisitionLimitRuleFascias } from "./requisition-limit-rule-options";
 import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 import { hasMaxTwoDecimalPlaces, MIN_MONEY_AMOUNT } from "@/lib/validation/money";
+import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
 
 type FormValues = {
     category: RequisitionLimitRuleCategory | "";
@@ -185,6 +185,12 @@ export function RequisitionLimitRuleFormModal({
         }
     }, [isGeneralTask, setValue]);
 
+    function handleClose() {
+        reset();
+        setServerError(null);
+        onClose();
+    }
+
     async function onValid(data: FormValues) {
         if (!data.category || !data.fascia) {
             return;
@@ -214,11 +220,12 @@ export function RequisitionLimitRuleFormModal({
     return (
         <Modal
             open={open}
-            onClose={onClose}
+            onClose={handleClose}
             title={isEditing ? "Edit Limit Rule" : "Create Limit Rule"}
         >
             <form onSubmit={handleSubmit(onValid)} noValidate className="space-y-5">
-                {serverError && <Alert tone="danger">{serverError}</Alert>}
+
+                <AdminFormServerError message={serverError} />
 
                 <Field label="Category" required error={errors.category?.message}>
                     <select className={fieldBase} {...register("category")}>
@@ -296,20 +303,11 @@ export function RequisitionLimitRuleFormModal({
                     </Field>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button type="submit" loading={isSubmitting}>
-                        {isEditing ? "Save Changes" : "Create"}
-                    </Button>
-                </div>
+                <AdminModalFormActions
+                    isEditing={isEditing}
+                    isSubmitting={isSubmitting}
+                    onCancel={handleClose}
+                />
             </form>
         </Modal>
     );
