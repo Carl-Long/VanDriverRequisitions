@@ -13,7 +13,6 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.FE;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 
@@ -121,7 +120,7 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
@@ -158,8 +157,8 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
-
+        var auditUser = currentUser.RequireAuditUser();
+        
         await validator.ValidateAsync(approveFeRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
@@ -180,7 +179,7 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(rejectFeRequisitionDto, cancellationToken);
 
@@ -266,12 +265,6 @@ public class FeRequisitionService(
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
     }
     
-    private AuditUser GetAuditUser()
-    {
-        var user = currentUser.RequireUser();
-        return new AuditUser(user.Id, user.Name);
-    }
-
     private void SetOriginalRowVersion(FeRequisition requisition, byte[]? rowVersion)
     {
         if (rowVersion is null) return;

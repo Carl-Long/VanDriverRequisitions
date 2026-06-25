@@ -13,7 +13,6 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.STD;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Services;
 
@@ -122,7 +121,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> SubmitAsync(Guid? id, SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
 
@@ -158,7 +157,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> ApproveAsync(Guid id, ApproveStdRequisitionDto approveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(approveStdRequisitionDto, cancellationToken);
 
@@ -180,7 +179,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> RejectAsync(Guid id, RejectStdRequisitionDto rejectStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser();
+        var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(rejectStdRequisitionDto, cancellationToken);
 
@@ -323,11 +322,5 @@ public sealed class StdRequisitionService(
         context.Entry(requisition)
             .Property(nameof(StdRequisition.RowVersion))
             .OriginalValue = rowVersion;
-    }
-
-    private AuditUser GetAuditUser()
-    {
-        var user = currentUser.RequireUser();
-        return new AuditUser(user.Id, user.Name);
     }
 }
