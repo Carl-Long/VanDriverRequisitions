@@ -115,7 +115,7 @@ public sealed class StdRequisitionService(
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
@@ -151,7 +151,7 @@ public sealed class StdRequisitionService(
 
         requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
@@ -171,7 +171,7 @@ public sealed class StdRequisitionService(
 
         requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
 
@@ -191,7 +191,7 @@ public sealed class StdRequisitionService(
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectStdRequisitionDto.RejectionNotes);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
 
@@ -329,20 +329,5 @@ public sealed class StdRequisitionService(
     {
         var user = currentUser.RequireUser();
         return new AuditUser(user.Id, user.Name);
-    }
-    
-    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(
-                "This requisition has been updated by another user since you opened it. " +
-                "Refresh the page to load the latest version. " +
-                "Any changes you have made since opening the requisition will need to be re-entered.");
-        }
     }
 }

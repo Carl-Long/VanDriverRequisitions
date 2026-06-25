@@ -114,7 +114,7 @@ public class FeRequisitionService(
         
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
@@ -151,7 +151,7 @@ public class FeRequisitionService(
         
         requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, saveData.DriverSummary, saveData.IsShopActive, cancellationToken);
     }
@@ -171,8 +171,8 @@ public class FeRequisitionService(
 
         requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
-
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
+        
         var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
@@ -191,7 +191,7 @@ public class FeRequisitionService(
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectFeRequisitionDto.RejectionNotes);
 
-        await SaveWithConcurrencyHandlingAsync(cancellationToken);
+        await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
         var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
 
@@ -277,20 +277,5 @@ public class FeRequisitionService(
         if (rowVersion is null) return;
         
         context.Entry(requisition).Property(nameof(FeRequisition.RowVersion)).OriginalValue = rowVersion;
-    }
-
-    private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(
-                "This requisition has been updated by another user since you opened it. " +
-                "Refresh the page to load the latest version. " +
-                "Any changes you have made since opening the requisition will need to be re-entered.");
-        }
     }
 }
