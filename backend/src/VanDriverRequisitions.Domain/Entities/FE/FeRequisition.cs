@@ -7,7 +7,9 @@ namespace VanDriverRequisitions.Domain.Entities.FE;
 
 public sealed class FeRequisition : ConcurrencyAwareEntity
 {
-    private FeRequisition() { } // EF
+    private FeRequisition()
+    {
+    } // EF
 
     public string RequisitionNumber { get; private set; } = string.Empty;
 
@@ -60,8 +62,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         .SingleOrDefault(x => x.Status == SubmissionStatus.Pending);
 
     public int NextSubmissionNumber => _submissions.Count == 0
-            ? 1
-            : _submissions.Max(x => x.SubmissionNumber) + 1;
+        ? 1
+        : _submissions.Max(x => x.SubmissionNumber) + 1;
 
     public bool CanSubmit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
     public bool CanEdit => Status is RequisitionStatus.Draft or RequisitionStatus.Rejected;
@@ -80,7 +82,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         requisition.Update(model);
         return requisition;
     }
-    
+
     public void Update(FeRequisitionUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
@@ -98,7 +100,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         RecalculateSubtotal();
     }
-    
+
     public void Submit(AuditUser submittedBy, DateTime submittedAtUtc, string snapshotJson)
     {
         ArgumentNullException.ThrowIfNull(submittedBy);
@@ -131,8 +133,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(approvedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
 
-        var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
+        var submission = PendingSubmission ?? throw new InvalidOperationException("No pending submission exists.");
 
         submission.Approve(approvedBy, approvedAtUtc, poNumber);
 
@@ -144,14 +145,13 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(rejectedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
 
-        var submission = PendingSubmission
-            ?? throw new InvalidOperationException("No pending submission exists.");
+        var submission = PendingSubmission ?? throw new InvalidOperationException("No pending submission exists.");
 
         submission.Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
 
         Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
     }
-    
+
     private void UpdateDetails(RequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
@@ -169,188 +169,138 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         IsVatApplicable = details.Driver.HasVat;
     }
-    
+
     private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
-        ArgumentNullException.ThrowIfNull(incomingTasks);
-
-        var incomingList = incomingTasks.ToList();
-        var existingTasks = GetPersistedChildrenById(_feGeneralTasks);
-        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
-
-        var tasksToRemove = _feGeneralTasks
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var task in tasksToRemove)
-        {
-            _feGeneralTasks.Remove(task);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            if (IsExistingChild(incoming.Id))
-            {
-                if (!existingTasks.TryGetValue(incoming.Id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"Task '{incoming.Id}' not found.");
-                }
-
-                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerJob);
-            }
-            else
-            {
-                var task = FeGeneralTask.Create(
-                    incoming.FeTaskTypeId,
-                    incoming.TaskTypeName,
-                    incoming.TaskTypeCode,
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
-
-                _feGeneralTasks.Add(task);
-            }
-        }
+        SyncChildren(
+            _feGeneralTasks,
+            incomingTasks,
+            x => x.Id,
+            (existing, incoming) => existing.Update(
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerJob),
+            incoming => FeGeneralTask.Create(
+                incoming.FeTaskTypeId,
+                incoming.TaskTypeName,
+                incoming.TaskTypeCode,
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerJob),
+            "Task");
     }
-    
+
     private void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
     {
-        ArgumentNullException.ThrowIfNull(incomingMileages);
-
-        var incomingList = incomingMileages.ToList();
-        var existingMileages = GetPersistedChildrenById(_feMileages);
-        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
-
-        var mileagesToRemove = _feMileages
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var mileage in mileagesToRemove)
-        {
-            _feMileages.Remove(mileage);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            if (IsExistingChild(incoming.Id))
-            {
-                if (!existingMileages.TryGetValue(incoming.Id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"Mileage '{incoming.Id}' not found.");
-                }
-
-                existing.Update(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
-            }
-            else
-            {
-                var mileage = FeMileage.Create(incoming.WeekEndingDate, incoming.Week, incoming.RatePerMile);
-                _feMileages.Add(mileage);
-            }
-        }
+        SyncChildren(
+            _feMileages,
+            incomingMileages,
+            x => x.Id,
+            (existing, incoming) => existing.Update(
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerMile),
+            incoming => FeMileage.Create(
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerMile),
+            "Mileage");
     }
-    
+
     private void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
     {
-        ArgumentNullException.ThrowIfNull(incomingTransfers);
-
-        var incomingList = incomingTransfers.ToList();
-        var existingTransfers = GetPersistedChildrenById(_feTransfers);
-        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
-
-        var transfersToRemove = _feTransfers
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var transfer in transfersToRemove)
-        {
-            _feTransfers.Remove(transfer);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            if (IsExistingChild(incoming.Id))
-            {
-                if (!existingTransfers.TryGetValue(incoming.Id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"Transfer '{incoming.Id}' not found.");
-                }
-
-                existing.Update(
-                    incoming.FromShop,
-                    incoming.ToShop,
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
-            }
-            else
-            {
-                var transfer = FeTransfer.Create(
-                    incoming.FromShop,
-                    incoming.ToShop,
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
-
-                _feTransfers.Add(transfer);
-            }
-        }
+        SyncChildren(
+            _feTransfers,
+            incomingTransfers,
+            x => x.Id,
+            (existing, incoming) => existing.Update(
+                incoming.FromShop,
+                incoming.ToShop,
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerJob),
+            incoming => FeTransfer.Create(
+                incoming.FromShop,
+                incoming.ToShop,
+                incoming.WeekEndingDate,
+                incoming.Week,
+                incoming.RatePerJob),
+            "Transfer");
     }
-    
+
     private void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
-        ArgumentNullException.ThrowIfNull(incomingAdditionalCosts);
+        SyncChildren(
+            _feAdditionalCosts,
+            incomingAdditionalCosts,
+            x => x.Id,
+            (existing, incoming) => existing.Update(
+                incoming.WeekEndingDate,
+                incoming.ReasonId,
+                incoming.ReasonCodeSnapshot,
+                incoming.ReasonTextSnapshot,
+                incoming.ChargingOption,
+                incoming.TotalNumber,
+                incoming.RatePerJob,
+                incoming.Miles,
+                incoming.RatePerMile),
+            incoming => FeAdditionalCost.Create(
+                incoming.WeekEndingDate,
+                incoming.ReasonId,
+                incoming.ReasonCodeSnapshot,
+                incoming.ReasonTextSnapshot,
+                incoming.ChargingOption,
+                incoming.TotalNumber,
+                incoming.RatePerJob,
+                incoming.Miles,
+                incoming.RatePerMile),
+            "Additional cost");
+    }
 
-        var incomingList = incomingAdditionalCosts.ToList();
-        var existingAdditionalCosts = GetPersistedChildrenById(_feAdditionalCosts);
-        var incomingIds = GetIncomingIds(incomingList, x => x.Id);
+    private static void SyncChildren<TChild, TIncoming>(
+        List<TChild> children,
+        IEnumerable<TIncoming> incomingItems,
+        Func<TIncoming, Guid?> getId,
+        Action<TChild, TIncoming> updateExisting,
+        Func<TIncoming, TChild> createNew,
+        string childName)
+        where TChild : AuditableEntity
+    {
+        ArgumentNullException.ThrowIfNull(incomingItems);
 
-        var additionalCostsToRemove = _feAdditionalCosts
+        var incomingList = incomingItems.ToList();
+        var existingChildren = GetPersistedChildrenById(children);
+        var incomingIds = GetIncomingIds(incomingList, getId);
+
+        var childrenToRemove = children
             .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
             .ToList();
 
-        foreach (var additionalCost in additionalCostsToRemove)
+        foreach (var child in childrenToRemove)
         {
-            _feAdditionalCosts.Remove(additionalCost);
+            children.Remove(child);
         }
 
         foreach (var incoming in incomingList)
         {
-            if (IsExistingChild(incoming.Id))
+            var id = getId(incoming);
+
+            if (IsExistingChild(id))
             {
-                if (!existingAdditionalCosts.TryGetValue(incoming.Id!.Value, out var existing))
+                if (!existingChildren.TryGetValue(id!.Value, out var existing))
                 {
-                    throw new InvalidOperationException($"Additional cost '{incoming.Id}' not found.");
+                    throw new InvalidOperationException($"{childName} '{id}' not found.");
                 }
 
-                existing.Update(
-                    incoming.WeekEndingDate,
-                    incoming.ReasonId,
-                    incoming.ReasonCodeSnapshot,
-                    incoming.ReasonTextSnapshot,
-                    incoming.ChargingOption,
-                    incoming.TotalNumber,
-                    incoming.RatePerJob,
-                    incoming.Miles,
-                    incoming.RatePerMile);
+                updateExisting(existing, incoming);
             }
             else
             {
-                var additionalCost = FeAdditionalCost.Create(
-                    incoming.WeekEndingDate,
-                    incoming.ReasonId,
-                    incoming.ReasonCodeSnapshot,
-                    incoming.ReasonTextSnapshot,
-                    incoming.ChargingOption,
-                    incoming.TotalNumber,
-                    incoming.RatePerJob,
-                    incoming.Miles,
-                    incoming.RatePerMile);
-                
-                _feAdditionalCosts.Add(additionalCost);
+                children.Add(createNew(incoming));
             }
         }
     }
-    
+
     private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
     {
         return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
@@ -369,7 +319,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     {
         return id.HasValue && id.Value != Guid.Empty;
     }
-    
+
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)
@@ -402,7 +352,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ClearApproval();
     }
 
-    private void ClearApproval() {
+    private void ClearApproval()
+    {
         ApprovedById = null;
         ApprovedByNameSnapshot = null;
         ApprovedAtUtc = null;
