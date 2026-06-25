@@ -16,7 +16,7 @@ public static class InfrastructureDependencyInjection
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IPoNumberGenerator, SqlPoNumberGenerator>();
-        services.AddScoped<IFeRequisitionNumberGenerator, SqlFeFeRequisitionNumberGenerator>();
+        services.AddScoped<IFeRequisitionNumberGenerator, SqlFeRequisitionNumberGenerator>();
         services.AddScoped<IStdRequisitionNumberGenerator, SqlStdRequisitionNumberGenerator>();
 
         services.AddDbContext<VanDriverDbContext>((sp, options) =>
