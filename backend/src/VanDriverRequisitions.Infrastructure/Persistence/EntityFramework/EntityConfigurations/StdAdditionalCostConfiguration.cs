@@ -62,17 +62,17 @@ public class StdAdditionalCostConfiguration : IEntityTypeConfiguration<StdAdditi
                 "[NumberOfBags] >= 1");
 
             t.HasCheckConstraint(
-                "CK_StdAdditionalCosts_Miles_NonNegative",
-                "[Miles] IS NULL OR [Miles] >= 0");
+                "CK_StdAdditionalCosts_Miles_Positive",
+                "[Miles] IS NULL OR [Miles] >= 1");
 
             t.HasCheckConstraint(
-                "CK_StdAdditionalCosts_RatePerMile_NonNegative",
-                "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
-
+                "CK_StdAdditionalCosts_RatePerMile_Minimum",
+                "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
+            
             t.HasCheckConstraint(
-                "CK_StdAdditionalCosts_FlatCharge_NonNegative",
-                "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
-
+                "CK_StdAdditionalCosts_FlatCharge_Minimum",
+                "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
+            
             t.HasCheckConstraint(
                 "CK_StdAdditionalCosts_TotalValue_NonNegative",
                 "[TotalValue] IS NULL OR [TotalValue] >= 0");

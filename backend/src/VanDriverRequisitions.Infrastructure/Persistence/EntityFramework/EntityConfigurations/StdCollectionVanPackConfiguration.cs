@@ -60,8 +60,8 @@ public class StdCollectionVanPackConfiguration : IEntityTypeConfiguration<StdCol
                 "[FilledBags] <= [VanPacksOut]");
 
             t.HasCheckConstraint(
-                "CK_StdCollectionVanPacks_RatePerVanPack_NonNegative",
-                "[RatePerVanPack] >= 0");
+                "CK_StdCollectionVanPacks_RatePerVanPack_Minimum",
+                "[RatePerVanPack] >= 0.01");
 
             t.HasCheckConstraint(
                 "CK_StdCollectionVanPacks_TotalValue_NonNegative",

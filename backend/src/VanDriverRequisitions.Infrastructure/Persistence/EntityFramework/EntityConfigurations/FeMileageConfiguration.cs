@@ -54,8 +54,8 @@ public class FeMileageConfiguration : IEntityTypeConfiguration<FeMileage>
             );
 
             t.HasCheckConstraint(
-                "CK_FeMileages_RatePerMile_NonNegative",
-                "[RatePerMile] IS NULL OR [RatePerMile] >= 0"
+                "CK_FeMileages_RatePerMile_Minimum",
+                "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01"
             );
 
             t.HasCheckConstraint(

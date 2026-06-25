@@ -94,17 +94,17 @@ public class StdTransferConfiguration : IEntityTypeConfiguration<StdTransfer>
                 "[NumberOfBoxes] IS NULL OR [NumberOfBoxes] >= 0");
 
             t.HasCheckConstraint(
-                "CK_StdTransfers_Miles_NonNegative",
-                "[Miles] IS NULL OR [Miles] >= 0");
+                "CK_StdCollectionChargesBanksAndBins_Miles_Positive",
+                "[Miles] IS NULL OR [Miles] >= 1");
 
             t.HasCheckConstraint(
-                "CK_StdTransfers_RatePerMile_NonNegative",
-                "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
+                "CK_StdCollectionChargesBanksAndBins_RatePerMile_Minimum",
+                "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
             t.HasCheckConstraint(
-                "CK_StdTransfers_FlatCharge_NonNegative",
-                "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
-
+                "CK_StdCollectionChargesBanksAndBins_FlatCharge_Minimum",
+                "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
+            
             t.HasCheckConstraint(
                 "CK_StdTransfers_TotalValue_NonNegative",
                 "[TotalValue] IS NULL OR [TotalValue] >= 0");

@@ -57,16 +57,16 @@ public class StdPickupConfiguration : IEntityTypeConfiguration<StdPickup>
                 "[NumberOfHouseholds] >= 1");
 
             t.HasCheckConstraint(
-                "CK_StdPickups_Miles_NonNegative",
-                "[Miles] IS NULL OR [Miles] >= 0");
+                "CK_StdPickups_Miles_Positive",
+                "[Miles] IS NULL OR [Miles] >= 1");
+            
+            t.HasCheckConstraint(
+                "CK_StdPickups_RatePerMile_Minimum",
+                "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
             t.HasCheckConstraint(
-                "CK_StdPickups_RatePerMile_NonNegative",
-                "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
-
-            t.HasCheckConstraint(
-                "CK_StdPickups_FlatCharge_NonNegative",
-                "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
+                "CK_StdPickups_FlatCharge_Minimum",
+                "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
 
             t.HasCheckConstraint(
                 "CK_StdPickups_TotalValue_NonNegative",

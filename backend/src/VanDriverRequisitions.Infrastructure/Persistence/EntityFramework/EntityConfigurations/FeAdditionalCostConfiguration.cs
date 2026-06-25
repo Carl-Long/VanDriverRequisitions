@@ -60,23 +60,23 @@ public class FeAdditionalCostConfiguration : IEntityTypeConfiguration<FeAddition
         builder.ToTable(t =>
         {
             t.HasCheckConstraint(
-                "CK_FeAdditionalCosts_Miles_NonNegative",
-                "[Miles] IS NULL OR [Miles] >= 0"
+                "CK_FeAdditionalCosts_Miles_Positive",
+                "[Miles] IS NULL OR [Miles] >= 1"
             );
 
             t.HasCheckConstraint(
-                "CK_FeAdditionalCosts_RatePerMile_NonNegative",
-                "[RatePerMile] IS NULL OR [RatePerMile] >= 0"
+                "CK_FeAdditionalCosts_RatePerMile_Minimum",
+                "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01"
             );
 
             t.HasCheckConstraint(
-                "CK_FeAdditionalCosts_TotalNumber_NonNegative",
-                "[TotalNumber] IS NULL OR [TotalNumber] >= 0"
+                "CK_FeAdditionalCosts_TotalNumber_Positive",
+                "[TotalNumber] IS NULL OR [TotalNumber] >= 1"
             );
 
             t.HasCheckConstraint(
-                "CK_FeAdditionalCosts_RatePerJob_NonNegative",
-                "[RatePerJob] IS NULL OR [RatePerJob] >= 0"
+                "CK_FeAdditionalCosts_RatePerJob_Minimum",
+                "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01"
             );
 
             t.HasCheckConstraint(

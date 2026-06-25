@@ -66,8 +66,8 @@ public class FeGeneralTaskConfiguration : IEntityTypeConfiguration<FeGeneralTask
             );
 
             t.HasCheckConstraint(
-                "CK_FeGeneralTasks_RatePerJob_NonNegative",
-                "[RatePerJob] IS NULL OR [RatePerJob] >= 0"
+                "CK_FeGeneralTasks_RatePerJob_Minimum",
+                "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01"
             );
 
             t.HasCheckConstraint(
