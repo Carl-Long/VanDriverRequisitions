@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
@@ -144,13 +145,11 @@ public sealed class StdRequisitionService(
             context.StdRequisitions.Add(requisition);
         }
 
-        var now = GetUtcNow();
-
         await limitValidator.ValidateAsync(requisition, cancellationToken);
 
         var snapshotJson = StdRequisitionSnapshotFactory.CreateJson(requisition);
 
-        requisition.Submit(auditUser, now, snapshotJson);
+        requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
@@ -170,7 +169,7 @@ public sealed class StdRequisitionService(
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
-        requisition.ApproveSubmission(auditUser, GetUtcNow(), poNumber);
+        requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
@@ -190,7 +189,7 @@ public sealed class StdRequisitionService(
 
         SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
 
-        requisition.RejectSubmission(auditUser, GetUtcNow(), rejectStdRequisitionDto.RejectionNotes);
+        requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectStdRequisitionDto.RejectionNotes);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
@@ -332,12 +331,7 @@ public sealed class StdRequisitionService(
             ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
             : throw new NotFoundException($"{actionName} must be performed by a user.");
     }
-
-    private DateTime GetUtcNow()
-    {
-        return timeProvider.GetUtcNow().UtcDateTime;
-    }
-
+    
     private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
     {
         try

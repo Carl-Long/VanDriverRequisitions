@@ -1,18 +1,20 @@
 using FluentValidation;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
 
 namespace VanDriverRequisitions.Application.Features.SubmitWindows.Validators;
 
 public class CreateSubmitWindowDtoValidator : AbstractValidator<CreateSubmitWindowDto>
 {
-    
-    public CreateSubmitWindowDtoValidator()
+    public CreateSubmitWindowDtoValidator(TimeProvider timeProvider)
     {
         RuleFor(x => x.OpenFrom)
-            .GreaterThan(DateTime.UtcNow).WithMessage("Open from date must be in the future.");
+            .Must(openFrom => openFrom > timeProvider.GetUtcDateTime())
+            .WithMessage("Open from date must be in the future.");
 
         RuleFor(x => x.OpenTo)
-            .GreaterThan(x => x.OpenFrom).WithMessage("Open to date must be after the open from date.");
+            .GreaterThan(x => x.OpenFrom)
+            .WithMessage("Open to date must be after the open from date.");
     }
 }
 

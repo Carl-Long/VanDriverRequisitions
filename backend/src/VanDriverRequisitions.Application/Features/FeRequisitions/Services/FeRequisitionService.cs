@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
@@ -23,7 +24,8 @@ public class FeRequisitionService(
     IPoNumberGenerator poNumberGenerator,
     IFeRequisitionLimitValidator limitValidator,
     IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
-    IFeRequisitionSaveDataBuilder saveDataBuilder) : IFeRequisitionService
+    IFeRequisitionSaveDataBuilder saveDataBuilder,
+    TimeProvider timeProvider) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -144,11 +146,10 @@ public class FeRequisitionService(
         }
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
-
-        var now = DateTime.UtcNow;
+        
         var snapshotJson = FeRequisitionSnapshotFactory.CreateJson(requisition);
-
-        requisition.Submit(auditUser, now, snapshotJson);
+        
+        requisition.Submit(auditUser, timeProvider.GetUtcDateTime(), snapshotJson);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
@@ -168,7 +169,7 @@ public class FeRequisitionService(
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
-        requisition.ApproveSubmission(auditUser, DateTime.UtcNow, poNumber);
+        requisition.ApproveSubmission(auditUser, timeProvider.GetUtcDateTime(), poNumber);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
@@ -188,7 +189,7 @@ public class FeRequisitionService(
 
         SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
 
-        requisition.RejectSubmission(auditUser, DateTime.UtcNow, rejectFeRequisitionDto.RejectionNotes);
+        requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectFeRequisitionDto.RejectionNotes);
 
         await SaveWithConcurrencyHandlingAsync(cancellationToken);
 
