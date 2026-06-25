@@ -15,6 +15,7 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -195,42 +196,34 @@ function TransfersTable({
                                     })}
                                 >
                                     <TableCell>
-                                        {formatDateGB(transfer.weekEndingDate) ?? "-"}
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <div className="space-y-1">
+                                        <div>
                                             <EditableCellButton
                                                 readonly={readonly}
                                                 ariaLabel="Edit transfer row"
                                                 onEdit={() => onEdit(transfer)}
-                                                className="block w-full"
                                             >
-                                                <span className="block text-sm">
-                                                    <span className="text-muted-foreground">From: </span>
-                                                    <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
-                                                </span>
-
-                                                <span className="block text-sm">
-                                                    <span className="text-muted-foreground">To: </span>
-                                                    <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
-                                                </span>
+                                                {formatDateGB(transfer.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-2 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit" ? "Missing limit" : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <span className="block text-sm">
+                                            <span className="text-muted-foreground">From: </span>
+                                            <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
+                                        </span>
+
+                                        <span className="block text-sm">
+                                            <span className="text-muted-foreground">To: </span>
+                                            <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
+                                        </span>
                                     </TableCell>
 
                                     <TableCell align="center">{transfer.quantities.sunday ?? "-"}</TableCell>

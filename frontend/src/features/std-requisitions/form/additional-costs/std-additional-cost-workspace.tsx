@@ -15,11 +15,10 @@ import type { StdAdditionalCostForm } from "../types/std-additional-cost-form";
 import { mapStdAdditionalCostDraftToForm } from "../lib/map-std-additional-cost-draft-to-form";
 import { StdAdditionalCostDrawer } from "./std-additional-cost-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
-import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
-import { cn } from "@/lib/utils";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 
 type Props = {
@@ -239,24 +238,11 @@ function AdditionalCostsTable({
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={cn(
-                                        getEditableTableRowClassName({
-                                            readonly,
-                                            hasIssue,
-                                        }),
-                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
-                                    )}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue,
+                                    })}
                                 >
-                                    <TableCell>
-                                        {row.date ? formatDateGB(row.date) : "-"}
-                                        {hasLimitIssue && (
-                                            <StdLimitWarningBlock
-                                                status={limitStatus}
-                                                className="mt-1"
-                                            />
-                                        )}
-                                    </TableCell>
-
                                     <TableCell>
                                         <div>
                                             <EditableCellButton
@@ -264,15 +250,26 @@ function AdditionalCostsTable({
                                                 ariaLabel="Edit additional cost row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                                {row.reasonCode && row.reasonText
-                                                    ? `${row.reasonCode} - ${row.reasonText}`
-                                                    : row.reasonText ?? "-"}
-
-                                                {row.isReasonActive === false && (
-                                                    <InactiveLookupWarning label="reason" />
-                                                )}
+                                                {row.date ? formatDateGB(row.date) : "-"}
                                             </EditableCellButton>
+
+                                            {hasLimitIssue && (
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
+                                            )}
                                         </div>
+                                    </TableCell>
+
+                                    <TableCell className="font-medium">
+                                        {row.reasonCode && row.reasonText
+                                            ? `${row.reasonCode} - ${row.reasonText}`
+                                            : row.reasonText ?? "-"}
+                                            
+                                        {row.isReasonActive === false && (
+                                            <InactiveLookupWarning label="reason" />
+                                        )}
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">

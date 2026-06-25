@@ -19,6 +19,7 @@ import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { cn } from "@/lib/utils";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -182,51 +183,38 @@ function AdditionalCostsTable({
                                 <TableRow
                                     key={row.clientId}
                                     onClick={readonly ? undefined : () => onEdit(row)}
-                                    className={cn(
-                                        getEditableTableRowClassName({
-                                            readonly,
-                                            hasIssue,
-                                        }),
-                                        hasIssue && "bg-warning-surface/40 hover:bg-warning-surface/60",
-                                    )}
+                                    className={getEditableTableRowClassName({
+                                        readonly,
+                                        hasIssue,
+                                    })}
                                 >
-                                    <TableCell>
-                                        {formatDateGB(row.weekEndingDate) ?? "-"}
-                                    </TableCell>
-
                                     <TableCell>
                                         <div>
                                             <EditableCellButton
                                                 readonly={readonly}
                                                 ariaLabel="Edit additional cost row"
                                                 onEdit={() => onEdit(row)}
-                                                className="font-medium"
                                             >
-                                                {row.reasonCode && row.reasonText
-                                                    ? `${row.reasonCode} - ${row.reasonText}`
-                                                    : row.reasonText ?? "-"}
-
-                                                {row.isReasonActive === false && (
-                                                    <InactiveLookupWarning label="reason" />
-                                                )}
+                                                {formatDateGB(row.weekEndingDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-2 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
+                                    </TableCell>
+
+                                    <TableCell className="font-medium">
+                                        {row.reasonCode && row.reasonText
+                                            ? `${row.reasonCode} - ${row.reasonText}`
+                                            : row.reasonText ?? "-"}
+
+                                        {row.isReasonActive === false && (
+                                            <InactiveLookupWarning label="reason" />
+                                        )}
                                     </TableCell>
 
                                     <TableCell>{row.chargingOption}</TableCell>

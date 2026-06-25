@@ -24,6 +24,7 @@ import { DeleteRowButton } from "../../../requisitions-shared/components/delete-
 import { formatDateGB } from "@/lib/format/date";
 import { Alert } from "@/components/ui/alert";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -72,7 +73,7 @@ export function FeGeneralTaskWorkspace({
                     setOpen(true);
                 }}
             />
-            
+
             {isTaskTypeInactive && (
                 <Alert tone="warning">
                     This task type is inactive. Existing rows are shown for historical accuracy, but new rows
@@ -234,17 +235,10 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit" ? "Missing limit" : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
                                     </TableCell>

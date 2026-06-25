@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-
 import { DeleteRowButton } from "@/features/requisitions-shared/components/delete-row-button";
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
@@ -23,10 +22,10 @@ import type { StdPickupForm } from "../types/std-pickup-form";
 import { mapStdPickupDraftToForm } from "../lib/map-std-pickup-draft-to-form";
 import { StdPickupDrawer } from "./std-pickup-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
-import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -267,12 +266,10 @@ function PickupTable({
                                                 {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
 
-                                            {hasLimitIssue && (
-                                                <StdLimitWarningBlock
-                                                    status={limitStatus}
-                                                    className="mt-1"
-                                                />
-                                            )}
+                                            <RequisitionLimitWarningBlock
+                                                status={limitStatus}
+                                                className="mt-1"
+                                            />
                                         </div>
                                     </TableCell>
 

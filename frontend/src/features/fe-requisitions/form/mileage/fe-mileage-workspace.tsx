@@ -16,6 +16,7 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -199,19 +200,10 @@ function MileageTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing limit"
-                                                            : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>{message}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
                                             )}
                                         </div>
                                     </TableCell>

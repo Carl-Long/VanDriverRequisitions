@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button/button";
 import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -19,6 +16,7 @@ import { EditableCellButton } from "@/features/requisitions-shared/components/ed
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
+import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 
 type Props = {
     readonly: boolean;
@@ -241,23 +239,11 @@ function VanPackTable({
                                                 {formatDateGB(row.deliveryDate) ?? "-"}
                                             </EditableCellButton>
 
-                                            {hasLimitIssue && (
-                                                <div className="mt-1 space-y-1">
-                                                    <div className="text-xs font-medium text-warning">
-                                                        {limitStatus.state === "missing-limit"
-                                                            ? "Missing price"
-                                                            : "Exceeds limit"}
-                                                    </div>
-
-                                                    <ul className="list-disc pl-4 text-xs text-warning">
-                                                        {limitStatus.messages.map((message, index) => (
-                                                            <li key={`${message}-${index}`}>
-                                                                {message}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
+                                            <RequisitionLimitWarningBlock
+                                                status={limitStatus}
+                                                className="mt-1"
+                                                missingLabel="Missing price"
+                                            />
                                         </div>
                                     </TableCell>
 

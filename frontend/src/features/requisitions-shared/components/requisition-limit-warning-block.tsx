@@ -1,12 +1,17 @@
 import { cn } from "@/lib/utils";
 
-type LimitWarningStatus = {
-    state: "ok" | "missing-limit" | "exceeds-limit";
+export type RequisitionLimitWarningState =
+    | "ok"
+    | "missing-limit"
+    | "exceeds-limit";
+
+export type RequisitionLimitWarningStatus = {
+    state: RequisitionLimitWarningState;
     messages: string[];
 };
 
 type Props = {
-    status: LimitWarningStatus;
+    status: RequisitionLimitWarningStatus;
     className?: string;
     missingLabel?: string;
     exceedsLabel?: string;
