@@ -55,6 +55,7 @@ export function VanDriverField({
                     pinnedOptions={pinnedOptions}
                     placeholder="Search van drivers..."
                     noMatchesText="No matching van drivers found"
+                    emptyStateText="No van drivers available"
                     onSearch={async (search) => {
                         const response = await vanDriversApi.search({
                             search,

@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -45,8 +44,21 @@ export function Combobox<TData = unknown>({
     const [asyncOptions, setAsyncOptions] = useState<ComboboxOption<TData>[]>([]);
     const [loading, setLoading] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const maxVisibleOptions = 50;
+    const hasSearch = search.trim().length > 0;
+
+    const closeCombobox = useCallback((focusTrigger = false) => {
+        setOpen(false);
+        setSearch("");
+
+        if (focusTrigger) {
+            globalThis.requestAnimationFrame(() => {
+                triggerRef.current?.focus();
+            });
+        }
+    }, []);
 
     const finalOptions = useMemo(() => {
         if (onSearch) {
@@ -63,6 +75,48 @@ export function Combobox<TData = unknown>({
             .filter((x) => x.label.toLowerCase().includes(normalisedSearch))
             .slice(0, maxVisibleOptions);
     }, [options, search, asyncOptions, onSearch]);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        function handleDocumentKeyDown(event: KeyboardEvent) {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            const target = event.target as Node | null;
+
+            if (!target || !wrapperRef.current?.contains(target)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            closeCombobox(true);
+        }
+
+        function handleDocumentOutsideInteraction(event: Event) {
+            const target = event.target as Node | null;
+
+            if (!target || !wrapperRef.current?.contains(target)) {
+                closeCombobox(false);
+            }
+        }
+
+        document.addEventListener("keydown", handleDocumentKeyDown, true);
+        document.addEventListener("mousedown", handleDocumentOutsideInteraction);
+        document.addEventListener("focusin", handleDocumentOutsideInteraction);
+
+        return () => {
+            document.removeEventListener("keydown", handleDocumentKeyDown, true);
+            document.removeEventListener("mousedown", handleDocumentOutsideInteraction);
+            document.removeEventListener("focusin", handleDocumentOutsideInteraction);
+        };
+    }, [open, closeCombobox]);
+
 
     useEffect(() => {
         if (!open) return;
@@ -96,23 +150,10 @@ export function Combobox<TData = unknown>({
         };
     }, [search, onSearch, open]);
 
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (!wrapperRef.current?.contains(e.target as Node)) {
-                setOpen(false);
-            }
-        }
-
-        document.addEventListener("mousedown", handleClick);
-
-        return () => {
-            document.removeEventListener("mousedown", handleClick);
-        };
-    }, []);
-
     return (
         <div ref={wrapperRef} className="relative">
             <button
+                ref={triggerRef}
                 type="button"
                 onClick={() => {
                     if (disabled) {
@@ -154,7 +195,6 @@ export function Combobox<TData = unknown>({
                     </div>
 
                     <div className="max-h-64 overflow-y-auto py-1">
-                        {/* Pinned options */}
                         {pinnedOptions.map((option) => {
                             const selected = option.value === value;
 
@@ -164,8 +204,7 @@ export function Combobox<TData = unknown>({
                                     type="button"
                                     onClick={() => {
                                         onChange(option.value, option);
-
-                                        setOpen(false);
+                                        closeCombobox(true);
                                     }}
                                     className={cn(
                                         "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
@@ -181,12 +220,10 @@ export function Combobox<TData = unknown>({
                             );
                         })}
 
-                        {/* Divider */}
                         {pinnedOptions.length > 0 && finalOptions.length > 0 && (
                             <div className="my-1 border-t border-border" />
                         )}
 
-                        {/* Async / normal options */}
                         {loading && (
                             <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-muted-foreground">
                                 <Loader2 size={14} className="animate-spin" />
@@ -204,8 +241,7 @@ export function Combobox<TData = unknown>({
                                         type="button"
                                         onClick={() => {
                                             onChange(option.value, option);
-
-                                            setOpen(false);
+                                            closeCombobox(true);
                                         }}
                                         className={cn(
                                             "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
@@ -221,15 +257,16 @@ export function Combobox<TData = unknown>({
                                 );
                             })}
 
-                        {!loading && pinnedOptions.length === 0 && finalOptions.length === 0 && (
-                            <div className="px-3 py-4 text-sm text-muted-foreground">
-                                {emptyStateText}
-                            </div>
-                        )}
-
-                        {!loading && pinnedOptions.length > 0 && finalOptions.length === 0 && (
-                            <div className="px-3 py-2 text-xs text-muted-foreground">
-                                {noMatchesText}
+                        {!loading && finalOptions.length === 0 && (
+                            <div
+                                className={cn(
+                                    "text-muted-foreground",
+                                    pinnedOptions.length > 0
+                                        ? "px-3 py-2 text-xs"
+                                        : "px-3 py-4 text-sm",
+                                )}
+                            >
+                                {hasSearch ? noMatchesText : emptyStateText}
                             </div>
                         )}
                     </div>

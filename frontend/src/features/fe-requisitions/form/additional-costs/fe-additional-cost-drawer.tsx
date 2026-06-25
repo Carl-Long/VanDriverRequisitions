@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
@@ -23,6 +23,7 @@ import { CostReasonField } from "@/features/cost-reasons/cost-reason-field";
 import { FASCIAS } from "@/lib/constants/fascias";
 import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -47,6 +48,7 @@ export function FeAdditionalCostDrawer({
 }: Readonly<Props>) {
     const [form, setForm] = useState<FeAdditionalCostForm>(createEmptyFeAdditionalCostForm());
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createFeAdditionalCostFormSchema({
         additionalCostLimitRule,
@@ -81,6 +83,7 @@ export function FeAdditionalCostDrawer({
         }
 
         setForm(createEmptyFeAdditionalCostForm(result.data.weekEndingDate));
+        focusFirstFormControl(formRef.current);
     }
 
     function setChargingOption(chargingOption: ChargingOption) {
@@ -117,6 +120,7 @@ export function FeAdditionalCostDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="additional-cost-drawer-form"
                 noValidate
                 className="space-y-6"

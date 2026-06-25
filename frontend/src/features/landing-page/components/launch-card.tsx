@@ -18,18 +18,20 @@ export function LaunchCard({ title, description, href, icon: Icon }: Readonly<La
                 "group flex h-full min-h-[200px] flex-col overflow-hidden",
                 "rounded-2xl border border-border bg-surface",
                 "card-shadow-interactive transition-all duration-300",
-                "hover:-translate-y-1 hover:border-primary/20",
+                "hover:-translate-y-1 hover:border-primary-border",
             )}
         >
             <div className="flex flex-1 flex-col p-6">
                 <div
                     className={cn(
                         "mb-5 flex h-12 w-12 flex-shrink-0 items-center justify-center",
-                        "rounded-xl bg-primary/10 text-primary",
-                        "transition-colors duration-300 group-hover:bg-primary/[0.15]",
+                        "rounded-xl border border-primary-border",
+                        "bg-primary-surface text-primary",
+                        "transition-colors duration-300",
+                        "group-hover:bg-primary-surface-hover",
                     )}
                 >
-                    <Icon size={22} strokeWidth={1.75} />
+                    <Icon size={22} strokeWidth={1.85} />
                 </div>
 
                 <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -22,6 +22,7 @@ import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
 import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 
 type Props = {
@@ -52,6 +53,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
     );
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createStdCollectionChargeBanksAndBinsFormSchema({
         mileageLimitRule,
@@ -91,6 +93,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
         }
 
         setForm(createEmptyStdCollectionChargeBanksAndBinsForm(result.data.date));
+        focusFirstFormControl(formRef.current);
     }
 
     function clearError(field: string) {
@@ -142,6 +145,7 @@ export function StdCollectionChargeBanksAndBinsDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="std-banks-bins-drawer-form"
                 noValidate
                 className="space-y-6"

@@ -110,11 +110,11 @@
     --warning-surface-hover: 92 52 12;
     --warning-border: 245 158 11;
 
-    --danger: 190 24 93;
-    --danger-foreground: 255 255 255;
-    --danger-surface: 76 5 45;
-    --danger-surface-hover: 103 8 61;
-    --danger-border: 190 24 93;
+    --danger: 251 113 133;
+    --danger-foreground: 15 23 42;
+    --danger-surface: 76 18 32;
+    --danger-surface-hover: 100 24 42;
+    --danger-border: 225 29 72;
 
     --border: 42 52 68;
     --border-subtle: 55 65 81;

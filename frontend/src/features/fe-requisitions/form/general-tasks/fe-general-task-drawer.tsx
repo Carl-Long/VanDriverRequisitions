@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -17,6 +17,7 @@ import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
 import { createFeGeneralTaskFormSchema } from "../schemas/create-fe-general-task-form-schema";
 import { DayInput } from "../form-fields/day-input";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -39,6 +40,7 @@ export function FeGeneralTaskDrawer({
 }: Readonly<Props>) {
     const [form, setForm] = useState<FeGeneralTaskForm>(createEmptyFeGeneralTaskForm());
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createFeGeneralTaskFormSchema(limitRule);
     const isEditMode = initialValues !== undefined;
@@ -69,6 +71,7 @@ export function FeGeneralTaskDrawer({
         }
 
         setForm(createEmptyFeGeneralTaskForm(result.data.weekEndingDate));
+        focusFirstFormControl(formRef.current);
     }
 
     function clearError(field: string) {
@@ -90,6 +93,7 @@ export function FeGeneralTaskDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="general-task-drawer-form"
                 noValidate
                 className="space-y-6"

@@ -30,10 +30,10 @@ export function RequisitionDrawerFormActions({
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <Button
-                    type="button"
+                    type={isEditMode ? "submit" : "button"}
                     className="min-w-[160px]"
                     variant="outline"
-                    onClick={onSaveAndClose}
+                    onClick={isEditMode ? undefined : onSaveAndClose}
                 >
                     {isEditMode ? updateAndCloseLabel : addAndCloseLabel}
                 </Button>

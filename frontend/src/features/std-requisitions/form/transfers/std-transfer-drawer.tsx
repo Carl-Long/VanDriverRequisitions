@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -19,6 +19,7 @@ import { StdChargeLimitSummary } from "../components/std-charge-limit-summary";
 import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
+import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
 
 type Props = {
     open: boolean;
@@ -45,6 +46,7 @@ export function StdTransferDrawer({
         createEmptyStdTransferForm(),
     );
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createStdTransferFormSchema({
         mileageLimitRule,
@@ -89,6 +91,7 @@ export function StdTransferDrawer({
         }
 
         setForm(createEmptyStdTransferForm(result.data.date));
+        focusFirstFormControl(formRef.current);
     }
 
     function setChargeType(chargeType: StdTransferForm["chargeType"]) {
@@ -130,6 +133,7 @@ export function StdTransferDrawer({
             onClose={onClose}
         >
             <form
+                ref={formRef}
                 id="std-transfer-drawer-form"
                 noValidate
                 className="space-y-6"
