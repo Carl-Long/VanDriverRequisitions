@@ -106,7 +106,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
 
@@ -134,7 +134,7 @@ public sealed class StdRequisitionService(
             requisition = await LoadFullAsync(id.Value, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-            SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+            context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
             requisition.Update(saveData.UpdateModel);
         }
         else
@@ -164,7 +164,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
@@ -185,8 +185,8 @@ public sealed class StdRequisitionService(
 
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
-
-        SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
+        
+        context.SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectStdRequisitionDto.RejectionNotes);
 
@@ -310,17 +310,5 @@ public sealed class StdRequisitionService(
             .AsNoTracking()
             .Where(x => locationIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
-    }
-
-    private void SetOriginalRowVersion(StdRequisition requisition, byte[]? rowVersion)
-    {
-        if (rowVersion is null)
-        {
-            return;
-        }
-
-        context.Entry(requisition)
-            .Property(nameof(StdRequisition.RowVersion))
-            .OriginalValue = rowVersion;
     }
 }

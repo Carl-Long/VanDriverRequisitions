@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
+using VanDriverRequisitions.Domain.Entities.Base;
 
 namespace VanDriverRequisitions.Application.Common.Extensions;
 
@@ -21,5 +22,15 @@ public static class ApplicationDbContextExtensions
         {
             throw new ConflictException(DefaultConcurrencyMessage);
         }
+    }
+    
+    public static void SetOriginalRowVersion<TEntity>(this IApplicationDbContext context, TEntity entity, byte[]? rowVersion) where TEntity : ConcurrencyAwareEntity
+    {
+        if (rowVersion is null)
+        {
+            return;
+        }
+
+        context.Entry(entity).Property(nameof(ConcurrencyAwareEntity.RowVersion)).OriginalValue = rowVersion;
     }
 }

@@ -105,7 +105,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
         
@@ -133,7 +133,7 @@ public class FeRequisitionService(
             requisition = await LoadFullAsync(id.Value, cancellationToken)
                 ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-            SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+            context.SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
             requisition.Update(saveData.UpdateModel);
         }
         else
@@ -164,7 +164,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
@@ -186,7 +186,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
+        context.SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectFeRequisitionDto.RejectionNotes);
 
@@ -263,12 +263,5 @@ public class FeRequisitionService(
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
-    }
-    
-    private void SetOriginalRowVersion(FeRequisition requisition, byte[]? rowVersion)
-    {
-        if (rowVersion is null) return;
-        
-        context.Entry(requisition).Property(nameof(FeRequisition.RowVersion)).OriginalValue = rowVersion;
     }
 }
