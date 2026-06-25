@@ -26,7 +26,4 @@ public interface IApplicationDbContext
     EntityEntry Entry(object entity);
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-
-    Task<string> NextFeRequisitionNumberAsync(CancellationToken cancellationToken);
-    Task<string> NextStdRequisitionNumberAsync(CancellationToken cancellationToken);
 }
