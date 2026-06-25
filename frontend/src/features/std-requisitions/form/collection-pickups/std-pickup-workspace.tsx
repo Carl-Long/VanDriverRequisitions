@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button/button";
 import {
     TableHeader,
     TableHeaderCell,
@@ -29,6 +26,7 @@ import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { formatDateGB } from "@/lib/format/date";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 type Props = {
     readonly: boolean;
@@ -91,35 +89,24 @@ export function StdPickupWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Pickup Collections</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage pickup collection entries
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Pickup Collections"
+                description="Manage pickup collection entries"
+                summary={
+                    <>
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
                         {totalBags} bags • {totalHouseholds} households •{" "}
                         {totalMiles} miles • {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!canAddRows}
-                        onClick={() => {
-                            setEditingRow(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Pickup
-                    </Button>
-                )}
-            </div>
+                    </>
+                }
+                actionLabel="Add Pickup"
+                actionHidden={readonly}
+                actionDisabled={!canAddRows}
+                onAction={() => {
+                    setEditingRow(null);
+                    setOpen(true);
+                }}
+            />
 
             {!canAddRows && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
@@ -301,7 +288,7 @@ function PickupTable({
                                     <StdMilesCell row={row} />
                                     <StdRateChargeCell row={row} />
 
-                                    <TableCell align="right"  className="font-semibold tabular-nums">
+                                    <TableCell align="right" className="font-semibold tabular-nums">
                                         {formatCurrencyGB(row.totalValue)}
                                     </TableCell>
 

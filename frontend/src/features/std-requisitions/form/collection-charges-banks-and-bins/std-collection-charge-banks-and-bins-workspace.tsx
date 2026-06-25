@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableFooter, TableHeader, TableHeaderCell, TableHeaderRow, TableRow, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
@@ -24,6 +21,7 @@ import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../component
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 type Props = {
     readonly: boolean;
@@ -64,32 +62,23 @@ export function StdCollectionChargeBanksAndBinsWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-md font-semibold">Banks & Bins Collection Charges</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage collection charges for banks and bins.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} • {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!shopId}
-                        onClick={() => {
-                            setEditingRow(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Banks & Bins Charge
-                    </Button>
-                )}
-            </div>
+            <RequisitionWorkspaceHeader
+                title="Banks & Bins Collection Charges"
+                description="Manage collection charges for banks and bins."
+                summary={
+                    <>
+                        {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
+                        {formatCurrencyGB(subtotal)}
+                    </>
+                }
+                actionLabel="Add Collection Charge"
+                actionHidden={readonly}
+                actionDisabled={!shopId}
+                onAction={() => {
+                    setEditingRow(null);
+                    setOpen(true);
+                }}
+            />
 
             {!shopId && !readonly && (
                 <Alert tone="warning">

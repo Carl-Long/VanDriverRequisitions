@@ -30,6 +30,7 @@ import { StdTransferDrawer } from "./std-transfer-drawer";
 import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 type Props = {
     readonly: boolean;
@@ -77,35 +78,24 @@ export function StdTransferWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Transfers</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage transfer entries between shops
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Transfers"
+                description="Manage transfer entries between shops"
+                summary={
+                    <>
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
                         {totalBags} bags • {totalBoxes} boxes • {totalMiles} miles •{" "}
                         {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!canAddRows}
-                        onClick={() => {
-                            setEditingTransfer(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Transfer
-                    </Button>
-                )}
-            </div>
+                    </>
+                }
+                actionLabel="Add Transfer"
+                actionHidden={readonly}
+                actionDisabled={!canAddRows}
+                onAction={() => {
+                    setEditingTransfer(null);
+                    setOpen(true);
+                }}
+            />
 
             {!canAddRows && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">

@@ -18,6 +18,7 @@ import { DeleteRowButton } from "@/features/requisitions-shared/components/delet
 import { EditableCellButton } from "@/features/requisitions-shared/components/editable-cell-button";
 import { getEditableTableRowClassName } from "@/features/requisitions-shared/lib/get-editable-table-row-class-name";
 import { formatDateGB } from "@/lib/format/date";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 type Props = {
     readonly: boolean;
@@ -78,35 +79,23 @@ export function StdCollectionVanPackWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Van Pack Collections</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage van pack collection entries
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Van Pack Collections"
+                description="Manage van pack collection entries"
+                summary={
+                    <>
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
-                        {totalVanPacksOut} van packs out •{" "}
-                        {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!vanPackLimitRule}
-                        onClick={() => {
-                            setEditingRow(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Van Pack Collection
-                    </Button>
-                )}
-            </div>
+                        {totalVanPacksOut} van packs out • {formatCurrencyGB(subtotal)}
+                    </>
+                }
+                actionLabel="Add Van Pack"
+                actionHidden={readonly}
+                actionDisabled={readonly}
+                onAction={() => {
+                    setEditingRow(null);
+                    setOpen(true);
+                }}
+            />
 
             {!vanPackLimitRule && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
@@ -249,7 +238,7 @@ function VanPackTable({
                                                 ariaLabel="Edit van pack collection row"
                                                 onEdit={() => onEdit(row)}
                                             >
-                                               {formatDateGB(row.deliveryDate) ?? "-"}
+                                                {formatDateGB(row.deliveryDate) ?? "-"}
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (

@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button/button";
 import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
@@ -21,6 +19,7 @@ import { StdLimitWarningBlock } from "../components/std-limit-warning-block";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { cn } from "@/lib/utils";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 
 type Props = {
@@ -81,35 +80,23 @@ export function StdAdditionalCostWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Additional Costs</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage additional standard van driver charges
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Additional Costs"
+                description="Manage additional standard van driver charges"
+                summary={
+                    <>
                         {rows.length} entr{rows.length === 1 ? "y" : "ies"} •{" "}
-                        {totalBags} bags • {totalMiles} miles •{" "}
-                        {formatCurrencyGB(subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        disabled={!canAddRows}
-                        onClick={() => {
-                            setEditingRow(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Additional Cost
-                    </Button>
-                )}
-            </div>
+                        {totalBags} bags • {totalMiles} miles • {formatCurrencyGB(subtotal)}
+                    </>
+                }
+                actionLabel="Add Additional Cost"
+                actionHidden={readonly}
+                actionDisabled={!canAddRows}
+                onAction={() => {
+                    setEditingRow(null);
+                    setOpen(true);
+                }}
+            />
 
             {!canAddRows && !readonly && (
                 <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">

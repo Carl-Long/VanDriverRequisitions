@@ -1,19 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button } from "@/components/ui/button/button";
-import {
-    TableHeader,
-    TableHeaderCell,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableRow,
-    TableHeaderRow,
-    Table,
-} from "@/components/ui/table/table";
+import { TableHeader, TableHeaderCell, TableBody, TableCell, TableFooter, TableRow, TableHeaderRow, Table, } from "@/components/ui/table/table";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { FeTransferDraft } from "../types/fe-transfer-draft";
@@ -25,6 +14,7 @@ import { getEditableTableRowClassName } from "../../../requisitions-shared/lib/g
 import { EditableCellButton } from "../../../requisitions-shared/components/editable-cell-button";
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
+import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 
 type Props = {
     readonly: boolean;
@@ -50,33 +40,22 @@ export function FeTransferWorkspace({
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-md font-semibold">Transfers</h2>
-
-                    <p className="text-sm text-muted-foreground">
-                        Manage transfer entries between shops
-                    </p>
-
-                    <p className="text-sm text-muted-foreground">
+            <RequisitionWorkspaceHeader
+                title="Transfers"
+                description="Manage transfer entries between shops"
+                summary={
+                    <>
                         {transfers.length} entr{transfers.length === 1 ? "y" : "ies"} •{" "}
                         {totals.totalNumber} quantity • {formatCurrencyGB(totals.subtotal)}
-                    </p>
-                </div>
-
-                {!readonly && (
-                    <Button
-                        type="button"
-                        onClick={() => {
-                            setEditingTransfer(null);
-                            setOpen(true);
-                        }}
-                    >
-                        <Plus size={14} />
-                        Add Transfer
-                    </Button>
-                )}
-            </div>
+                    </>
+                }
+                actionLabel="Add Transfer"
+                actionHidden={readonly}
+                onAction={() => {
+                    setEditingTransfer(null);
+                    setOpen(true);
+                }}
+            />
 
             {transfers.length === 0 ? (
                 <EmptyState title="No Transfers" />
