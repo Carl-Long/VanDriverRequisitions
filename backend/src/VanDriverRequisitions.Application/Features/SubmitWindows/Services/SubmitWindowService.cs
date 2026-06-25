@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
@@ -120,7 +119,9 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
             .AnyAsync(x => x.Id != id && x.OpenFrom < openTo && x.OpenTo > openFrom, cancellationToken);
 
         if (overlapping)
-            throw new ValidationException("This window overlaps with an upcoming or completed submit window.");
+        {
+            throw new BadRequestException("This window overlaps with an upcoming or completed submit window.");
+        }
     }
 
     private IQueryable<SubmitWindow> BuildFilteredQuery(SubmitWindowFilter filter, DateTime now)
