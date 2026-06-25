@@ -1,4 +1,5 @@
 using FluentValidation;
+using VanDriverRequisitions.Application.Common.Validation;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
 using VanDriverRequisitions.Domain.Enums;
 
@@ -26,10 +27,12 @@ public class CreateRequisitionLimitRuleDtoValidator
 
         RuleFor(x => x.MaxQuantity)
             .GreaterThan(0)
-            .WithMessage("MaxQuantity must be greater than 0.");
+            .WithMessage("Max quantity must be greater than zero.");
 
         RuleFor(x => x.MaxRate)
-            .GreaterThan(0)
-            .WithMessage("MaxRate must be greater than 0.");
+            .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)
+            .WithMessage("Max rate must be at least £0.01.")
+            .Must(MoneyValidationRules.HasMaxTwoDecimalPlaces)
+            .WithMessage("Max rate can have a maximum of 2 decimal places.");
     }
 }

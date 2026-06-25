@@ -2,6 +2,7 @@ using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.Helpers;
 
 namespace VanDriverRequisitions.Domain.Entities.Common;
 
@@ -38,15 +39,12 @@ public class RequisitionLimitRule : AuditableEntity
 
     private static void Validate(RequisitionLimitRuleDetails details)
     {
-        if (details.MaxQuantity < 0)
+        if (details.MaxQuantity <= 0)
         {
-            throw new InvalidOperationException("Max quantity cannot be negative.");
+            throw new InvalidOperationException("Max quantity must be greater than zero.");
         }
 
-        if (details.MaxRate < 0)
-        {
-            throw new InvalidOperationException("Max rate cannot be negative.");
-        }
+        MoneyGuard.EnsureMoneyAmount(details.MaxRate, "Max rate");
 
         if (details.Category == RequisitionRowCategory.GeneralTask && details.FeTaskTypeId is null)
         {
