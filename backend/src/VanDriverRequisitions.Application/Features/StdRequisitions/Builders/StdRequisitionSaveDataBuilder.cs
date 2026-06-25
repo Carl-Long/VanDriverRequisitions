@@ -54,22 +54,26 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context)
 
     private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
     {
-        return await context.VanDrivers
+        var driver = await context.VanDrivers
             .AsNoTracking()
             .Where(x => x.Id == vanDriverId)
             .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return driver ?? throw new NotFoundException($"Van driver '{vanDriverId}' was not found.");
     }
 
     private async Task<ShopRequisitionSnapshotDto> LoadShopSnapshotAsync(Guid shopId, CancellationToken cancellationToken)
     {
-        return await context.Shops
+        var shop = await context.Shops
             .AsNoTracking()
             .Where(x => x.Id == shopId)
             .Select(ShopProjections.AsRequisitionSnapshotDto)
-            .SingleAsync(cancellationToken);
-    }
+            .SingleOrDefaultAsync(cancellationToken);
 
+        return shop ?? throw new NotFoundException($"Shop '{shopId}' was not found.");
+    }
+    
     private async Task<Dictionary<Guid, StdCollectionType>> LoadCollectionTypeMapAsync(
         IEnumerable<SaveStdCollectionChargeBanksAndBinsDto> collectionCharges,
         CancellationToken cancellationToken)

@@ -214,22 +214,26 @@ public sealed class StdRequisitionService(
 
     private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
     {
-        return await context.VanDrivers
+        var driver = await context.VanDrivers
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(x => x.Id == vanDriverId)
             .Select(VanDriverProjections.AsLookupDto)
-            .SingleAsync(cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return driver ?? throw new NotFoundException($"Van driver '{vanDriverId}' was not found.");
     }
 
     private async Task<bool> IsShopActiveAsync(Guid shopId, CancellationToken cancellationToken)
     {
-        return await context.Shops
+        var isActive = await context.Shops
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(x => x.Id == shopId)
-            .Select(x => x.IsActive)
-            .SingleAsync(cancellationToken);
+            .Select(x => (bool?)x.IsActive)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        return isActive ?? throw new NotFoundException($"Shop '{shopId}' was not found.");
     }
 
     private async Task<StdRequisitionDetailDto> MapToDetailDtoAsync(
@@ -241,14 +245,9 @@ public sealed class StdRequisitionService(
         driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
         var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
 
-        var additionalCostReasonActiveMap =
-            await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
-
-        var collectionTypeActiveMap =
-            await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
-
-        var locationActiveMap =
-            await LoadLocationActiveMapAsync(requisition, cancellationToken);
+        var additionalCostReasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
+        var collectionTypeActiveMap = await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
+        var locationActiveMap = await LoadLocationActiveMapAsync(requisition, cancellationToken);
 
         return StdRequisitionMapper.MapRequisitionToDetailDto(
             requisition,
