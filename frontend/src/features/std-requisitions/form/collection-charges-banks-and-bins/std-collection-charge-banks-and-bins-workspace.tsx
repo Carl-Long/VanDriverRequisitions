@@ -251,10 +251,12 @@ function BanksAndBinsTable({
                                                 {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
 
-                                            <RequisitionLimitWarningBlock
-                                                status={limitStatus}
-                                                className="mt-1"
-                                            />
+                                            {hasLimitIssue && (
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
+                                            )}
                                         </div>
                                     </TableCell>
 

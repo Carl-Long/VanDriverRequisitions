@@ -238,12 +238,14 @@ function VanPackTable({
                                             >
                                                 {formatDateGB(row.deliveryDate) ?? "-"}
                                             </EditableCellButton>
-
-                                            <RequisitionLimitWarningBlock
-                                                status={limitStatus}
-                                                className="mt-1"
-                                                missingLabel="Missing price"
-                                            />
+                                            
+                                            {hasLimitIssue && (
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                    missingLabel="Missing price"
+                                                />
+                                            )}
                                         </div>
                                     </TableCell>
 

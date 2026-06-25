@@ -269,10 +269,12 @@ function TransfersTable({
                                                 {transfer.date ? formatDateGB(transfer.date) : "-"}
                                             </EditableCellButton>
 
-                                            <RequisitionLimitWarningBlock
-                                                status={limitStatus}
-                                                className="mt-1"
-                                            />
+                                            {hasLimitIssue && (
+                                                <RequisitionLimitWarningBlock
+                                                    status={limitStatus}
+                                                    className="mt-1"
+                                                />
+                                            )}
                                         </div>
                                     </TableCell>
 
