@@ -46,7 +46,7 @@ public class CostReasonsController(ICostReasonService costReasonService) : Contr
 
     [HttpPost]
     [Authorize(Policy = Policies.CanManageConfiguration)]
-    [EnableRateLimiting(RateLimitPolicies.Read)]
+    [EnableRateLimiting(RateLimitPolicies.Write)]
     [ProducesResponseType(typeof(CostReasonSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
