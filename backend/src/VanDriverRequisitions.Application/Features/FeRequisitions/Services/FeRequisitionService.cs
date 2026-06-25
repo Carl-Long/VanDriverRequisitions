@@ -11,7 +11,6 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
-using VanDriverRequisitions.Application.Features.VanDrivers.Mappings;
 using VanDriverRequisitions.Domain.Entities.FE;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
@@ -24,7 +23,8 @@ public class FeRequisitionService(
     IFeRequisitionLimitValidator limitValidator,
     IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
     IFeRequisitionSaveDataBuilder saveDataBuilder,
-    TimeProvider timeProvider) : IFeRequisitionService
+    TimeProvider timeProvider,
+    IRequisitionLookupLoader lookupLoader) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
     {
@@ -56,7 +56,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
         
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -172,7 +172,7 @@ public class FeRequisitionService(
 
         await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
         
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -192,7 +192,7 @@ public class FeRequisitionService(
 
         await context.SaveChangesWithConcurrencyHandlingAsync(cancellationToken);
 
-        var driverSummary = await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
 
         return await MapToDetailDtoAsync(requisition, driverSummary, null, cancellationToken);
     }
@@ -208,30 +208,6 @@ public class FeRequisitionService(
             .Include(x => x.Submissions)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
-
-    private async Task<VanDriverLookupDto> LoadDriverSummaryAsync(Guid vanDriverId, CancellationToken cancellationToken)
-    {
-        var driver = await context.VanDrivers
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == vanDriverId)
-            .Select(VanDriverProjections.AsLookupDto)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return driver ?? throw new NotFoundException($"Van driver '{vanDriverId}' was not found.");
-    }
-    
-    private async Task<bool> IsShopActiveAsync(Guid shopId, CancellationToken cancellationToken)
-    {
-        var isActive = await context.Shops
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => x.Id == shopId)
-            .Select(x => (bool?)x.IsActive)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return isActive ?? throw new NotFoundException($"Shop '{shopId}' was not found.");
-    }
     
     private async Task<FeRequisitionDetailDto> MapToDetailDtoAsync(
         FeRequisition requisition,
@@ -239,8 +215,8 @@ public class FeRequisitionService(
         bool? isShopActive,
         CancellationToken cancellationToken)
     {
-        driverSummary ??= await LoadDriverSummaryAsync(requisition.VanDriverId, cancellationToken);
-        var shopActive = isShopActive ?? await IsShopActiveAsync(requisition.ShopId, cancellationToken);
+        driverSummary ??= await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
+        var shopActive = isShopActive ?? await lookupLoader.IsShopActiveAsync(requisition.ShopId, cancellationToken);
         var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
 
         return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
