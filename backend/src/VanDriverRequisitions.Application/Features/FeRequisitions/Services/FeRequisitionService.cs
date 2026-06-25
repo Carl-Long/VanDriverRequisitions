@@ -121,7 +121,7 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> SubmitAsync(Guid? id, SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Submission");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
 
@@ -158,7 +158,7 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> ApproveAsync(Guid id, ApproveFeRequisitionDto approveFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Approval");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(approveFeRequisitionDto, cancellationToken);
 
@@ -180,7 +180,7 @@ public class FeRequisitionService(
 
     public async Task<FeRequisitionDetailDto> RejectAsync(Guid id, RejectFeRequisitionDto rejectFeRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Rejection");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(rejectFeRequisitionDto, cancellationToken);
 
@@ -266,11 +266,10 @@ public class FeRequisitionService(
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
     }
     
-    private AuditUser GetAuditUser(string actionName)
+    private AuditUser GetAuditUser()
     {
-        return currentUser.User is not null
-            ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
-            : throw new NotFoundException($"{actionName} must be performed by a user.");
+        var user = currentUser.RequireUser();
+        return new AuditUser(user.Id, user.Name);
     }
 
     private void SetOriginalRowVersion(FeRequisition requisition, byte[]? rowVersion)

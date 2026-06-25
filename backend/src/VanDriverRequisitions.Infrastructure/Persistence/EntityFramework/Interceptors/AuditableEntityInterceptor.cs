@@ -34,7 +34,7 @@ public class AuditableEntityInterceptor(ICurrentUserService currentUser)
         if (context is null) return;
 
         var now = DateTime.UtcNow;
-        var user = currentUser.User ?? LoggedInUser.System;
+        var user = currentUser.UserOrSystem;
 
         ApplyAuditing(context, now, user);
         TouchRequisitionParents(context, now, user);

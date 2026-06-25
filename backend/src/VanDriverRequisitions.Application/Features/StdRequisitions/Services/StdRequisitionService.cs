@@ -122,7 +122,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> SubmitAsync(Guid? id, SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Submission");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
 
@@ -158,7 +158,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> ApproveAsync(Guid id, ApproveStdRequisitionDto approveStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Approval");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(approveStdRequisitionDto, cancellationToken);
 
@@ -180,7 +180,7 @@ public sealed class StdRequisitionService(
 
     public async Task<StdRequisitionDetailDto> RejectAsync(Guid id, RejectStdRequisitionDto rejectStdRequisitionDto, CancellationToken cancellationToken = default)
     {
-        var auditUser = GetAuditUser("Rejection");
+        var auditUser = GetAuditUser();
 
         await validator.ValidateAsync(rejectStdRequisitionDto, cancellationToken);
 
@@ -325,11 +325,10 @@ public sealed class StdRequisitionService(
             .OriginalValue = rowVersion;
     }
 
-    private AuditUser GetAuditUser(string actionName)
+    private AuditUser GetAuditUser()
     {
-        return currentUser.User is not null
-            ? new AuditUser(currentUser.User.Id, currentUser.User.Name)
-            : throw new NotFoundException($"{actionName} must be performed by a user.");
+        var user = currentUser.RequireUser();
+        return new AuditUser(user.Id, user.Name);
     }
     
     private async Task SaveWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
