@@ -3,7 +3,7 @@
 import { PageContainer } from "@/components/layout/page-container";
 import { canApproveRequisitions, canCreateRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
-import { HeartHandshake, Sofa, Shirt, ClipboardCheck } from "lucide-react";
+import { HeartHandshake, Sofa, Shirt, ClipboardCheck, BadgeCheck } from "lucide-react";
 import { LaunchCard, type LaunchCardProps } from "./launch-card";
 import { WelcomeHeading } from "./welcome-heading";
 import { SubmitWindowHeroCompact } from "@/features/submit-windows/components/submit-window-hero-compact";
@@ -46,7 +46,7 @@ export function HomePage() {
                     title: "Standard Van Driver Approvals",
                     description: "Review submitted STD requisitions awaiting approval",
                     href: "/standard-van-drivers/approvals",
-                    icon: ClipboardCheck,
+                    icon: BadgeCheck,
                 },
             ]
             : []),

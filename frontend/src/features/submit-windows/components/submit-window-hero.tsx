@@ -20,7 +20,7 @@ const copy = {
         `Next submission window opens ${time === "soon" ? "soon" : `in ${time}`}.`,
     none: "No upcoming submission windows. You can save requisitions but not submit.",
     noneStrict:
-        "No upcoming submission windows. An admin must set one before submissions are possible.",
+        "An admin must set one before submissions are possible.",
 };
 
 function getWindowState(status: SubmitWindowStatus) {
