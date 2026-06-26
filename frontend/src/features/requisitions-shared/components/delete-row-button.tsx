@@ -19,7 +19,7 @@ export function DeleteRowButton({ ariaLabel, onDelete }: Readonly<Props>) {
                 onDelete();
             }}
         >
-            <Trash2 size={14} />
+            <Trash2 className="size-[1em]" />
         </IconButton>
     );
 }

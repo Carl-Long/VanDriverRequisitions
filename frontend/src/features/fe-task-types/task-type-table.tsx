@@ -82,7 +82,7 @@ export function TaskTypeTable({ items, pendingIds, onEdit, onToggleActive }: Rea
                                             onClick={() => onEdit(item)}
                                             aria-label="Edit"
                                         >
-                                            <Pencil size={14} />
+                                            <Pencil className="size-[0.95em]" />
                                         </IconButton>
                                     </div>
                                 </TableCell>

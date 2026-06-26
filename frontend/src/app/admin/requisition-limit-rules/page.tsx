@@ -152,7 +152,7 @@ export default function RequisitionLimitRulesPage() {
                 description="Manage requisition quantity and rate limits."
             >
                 <Button onClick={openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Rule
                 </Button>
             </PageHeader>

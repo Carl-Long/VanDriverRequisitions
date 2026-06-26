@@ -32,22 +32,22 @@ const filterOptions: {
     label: string;
     activeClassName: string;
 }[] = [
-    {
-        value: "active",
-        label: "Current & Upcoming",
-        activeClassName: "bg-success/20 text-foreground shadow-sm",
-    },
-    {
-        value: "past",
-        label: "Completed",
-        activeClassName: "bg-accent/20 text-foreground shadow-sm",
-    },
-    {
-        value: "deleted",
-        label: "Deleted",
-        activeClassName: "bg-danger/20 text-foreground shadow-sm",
-    },
-];
+        {
+            value: "active",
+            label: "Current & Upcoming",
+            activeClassName: "bg-success/20 text-foreground shadow-sm",
+        },
+        {
+            value: "past",
+            label: "Completed",
+            activeClassName: "bg-accent/20 text-foreground shadow-sm",
+        },
+        {
+            value: "deleted",
+            label: "Deleted",
+            activeClassName: "bg-danger/20 text-foreground shadow-sm",
+        },
+    ];
 
 export default function SubmitWindowsPage() {
     const [data, setData] = useState<PagedResult<SubmitWindow> | null>(null);
@@ -159,7 +159,7 @@ export default function SubmitWindowsPage() {
                 description="Manage the time windows during which requisitions can be submitted."
             >
                 <Button onClick={modal.openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Window
                 </Button>
             </PageHeader>

@@ -23,7 +23,6 @@ export function NavItem({
 }: Readonly<NavItemProps>) {
     return (
         <div className="relative group">
-            {/* LINK */}
             <Link
                 href={href}
                 className={cn(
@@ -35,7 +34,7 @@ export function NavItem({
                 )}
             >
                 <div className="relative">
-                    <Icon size={18} />
+                    <Icon className="size-[1.15em]" />
                     {showBadge && (
                         <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-surface" />
                     )}
@@ -61,7 +60,6 @@ export function NavItem({
                 >
                     {label}
 
-                    {/* little arrow */}
                     <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-surface-elevated border-l border-b border-border" />
                 </div>
             )}

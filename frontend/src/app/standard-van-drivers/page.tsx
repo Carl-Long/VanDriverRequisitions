@@ -130,7 +130,7 @@ export default function StandardDriversPage() {
                 description="View and manage standard van driver requisitions."
             >
                 <Button onClick={() => router.push(newRequisitionHref)}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     <span>New Requisition</span>
                 </Button>
             </PageHeader>

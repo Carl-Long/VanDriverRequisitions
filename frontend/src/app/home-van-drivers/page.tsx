@@ -118,7 +118,7 @@ export default function HomeVanDriversPage() {
         <PageContainer>
             <PageHeader title="Home Van Drivers" description="View and manage home van driver requisitions.">
                 <Button onClick={() => router.push(newRequisitionHref)}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     <span>New Requisition</span>
                 </Button>
             </PageHeader>

@@ -133,7 +133,7 @@ export default function StdLocationsPage() {
                 description="Manage STD collection locations by shop and collection type."
             >
                 <Button onClick={modal.openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Location
                 </Button>
             </PageHeader>
@@ -141,8 +141,7 @@ export default function StdLocationsPage() {
                 <div className="flex flex-col gap-5">
                     <div>
                         <div className="flex items-center gap-2">
-                            <SlidersHorizontal size={16} className="text-muted-foreground" />
-
+                            <SlidersHorizontal className="size-[1em] text-muted-foreground" />
                             <h2 className="text-sm font-semibold text-foreground">
                                 Find Locations
                             </h2>
@@ -156,8 +155,7 @@ export default function StdLocationsPage() {
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="relative w-full max-w-md">
                             <Search
-                                size={16}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                             />
 
                             <Input
@@ -176,7 +174,7 @@ export default function StdLocationsPage() {
                             size="sm"
                             onClick={handleResetFilters}
                         >
-                            <RotateCcw size={16} />
+                            <RotateCcw className="size-[1em]" />
 
                             <span>Reset Filters</span>
                         </Button>

@@ -20,7 +20,7 @@ export function MenuItem({
                 variant === "danger" && "text-danger",
             )}
         >
-            {Icon && <Icon size={16} />}
+            {Icon && <Icon className="size-[1.05em]" />}
             {label}
         </button>
     );

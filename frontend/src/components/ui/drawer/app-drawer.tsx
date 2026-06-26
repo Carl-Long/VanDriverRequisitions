@@ -101,7 +101,7 @@ export function AppDrawer({
                         aria-label="Close drawer"
                         onClick={onClose}
                     >
-                        <X size={18} />
+                        <X className="size-[1.1em]" />
                     </IconButton>
                 </div>
 

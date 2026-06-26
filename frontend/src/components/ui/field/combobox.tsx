@@ -175,15 +175,14 @@ export function Combobox<TData = unknown>({
                     {label ?? placeholder}
                 </span>
 
-                <ChevronDown size={16} />
+                <ChevronDown className="size-[1em]" />
             </button>
 
             {open && (
                 <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-background shadow-lg">
                     <div className="relative rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset overflow-hidden">
                         <Search
-                            size={14}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         />
 
                         <input
@@ -211,10 +210,11 @@ export function Combobox<TData = unknown>({
                                     )}
                                 >
                                     <Check
-                                        size={14}
-                                        className={cn(selected ? "opacity-100" : "opacity-0")}
+                                        className={cn(
+                                            "size-[1em]",
+                                            selected ? "opacity-100" : "opacity-0",
+                                        )}
                                     />
-
                                     <span className="truncate">{option.label}</span>
                                 </button>
                             );
@@ -226,7 +226,7 @@ export function Combobox<TData = unknown>({
 
                         {loading && (
                             <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-muted-foreground">
-                                <Loader2 size={14} className="animate-spin" />
+                                <Loader2 className="size-[1em] animate-spin" />
                                 Loading...
                             </div>
                         )}
@@ -248,8 +248,10 @@ export function Combobox<TData = unknown>({
                                         )}
                                     >
                                         <Check
-                                            size={14}
-                                            className={cn(selected ? "opacity-100" : "opacity-0")}
+                                            className={cn(
+                                                "size-[1em]",
+                                                selected ? "opacity-100" : "opacity-0",
+                                            )}
                                         />
 
                                         <span className="truncate">{option.label}</span>

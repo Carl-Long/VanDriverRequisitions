@@ -78,7 +78,7 @@ export function UserMenu() {
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-border/50">
                         <div className="flex items-center gap-2">
-                            <User size={14} className="text-muted-foreground" />
+                            <User className="size-[1.05em] text-muted-foreground" />
 
                             <p className="text-sm font-medium">{user.name}</p>
                         </div>
@@ -113,7 +113,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <Palette size={16} />
+                                <Palette className="size-[1.05em]" />
                                 Theme
                             </button>
 
@@ -124,7 +124,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <ALargeSmall size={16} />
+                                <ALargeSmall className="size-[1.05em]" />
                                 Text size
                             </button>
 
@@ -135,7 +135,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <Type size={16} />
+                                <Type className="size-[1.05em]" />
                                 Font
                             </button>
 
@@ -150,7 +150,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left text-danger",
                                 )}
                             >
-                                <LogOut size={16} />
+                                <LogOut className="size-[1.05em]" />
                                 Sign out
                             </button>
                         </div>
@@ -165,7 +165,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <ChevronLeft size={16} />
+                                <ChevronLeft className="size-[1.05em]" />
                                 Back
                             </button>
 
@@ -181,7 +181,7 @@ export function UserMenu() {
                                 >
                                     <span>{t.label}</span>
 
-                                    {theme === t.value && <Check size={16} />}
+                                    {theme === t.value && <Check className="size-[1.05em]" />}
                                 </button>
                             ))}
                         </div>
@@ -196,7 +196,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <ChevronLeft size={16} />
+                                <ChevronLeft className="size-[1.05em]" />
                                 Back
                             </button>
 
@@ -225,7 +225,7 @@ export function UserMenu() {
                                             Aa
                                         </span>
 
-                                        {textSize === size.value && <Check size={16} />}
+                                        {textSize === size.value && <Check className="size-[1.05em]" />}
                                     </div>
                                 </button>
                             ))}
@@ -241,7 +241,7 @@ export function UserMenu() {
                                     "hover:bg-muted transition text-left",
                                 )}
                             >
-                                <ChevronLeft size={16} />
+                                <ChevronLeft className="size-[1.05em]" />
                                 Back
                             </button>
 
@@ -265,7 +265,7 @@ export function UserMenu() {
                                             Ag 123
                                         </span>
 
-                                        {fontChoice === choice.value && <Check size={16} />}
+                                        {fontChoice === choice.value && <Check className="size-[1.05em]" />}
                                     </div>
                                 </button>
                             ))}

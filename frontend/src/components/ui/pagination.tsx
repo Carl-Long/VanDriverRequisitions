@@ -47,7 +47,7 @@ export function Pagination({
                 onClick={() => onPageChange(page - 1)}
                 disabled={page <= 1}
             >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="size-[1em]" />
             </IconButton>
 
             {getPageNumbers().map((p, idx) =>
@@ -80,7 +80,7 @@ export function Pagination({
                 onClick={() => onPageChange(page + 1)}
                 disabled={page >= totalPages}
             >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="size-[1em]" />
             </IconButton>
         </nav>
     );

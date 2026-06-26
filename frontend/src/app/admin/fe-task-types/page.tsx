@@ -107,7 +107,7 @@ export default function FeTaskTypesPage() {
         <PageContainer>
             <PageHeader title="FE Task Types" description="Manage FE task type codes.">
                 <Button onClick={modal.openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Task Type
                 </Button>
             </PageHeader>

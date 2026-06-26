@@ -19,8 +19,8 @@ export function SearchInput({
     return (
         <div className={cn("relative", className)}>
             <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                
+                className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
                 type="text"
