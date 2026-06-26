@@ -19,7 +19,7 @@ export function Sidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const [isDesktop, setIsDesktop] = useState(true);
-
+    
     const { user } = useAuth();
     const showMainNavigation = canCreateRequisitions(user);
     const showApprovals = canApproveRequisitions(user);
@@ -70,14 +70,18 @@ export function Sidebar() {
     return (
         <aside
             className={cn(
-                "flex flex-col h-[calc(100vh-64px)]",
+                "flex h-[calc(100dvh-64px)] min-h-0 flex-col",
                 "border-r border-border bg-surface",
-                "overflow-visible transition-all duration-300 ease-in-out",
-                collapsed ? "w-16" : "w-60",
+                "transition-all duration-300 ease-in-out",
+                collapsed ? "w-16 overflow-visible" : "w-60 overflow-hidden",
             )}
         >
-            <div className="flex flex-col px-2 py-1.5">
-                {/* COLLAPSED HEADER */}
+            <div
+                className={cn(
+                    "flex h-full min-h-0 flex-col px-2 py-1.5",
+                    collapsed ? "overflow-visible" : "overflow-y-auto overflow-x-hidden",
+                )}
+            >
                 {collapsed && (
                     <div className="mb-2 flex justify-center">
                         <IconButton
@@ -91,7 +95,6 @@ export function Sidebar() {
                     </div>
                 )}
 
-                {/* EXPANDED HEADER */}
                 {!collapsed && (
                     <div className="mb-3 flex items-center gap-2">
                         <div className="flex-1">
@@ -115,7 +118,6 @@ export function Sidebar() {
                     </div>
                 )}
 
-                {/* HOME ICON (collapsed mode) */}
                 {collapsed && (
                     <NavItem
                         href="/"
@@ -126,7 +128,6 @@ export function Sidebar() {
                     />
                 )}
 
-                {/* MAIN NAV */}
                 {showMainNavigation && (
                     <div className="mt-2 space-y-1">
                         {navigation.map((item) => (
@@ -157,7 +158,6 @@ export function Sidebar() {
                     </div>
                 )}
 
-                {/* ADMIN */}
                 {showAdmin && (
                     <div className="mt-4 border-t border-border pt-3">
                         {!collapsed && (
