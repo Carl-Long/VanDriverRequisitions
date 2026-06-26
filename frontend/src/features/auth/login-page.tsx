@@ -90,7 +90,7 @@ export function LoginPage() {
                         {error && <Alert>{error}</Alert>}
 
                         <Button type="submit" loading={loading} className="w-full">
-                            <LogIn size={16} />
+                            <LogIn className="size-[1em]" />
                             Sign in
                         </Button>
                     </form>

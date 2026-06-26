@@ -51,7 +51,7 @@ function getWindowState(status: SubmitWindowStatus) {
 function UpdatingIndicator() {
     return (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Loader2 size={12} className="animate-spin" />
+            <Loader2 className="size-[0.95] animate-spin" />
             Updating...
         </div>
     );
@@ -93,7 +93,7 @@ export function SubmitWindowHero({
             return (
                 <div className="rounded-xl border border-success-border bg-success-surface px-4 py-3">
                     <div className="flex items-center justify-center gap-2 text-center">
-                        <CalendarCheck size={16} className="text-success" />
+                        <CalendarCheck className="size-[1em] text-success" />
                         <span className="text-sm font-medium text-foreground">{copy.open}</span>
                     </div>
 
@@ -108,7 +108,7 @@ export function SubmitWindowHero({
             return (
                 <div className="rounded-xl border border-info-border bg-info-surface px-4 py-3">
                     <div className="flex items-center justify-center gap-2 text-center">
-                        <CalendarClock size={16} className="text-info" />
+                        <CalendarClock className="size-[1em] text-info" />
                         <span className="text-sm font-medium text-foreground">
                             {copy.next(state.opensIn)}
                         </span>
@@ -124,7 +124,7 @@ export function SubmitWindowHero({
         return (
             <div className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
                 <div className="flex items-center justify-center gap-2 text-center">
-                    <CalendarPlus size={16} className="text-warning" />
+                    <CalendarPlus className="size-[1em] text-warning" />
                     <span className="text-sm text-muted-foreground">{copy.none}</span>
                 </div>
 
@@ -144,7 +144,7 @@ export function SubmitWindowHero({
                 )}
             >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-success/10">
-                    <CalendarCheck size={24} className="text-success" />
+                    <CalendarCheck className="size-[1.2em]text-success" />
                 </div>
 
                 <div className="flex-1">
@@ -171,7 +171,7 @@ export function SubmitWindowHero({
                 )}
             >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-info/10">
-                    <CalendarClock size={24} className="text-info" />
+                    <CalendarClock className="size-[1.2em] mitext-info" />
                 </div>
 
                 <div className="flex-1">
@@ -199,7 +199,7 @@ export function SubmitWindowHero({
             )}
         >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-warning/10">
-                <CalendarX size={24} className="text-warning" />
+                <CalendarX className="size-[1.2em] text-warning" />
             </div>
 
             <div className="flex-1">

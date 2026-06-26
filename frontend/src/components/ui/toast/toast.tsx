@@ -93,7 +93,7 @@ function ToastItem({ toast, onDismiss }: Readonly<{ toast: Toast; onDismiss: () 
                 <div
                     className={cn("flex h-8 w-8 items-center justify-center rounded-lg", iconClass)}
                 >
-                    <Icon size={16} />
+                    <Icon className="size-[1em]" />
                 </div>
 
                 {/* Message */}
@@ -111,7 +111,7 @@ function ToastItem({ toast, onDismiss }: Readonly<{ toast: Toast; onDismiss: () 
                         transition
                     "
                 >
-                    <X size={14} />
+                    <X className="size-[1.1em]" />
                 </button>
             </div>
         </div>

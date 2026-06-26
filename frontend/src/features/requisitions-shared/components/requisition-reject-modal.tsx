@@ -61,7 +61,7 @@ export function RequisitionRejectModal({ open, loading, onClose, onConfirm }: Re
         >
             <div className="space-y-5">
                 <div className="flex items-start gap-3 rounded-lg border border-danger-border bg-danger-surface p-4">
-                    <XCircle size={18} className="mt-0.5 shrink-0 text-danger" />
+                    <XCircle className="size-[1.05em] mt-0.5 shrink-0 text-danger" />
 
                     <div>
                         <p className="font-medium text-danger">

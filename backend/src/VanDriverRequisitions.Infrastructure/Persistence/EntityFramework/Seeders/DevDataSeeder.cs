@@ -9,9 +9,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Seede
 /// </summary>
 public static partial class DevDataSeeder
 {
-    public static async Task SeedAsync(
-        VanDriverDbContext context,
-        ILogger? logger = null)
+    public static async Task SeedAsync(VanDriverDbContext context, ILogger? logger = null)
     {
         var hasTaskTypes = await context.FeTaskTypes.AnyAsync();
         var hasReasons = await context.CostReasons.AnyAsync();
@@ -33,7 +31,10 @@ public static partial class DevDataSeeder
             hasStdCollectionTypes &&
             hasStdLocations)
         {
-            logger?.LogInformation("Dev seed already exists — skipping.");
+            logger?.LogInformation("Dev seed already exists — aligning requisition sequences only.");
+
+            await AlignRequisitionSequencesAsync(context, logger);
+
             return;
         }
 
@@ -83,7 +84,9 @@ public static partial class DevDataSeeder
         {
             await SeedStdRequisitionsAsync(context, logger);
         }
-
+        
+        await AlignRequisitionSequencesAsync(context, logger);
+        
         logger?.LogInformation("Development seeding complete.");
     }
 }

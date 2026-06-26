@@ -28,7 +28,7 @@ export function StdRequisitionFiltersToolbar({
             <div className="flex flex-col gap-5">
                 <div>
                     <div className="flex items-center gap-2">
-                        <SlidersHorizontal size={16} className="text-muted-foreground" />
+                        <SlidersHorizontal className="size-[1em] text-muted-foreground" />
 
                         <h2 className="text-sm font-semibold text-foreground">Find Requisitions</h2>
                     </div>
@@ -41,8 +41,7 @@ export function StdRequisitionFiltersToolbar({
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="relative w-full max-w-md">
                         <Search
-                            size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         />
 
                         <Input
@@ -59,7 +58,7 @@ export function StdRequisitionFiltersToolbar({
                     </div>
 
                     <Button tone="accent" variant="solid" size="sm" onClick={onReset}>
-                        <RotateCcw size={16} />
+                        <RotateCcw className="size-[1em]" />
                         <span>Reset Filters</span>
                     </Button>
                 </div>

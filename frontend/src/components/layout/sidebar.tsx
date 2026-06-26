@@ -86,7 +86,7 @@ export function Sidebar() {
                             onClick={expandSidebar}
                             aria-label="Expand sidebar"
                         >
-                            <PanelLeft size={18} className="rotate-180" />
+                            <PanelLeft className="size-[1.15em] rotate-180" />
                         </IconButton>
                     </div>
                 )}
@@ -110,7 +110,7 @@ export function Sidebar() {
                             onClick={collapseSidebar}
                             aria-label="Collapse sidebar"
                         >
-                            <PanelLeft size={18} />
+                            <PanelLeft className="size-[1.15em] rotate-180" />
                         </IconButton>
                     </div>
                 )}

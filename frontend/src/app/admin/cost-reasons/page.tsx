@@ -120,7 +120,7 @@ export default function CostReasonsPage() {
                 description="Manage additional cost reason codes for FE, STD, or shared requisition use."
             >
                 <Button onClick={modal.openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Cost Reason
                 </Button>
             </PageHeader>

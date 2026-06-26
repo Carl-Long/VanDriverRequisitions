@@ -78,7 +78,7 @@ export default function SubmissionPage() {
                     </BackLink>
 
                     <Button type="button" variant="outline" tone="accent" onClick={() => globalThis.print()}>
-                        <Printer size={14} />
+                        <Printer className="size-[1em]" />
                         Print / Save PDF
                     </Button>
                 </div>

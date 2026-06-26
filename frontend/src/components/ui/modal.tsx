@@ -56,7 +56,7 @@ export function Modal({ open, onClose, title, titleClassName, children }: Readon
                     onClick={onClose}
                     aria-label="Close modal"
                 >
-                    <X size={18} />
+                    <X className="size-[1.1em]" />
                 </IconButton>
             </div>
             <div className="px-6 py-5">{children}</div>

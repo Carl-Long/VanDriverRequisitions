@@ -6,7 +6,6 @@ import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
 import { stdLocationsApi } from "./std-locations-api";
 import { StdLocationLookup } from "./std-location.types";
-import { Alert } from "@/components/ui/alert";
 import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 
 
@@ -150,3 +149,4 @@ export function StdLocationField({
         </Field>
     );
 }
+

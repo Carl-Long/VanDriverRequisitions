@@ -17,7 +17,7 @@ export function RequisitionApproveModal({ open, loading, onClose, onConfirm }: R
         <Modal open={open} onClose={onClose} title="Confirm Approval" titleClassName="text-success">
             <div className="space-y-5">
                 <div className="flex items-start gap-3 rounded-lg border border-success-border bg-success-surface p-4">
-                    <CheckCircle size={18} className="mt-0.5 shrink-0 text-success" />
+                    <CheckCircle  className="size-[1.05em] mt-0.5 shrink-0 text-success" />
 
                     <div>
                         <p className="font-medium text-success">

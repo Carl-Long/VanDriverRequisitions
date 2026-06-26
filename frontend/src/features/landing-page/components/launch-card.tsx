@@ -31,7 +31,7 @@ export function LaunchCard({ title, description, href, icon: Icon }: Readonly<La
                         "group-hover:bg-primary-surface-hover",
                     )}
                 >
-                    <Icon size={22} strokeWidth={1.85} />
+                 <Icon className="size-[1.35em]" strokeWidth={1.85} />
                 </div>
 
                 <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>

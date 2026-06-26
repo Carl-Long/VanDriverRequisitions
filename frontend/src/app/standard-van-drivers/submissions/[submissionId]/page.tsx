@@ -76,7 +76,7 @@ export default function StdSubmissionPage() {
                         tone="accent"
                         onClick={() => globalThis.print()}
                     >
-                        <Printer size={14} />
+                        <Printer className="size-[1em]" />
                         Print / Save PDF
                     </Button>
                 </div>

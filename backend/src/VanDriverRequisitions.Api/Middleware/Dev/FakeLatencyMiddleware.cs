@@ -1,13 +1,21 @@
+using Microsoft.Extensions.Options;
+
 namespace VanDriverRequisitions.Api.Middleware.Dev;
 
-public sealed class FakeLatencyMiddleware(RequestDelegate next)
+public sealed class FakeLatencyMiddleware(RequestDelegate next, IOptions<FakeLatencyOptions> options)
 {
-    private readonly RequestDelegate _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
-        await Task.Delay(Random.Shared.Next(0, 500));
+        var settings = options.Value;
 
-        await _next(context);
+        var min = Math.Max(0, settings.MinMilliseconds);
+        var max = Math.Max(min, settings.MaxMilliseconds);
+
+        if (settings.Enabled && max > 0)
+        {
+            await Task.Delay(Random.Shared.Next(min, max + 1));
+        }
+
+        await next(context);
     }
 }

@@ -36,7 +36,7 @@ export function RequisitionWorkspaceHeader({
 
             {showAction && (
                 <Button type="button" disabled={actionDisabled} onClick={onAction}>
-                    <Plus size={14} />
+                    <Plus className="size-[1em]" />
                     {actionLabel}
                 </Button>
             )}

@@ -41,7 +41,7 @@ export default function VolunteerDriversPage() {
                             "transition hover:bg-surface-hover",
                         )}
                     >
-                        <ArrowLeft size={15} />
+                        <ArrowLeft className="size-[1em]" />
                         Back to dashboard
                     </Link>
                 </section>

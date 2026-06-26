@@ -117,7 +117,7 @@ export default function StdCollectionTypesPage() {
                 description="Manage STD collection type codes used by Banks & Bins collection rows."
             >
                 <Button onClick={modal.openCreate}>
-                    <Plus size={16} />
+                    <Plus className="size-[1em]" />
                     New Collection Type
                 </Button>
             </PageHeader>

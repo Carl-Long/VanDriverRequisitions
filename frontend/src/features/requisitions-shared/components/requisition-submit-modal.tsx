@@ -29,7 +29,7 @@ export function RequisitionSubmitModal({
         >
             <div className="space-y-5">
                 <div className="flex items-start gap-3 rounded-lg border border-danger-border bg-danger-surface p-4">
-                    <Send size={18} className="mt-0.5 shrink-0 text-danger" />
+                    <Send className="size-[1em.05] mt-0.5 shrink-0 text-danger" />
 
                     <div>
                         <p className="font-medium text-danger">This action cannot be undone.</p>
@@ -52,7 +52,7 @@ export function RequisitionSubmitModal({
                     </Button>
 
                     <Button type="button" tone="danger" loading={loading} onClick={onConfirm}>
-                        <Send size={14} />
+                        <Send className="size-[1em]" />
                         Yes, Submit Requisition
                     </Button>
                 </div>

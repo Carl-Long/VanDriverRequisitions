@@ -1,10 +1,11 @@
 "use client";
 
-import { Field } from "@/components/ui/field/field";
-import { Combobox, ComboboxOption } from "@/components/ui/field/combobox";
-import { vanDriversApi, VanDriverLookup } from "@/lib/api/van-drivers";
 import { useMemo } from "react";
+
+import { Field } from "@/components/ui/field/field";
+import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { vanDriversApi, type VanDriverLookup } from "@/lib/api/van-drivers";
 
 type Props = {
     disabled?: boolean;
@@ -44,6 +45,34 @@ export function VanDriverField({
             },
         ];
     }, [value, label, selectedVanDriver]);
+
+    async function searchVanDrivers(search: string): Promise<VanDriverOption[]> {
+        const response = await vanDriversApi.search({
+            search,
+            pageSize: 20,
+        });
+
+        return response.items.map(mapVanDriverToOption);
+    }
+
+    function handleChange(value: string | null, option: VanDriverOption | null) {
+        if (!value || !option) {
+            onChange({
+                id: null,
+                label: null,
+                summary: null,
+            });
+
+            return;
+        }
+
+        onChange({
+            id: value,
+            label: option.label,
+            summary: option.data ?? null,
+        });
+    }
+
     return (
         <Field label="Van Driver" error={error} required>
             <div className="space-y-2">
@@ -52,36 +81,13 @@ export function VanDriverField({
                     state={error ? "error" : "default"}
                     value={value}
                     label={label}
+                    searchDebounceMs={300}
                     pinnedOptions={pinnedOptions}
                     placeholder="Search van drivers..."
                     noMatchesText="No matching van drivers found"
                     emptyStateText="No van drivers available"
-                    onSearch={async (search) => {
-                        const response = await vanDriversApi.search({
-                            search,
-                            pageSize: 20,
-                        });
-
-                        return response.items.map(
-                            (x): VanDriverOption => ({
-                                value: x.id,
-                                label: `${x.code} - ${x.tradersName}`,
-                                data: x,
-                            }),
-                        );
-                    }}
-                    onChange={(value, option) => {
-                        if (!value || !option) {
-                            onChange({ id: null, label: null, summary: null });
-                            return;
-                        }
-
-                        onChange({
-                            id: value,
-                            label: option.label,
-                            summary: option.data ?? null,
-                        });
-                    }}
+                    onSearch={searchVanDrivers}
+                    onChange={handleChange}
                 />
 
                 {showInactiveWarning && (
@@ -90,4 +96,12 @@ export function VanDriverField({
             </div>
         </Field>
     );
+}
+
+function mapVanDriverToOption(vanDriver: VanDriverLookup): VanDriverOption {
+    return {
+        value: vanDriver.id,
+        label: `${vanDriver.code} - ${vanDriver.tradersName}`,
+        data: vanDriver,
+    };
 }

@@ -125,7 +125,7 @@ export function SubmitWindowTable({ items, filter, onEdit, onDelete }: Readonly<
                                                     onClick={() => onEdit(item)}
                                                     aria-label="Edit"
                                                 >
-                                                    <Pencil size={14} />
+                                                    <Pencil className="size-[0.95em]" />
                                                 </IconButton>
 
                                                 <IconButton
@@ -135,7 +135,7 @@ export function SubmitWindowTable({ items, filter, onEdit, onDelete }: Readonly<
                                                     onClick={() => onDelete(item)}
                                                     aria-label="Delete"
                                                 >
-                                                    <Trash2 size={14} />
+                                                    <Trash2 className="size-[0.95em]" />
                                                 </IconButton>
                                             </>
                                         )}

@@ -32,7 +32,7 @@ public static partial class DevDataSeeder
             new FeTaskType { Id = CollectionsTaskTypeId, Name = "Collections", Code = "23707" },
             new FeTaskType { Id = DeliveriesTaskTypeId, Name = "Deliveries", Code = "23709" },
             new FeTaskType { Id = WasteTaskTypeId, Name = "Waste", Code = "20097" },
-            new FeTaskType { Id = LoadingTaskTypeId, Name = "Loading&Unloading", Code = "10119" }
+            new FeTaskType { Id = LoadingTaskTypeId, Name = "Loading & Unloading", Code = "10119" }
         );
 
         await context.SaveChangesAsync();

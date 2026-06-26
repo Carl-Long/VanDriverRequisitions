@@ -9,14 +9,16 @@ export type CreatedByFilter =
     | { type: "me" }
     | { type: "user"; userId: string; label: string };
 
+const ME_OPTION_VALUE = "__ME__";
+const ANY_OPTION_VALUE = "__ANY__";
+
 const STATIC_OPTIONS: ComboboxOption[] = [
     {
-        value: "__ME__",
+        value: ME_OPTION_VALUE,
         label: "Me",
     },
-
     {
-        value: "__ANY__",
+        value: ANY_OPTION_VALUE,
         label: "Anyone",
     },
 ];
@@ -34,61 +36,55 @@ export function CreatedByUserFilterField({
     fascia,
     hideLabel = false,
 }: Readonly<Props>) {
+    const selectedValue = getSelectedValue(value);
+    const selectedLabel = getSelectedLabel(value);
 
-    const selectedValue =
-        value.type === "any" ? "__ANY__" : value.type === "me" ? "__ME__" : value.userId;
+    async function searchUsers(search: string): Promise<ComboboxOption[]> {
+        const response = await requisitionUsersApi.search({
+            search,
+            pageSize: 20,
+            fascia,
+        });
 
-    const selectedLabel =
-        value.type === "me"
-            ? "Created By: Me"
-            : value.type === "any"
-                ? "Created By: Anyone"
-                : `Created By: ${value.label}`;
+        return response.items.map((user) => ({
+            value: user.id,
+            label: user.name,
+        }));
+    }
+
+    function handleChange(value: string | null, option: ComboboxOption | null) {
+        if (value === ME_OPTION_VALUE) {
+            onChange({ type: "me" });
+            return;
+        }
+
+        if (value === ANY_OPTION_VALUE || value === null) {
+            onChange({ type: "any" });
+            return;
+        }
+
+        if (!option) {
+            return;
+        }
+
+        onChange({
+            type: "user",
+            userId: value,
+            label: option.label,
+        });
+    }
 
     const combobox = (
         <Combobox
             value={selectedValue}
             label={selectedLabel}
             placeholder="Created By: Anyone"
+            emptyStateText="No users available"
             noMatchesText="No matching users found"
             pinnedOptions={STATIC_OPTIONS}
-            onSearch={async (search) => {
-                const res = await requisitionUsersApi.search({
-                    search,
-                    pageSize: 20,
-                    fascia,
-                });
-
-                return res.items.map((x) => ({
-                    value: x.id,
-                    label: x.name,
-                }));
-            }}
-            onChange={(value, option) => {
-                if (value === "__ME__") {
-                    onChange({
-                        type: "me",
-                    });
-
-                    return;
-                }
-
-                if (value === "__ANY__") {
-                    onChange({
-                        type: "any",
-                    });
-
-                    return;
-                }
-
-                if (option) {
-                    onChange({
-                        type: "user",
-                        userId: value!,
-                        label: option.label,
-                    });
-                }
-            }}
+            searchDebounceMs={300}
+            onSearch={searchUsers}
+            onChange={handleChange}
         />
     );
 
@@ -97,4 +93,30 @@ export function CreatedByUserFilterField({
     }
 
     return <Field label="Created By">{combobox}</Field>;
+}
+
+function getSelectedValue(value: CreatedByFilter) {
+    switch (value.type) {
+        case "any":
+            return ANY_OPTION_VALUE;
+
+        case "me":
+            return ME_OPTION_VALUE;
+
+        case "user":
+            return value.userId;
+    }
+}
+
+function getSelectedLabel(value: CreatedByFilter) {
+    switch (value.type) {
+        case "any":
+            return "Created By: Anyone";
+
+        case "me":
+            return "Created By: Me";
+
+        case "user":
+            return `Created By: ${value.label}`;
+    }
 }

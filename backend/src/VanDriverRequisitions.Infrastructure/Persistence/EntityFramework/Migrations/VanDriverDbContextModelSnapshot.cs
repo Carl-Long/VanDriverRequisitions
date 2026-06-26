@@ -22,8 +22,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.HasSequence("FeRequisitionNumber")
-                .StartsAt(101L);
+            modelBuilder.HasSequence("FeRequisitionNumber");
 
             modelBuilder.HasSequence("PoNumber");
 

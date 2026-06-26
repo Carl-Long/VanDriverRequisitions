@@ -74,7 +74,7 @@ export function CostReasonTable({ items, pendingIds, onEdit, onToggleActive }: R
                                         onClick={() => onEdit(item)}
                                         aria-label="Edit"
                                     >
-                                        <Pencil size={14} />
+                                        <Pencil className="size-[0.95em]" />
                                     </IconButton>
                                 </div>
                             </TableCell>

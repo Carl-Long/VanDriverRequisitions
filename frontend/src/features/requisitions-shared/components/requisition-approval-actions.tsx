@@ -25,7 +25,7 @@ export function RequisitionApprovalActions({
                 disabled={isBusy}
                 onClick={onReject}
             >
-                <XCircle size={14} />
+                <XCircle className="size-[1em]" />
                 Reject
             </Button>
 
@@ -36,7 +36,7 @@ export function RequisitionApprovalActions({
                 disabled={isBusy}
                 onClick={onApprove}
             >
-                <CheckCircle size={14} />
+                <CheckCircle className="size-[1em]" />
                 Approve
             </Button>
         </div>

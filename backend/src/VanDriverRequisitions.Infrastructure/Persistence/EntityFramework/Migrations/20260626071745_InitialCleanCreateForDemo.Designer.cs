@@ -12,8 +12,8 @@ using VanDriverRequisitions.Infrastructure.Persistence.EntityFramework;
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migrations
 {
     [DbContext(typeof(VanDriverDbContext))]
-    [Migration("20260623132154_AddedMoreIndexesToStdLocationConfigToAideWithFiltering")]
-    partial class AddedMoreIndexesToStdLocationConfigToAideWithFiltering
+    [Migration("20260626071745_InitialCleanCreateForDemo")]
+    partial class InitialCleanCreateForDemo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,8 +25,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.HasSequence("FeRequisitionNumber")
-                .StartsAt(101L);
+            modelBuilder.HasSequence("FeRequisitionNumber");
 
             modelBuilder.HasSequence("PoNumber");
 
@@ -418,15 +417,15 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.ToTable("FeAdditionalCosts", null, t =>
                         {
-                            t.HasCheckConstraint("CK_FeAdditionalCosts_Miles_NonNegative", "[Miles] IS NULL OR [Miles] >= 0");
+                            t.HasCheckConstraint("CK_FeAdditionalCosts_Miles_Positive", "[Miles] IS NULL OR [Miles] >= 1");
 
                             t.HasCheckConstraint("CK_FeAdditionalCosts_MutuallyExclusive", "([ChargingOption] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [TotalNumber] IS NULL AND [RatePerJob] IS NULL) OR ([ChargingOption] = 1 AND [TotalNumber] IS NOT NULL AND [RatePerJob] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)");
 
-                            t.HasCheckConstraint("CK_FeAdditionalCosts_RatePerJob_NonNegative", "[RatePerJob] IS NULL OR [RatePerJob] >= 0");
+                            t.HasCheckConstraint("CK_FeAdditionalCosts_RatePerJob_Minimum", "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01");
 
-                            t.HasCheckConstraint("CK_FeAdditionalCosts_RatePerMile_NonNegative", "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
+                            t.HasCheckConstraint("CK_FeAdditionalCosts_RatePerMile_Minimum", "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
-                            t.HasCheckConstraint("CK_FeAdditionalCosts_TotalNumber_NonNegative", "[TotalNumber] IS NULL OR [TotalNumber] >= 0");
+                            t.HasCheckConstraint("CK_FeAdditionalCosts_TotalNumber_Positive", "[TotalNumber] IS NULL OR [TotalNumber] >= 1");
 
                             t.HasCheckConstraint("CK_FeAdditionalCosts_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
@@ -500,7 +499,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.ToTable("FeGeneralTasks", null, t =>
                         {
-                            t.HasCheckConstraint("CK_FeGeneralTasks_RatePerJob_NonNegative", "[RatePerJob] IS NULL OR [RatePerJob] >= 0");
+                            t.HasCheckConstraint("CK_FeGeneralTasks_RatePerJob_Minimum", "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01");
 
                             t.HasCheckConstraint("CK_FeGeneralTasks_TotalNumber_NonNegative", "[TotalNumber] >= 0");
 
@@ -563,7 +562,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.ToTable("FeMileages", null, t =>
                         {
-                            t.HasCheckConstraint("CK_FeMileages_RatePerMile_NonNegative", "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
+                            t.HasCheckConstraint("CK_FeMileages_RatePerMile_Minimum", "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
                             t.HasCheckConstraint("CK_FeMileages_TotalMiles_NonNegative", "[TotalMiles] IS NULL OR [TotalMiles] >= 0");
 
@@ -924,7 +923,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.ToTable("FeTransfers", null, t =>
                         {
-                            t.HasCheckConstraint("CK_FeTransfers_RatePerJob_NonNegative", "[RatePerJob] IS NULL OR [RatePerJob] >= 0");
+                            t.HasCheckConstraint("CK_FeTransfers_RatePerJob_Minimum", "[RatePerJob] IS NULL OR [RatePerJob] >= 0.01");
 
                             t.HasCheckConstraint("CK_FeTransfers_TotalNumber_NonNegative", "[TotalNumber] >= 0");
 
@@ -1014,13 +1013,13 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         {
                             t.HasCheckConstraint("CK_StdAdditionalCosts_ChargeShape", "([ChargeType] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [FlatCharge] IS NULL) OR ([ChargeType] = 1 AND [FlatCharge] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)");
 
-                            t.HasCheckConstraint("CK_StdAdditionalCosts_FlatCharge_NonNegative", "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
+                            t.HasCheckConstraint("CK_StdAdditionalCosts_FlatCharge_Minimum", "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
 
-                            t.HasCheckConstraint("CK_StdAdditionalCosts_Miles_NonNegative", "[Miles] IS NULL OR [Miles] >= 0");
+                            t.HasCheckConstraint("CK_StdAdditionalCosts_Miles_Positive", "[Miles] IS NULL OR [Miles] >= 1");
 
                             t.HasCheckConstraint("CK_StdAdditionalCosts_NumberOfBags_Positive", "[NumberOfBags] >= 1");
 
-                            t.HasCheckConstraint("CK_StdAdditionalCosts_RatePerMile_NonNegative", "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
+                            t.HasCheckConstraint("CK_StdAdditionalCosts_RatePerMile_Minimum", "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
                             t.HasCheckConstraint("CK_StdAdditionalCosts_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
@@ -1257,7 +1256,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                             t.HasCheckConstraint("CK_StdCollectionVanPacks_FilledBags_Positive", "[FilledBags] >= 1");
 
-                            t.HasCheckConstraint("CK_StdCollectionVanPacks_RatePerVanPack_NonNegative", "[RatePerVanPack] >= 0");
+                            t.HasCheckConstraint("CK_StdCollectionVanPacks_RatePerVanPack_Minimum", "[RatePerVanPack] >= 0.01");
 
                             t.HasCheckConstraint("CK_StdCollectionVanPacks_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
 
@@ -1326,15 +1325,7 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.HasIndex("ShopId");
 
-                    b.HasIndex("CollectionTypeId", "IsActive");
-
-                    b.HasIndex("ShopId", "IsActive");
-
                     b.HasIndex("ShopId", "CollectionTypeId", "IsActive");
-
-                    b.HasIndex("ShopId", "CollectionTypeId", "LocationName");
-
-                    b.HasIndex("ShopId", "CollectionTypeId", "PostCode");
 
                     b.HasIndex("ShopId", "CollectionTypeId", "LocationName", "PostCode")
                         .IsUnique();
@@ -1412,15 +1403,15 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
                         {
                             t.HasCheckConstraint("CK_StdPickups_ChargeShape", "([ChargeType] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [FlatCharge] IS NULL) OR ([ChargeType] = 1 AND [FlatCharge] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)");
 
-                            t.HasCheckConstraint("CK_StdPickups_FlatCharge_NonNegative", "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
+                            t.HasCheckConstraint("CK_StdPickups_FlatCharge_Minimum", "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
 
-                            t.HasCheckConstraint("CK_StdPickups_Miles_NonNegative", "[Miles] IS NULL OR [Miles] >= 0");
+                            t.HasCheckConstraint("CK_StdPickups_Miles_Positive", "[Miles] IS NULL OR [Miles] >= 1");
 
                             t.HasCheckConstraint("CK_StdPickups_NumberOfBags_Positive", "[NumberOfBags] >= 1");
 
                             t.HasCheckConstraint("CK_StdPickups_NumberOfHouseholds_Positive", "[NumberOfHouseholds] >= 1");
 
-                            t.HasCheckConstraint("CK_StdPickups_RatePerMile_NonNegative", "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
+                            t.HasCheckConstraint("CK_StdPickups_RatePerMile_Minimum", "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
 
                             t.HasCheckConstraint("CK_StdPickups_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
@@ -1743,19 +1734,19 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
                     b.ToTable("StdTransfers", null, t =>
                         {
+                            t.HasCheckConstraint("CK_StdCollectionChargesBanksAndBins_FlatCharge_Minimum", "[FlatCharge] IS NULL OR [FlatCharge] >= 0.01");
+
+                            t.HasCheckConstraint("CK_StdCollectionChargesBanksAndBins_Miles_Positive", "[Miles] IS NULL OR [Miles] >= 1");
+
+                            t.HasCheckConstraint("CK_StdCollectionChargesBanksAndBins_RatePerMile_Minimum", "[RatePerMile] IS NULL OR [RatePerMile] >= 0.01");
+
                             t.HasCheckConstraint("CK_StdTransfers_ChargeShape", "([ChargeType] = 0 AND [Miles] IS NOT NULL AND [RatePerMile] IS NOT NULL AND [FlatCharge] IS NULL) OR ([ChargeType] = 1 AND [FlatCharge] IS NOT NULL AND [Miles] IS NULL AND [RatePerMile] IS NULL)");
 
                             t.HasCheckConstraint("CK_StdTransfers_DifferentShops", "[ShopIdFrom] <> [ShopIdTo]");
 
-                            t.HasCheckConstraint("CK_StdTransfers_FlatCharge_NonNegative", "[FlatCharge] IS NULL OR [FlatCharge] >= 0");
-
-                            t.HasCheckConstraint("CK_StdTransfers_Miles_NonNegative", "[Miles] IS NULL OR [Miles] >= 0");
-
                             t.HasCheckConstraint("CK_StdTransfers_NumberOfBags_NonNegative", "[NumberOfBags] IS NULL OR [NumberOfBags] >= 0");
 
                             t.HasCheckConstraint("CK_StdTransfers_NumberOfBoxes_NonNegative", "[NumberOfBoxes] IS NULL OR [NumberOfBoxes] >= 0");
-
-                            t.HasCheckConstraint("CK_StdTransfers_RatePerMile_NonNegative", "[RatePerMile] IS NULL OR [RatePerMile] >= 0");
 
                             t.HasCheckConstraint("CK_StdTransfers_TotalValue_NonNegative", "[TotalValue] IS NULL OR [TotalValue] >= 0");
                         });
@@ -2001,17 +1992,21 @@ namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Migra
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdLocation", b =>
                 {
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.STD.StdCollectionType", "CollectionType")
                         .WithMany()
                         .HasForeignKey("CollectionTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", null)
+                    b.HasOne("VanDriverRequisitions.Domain.Entities.Common.Shop", "Shop")
                         .WithMany()
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CollectionType");
+
+                    b.Navigation("Shop");
                 });
 
             modelBuilder.Entity("VanDriverRequisitions.Domain.Entities.STD.StdPickup", b =>

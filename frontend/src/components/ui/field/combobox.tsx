@@ -22,6 +22,7 @@ type Props<TData = unknown> = {
     emptyStateText?: string;
     options?: ComboboxOption<TData>[];
     pinnedOptions?: ComboboxOption<TData>[];
+    searchDebounceMs?: number;
     onSearch?: (search: string) => Promise<ComboboxOption<TData>[]>;
     onChange: (value: string | null, option: ComboboxOption<TData> | null) => void;
 };
@@ -36,6 +37,7 @@ export function Combobox<TData = unknown>({
     pinnedOptions = [],
     emptyStateText = "No options available",
     noMatchesText = "No matching results",
+    searchDebounceMs = 0,
     onSearch,
     onChange,
 }: Readonly<Props<TData>>) {
@@ -43,11 +45,19 @@ export function Combobox<TData = unknown>({
     const [search, setSearch] = useState("");
     const [asyncOptions, setAsyncOptions] = useState<ComboboxOption<TData>[]>([]);
     const [loading, setLoading] = useState(false);
+
     const wrapperRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
 
     const maxVisibleOptions = 50;
     const hasSearch = search.trim().length > 0;
+
+    const emptyResultsMessage = hasSearch ? noMatchesText : emptyStateText;
+
+    const emptyResultsClassName = cn(
+        "text-muted-foreground",
+        getEmptyResultsSpacingClassName(pinnedOptions.length > 0),
+    );
 
     const closeCombobox = useCallback((focusTrigger = false) => {
         setOpen(false);
@@ -60,12 +70,20 @@ export function Combobox<TData = unknown>({
         }
     }, []);
 
+    const selectOption = useCallback(
+        (option: ComboboxOption<TData>) => {
+            onChange(option.value, option);
+            closeCombobox(true);
+        },
+        [onChange, closeCombobox],
+    );
+
     const finalOptions = useMemo(() => {
         if (onSearch) {
             return asyncOptions.slice(0, maxVisibleOptions);
         }
 
-        if (!search) {
+        if (!hasSearch) {
             return options.slice(0, maxVisibleOptions);
         }
 
@@ -74,7 +92,7 @@ export function Combobox<TData = unknown>({
         return options
             .filter((x) => x.label.toLowerCase().includes(normalisedSearch))
             .slice(0, maxVisibleOptions);
-    }, [options, search, asyncOptions, onSearch]);
+    }, [options, search, asyncOptions, onSearch, hasSearch]);
 
     useEffect(() => {
         if (!open) {
@@ -117,38 +135,40 @@ export function Combobox<TData = unknown>({
         };
     }, [open, closeCombobox]);
 
-
     useEffect(() => {
-        if (!open) return;
-
-        if (!onSearch) return;
-
-        const searchFn = onSearch;
-
-        let cancelled = false;
-
-        async function run() {
-            setLoading(true);
-
-            try {
-                const results = await searchFn(search);
-
-                if (!cancelled) {
-                    setAsyncOptions(results);
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
+        if (!open || !onSearch) {
+            return;
         }
 
-        run();
+        const delay = getSearchDelay(search, searchDebounceMs);
+        const searchFn = onSearch;
+        let cancelled = false;
 
+        const timeoutId = globalThis.setTimeout(() => {
+            if (!cancelled) {
+                setLoading(true);
+            }
+
+            void runAsyncSearch(
+                searchFn,
+                search,
+                (results) => {
+                    if (!cancelled) {
+                        setAsyncOptions(results);
+                    }
+                },
+                () => {
+                    if (!cancelled) {
+                        setLoading(false);
+                    }
+                },
+            );
+        }, delay);
         return () => {
             cancelled = true;
+            globalThis.clearTimeout(timeoutId);
         };
-    }, [search, onSearch, open]);
+    }, [search, onSearch, open, searchDebounceMs]);
 
     return (
         <div ref={wrapperRef} className="relative">
@@ -164,10 +184,8 @@ export function Combobox<TData = unknown>({
                 }}
                 className={cn(
                     fieldBase,
-                    "cursor-pointer flex items-center justify-between",
-
+                    "flex cursor-pointer items-center justify-between",
                     state === "error" && "border-danger ring-1 ring-danger/30",
-
                     disabled && "cursor-not-allowed opacity-60",
                 )}
             >
@@ -175,16 +193,13 @@ export function Combobox<TData = unknown>({
                     {label ?? placeholder}
                 </span>
 
-                <ChevronDown size={16} />
+                <ChevronDown className="size-[1em]" />
             </button>
 
             {open && (
                 <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-background shadow-lg">
-                    <div className="relative rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset overflow-hidden">
-                        <Search
-                            size={14}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                        />
+                    <div className="relative overflow-hidden rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset">
+                        <Search className="absolute left-3 top-1/2 size-[0.95em] -translate-y-1/2 text-muted-foreground" />
 
                         <input
                             value={search}
@@ -202,17 +217,14 @@ export function Combobox<TData = unknown>({
                                 <button
                                     key={option.value}
                                     type="button"
-                                    onClick={() => {
-                                        onChange(option.value, option);
-                                        closeCombobox(true);
-                                    }}
-                                    className={cn(
-                                        "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
-                                    )}
+                                    onClick={() => selectOption(option)}
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
                                 >
                                     <Check
-                                        size={14}
-                                        className={cn(selected ? "opacity-100" : "opacity-0")}
+                                        className={cn(
+                                            "size-[1em]",
+                                            selected ? "opacity-100" : "opacity-0",
+                                        )}
                                     />
 
                                     <span className="truncate">{option.label}</span>
@@ -226,7 +238,7 @@ export function Combobox<TData = unknown>({
 
                         {loading && (
                             <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-muted-foreground">
-                                <Loader2 size={14} className="animate-spin" />
+                                <Loader2 className="size-[1em] animate-spin" />
                                 Loading...
                             </div>
                         )}
@@ -239,17 +251,14 @@ export function Combobox<TData = unknown>({
                                     <button
                                         key={option.value}
                                         type="button"
-                                        onClick={() => {
-                                            onChange(option.value, option);
-                                            closeCombobox(true);
-                                        }}
-                                        className={cn(
-                                            "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted",
-                                        )}
+                                        onClick={() => selectOption(option)}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
                                     >
                                         <Check
-                                            size={14}
-                                            className={cn(selected ? "opacity-100" : "opacity-0")}
+                                            className={cn(
+                                                "size-[1em]",
+                                                selected ? "opacity-100" : "opacity-0",
+                                            )}
                                         />
 
                                         <span className="truncate">{option.label}</span>
@@ -258,15 +267,8 @@ export function Combobox<TData = unknown>({
                             })}
 
                         {!loading && finalOptions.length === 0 && (
-                            <div
-                                className={cn(
-                                    "text-muted-foreground",
-                                    pinnedOptions.length > 0
-                                        ? "px-3 py-2 text-xs"
-                                        : "px-3 py-4 text-sm",
-                                )}
-                            >
-                                {hasSearch ? noMatchesText : emptyStateText}
+                            <div className={emptyResultsClassName}>
+                                {emptyResultsMessage}
                             </div>
                         )}
                     </div>
@@ -274,4 +276,34 @@ export function Combobox<TData = unknown>({
             )}
         </div>
     );
+}
+
+function getSearchDelay(search: string, searchDebounceMs: number) {
+    if (search.trim().length === 0) {
+        return 0;
+    }
+
+    return searchDebounceMs;
+}
+
+function getEmptyResultsSpacingClassName(hasPinnedOptions: boolean) {
+    if (hasPinnedOptions) {
+        return "px-3 py-2 text-xs";
+    }
+
+    return "px-3 py-4 text-sm";
+}
+
+async function runAsyncSearch<TData>(
+    searchFn: (search: string) => Promise<ComboboxOption<TData>[]>,
+    search: string,
+    onSuccess: (results: ComboboxOption<TData>[]) => void,
+    onFinally: () => void,
+) {
+    try {
+        const results = await searchFn(search);
+        onSuccess(results);
+    } finally {
+        onFinally();
+    }
 }

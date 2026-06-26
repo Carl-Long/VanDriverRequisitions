@@ -27,8 +27,8 @@ export function RequisitionActions({
                 disabled={isBusy}
                 onClick={onSaveAndContinue}
             >
-                <Save size={14} />
-                <ArrowRightCircle size={14} />
+                <Save className="size-[1em]" />
+                <ArrowRightCircle className="size-[1em]" />
                 Save & Continue
             </Button>
 
@@ -38,8 +38,8 @@ export function RequisitionActions({
                 disabled={isBusy}
                 onClick={onSaveDraft}
             >
-                <Save size={14} />
-                <LogOut size={14} />
+                <Save className="size-[1em]" />
+                <LogOut className="size-[1em]" />
                 Save & Close
             </Button>
 
@@ -50,7 +50,7 @@ export function RequisitionActions({
                     disabled={isBusy}
                     onClick={onSubmit}
                 >
-                    <Send size={14} />
+                    <Send className="size-[1em]" />
                     Submit
                 </Button>
             )}
