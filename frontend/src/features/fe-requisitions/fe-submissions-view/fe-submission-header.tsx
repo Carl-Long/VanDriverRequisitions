@@ -9,12 +9,14 @@ type Props = { submission: FeRequisitionSubmissionDetail };
 
 export function FeSubmissionHeader({ submission }: Readonly<Props>) {
     return (
-        <div className="rounded-2xl border border-border bg-surface p-6 print-card">
+        <div className="rounded-2xl border border-border bg-surface p-6 print-card print-submission-header">
             <div className="flex items-start justify-between print-header-row">
                 <div>
-                    <h1 className="text-xl font-bold">Submission #{submission.submissionNumber}</h1>
+                    <h1 className="text-xl font-bold print-title">
+                        Submission #{submission.submissionNumber}
+                    </h1>
 
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-2 text-sm text-muted-foreground print-subtitle">
                         Historical submission snapshot
                     </p>
                 </div>

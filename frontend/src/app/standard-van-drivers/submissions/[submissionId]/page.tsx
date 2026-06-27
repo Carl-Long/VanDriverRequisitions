@@ -72,7 +72,7 @@ export default function StdSubmissionPage() {
 
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="solid"
                         tone="accent"
                         onClick={() => globalThis.print()}
                     >
