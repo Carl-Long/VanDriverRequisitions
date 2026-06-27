@@ -11,6 +11,7 @@ export type NavItemProps = {
     active: boolean;
     collapsed?: boolean;
     showBadge?: boolean;
+    onNavigate?: () => void;
 };
 
 export function NavItem({
@@ -20,47 +21,48 @@ export function NavItem({
     active,
     collapsed,
     showBadge,
+    onNavigate,
 }: Readonly<NavItemProps>) {
     return (
-        <div className="relative group">
+        <div className="group relative">
             <Link
                 href={href}
+                onClick={onNavigate}
                 className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-3 transition",
+                    "flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition",
                     collapsed ? "justify-center" : "justify-start",
                     active
                         ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted text-foreground",
+                        : "text-foreground hover:bg-muted",
                 )}
             >
-                <div className="relative">
-                    <Icon className="size-[1.15em]" />
+                <div className="relative flex shrink-0 items-center justify-center">
+                    <Icon className="size-[1.5em] shrink-0" />
+
                     {showBadge && (
-                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-surface" />
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-warning ring-2 ring-surface" />
                     )}
                 </div>
-                {!collapsed && <span className="text-sm">{label}</span>}
+
+                {!collapsed && <span className="truncate">{label}</span>}
             </Link>
 
-            {/* TOOLTIP (ONLY WHEN COLLAPSED) */}
             {collapsed && (
                 <div
                     className={cn(
-                        "absolute left-full ml-2 top-1/2 -translate-y-1/2",
-                        "px-3 py-1.5 rounded-md",
-                        "bg-surface-elevated border border-border",
+                        "absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2",
+                        "rounded-md border border-border bg-surface-elevated",
+                        "px-3 py-1.5",
                         "text-xs font-medium text-foreground",
-                        "shadow-md",
-                        "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+                        "whitespace-nowrap shadow-md",
                         "pointer-events-none",
-                        "transition-opacity duration-200",
-                        "whitespace-nowrap",
-                        "z-50",
+                        "opacity-0 transition-opacity duration-200",
+                        "group-hover:opacity-100 group-focus-within:opacity-100",
                     )}
                 >
                     {label}
 
-                    <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-surface-elevated border-l border-b border-border" />
+                    <div className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-l border-border bg-surface-elevated" />
                 </div>
             )}
         </div>
