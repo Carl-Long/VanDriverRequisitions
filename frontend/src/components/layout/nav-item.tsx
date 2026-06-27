@@ -28,8 +28,10 @@ export function NavItem({
             <Link
                 href={href}
                 onClick={onNavigate}
+                data-active-nav={active ? "true" : undefined}
                 className={cn(
                     "flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
                     collapsed ? "justify-center" : "justify-start",
                     active
                         ? "bg-primary text-primary-foreground"

@@ -15,6 +15,19 @@
         color: black !important;
     }
 
+    *,
+    *::before,
+    *::after {
+        background-image: none !important;
+    }
+
+    main,
+    .print-page,
+    .submission-print,
+    .submission-print * {
+        background-color: white !important;
+    }
+
     .no-print,
     aside,
     nav,
@@ -130,7 +143,7 @@
 
     .submission-print tfoot td {
         font-weight: 700 !important;
-        background: #f7f7f7 !important;
+        background: white !important;
         border-top-color: #999 !important;
     }
 
@@ -148,7 +161,7 @@
 
     .submission-print th {
         font-weight: 700 !important;
-        background: #f5f5f5 !important;
+        background: white !important;
         border-bottom-color: #999 !important;
     }
 

@@ -51,7 +51,7 @@ function getWindowState(status: SubmitWindowStatus) {
 function UpdatingIndicator() {
     return (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Loader2 className="size-[0.95] animate-spin" />
+            <Loader2 className="size-[0.95em] animate-spin" />
             Updating...
         </div>
     );
@@ -66,9 +66,17 @@ export function SubmitWindowHero({
     if (loading) {
         if (variant === "compact") {
             return (
-                <div className="rounded-xl border border-border px-4 py-3">
-                    <Skeleton className="mx-auto h-4 w-52" />
-                    <Skeleton className="mx-auto mt-2 h-3 w-36" />
+                <div className="rounded-xl border border-border bg-surface px-4 py-3">
+                    <div className="flex min-h-[40px] flex-col items-center justify-center text-center">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                            <Loader2 className="size-[1em] animate-spin text-primary" />
+                            <span>Getting submit window status...</span>
+                        </div>
+
+                        <p className="mt-1 text-xs text-muted-foreground/80">
+                            This only takes a moment.
+                        </p>
+                    </div>
                 </div>
             );
         }
@@ -171,7 +179,7 @@ export function SubmitWindowHero({
                 )}
             >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-info/10">
-                    <CalendarClock className="size-[1.2em] mitext-info" />
+                    <CalendarClock className="size-[1.2em] text-info" />
                 </div>
 
                 <div className="flex-1">
