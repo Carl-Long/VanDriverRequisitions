@@ -1,185 +1,83 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import { HomeIcon, PanelLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { navigation, adminNavigation, approvalNavigation } from "@/lib/navigation";
+import { PanelLeftOpen } from "lucide-react";
+
+import { SidebarBrand } from "@/components/layout/sidebar-brand";
+import { SidebarNavContent } from "@/components/layout/sidebar-nav-content";
+import { IconButton } from "@/components/ui/button/icon-button";
 import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants/constants";
-import { NavItem } from "@/components/layout/nav-item";
-import { useAuth } from "@/providers/auth-provider";
-import {
-    canApproveRequisitions,
-    canCreateRequisitions,
-    canManageConfiguration,
-} from "@/features/auth/roles";
-import { IconButton } from "../ui/button/icon-button";
+import { cn } from "@/lib/utils";
 
 export function Sidebar() {
-    const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
-    const [isDesktop, setIsDesktop] = useState(true);
 
-    const { user } = useAuth();
-    const showMainNavigation = canCreateRequisitions(user);
-    const showApprovals = canApproveRequisitions(user);
-    const showAdmin = canManageConfiguration(user);
-
-    // Auto-collapse on small screens, but only persist deliberate desktop toggles.
     useEffect(() => {
-        const mq = globalThis.matchMedia("(min-width: 1024px)");
-
-        const sync = () => {
-            const desktop = mq.matches;
-            setIsDesktop(desktop);
-
-            if (desktop) {
-                const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
-
-                setCollapsed(saved === "true");
-            } else {
-                setCollapsed(true);
-            }
-        };
-
-        sync();
-
-        mq.addEventListener("change", sync);
-
-        return () => mq.removeEventListener("change", sync);
+        const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
+        setCollapsed(saved === "true");
     }, []);
 
     const collapseSidebar = () => {
         setCollapsed(true);
-
-        if (isDesktop) {
-            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "true");
-        }
+        localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "true");
     };
 
     const expandSidebar = () => {
         setCollapsed(false);
-
-        if (isDesktop) {
-            localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "false");
-        }
+        localStorage.setItem(SIDEBAR_COLLAPSE_KEY, "false");
     };
-
-    const isActive = (href: string) => pathname === href;
 
     return (
         <aside
             className={cn(
-                "flex flex-col h-[calc(100vh-64px)]",
-                "border-r border-border bg-surface",
-                "overflow-visible transition-all duration-300 ease-in-out",
-                collapsed ? "w-16" : "w-60",
+                "hidden h-screen min-h-0 flex-col border-r border-border bg-surface transition-all duration-300 ease-in-out lg:flex",
+                collapsed ? "w-16 overflow-visible" : "w-60 overflow-hidden",
             )}
         >
-            <div className="flex flex-col px-2 py-1.5">
-                {/* COLLAPSED HEADER */}
-                {collapsed && (
-                    <div className="mb-2 flex justify-center">
-                        <IconButton
-                            size="md"
-                            variant="ghost"
-                            onClick={expandSidebar}
-                            aria-label="Expand sidebar"
-                        >
-                            <PanelLeft className="size-[1.15em] rotate-180" />
-                        </IconButton>
-                    </div>
-                )}
+            <div className="flex h-full min-h-0 flex-col">
+                <SidebarBrand
+                    collapsed={collapsed}
+                    onCollapse={collapseSidebar}
+                />
 
-                {/* EXPANDED HEADER */}
-                {!collapsed && (
-                    <div className="mb-3 flex items-center gap-2">
-                        <div className="flex-1">
-                            <NavItem
-                                href="/"
-                                label="Home"
-                                icon={HomeIcon}
-                                active={isActive("/")}
-                                collapsed={false}
-                            />
-                        </div>
-
-                        <IconButton
-                            size="md"
-                            variant="ghost"
-                            onClick={collapseSidebar}
-                            aria-label="Collapse sidebar"
-                        >
-                            <PanelLeft className="size-[1.15em] rotate-180" />
-                        </IconButton>
-                    </div>
-                )}
-
-                {/* HOME ICON (collapsed mode) */}
-                {collapsed && (
-                    <NavItem
-                        href="/"
-                        label="Home"
-                        icon={HomeIcon}
-                        active={isActive("/")}
+                <div
+                    className={cn(
+                        "min-h-0 flex-1 px-2 py-3",
                         collapsed
-                    />
-                )}
+                            ? "overflow-visible"
+                            : "overflow-y-auto overflow-x-hidden",
+                    )}
+                >
+                    {collapsed && (
+                        <div className="group relative mb-3 flex justify-center">
+                            <IconButton
+                                size="md"
+                                variant="ghost"
+                                onClick={expandSidebar}
+                                aria-label="Expand sidebar"
+                            >
+                                <PanelLeftOpen className="size-[1.15em]" />
+                            </IconButton>
 
-                {/* MAIN NAV */}
-                {showMainNavigation && (
-                    <div className="mt-2 space-y-1">
-                        {navigation.map((item) => (
-                            <NavItem
-                                key={item.href}
-                                href={item.href}
-                                label={item.title}
-                                icon={item.icon}
-                                active={isActive(item.href)}
-                                collapsed={collapsed}
-                            />
-                        ))}
-                    </div>
-                )}
+                            <div
+                                className={cn(
+                                    "absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2",
+                                    "rounded-md border border-border bg-surface-elevated",
+                                    "px-3 py-1.5",
+                                    "whitespace-nowrap text-xs font-medium text-foreground shadow-md",
+                                    "pointer-events-none opacity-0 transition-opacity duration-200",
+                                    "group-hover:opacity-100 group-focus-within:opacity-100",
+                                )}
+                            >
+                                Expand sidebar
 
-                {showApprovals && (
-                    <div className="mt-2 space-y-1">
-                        {approvalNavigation.map((item) => (
-                            <NavItem
-                                key={item.href}
-                                href={item.href}
-                                label={item.title}
-                                icon={item.icon}
-                                active={pathname.startsWith(item.href)}
-                                collapsed={collapsed}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {/* ADMIN */}
-                {showAdmin && (
-                    <div className="mt-4 border-t border-border pt-3">
-                        {!collapsed && (
-                            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                Admin
-                            </p>
-                        )}
-
-                        <div className="space-y-1">
-                            {adminNavigation[0].items.map((item) => (
-                                <NavItem
-                                    key={item.href}
-                                    href={item.href}
-                                    label={item.title}
-                                    icon={item.icon}
-                                    active={isActive(item.href)}
-                                    collapsed={collapsed}
-                                />
-                            ))}
+                                <div className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-l border-border bg-surface-elevated" />
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    <SidebarNavContent collapsed={collapsed} />
+                </div>
             </div>
         </aside>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, CalendarCheck, CalendarPlus, CalendarX, Loader2 } from "lucide-react";
+import { CalendarClock, CalendarCheck, CalendarX, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +20,7 @@ const copy = {
         `Next submission window opens ${time === "soon" ? "soon" : `in ${time}`}.`,
     none: "No upcoming submission windows. You can save requisitions but not submit.",
     noneStrict:
-        "No upcoming submission windows. An admin must set one before submissions are possible.",
+        "An admin must set one before submissions are possible.",
 };
 
 function getWindowState(status: SubmitWindowStatus) {
@@ -93,7 +93,7 @@ export function SubmitWindowHero({
             return (
                 <div className="rounded-xl border border-success-border bg-success-surface px-4 py-3">
                     <div className="flex items-center justify-center gap-2 text-center">
-                        <CalendarCheck className="size-[1em] text-success" />
+                        <CalendarCheck className="size-[1.2em] text-success" />
                         <span className="text-sm font-medium text-foreground">{copy.open}</span>
                     </div>
 
@@ -108,7 +108,7 @@ export function SubmitWindowHero({
             return (
                 <div className="rounded-xl border border-info-border bg-info-surface px-4 py-3">
                     <div className="flex items-center justify-center gap-2 text-center">
-                        <CalendarClock className="size-[1em] text-info" />
+                        <CalendarClock className="size-[1.2em] text-info" />
                         <span className="text-sm font-medium text-foreground">
                             {copy.next(state.opensIn)}
                         </span>
@@ -124,7 +124,7 @@ export function SubmitWindowHero({
         return (
             <div className="rounded-xl border border-warning-border bg-warning-surface px-4 py-3">
                 <div className="flex items-center justify-center gap-2 text-center">
-                    <CalendarPlus className="size-[1em] text-warning" />
+                    <CalendarX className="size-[1.2em] text-warning" />
                     <span className="text-sm text-muted-foreground">{copy.none}</span>
                 </div>
 
@@ -144,7 +144,7 @@ export function SubmitWindowHero({
                 )}
             >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-success/10">
-                    <CalendarCheck className="size-[1.2em]text-success" />
+                    <CalendarCheck className="size-[1.2em] text-success" />
                 </div>
 
                 <div className="flex-1">
