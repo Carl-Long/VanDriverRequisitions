@@ -18,6 +18,7 @@ export function MobileSidebarDrawer({
     onClose,
 }: Readonly<MobileSidebarDrawerProps>) {
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -25,6 +26,16 @@ export function MobileSidebarDrawer({
 
         if (open && !dialog.open) {
             dialog.showModal();
+
+            requestAnimationFrame(() => {
+                const focusTarget =
+                    dialog.querySelector<HTMLElement>('[data-active-nav="true"]') ??
+                    dialog.querySelector<HTMLElement>('[data-drawer-close="true"]') ??
+                    dialog.querySelector<HTMLElement>("a, button");
+
+                focusTarget?.focus({ preventScroll: true });
+            });
+
             return;
         }
 
@@ -41,6 +52,7 @@ export function MobileSidebarDrawer({
                 "h-dvh max-h-dvh w-72 max-w-[85vw] p-0",
                 "border-r border-border bg-surface text-foreground shadow-xl",
                 "backdrop:bg-black/40",
+                "outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0",
                 "lg:hidden",
             )}
             aria-label="Main navigation"
@@ -74,6 +86,8 @@ export function MobileSidebarDrawer({
                         variant="ghost"
                         onClick={onClose}
                         aria-label="Close navigation"
+                        title="Close navigation"
+                        data-drawer-close="true"
                     >
                         <X className="size-[1.15em]" />
                     </IconButton>
