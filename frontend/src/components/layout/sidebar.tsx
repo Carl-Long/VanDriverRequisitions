@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PanelLeft } from "lucide-react";
+import { PanelLeftOpen } from "lucide-react";
 
 import { SidebarBrand } from "@/components/layout/sidebar-brand";
 import { SidebarNavContent } from "@/components/layout/sidebar-nav-content";
@@ -56,7 +56,7 @@ export function Sidebar() {
                                 onClick={expandSidebar}
                                 aria-label="Expand sidebar"
                             >
-                                <PanelLeft className="size-[1.15em]" />
+                                <PanelLeftOpen className="size-[1.15em]" />
                             </IconButton>
 
                             <div

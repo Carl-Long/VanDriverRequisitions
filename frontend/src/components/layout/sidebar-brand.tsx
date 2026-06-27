@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PanelLeft } from "lucide-react";
+import { PanelLeftClose } from "lucide-react";
 
 import { IconButton } from "@/components/ui/button/icon-button";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,7 @@ export function SidebarBrand({
                     onClick={onCollapse}
                     aria-label="Collapse sidebar"
                 >
-                    <PanelLeft className="size-[1.15em] rotate-180" />
+                    <PanelLeftClose className="size-[1.15em]" />
                 </IconButton>
 
                 <div
