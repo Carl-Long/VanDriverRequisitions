@@ -2,6 +2,7 @@ using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
+using VanDriverRequisitions.Domain.Helpers;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
@@ -176,14 +177,19 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
     private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feGeneralTasks,
             incomingTasks,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
+            (existing, incoming) =>
+            {
+                EnsureGeneralTaskTypeHasNotChanged(existing, incoming);
+
+                existing.Update(
+                    incoming.WeekEndingDate,
+                    incoming.Week,
+                    incoming.RatePerJob);
+            },
             incoming => FeGeneralTask.Create(
                 incoming.FeTaskTypeId,
                 incoming.TaskTypeName,
@@ -193,10 +199,20 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 incoming.RatePerJob),
             "Task");
     }
+    
+    private static void EnsureGeneralTaskTypeHasNotChanged(FeGeneralTask existing, FeGeneralTaskUpdateModel incoming)
+    {
+        if (existing.FeTaskTypeId == incoming.FeTaskTypeId)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException("An existing FE general task row cannot be changed to a different task type.");
+    }
 
     private void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feMileages,
             incomingMileages,
             x => x.Id,
@@ -213,7 +229,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
     private void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feTransfers,
             incomingTransfers,
             x => x.Id,
@@ -234,7 +250,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
     private void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feAdditionalCosts,
             incomingAdditionalCosts,
             x => x.Id,
@@ -259,69 +275,6 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
                 incoming.Miles,
                 incoming.RatePerMile),
             "Additional cost");
-    }
-
-    private static void SyncChildren<TChild, TIncoming>(
-        List<TChild> children,
-        IEnumerable<TIncoming> incomingItems,
-        Func<TIncoming, Guid?> getId,
-        Action<TChild, TIncoming> updateExisting,
-        Func<TIncoming, TChild> createNew,
-        string childName)
-        where TChild : AuditableEntity
-    {
-        ArgumentNullException.ThrowIfNull(incomingItems);
-
-        var incomingList = incomingItems.ToList();
-        var existingChildren = GetPersistedChildrenById(children);
-        var incomingIds = GetIncomingIds(incomingList, getId);
-
-        var childrenToRemove = children
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var child in childrenToRemove)
-        {
-            children.Remove(child);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            var id = getId(incoming);
-
-            if (IsExistingChild(id))
-            {
-                if (!existingChildren.TryGetValue(id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"{childName} '{id}' not found.");
-                }
-
-                updateExisting(existing, incoming);
-            }
-            else
-            {
-                children.Add(createNew(incoming));
-            }
-        }
-    }
-
-    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
-    {
-        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
-    }
-
-    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
-    {
-        return incomingItems
-            .Select(getId)
-            .Where(IsExistingChild)
-            .Select(id => id!.Value)
-            .ToHashSet();
-    }
-
-    private static bool IsExistingChild(Guid? id)
-    {
-        return id.HasValue && id.Value != Guid.Empty;
     }
 
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)

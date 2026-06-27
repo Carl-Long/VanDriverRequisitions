@@ -2,6 +2,7 @@ using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
+using VanDriverRequisitions.Domain.Helpers;
 
 namespace VanDriverRequisitions.Domain.Entities.STD;
 
@@ -184,7 +185,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncPickups(IEnumerable<StdPickupUpdateModel> incomingPickups)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _pickups,
             incomingPickups,
             x => x.Id,
@@ -195,7 +196,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncTransfers(IEnumerable<StdTransferUpdateModel> incomingTransfers)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _transfers,
             incomingTransfers,
             x => x.Id,
@@ -204,10 +205,9 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             "Transfer");
     }
 
-    private void SyncCollectionChargesBanksAndBins(
-        IEnumerable<StdCollectionChargeBanksAndBinsUpdateModel> incomingCollectionCharges)
+    private void SyncCollectionChargesBanksAndBins(IEnumerable<StdCollectionChargeBanksAndBinsUpdateModel> incomingCollectionCharges)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _collectionChargesBanksAndBins,
             incomingCollectionCharges,
             x => x.Id,
@@ -226,7 +226,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncCollectionVanPacks(IEnumerable<StdCollectionVanPackUpdateModel> incomingVanPacks)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _collectionVanPacks,
             incomingVanPacks,
             x => x.Id,
@@ -237,7 +237,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncAdditionalCosts(IEnumerable<StdAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _additionalCosts,
             incomingAdditionalCosts,
             x => x.Id,
@@ -253,69 +253,6 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         {
             throw new InvalidOperationException("Location does not belong to the selected requisition shop.");
         }
-    }
-
-    private static void SyncChildren<TChild, TIncoming>(
-        List<TChild> children,
-        IEnumerable<TIncoming> incomingItems,
-        Func<TIncoming, Guid?> getId,
-        Action<TChild, TIncoming> updateExisting,
-        Func<TIncoming, TChild> createNew,
-        string childName)
-        where TChild : AuditableEntity
-    {
-        ArgumentNullException.ThrowIfNull(incomingItems);
-
-        var incomingList = incomingItems.ToList();
-        var existingChildren = GetPersistedChildrenById(children);
-        var incomingIds = GetIncomingIds(incomingList, getId);
-
-        var childrenToRemove = children
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var child in childrenToRemove)
-        {
-            children.Remove(child);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            var id = getId(incoming);
-
-            if (IsExistingChild(id))
-            {
-                if (!existingChildren.TryGetValue(id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"{childName} '{id}' not found.");
-                }
-
-                updateExisting(existing, incoming);
-            }
-            else
-            {
-                children.Add(createNew(incoming));
-            }
-        }
-    }
-
-    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
-    {
-        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
-    }
-
-    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
-    {
-        return incomingItems
-            .Select(getId)
-            .Where(IsExistingChild)
-            .Select(id => id!.Value)
-            .ToHashSet();
-    }
-
-    private static bool IsExistingChild(Guid? id)
-    {
-        return id.HasValue && id.Value != Guid.Empty;
     }
 
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
