@@ -75,4 +75,42 @@ public sealed class SubmitWindowTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => submitWindow.Update(OpenFrom, openTo));
     }
+    
+    [Fact]
+    public void Create_WhenOpenFromIsDefault_ThrowsInvalidOperationException()
+    {
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => SubmitWindow.Create(default, OpenTo));
+    }
+
+    [Fact]
+    public void Create_WhenOpenToIsDefault_ThrowsInvalidOperationException()
+    {
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => SubmitWindow.Create(OpenFrom, default));
+    }
+
+    [Theory]
+    [InlineData(DateTimeKind.Local)]
+    [InlineData(DateTimeKind.Unspecified)]
+    public void Create_WhenOpenFromIsNotUtc_ThrowsInvalidOperationException(DateTimeKind kind)
+    {
+        // Arrange
+        var openFrom = new DateTime(2026, 6, 13, 9, 0, 0, kind);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => SubmitWindow.Create(openFrom, OpenTo));
+    }
+
+    [Theory]
+    [InlineData(DateTimeKind.Local)]
+    [InlineData(DateTimeKind.Unspecified)]
+    public void Create_WhenOpenToIsNotUtc_ThrowsInvalidOperationException(DateTimeKind kind)
+    {
+        // Arrange
+        var openTo = new DateTime(2026, 6, 13, 17, 0, 0, kind);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => SubmitWindow.Create(OpenFrom, openTo));
+    }
 }

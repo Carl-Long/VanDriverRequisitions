@@ -10,6 +10,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.STD;
 
@@ -24,6 +25,7 @@ public sealed class StdRequisitionService(
     IStdRequisitionSaveDataBuilder saveDataBuilder,
     IStdRequisitionLimitValidator limitValidator,
     TimeProvider timeProvider,
+    ISubmitWindowSubmissionGuard submitWindowGuard,
     IRequisitionLookupLoader lookupLoader) : IStdRequisitionService
 {
     public async Task<PagedResult<StdRequisitionSummaryDto>> GetAllAsync(StdRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -124,7 +126,8 @@ public sealed class StdRequisitionService(
         var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
-
+        await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
+        
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
 
         StdRequisition requisition;

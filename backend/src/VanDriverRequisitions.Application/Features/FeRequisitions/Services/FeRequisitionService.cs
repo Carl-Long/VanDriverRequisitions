@@ -10,6 +10,7 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.FE;
 
@@ -24,6 +25,7 @@ public class FeRequisitionService(
     IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
     IFeRequisitionSaveDataBuilder saveDataBuilder,
     TimeProvider timeProvider,
+    ISubmitWindowSubmissionGuard submitWindowGuard,
     IRequisitionLookupLoader lookupLoader) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -123,7 +125,8 @@ public class FeRequisitionService(
         var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
-
+        await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
+        
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
 
         FeRequisition requisition;

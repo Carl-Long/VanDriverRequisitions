@@ -4,6 +4,7 @@ using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Dtos;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Extensions;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Mappings;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Enums;
@@ -89,7 +90,7 @@ public class SubmitWindowService(IApplicationDbContext context, IValidatorServic
         var now = timeProvider.GetUtcDateTime();
 
         var currentWindow = await context.SubmitWindows
-            .Where(x => x.OpenFrom <= now && x.OpenTo >= now)
+            .OpenAt(now)
             .OrderBy(x => x.OpenFrom)
             .Select(SubmitWindowProjections.AsSummaryDto)
             .FirstOrDefaultAsync(cancellationToken);
