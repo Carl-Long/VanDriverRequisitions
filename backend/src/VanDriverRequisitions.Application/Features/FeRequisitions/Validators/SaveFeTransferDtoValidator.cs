@@ -8,6 +8,10 @@ public sealed class SaveFeTransferDtoValidator : AbstractValidator<SaveFeTransfe
 {
     public SaveFeTransferDtoValidator()
     {
+        RuleFor(x => x.WeekEndingDate)
+            .NotEmpty()
+            .WithMessage("Week ending date is required.");
+        
         RuleFor(x => x.ShopIdFrom)
             .NotEmpty()
             .WithMessage("From shop is required.");

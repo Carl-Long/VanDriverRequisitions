@@ -8,6 +8,10 @@ public sealed class SaveFeMileageDtoValidator : AbstractValidator<SaveFeMileageD
 {
     public SaveFeMileageDtoValidator()
     {
+        RuleFor(x => x.WeekEndingDate)
+            .NotEmpty()
+            .WithMessage("Week ending date is required.");
+        
         RuleFor(x => x.Week)
             .NotNull()
             .SetValidator(new WeeklyQuantitiesDtoValidator());

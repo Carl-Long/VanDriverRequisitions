@@ -8,6 +8,10 @@ public sealed class SaveFeRequisitionDtoValidator
 {
     public SaveFeRequisitionDtoValidator()
     {
+        RuleFor(x => x.RequisitionDate)
+            .NotEmpty()
+            .WithMessage("Requisition date is required.");
+        
         RuleFor(x => x.VanDriverId)
             .NotEmpty();
 
