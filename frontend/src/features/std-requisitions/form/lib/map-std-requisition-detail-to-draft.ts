@@ -107,11 +107,13 @@ export function mapStdRequisitionDetailToDraft(
             shopLabelFrom: `${row.shopCodeFrom} - ${row.shopNameFrom}`,
             shopCodeFrom: row.shopCodeFrom,
             shopNameFrom: row.shopNameFrom,
+            isShopFromActive: row.isShopFromActive,
 
             shopIdTo: row.shopIdTo,
             shopLabelTo: `${row.shopCodeTo} - ${row.shopNameTo}`,
             shopCodeTo: row.shopCodeTo,
             shopNameTo: row.shopNameTo,
+            isShopToActive: row.isShopToActive,
 
             numberOfBags: row.numberOfBags,
             numberOfBoxes: row.numberOfBoxes,

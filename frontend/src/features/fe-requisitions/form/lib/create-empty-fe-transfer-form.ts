@@ -7,9 +7,11 @@ export function createEmptyFeTransferForm(
     return {
         shopIdFrom: null,
         shopLabelFrom: null,
+        isShopFromActive: true,
 
         shopIdTo: null,
         shopLabelTo: null,
+        isShopToActive: true,
 
         weekEndingDate: weekEndingDate ?? getUpcomingSaturday(),
 

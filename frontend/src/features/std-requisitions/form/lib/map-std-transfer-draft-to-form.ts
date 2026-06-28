@@ -11,11 +11,13 @@ export function mapStdTransferDraftToForm(
         shopLabelFrom: row.shopLabelFrom,
         shopCodeFrom: row.shopCodeFrom,
         shopNameFrom: row.shopNameFrom,
+        isShopFromActive: row.isShopFromActive,
 
         shopIdTo: row.shopIdTo,
         shopLabelTo: row.shopLabelTo,
         shopCodeTo: row.shopCodeTo,
         shopNameTo: row.shopNameTo,
+        isShopToActive: row.isShopToActive,
 
         numberOfBags: row.numberOfBags,
         numberOfBoxes: row.numberOfBoxes,

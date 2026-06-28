@@ -97,12 +97,17 @@ export type FeMileage = {
 export type FeTransfer = {
     id: string | null;
     weekEndingDate: string;
+
     shopIdFrom: string;
     shopCodeFrom: string;
     shopNameFrom: string;
+    isShopFromActive: boolean;
+
     shopIdTo: string;
     shopCodeTo: string;
     shopNameTo: string;
+    isShopToActive: boolean;
+
     week: WeeklyQuantities;
     ratePerJob: number | null;
     totalNumber: number;

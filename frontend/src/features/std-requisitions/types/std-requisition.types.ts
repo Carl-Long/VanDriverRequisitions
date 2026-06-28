@@ -124,10 +124,12 @@ export type StdTransfer = {
     shopIdFrom: string;
     shopCodeFrom: string;
     shopNameFrom: string;
+    isShopFromActive: boolean;
 
     shopIdTo: string;
     shopCodeTo: string;
     shopNameTo: string;
+    isShopToActive: boolean;
 
     numberOfBags: number | null;
     numberOfBoxes: number | null;
