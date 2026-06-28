@@ -278,6 +278,36 @@ public sealed class FeTransferTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => FeTransfer.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenFromShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fromShop = CreateShopSnapshot(id: Guid.Empty, code: "S001", name: "From Shop");
+        var toShop = CreateShopSnapshot(code: "S002", name: "To Shop");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            FeTransfer.Create(CreateModel(
+                fromShop: fromShop,
+                toShop: toShop,
+                ratePerJob: 1m)));
+    }
+
+    [Fact]
+    public void Create_WhenToShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fromShop = CreateShopSnapshot(code: "S001", name: "From Shop");
+        var toShop = CreateShopSnapshot(id: Guid.Empty, code: "S002", name: "To Shop");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            FeTransfer.Create(CreateModel(
+                fromShop: fromShop,
+                toShop: toShop,
+                ratePerJob: 1m)));
+    }
 
     private static FeTransfer CreateTransfer()
     {

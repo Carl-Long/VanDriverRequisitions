@@ -160,23 +160,22 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     private void UpdateDetails(RequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(details.Driver, nameof(details.Driver));
-        ArgumentNullException.ThrowIfNull(details.Shop, nameof(details.Shop));
-        
+
+        var driver = SnapshotGuard.EnsureRequiredVanDriver(details.Driver, "Driver");
+        var shop = SnapshotGuard.EnsureRequiredShop(details.Shop, "Shop");
+
         RequisitionDate = DateGuard.EnsureRequiredDate(details.RequisitionDate, "Requisition date");
 
-        VanDriverId = details.Driver.Id;
+        VanDriverId = driver.Id;
+        VanDriverCode = driver.Code;
+        VanDriverName = driver.Name;
+        TradersName = driver.TradersName;
 
-        VanDriverId = details.Driver.Id;
-        VanDriverCode = details.Driver.Code;
-        VanDriverName = details.Driver.Name;
-        TradersName = details.Driver.TradersName;
+        ShopId = shop.Id;
+        ShopCode = shop.Code;
+        ShopName = shop.Name;
 
-        ShopId = details.Shop.Id;
-        ShopCode = details.Shop.Code;
-        ShopName = details.Shop.Name;
-
-        IsVatApplicable = details.Driver.HasVat;
+        IsVatApplicable = driver.HasVat;
     }
     
     private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)

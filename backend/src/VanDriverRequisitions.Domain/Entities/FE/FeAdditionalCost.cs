@@ -33,20 +33,12 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        if (model.ReasonId == Guid.Empty)
-        {
-            throw new InvalidOperationException("Reason is required.");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonCodeSnapshot);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonTextSnapshot);
-
         WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
 
-        ReasonId = model.ReasonId;
-        ReasonCodeSnapshot = model.ReasonCodeSnapshot.Trim();
-        ReasonTextSnapshot = model.ReasonTextSnapshot.Trim();
-
+        ReasonId = SnapshotGuard.EnsureRequiredId(model.ReasonId, "Reason id");
+        ReasonCodeSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonCodeSnapshot, "Reason code");
+        ReasonTextSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonTextSnapshot, "Reason text");
+        
         switch (model.ChargingOption)
         {
             case ChargingOption.Mileage:

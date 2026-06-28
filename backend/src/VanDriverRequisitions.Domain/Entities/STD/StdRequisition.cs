@@ -166,23 +166,24 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
     private void UpdateDetails(StdRequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(details.Driver, nameof(details.Driver));
-        ArgumentNullException.ThrowIfNull(details.Shop, nameof(details.Shop));
-        
+
+        var driver = SnapshotGuard.EnsureRequiredVanDriver(details.Driver, "Driver");
+        var shop = SnapshotGuard.EnsureRequiredShop(details.Shop, "Shop");
+
         RequisitionDate = DateGuard.EnsureRequiredDate(details.RequisitionDate, "Requisition date");
-       
-        VanDriverId = details.Driver.Id;
-        VanDriverCode = details.Driver.Code;
-        VanDriverName = details.Driver.Name;
-        TradersName = details.Driver.TradersName;
 
-        ShopId = details.Shop.Id;
-        ShopCode = details.Shop.Code;
-        ShopName = details.Shop.Name;
+        VanDriverId = driver.Id;
+        VanDriverCode = driver.Code;
+        VanDriverName = driver.Name;
+        TradersName = driver.TradersName;
 
-        IsVatApplicable = details.Driver.HasVat;
+        ShopId = shop.Id;
+        ShopCode = shop.Code;
+        ShopName = shop.Name;
+
+        IsVatApplicable = driver.HasVat;
     }
-
+    
     private void SyncPickups(IEnumerable<StdPickupUpdateModel> incomingPickups)
     {
         ChildCollectionSyncHelper.Sync(

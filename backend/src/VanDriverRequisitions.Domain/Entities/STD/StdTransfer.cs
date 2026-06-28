@@ -43,10 +43,11 @@ public sealed class StdTransfer : AuditableEntity, IStdRequisitionChild
     public void Update(StdTransferUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        ArgumentNullException.ThrowIfNull(model.FromShop);
-        ArgumentNullException.ThrowIfNull(model.ToShop);
 
-        if (model.FromShop.Id == model.ToShop.Id)
+        var fromShop = SnapshotGuard.EnsureRequiredShop(model.FromShop, "From shop");
+        var toShop = SnapshotGuard.EnsureRequiredShop(model.ToShop, "To shop");
+
+        if (fromShop.Id == toShop.Id)
         {
             throw new InvalidOperationException("From shop and to shop must be different.");
         }
@@ -63,19 +64,22 @@ public sealed class StdTransfer : AuditableEntity, IStdRequisitionChild
 
         Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
 
-        ShopIdFrom = model.FromShop.Id;
-        ShopCodeFrom = model.FromShop.Code;
-        ShopNameFrom = model.FromShop.Name;
+        ShopIdFrom = fromShop.Id;
+        ShopCodeFrom = fromShop.Code;
+        ShopNameFrom = fromShop.Name;
 
-        ShopIdTo = model.ToShop.Id;
-        ShopCodeTo = model.ToShop.Code;
-        ShopNameTo = model.ToShop.Name;
+        ShopIdTo = toShop.Id;
+        ShopCodeTo = toShop.Code;
+        ShopNameTo = toShop.Name;
 
         NumberOfBags = model.NumberOfBags;
         NumberOfBoxes = model.NumberOfBoxes;
-        ChargeType = model.ChargeType;
 
-        var charge = StdChargeCalculator.Calculate(model.ChargeType, model.NumberOfMiles, model.RatePerMile, model.FlatCharge);
+        var charge = StdChargeCalculator.Calculate(
+            model.ChargeType,
+            model.NumberOfMiles,
+            model.RatePerMile,
+            model.FlatCharge);
 
         ChargeType = model.ChargeType;
         Miles = charge.Miles;

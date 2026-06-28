@@ -52,19 +52,11 @@ public sealed class FeGeneralTask : AuditableEntity, IFeRequisitionChild
 
     private void SetTaskType(Guid feTaskTypeId, string taskTypeName, string taskTypeCode)
     {
-        if (feTaskTypeId == Guid.Empty)
-        {
-            throw new ArgumentException("Task type id is required.", nameof(feTaskTypeId));
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskTypeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskTypeCode);
-
-        FeTaskTypeId = feTaskTypeId;
-        TaskTypeName = taskTypeName;
-        TaskTypeCode = taskTypeCode;
+        FeTaskTypeId = SnapshotGuard.EnsureRequiredId(feTaskTypeId, "Task type id");
+        TaskTypeName = SnapshotGuard.EnsureRequiredText(taskTypeName, "Task type name");
+        TaskTypeCode = SnapshotGuard.EnsureRequiredText(taskTypeCode, "Task type code");
     }
-
+    
     private void RecalculateTotals()
     {
         TotalNumber = Week.Total;

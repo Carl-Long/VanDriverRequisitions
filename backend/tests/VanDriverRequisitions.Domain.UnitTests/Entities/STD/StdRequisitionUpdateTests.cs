@@ -289,6 +289,34 @@ public sealed class StdRequisitionUpdateTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
     }
+    
+    [Fact]
+    public void Update_WhenDriverSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = StdRequisitionTestData.CreateDetails(driver: StdRequisitionTestData.CreateDriverSnapshot(id: Guid.Empty));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = StdRequisitionTestData.CreateDetails(shop: StdRequisitionTestData.CreateShopSnapshot(id: Guid.Empty));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
 
     private static StdRequisition CreateRequisition()
     {

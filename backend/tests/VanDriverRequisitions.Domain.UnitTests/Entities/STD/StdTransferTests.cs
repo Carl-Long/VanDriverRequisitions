@@ -87,7 +87,7 @@ public sealed class StdTransferTests
         var exception = Assert.Throws<ArgumentNullException>(() => StdTransfer.Create(model));
 
         // Assert
-        Assert.Equal("model.FromShop", exception.ParamName);
+        Assert.Equal("From shop", exception.ParamName);
     }
     
     [Fact]
@@ -103,7 +103,7 @@ public sealed class StdTransferTests
         var exception = Assert.Throws<ArgumentNullException>(() => StdTransfer.Create(model));
 
         // Assert
-        Assert.Contains("ToShop", exception.ParamName);
+        Assert.Equal("To shop", exception.ParamName);
     }
 
     [Theory]
@@ -126,6 +126,36 @@ public sealed class StdTransferTests
         {
             Date = default(DateOnly)
         };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdTransfer.Create(model));
+    }
+    
+    [Fact]
+    public void Create_WhenFromShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fromShop = StdRequisitionTestData.CreateShopSnapshot(id: Guid.Empty, code: "S001", name: "From Shop");
+        var toShop = StdRequisitionTestData.CreateShopSnapshot(code: "S002", name: "To Shop");
+
+        var model = StdRequisitionTestData.CreateTransferMileageModel(
+            fromShop: fromShop,
+            toShop: toShop);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdTransfer.Create(model));
+    }
+
+    [Fact]
+    public void Create_WhenToShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fromShop = StdRequisitionTestData.CreateShopSnapshot(code: "S001", name: "From Shop");
+        var toShop = StdRequisitionTestData.CreateShopSnapshot(id: Guid.Empty, code: "S002", name: "To Shop");
+
+        var model = StdRequisitionTestData.CreateTransferMileageModel(
+            fromShop: fromShop,
+            toShop: toShop);
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => StdTransfer.Create(model));

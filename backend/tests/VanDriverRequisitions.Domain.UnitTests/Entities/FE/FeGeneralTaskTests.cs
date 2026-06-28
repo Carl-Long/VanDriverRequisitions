@@ -103,11 +103,10 @@ public sealed class FeGeneralTaskTests
     }
 
     [Fact]
-    public void Create_WhenTaskTypeIdIsEmpty_ThrowsArgumentException()
+    public void Create_WhenTaskTypeIdIsEmpty_ThrowsInvalidOperationException()
     {
         // Act / Assert
-        Assert.Throws<ArgumentException>(() =>
-            FeGeneralTask.Create(CreateModel(feTaskTypeId: Guid.Empty)));
+        Assert.Throws<InvalidOperationException>(() => FeGeneralTask.Create(CreateModel(feTaskTypeId: Guid.Empty)));
     }
 
     [Theory]

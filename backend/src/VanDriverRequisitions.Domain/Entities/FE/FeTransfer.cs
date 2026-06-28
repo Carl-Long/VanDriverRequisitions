@@ -38,24 +38,25 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
     public void Update(FeTransferUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        ArgumentNullException.ThrowIfNull(model.FromShop, nameof(model.FromShop));
-        ArgumentNullException.ThrowIfNull(model.ToShop, nameof(model.ToShop));
         ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
+
+        var fromShop = SnapshotGuard.EnsureRequiredShop(model.FromShop, "From shop");
+        var toShop = SnapshotGuard.EnsureRequiredShop(model.ToShop, "To shop");
 
         MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerJob, "Rate per job");
 
-        if (model.FromShop.Id == model.ToShop.Id)
+        if (fromShop.Id == toShop.Id)
         {
             throw new InvalidOperationException("From shop and to shop must be different.");
         }
 
-        ShopIdFrom = model.FromShop.Id;
-        ShopCodeFrom = model.FromShop.Code;
-        ShopNameFrom = model.FromShop.Name;
+        ShopIdFrom = fromShop.Id;
+        ShopCodeFrom = fromShop.Code;
+        ShopNameFrom = fromShop.Name;
 
-        ShopIdTo = model.ToShop.Id;
-        ShopCodeTo = model.ToShop.Code;
-        ShopNameTo = model.ToShop.Name;
+        ShopIdTo = toShop.Id;
+        ShopCodeTo = toShop.Code;
+        ShopNameTo = toShop.Name;
 
         WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
 

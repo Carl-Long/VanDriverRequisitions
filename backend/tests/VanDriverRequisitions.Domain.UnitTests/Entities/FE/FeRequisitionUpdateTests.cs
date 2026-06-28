@@ -257,6 +257,34 @@ public sealed class FeRequisitionUpdateTests
         Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
     }
     
+    [Fact]
+    public void Update_WhenDriverSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = FeRequisitionTestData.CreateDetails(driver: FeRequisitionTestData.CreateDriverSnapshot(id: Guid.Empty));
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = FeRequisitionTestData.CreateDetails(shop: FeRequisitionTestData.CreateShopSnapshot(id: Guid.Empty));
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
     private static FeRequisition CreateRequisition()
     {
         return FeRequisition.Create(FeRequisitionTestData.RequisitionNumber, FeRequisitionTestData.CreateUpdateModel());

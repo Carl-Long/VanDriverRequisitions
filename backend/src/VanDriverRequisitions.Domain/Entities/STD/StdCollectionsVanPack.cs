@@ -39,8 +39,6 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
     {
         ArgumentNullException.ThrowIfNull(model);
         
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.PostCodeZone);
-
         if (model.VanPacksOut < 1)
         {
             throw new InvalidOperationException("Van packs out must be at least 1.");
@@ -57,9 +55,13 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
         }
 
         MoneyGuard.EnsureMoneyAmount(model.RatePerVanPack, "Rate per van pack");
-
+        
         DeliveryDate = DateGuard.EnsureRequiredDate(model.DeliveryDate, "Delivery date");
-        PostCodeZone = model.PostCodeZone.Trim();
+        PostCodeZone = SnapshotGuard.EnsureRequiredText(model.PostCodeZone, "Post code zone");
+
+        VanPacksOut = model.VanPacksOut;
+        FilledBags = model.FilledBags;
+        RatePerVanPack = model.RatePerVanPack;
         VanPacksOut = model.VanPacksOut;
         FilledBags = model.FilledBags;
         RatePerVanPack = model.RatePerVanPack;
