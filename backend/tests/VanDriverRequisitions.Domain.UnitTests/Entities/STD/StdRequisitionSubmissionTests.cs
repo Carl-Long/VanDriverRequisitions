@@ -12,13 +12,14 @@ public sealed class StdRequisitionSubmissionTests
     [Fact]
     public void Create_WhenValid_CreatesPendingSubmission()
     {
-        // Arrange
         var submittedBy = StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Submitter");
 
-        // Act
-        var submission = StdRequisitionSubmission.Create(submissionNumber: 1, submittedBy, SubmittedAtUtc, snapshotJson: "{}");
+        var submission = StdRequisitionSubmission.Create(
+            submissionNumber: 1,
+            submittedBy,
+            SubmittedAtUtc,
+            snapshotJson: "{}");
 
-        // Assert
         Assert.Equal(1, submission.SubmissionNumber);
         Assert.Equal(SubmissionStatus.Pending, submission.Status);
 
@@ -39,7 +40,6 @@ public sealed class StdRequisitionSubmissionTests
     [InlineData(-1)]
     public void Create_WhenSubmissionNumberIsZeroOrNegative_ThrowsArgumentOutOfRangeException(int submissionNumber)
     {
-        // Act
         var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
             StdRequisitionSubmission.Create(
                 submissionNumber,
@@ -47,21 +47,58 @@ public sealed class StdRequisitionSubmissionTests
                 SubmittedAtUtc,
                 snapshotJson: "{}"));
 
-        // Assert
         Assert.Equal("submissionNumber", exception.ParamName);
+    }
+
+    [Fact]
+    public void Create_WhenSubmittedByIsNull_ThrowsArgumentNullException()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            StdRequisitionSubmission.Create(
+                submissionNumber: 1,
+                submittedBy: null!,
+                SubmittedAtUtc,
+                snapshotJson: "{}"));
+
+        Assert.Equal("submittedBy", exception.ParamName);
+    }
+
+    [Fact]
+    public void Create_WhenSnapshotJsonIsNull_ThrowsArgumentNullException()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            StdRequisitionSubmission.Create(
+                submissionNumber: 1,
+                StdRequisitionTestData.CreateAuditUser(),
+                SubmittedAtUtc,
+                snapshotJson: null!));
+
+        Assert.Equal("snapshotJson", exception.ParamName);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_WhenSnapshotJsonIsEmptyOrWhitespace_ThrowsArgumentException(string snapshotJson)
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            StdRequisitionSubmission.Create(
+                submissionNumber: 1,
+                StdRequisitionTestData.CreateAuditUser(),
+                SubmittedAtUtc,
+                snapshotJson));
+
+        Assert.Equal("snapshotJson", exception.ParamName);
     }
 
     [Fact]
     public void Approve_WhenPending_SetsApprovedStateAndReviewFields()
     {
-        // Arrange
         var submission = CreateSubmission();
         var reviewedBy = StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver");
 
-        // Act
         submission.Approve(reviewedBy, ReviewedAtUtc, poNumber: "PO-123");
 
-        // Assert
         Assert.Equal(SubmissionStatus.Approved, submission.Status);
         Assert.Equal(reviewedBy.Id, submission.ReviewedById);
         Assert.Equal("Approver", submission.ReviewedByNameSnapshot);
@@ -73,14 +110,11 @@ public sealed class StdRequisitionSubmissionTests
     [Fact]
     public void Reject_WhenPending_SetsRejectedStateAndReviewFields()
     {
-        // Arrange
         var submission = CreateSubmission();
         var reviewedBy = StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter");
 
-        // Act
         submission.Reject(reviewedBy, ReviewedAtUtc, rejectionNotes: "Incorrect rate.");
 
-        // Assert
         Assert.Equal(SubmissionStatus.Rejected, submission.Status);
         Assert.Equal(reviewedBy.Id, submission.ReviewedById);
         Assert.Equal("Rejecter", submission.ReviewedByNameSnapshot);
@@ -92,7 +126,6 @@ public sealed class StdRequisitionSubmissionTests
     [Fact]
     public void Approve_WhenAlreadyApproved_ThrowsInvalidOperationException()
     {
-        // Arrange
         var submission = CreateSubmission();
 
         submission.Approve(
@@ -100,12 +133,144 @@ public sealed class StdRequisitionSubmissionTests
             ReviewedAtUtc,
             poNumber: "PO-123");
 
-        // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
             submission.Approve(
                 StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Second Approver"),
                 ReviewedAtUtc.AddHours(1),
                 poNumber: "PO-456"));
+    }
+
+    [Fact]
+    public void Reject_WhenAlreadyRejected_ThrowsInvalidOperationException()
+    {
+        var submission = CreateSubmission();
+
+        submission.Reject(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "First Rejecter"),
+            ReviewedAtUtc,
+            rejectionNotes: "Incorrect rate.");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            submission.Reject(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Second Rejecter"),
+                ReviewedAtUtc.AddHours(1),
+                rejectionNotes: "Still incorrect."));
+    }
+
+    [Fact]
+    public void Reject_WhenAlreadyApproved_ThrowsInvalidOperationException()
+    {
+        var submission = CreateSubmission();
+
+        submission.Approve(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver"),
+            ReviewedAtUtc,
+            poNumber: "PO-123");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            submission.Reject(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter"),
+                ReviewedAtUtc.AddHours(1),
+                rejectionNotes: "Incorrect rate."));
+    }
+
+    [Fact]
+    public void Approve_WhenAlreadyRejected_ThrowsInvalidOperationException()
+    {
+        var submission = CreateSubmission();
+
+        submission.Reject(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter"),
+            ReviewedAtUtc,
+            rejectionNotes: "Incorrect rate.");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            submission.Approve(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver"),
+                ReviewedAtUtc.AddHours(1),
+                poNumber: "PO-123"));
+    }
+
+    [Fact]
+    public void Approve_WhenReviewedByIsNull_ThrowsArgumentNullException()
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            submission.Approve(reviewedBy: null!, ReviewedAtUtc, poNumber: "PO-123"));
+
+        Assert.Equal("reviewedBy", exception.ParamName);
+    }
+
+    [Fact]
+    public void Reject_WhenReviewedByIsNull_ThrowsArgumentNullException()
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            submission.Reject(reviewedBy: null!, ReviewedAtUtc, rejectionNotes: "Incorrect rate."));
+
+        Assert.Equal("reviewedBy", exception.ParamName);
+    }
+
+    [Fact]
+    public void Approve_WhenPoNumberIsNull_ThrowsArgumentNullException()
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            submission.Approve(
+                StdRequisitionTestData.CreateAuditUser(),
+                ReviewedAtUtc,
+                poNumber: null!));
+
+        Assert.Equal("poNumber", exception.ParamName);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Approve_WhenPoNumberIsEmptyOrWhitespace_ThrowsArgumentException(string poNumber)
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentException>(() =>
+            submission.Approve(
+                StdRequisitionTestData.CreateAuditUser(),
+                ReviewedAtUtc,
+                poNumber));
+
+        Assert.Equal("poNumber", exception.ParamName);
+    }
+
+    [Fact]
+    public void Reject_WhenRejectionNotesIsNull_ThrowsArgumentNullException()
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            submission.Reject(
+                StdRequisitionTestData.CreateAuditUser(),
+                ReviewedAtUtc,
+                rejectionNotes: null!));
+
+        Assert.Equal("rejectionNotes", exception.ParamName);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Reject_WhenRejectionNotesIsEmptyOrWhitespace_ThrowsArgumentException(string rejectionNotes)
+    {
+        var submission = CreateSubmission();
+
+        var exception = Assert.Throws<ArgumentException>(() =>
+            submission.Reject(
+                StdRequisitionTestData.CreateAuditUser(),
+                ReviewedAtUtc,
+                rejectionNotes));
+
+        Assert.Equal("rejectionNotes", exception.ParamName);
     }
 
     private static StdRequisitionSubmission CreateSubmission()

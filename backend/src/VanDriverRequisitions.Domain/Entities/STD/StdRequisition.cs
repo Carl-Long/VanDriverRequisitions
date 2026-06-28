@@ -166,8 +166,8 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
     private void UpdateDetails(StdRequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(details.Driver);
-        ArgumentNullException.ThrowIfNull(details.Shop);
+        ArgumentNullException.ThrowIfNull(details.Driver, nameof(details.Driver));
+        ArgumentNullException.ThrowIfNull(details.Shop, nameof(details.Shop));
 
         RequisitionDate = details.RequisitionDate;
 

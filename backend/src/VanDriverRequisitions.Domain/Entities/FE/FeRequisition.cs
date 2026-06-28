@@ -160,8 +160,12 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     private void UpdateDetails(RequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
+        ArgumentNullException.ThrowIfNull(details.Driver, nameof(details.Driver));
+        ArgumentNullException.ThrowIfNull(details.Shop, nameof(details.Shop));
 
         RequisitionDate = details.RequisitionDate;
+
+        VanDriverId = details.Driver.Id;
 
         VanDriverId = details.Driver.Id;
         VanDriverCode = details.Driver.Code;

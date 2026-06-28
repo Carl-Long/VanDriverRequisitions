@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.STD;
+using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.UnitTests.TestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.STD;
@@ -214,6 +215,62 @@ public sealed class StdRequisitionUpdateTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
+    [Fact]
+    public void Update_WhenDetailsIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var validModel = StdRequisitionTestData.CreateUpdateModel();
+        var updateModel = validModel with { Details = null! };
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("details", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenDriverSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            StdRequisitionTestData.RequisitionDate,
+            Driver: null!,
+            Shop: StdRequisitionTestData.CreateShopSnapshot(id: StdRequisitionTestData.DefaultShopId));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Driver", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            StdRequisitionTestData.RequisitionDate,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: null!);
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Shop", exception.ParamName);
     }
 
     private static StdRequisition CreateRequisition()
