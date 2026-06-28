@@ -262,6 +262,22 @@ public sealed class FeTransferTests
                 toShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
                 ratePerJob: ratePerJob)));
     }
+    
+    [Fact]
+    public void Create_WhenWeekEndingDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = new FeTransferUpdateModel(
+            Id: null,
+            FromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+            ToShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+            WeekEndingDate: default(DateOnly),
+            Week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            RatePerJob: 1m);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => FeTransfer.Create(model));
+    }
 
     private static FeTransfer CreateTransfer()
     {

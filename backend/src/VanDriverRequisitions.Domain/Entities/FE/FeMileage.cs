@@ -27,11 +27,12 @@ public sealed class FeMileage : AuditableEntity, IFeRequisitionChild
     public void Update(FeMileageUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        ArgumentNullException.ThrowIfNull(model.Week);
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
 
         MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerMile, "Rate per mile");
 
-        WeekEndingDate = model.WeekEndingDate;
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
         Week = model.Week;
         RatePerMile = model.RatePerMile;
 

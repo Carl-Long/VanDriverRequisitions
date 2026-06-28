@@ -38,11 +38,12 @@ public sealed class FeGeneralTask : AuditableEntity, IFeRequisitionChild
     public void Update(FeGeneralTaskUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        ArgumentNullException.ThrowIfNull(model.Week);
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
 
         MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerJob, "Rate per job");
 
-        WeekEndingDate = model.WeekEndingDate;
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
         Week = model.Week;
         RatePerJob = model.RatePerJob;
 

@@ -273,6 +273,26 @@ public sealed class FeAdditionalCostTests
                 Miles: null,
                 RatePerMile: null)));
     }
+    
+    [Fact]
+    public void Create_WhenWeekEndingDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = new FeAdditionalCostUpdateModel(
+            Id: null,
+            WeekEndingDate: default(DateOnly),
+            ParkingReasonId,
+            ParkingReasonCode,
+            ParkingReasonText,
+            ChargingOption.Job,
+            TotalNumber: 1,
+            RatePerJob: 10m,
+            Miles: null,
+            RatePerMile: null);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => FeAdditionalCost.Create(model));
+    }
 
     private static FeAdditionalCost CreateJobCost(int? totalNumber = 3, decimal? ratePerJob = 10m)
     {

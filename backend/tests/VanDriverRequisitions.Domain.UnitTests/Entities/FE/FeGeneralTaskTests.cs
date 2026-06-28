@@ -198,6 +198,23 @@ public sealed class FeGeneralTaskTests
         Assert.Throws<InvalidOperationException>(() =>
             FeGeneralTask.Create(CreateModel(ratePerJob: ratePerJob)));
     }
+    
+    [Fact]
+    public void Create_WhenWeekEndingDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = new FeGeneralTaskUpdateModel(
+            Id: null,
+            FeTaskTypeId: Guid.NewGuid(),
+            TaskTypeName: "Collections",
+            TaskTypeCode: "23707",
+            WeekEndingDate: default(DateOnly),
+            Week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            RatePerJob: 1m);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => FeGeneralTask.Create(model));
+    }
 
     private static FeGeneralTask CreateTask()
     {

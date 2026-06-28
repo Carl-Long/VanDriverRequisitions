@@ -38,9 +38,9 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
     public void Update(FeTransferUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        ArgumentNullException.ThrowIfNull(model.FromShop);
-        ArgumentNullException.ThrowIfNull(model.ToShop);
-        ArgumentNullException.ThrowIfNull(model.Week);
+        ArgumentNullException.ThrowIfNull(model.FromShop, nameof(model.FromShop));
+        ArgumentNullException.ThrowIfNull(model.ToShop, nameof(model.ToShop));
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
 
         MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerJob, "Rate per job");
 
@@ -57,7 +57,8 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
         ShopCodeTo = model.ToShop.Code;
         ShopNameTo = model.ToShop.Name;
 
-        WeekEndingDate = model.WeekEndingDate;
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
         Week = model.Week;
         RatePerJob = model.RatePerJob;
 

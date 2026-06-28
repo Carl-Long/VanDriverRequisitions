@@ -239,7 +239,24 @@ public sealed class FeRequisitionUpdateTests
         // Assert
         Assert.Equal("Shop", exception.ParamName);
     }
+    
+    [Fact]
+    public void Update_WhenRequisitionDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
 
+        var details = new RequisitionDetails(
+            RequisitionDate: default,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: StdRequisitionTestData.CreateShopSnapshot());
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
     private static FeRequisition CreateRequisition()
     {
         return FeRequisition.Create(FeRequisitionTestData.RequisitionNumber, FeRequisitionTestData.CreateUpdateModel());

@@ -35,12 +35,7 @@ public sealed class StdPickup : AuditableEntity, IStdRequisitionChild
     public void Update(StdPickupUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-
-        if (model.Date == default)
-        {
-            throw new InvalidOperationException("Date is required.");
-        }
-
+        
         if (model.NumberOfBags < 1)
         {
             throw new InvalidOperationException("Number of bags must be at least 1.");
@@ -52,8 +47,8 @@ public sealed class StdPickup : AuditableEntity, IStdRequisitionChild
         }
 
         var charge = StdChargeCalculator.Calculate(model.ChargeType, model.Miles, model.RatePerMile, model.FlatCharge);
-
-        Date = model.Date;
+        
+        Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
         NumberOfBags = model.NumberOfBags;
         NumberOfHouseholds = model.NumberOfHouseholds;
 

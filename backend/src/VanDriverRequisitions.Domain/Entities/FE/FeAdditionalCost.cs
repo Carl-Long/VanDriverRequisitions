@@ -41,7 +41,8 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonCodeSnapshot);
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonTextSnapshot);
 
-        WeekEndingDate = model.WeekEndingDate;
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
         ReasonId = model.ReasonId;
         ReasonCodeSnapshot = model.ReasonCodeSnapshot.Trim();
         ReasonTextSnapshot = model.ReasonTextSnapshot.Trim();
@@ -57,10 +58,7 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(
-                    nameof(model.ChargingOption),
-                    model.ChargingOption,
-                    "Unknown charging option.");
+                throw new ArgumentOutOfRangeException(nameof(model.ChargingOption), model.ChargingOption, "Unknown charging option.");
         }
     }
 

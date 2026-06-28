@@ -272,6 +272,23 @@ public sealed class StdRequisitionUpdateTests
         // Assert
         Assert.Equal("Shop", exception.ParamName);
     }
+    
+    [Fact]
+    public void Update_WhenRequisitionDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            RequisitionDate: default,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: StdRequisitionTestData.CreateShopSnapshot());
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
 
     private static StdRequisition CreateRequisition()
     {

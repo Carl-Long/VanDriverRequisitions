@@ -46,11 +46,6 @@ public sealed class StdTransfer : AuditableEntity, IStdRequisitionChild
         ArgumentNullException.ThrowIfNull(model.FromShop);
         ArgumentNullException.ThrowIfNull(model.ToShop);
 
-        if (model.Date == default)
-        {
-            throw new InvalidOperationException("Date is required.");
-        }
-
         if (model.FromShop.Id == model.ToShop.Id)
         {
             throw new InvalidOperationException("From shop and to shop must be different.");
@@ -66,7 +61,7 @@ public sealed class StdTransfer : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Number of boxes cannot be negative.");
         }
 
-        Date = model.Date;
+        Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
 
         ShopIdFrom = model.FromShop.Id;
         ShopCodeFrom = model.FromShop.Code;

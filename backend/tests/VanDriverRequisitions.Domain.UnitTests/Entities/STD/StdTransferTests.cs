@@ -117,4 +117,17 @@ public sealed class StdTransferTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => StdTransfer.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = StdRequisitionTestData.CreateTransferMileageModel() with
+        {
+            Date = default(DateOnly)
+        };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdTransfer.Create(model));
+    }
 }

@@ -38,12 +38,7 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
     public void Update(StdAdditionalCostUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-
-        if (model.Date == default)
-        {
-            throw new InvalidOperationException("Date is required.");
-        }
-
+        
         if (model.ReasonId == Guid.Empty)
         {
             throw new InvalidOperationException("Reason is required.");
@@ -57,7 +52,7 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
             throw new InvalidOperationException("Number of bags must be at least 1.");
         }
 
-        Date = model.Date;
+        Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
         ReasonId = model.ReasonId;
         ReasonCodeSnapshot = model.ReasonCodeSnapshot.Trim();
         ReasonTextSnapshot = model.ReasonTextSnapshot.Trim();

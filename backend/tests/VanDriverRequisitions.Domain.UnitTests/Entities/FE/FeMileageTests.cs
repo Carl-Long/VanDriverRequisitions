@@ -151,6 +151,20 @@ public sealed class FeMileageTests
         Assert.Throws<InvalidOperationException>(() =>
             FeMileage.Create(CreateModel(ratePerMile: ratePerMile)));
     }
+    
+    [Fact]
+    public void Create_WhenWeekEndingDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = new FeMileageUpdateModel(
+            Id: null,
+            WeekEndingDate: default(DateOnly),
+            Week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            RatePerMile: 0.50m);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => FeMileage.Create(model));
+    }
 
     private static FeMileage CreateMileage()
     {

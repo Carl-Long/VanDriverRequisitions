@@ -168,9 +168,9 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(details);
         ArgumentNullException.ThrowIfNull(details.Driver, nameof(details.Driver));
         ArgumentNullException.ThrowIfNull(details.Shop, nameof(details.Shop));
-
-        RequisitionDate = details.RequisitionDate;
-
+        
+        RequisitionDate = DateGuard.EnsureRequiredDate(details.RequisitionDate, "Requisition date");
+       
         VanDriverId = details.Driver.Id;
         VanDriverCode = details.Driver.Code;
         VanDriverName = details.Driver.Name;

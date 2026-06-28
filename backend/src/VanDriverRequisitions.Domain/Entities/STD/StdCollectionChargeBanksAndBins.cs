@@ -42,12 +42,7 @@ public sealed class StdCollectionChargeBanksAndBins : AuditableEntity, IStdRequi
     public void Update(StdCollectionChargeBanksAndBinsUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-
-        if (model.Date == default)
-        {
-            throw new InvalidOperationException("Date is required.");
-        }
-
+        
         if (model.CollectionTypeId == Guid.Empty)
         {
             throw new InvalidOperationException("Collection type is required.");
@@ -74,7 +69,7 @@ public sealed class StdCollectionChargeBanksAndBins : AuditableEntity, IStdRequi
             throw new InvalidOperationException("Number of bags cannot be negative.");
         }
 
-        Date = model.Date;
+        Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
 
         CollectionTypeId = model.CollectionTypeId;
         CollectionTypeNameSnapshot = model.CollectionTypeName.Trim();
