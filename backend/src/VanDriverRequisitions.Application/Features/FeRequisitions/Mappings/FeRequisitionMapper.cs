@@ -14,7 +14,8 @@ public static class FeRequisitionMapper
         FeRequisition requisition,
         VanDriverLookupDto vanDriverSummary,
         bool isShopActive,
-        IReadOnlyDictionary<Guid, bool> reasonActiveMap)
+        IReadOnlyDictionary<Guid, bool> reasonActiveMap,
+        IReadOnlyDictionary<Guid, bool> transferShopActiveMap)
     {
         return new FeRequisitionDetailDto
         {
@@ -61,7 +62,10 @@ public static class FeRequisitionMapper
                 .ThenBy(x => x.ShopNameTo)
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
-                .Select(FeTransferMapper.ToDetailDto)
+                .Select(x => FeTransferMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(transferShopActiveMap, x.ShopIdFrom),
+                    IsLookupActive(transferShopActiveMap, x.ShopIdTo)))
                 .ToList(),
 
             FeAdditionalCosts = requisition.FeAdditionalCosts

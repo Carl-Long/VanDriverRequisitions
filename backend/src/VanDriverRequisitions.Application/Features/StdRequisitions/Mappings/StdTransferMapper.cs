@@ -29,7 +29,7 @@ public static class StdTransferMapper
             dto.FlatCharge);
     }
 
-    public static StdTransferDetailDto ToDetailDto(StdTransfer row)
+    public static StdTransferDetailDto ToDetailDto(StdTransfer row, bool isShopFromActive, bool isShopToActive)
     {
         ArgumentNullException.ThrowIfNull(row);
 
@@ -41,10 +41,12 @@ public static class StdTransferMapper
             ShopIdFrom = row.ShopIdFrom,
             ShopCodeFrom = row.ShopCodeFrom,
             ShopNameFrom = row.ShopNameFrom,
+            IsShopFromActive = isShopFromActive,
 
             ShopIdTo = row.ShopIdTo,
             ShopCodeTo = row.ShopCodeTo,
             ShopNameTo = row.ShopNameTo,
+            IsShopToActive = isShopToActive,
 
             NumberOfBags = row.NumberOfBags,
             NumberOfBoxes = row.NumberOfBoxes,

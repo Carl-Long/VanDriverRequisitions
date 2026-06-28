@@ -16,7 +16,8 @@ public static class StdRequisitionMapper
         bool isShopActive,
         IReadOnlyDictionary<Guid, bool> additionalCostReasonActiveMap,
         IReadOnlyDictionary<Guid, bool> collectionTypeActiveMap,
-        IReadOnlyDictionary<Guid, bool> locationActiveMap)
+        IReadOnlyDictionary<Guid, bool> locationActiveMap,
+        IReadOnlyDictionary<Guid, bool> transferShopActiveMap)
     {
         return new StdRequisitionDetailDto
         {
@@ -75,7 +76,10 @@ public static class StdRequisitionMapper
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.ShopNameFrom)
                 .ThenBy(x => x.ShopNameTo)
-                .Select(StdTransferMapper.ToDetailDto)
+                .Select(x => StdTransferMapper.ToDetailDto(
+                    x,
+                    IsLookupActive(transferShopActiveMap, x.ShopIdFrom),
+                    IsLookupActive(transferShopActiveMap, x.ShopIdTo)))
                 .ToList(),
             
             AdditionalCosts = requisition.AdditionalCosts

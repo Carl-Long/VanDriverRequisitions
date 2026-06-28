@@ -232,14 +232,16 @@ public sealed class StdRequisitionService(
         var additionalCostReasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
         var collectionTypeActiveMap = await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
         var locationActiveMap = await LoadLocationActiveMapAsync(requisition, cancellationToken);
-
+        var transferShopActiveMap = await LoadTransferShopActiveMapAsync(requisition, cancellationToken);
+        
         return StdRequisitionMapper.MapRequisitionToDetailDto(
             requisition,
             driverSummary,
             shopActive,
             additionalCostReasonActiveMap,
             collectionTypeActiveMap,
-            locationActiveMap);
+            locationActiveMap,
+            transferShopActiveMap);
     }
     
     private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
@@ -296,5 +298,29 @@ public sealed class StdRequisitionService(
             .AsNoTracking()
             .Where(x => locationIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(
+        StdRequisition requisition,
+        CancellationToken cancellationToken)
+    {
+        var shopIds = requisition.Transfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+
+        if (shopIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        var shopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            shopIds,
+            cancellationToken,
+            includeInactive: true);
+
+        return shopMap.ToDictionary(
+            x => x.Key,
+            x => x.Value.IsActive);
     }
 }

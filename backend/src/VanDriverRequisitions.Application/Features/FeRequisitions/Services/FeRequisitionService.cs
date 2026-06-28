@@ -228,9 +228,14 @@ public class FeRequisitionService(
         driverSummary ??= await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
         var shopActive = isShopActive ?? await lookupLoader.IsShopActiveAsync(requisition.ShopId, cancellationToken);
         var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
-
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
-    }
+        var transferShopActiveMap = await LoadTransferShopActiveMapAsync(requisition, cancellationToken);
+        
+        return FeRequisitionMapper.MapRequisitionToDetailDto(
+            requisition,
+            driverSummary,
+            shopActive,
+            reasonActiveMap,
+            transferShopActiveMap);    }
     
     private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
     {
@@ -249,5 +254,27 @@ public class FeRequisitionService(
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
+    {
+        var shopIds = requisition.FeTransfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+
+        if (shopIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        var shopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            shopIds,
+            cancellationToken,
+            includeInactive: true);
+
+        return shopMap.ToDictionary(
+            x => x.Key,
+            x => x.Value.IsActive);
     }
 }
