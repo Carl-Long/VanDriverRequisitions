@@ -27,4 +27,44 @@ public sealed class DateGuardTests
         // Assert
         Assert.Equal("Date is required.", exception.Message);
     }
+    
+    [Fact]
+    public void EnsureRequiredUtcDateTime_WhenDateTimeIsValidUtc_ReturnsDateTime()
+    {
+        // Arrange
+        var dateTime = new DateTime(2026, 6, 13, 10, 0, 0, DateTimeKind.Utc);
+
+        // Act
+        var result = DateGuard.EnsureRequiredUtcDateTime(dateTime, "Submitted at UTC");
+
+        // Assert
+        Assert.Equal(dateTime, result);
+    }
+
+    [Fact]
+    public void EnsureRequiredUtcDateTime_WhenDateTimeIsDefault_ThrowsInvalidOperationException()
+    {
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            DateGuard.EnsureRequiredUtcDateTime(default, "Submitted at UTC"));
+
+        // Assert
+        Assert.Equal("Submitted at UTC is required.", exception.Message);
+    }
+
+    [Theory]
+    [InlineData(DateTimeKind.Local)]
+    [InlineData(DateTimeKind.Unspecified)]
+    public void EnsureRequiredUtcDateTime_WhenDateTimeIsNotUtc_ThrowsInvalidOperationException(DateTimeKind kind)
+    {
+        // Arrange
+        var dateTime = new DateTime(2026, 6, 13, 10, 0, 0, kind);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            DateGuard.EnsureRequiredUtcDateTime(dateTime, "Submitted at UTC"));
+
+        // Assert
+        Assert.Equal("Submitted at UTC must be UTC.", exception.Message);
+    }
 }

@@ -1,5 +1,6 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.STD;
@@ -46,7 +47,7 @@ public sealed class StdRequisitionSubmission : AuditableEntity
             Status = SubmissionStatus.Pending,
             SubmittedById = submittedBy.Id,
             SubmittedByNameSnapshot = submittedBy.NameSnapshot,
-            SubmittedAtUtc = submittedAtUtc,
+            SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC"),
             SnapshotJson = snapshotJson
         };
     }
@@ -61,7 +62,7 @@ public sealed class StdRequisitionSubmission : AuditableEntity
         Status = SubmissionStatus.Approved;
         ReviewedById = reviewedBy.Id;
         ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
-        ReviewedAtUtc = reviewedAtUtc;
+        ReviewedAtUtc = DateGuard.EnsureRequiredUtcDateTime(reviewedAtUtc, "Reviewed at UTC");
 
         PoNumber = poNumber;
         RejectionNotes = null;
@@ -77,7 +78,7 @@ public sealed class StdRequisitionSubmission : AuditableEntity
         Status = SubmissionStatus.Rejected;
         ReviewedById = reviewedBy.Id;
         ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
-        ReviewedAtUtc = reviewedAtUtc;
+        ReviewedAtUtc = DateGuard.EnsureRequiredUtcDateTime(reviewedAtUtc, "Reviewed at UTC");
 
         RejectionNotes = rejectionNotes;
         PoNumber = null;

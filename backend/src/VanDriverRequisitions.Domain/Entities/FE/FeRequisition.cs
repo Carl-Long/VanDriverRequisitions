@@ -119,15 +119,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         {
             throw new InvalidOperationException("A pending submission already exists.");
         }
+        
 
         var submission = FeRequisitionSubmission.Create(NextSubmissionNumber, submittedBy, submittedAtUtc, snapshotJson);
 
         _submissions.Add(submission);
 
+        SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC");
         Status = RequisitionStatus.Submitted;
         SubmittedById = submittedBy.Id;
         SubmittedByNameSnapshot = submittedBy.NameSnapshot;
-        SubmittedAtUtc = submittedAtUtc;
 
         ClearRejection();
     }
@@ -253,10 +254,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be approved.");
         }
 
+        ApprovedAtUtc = DateGuard.EnsureRequiredUtcDateTime(approvedAtUtc, "Approved at UTC");
         Status = RequisitionStatus.Approved;
         ApprovedById = approvedBy.Id;
         ApprovedByNameSnapshot = approvedBy.NameSnapshot;
-        ApprovedAtUtc = approvedAtUtc;
         PoNumber = poNumber;
 
         ClearRejection();
@@ -269,10 +270,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be rejected.");
         }
 
+        RejectedAtUtc = DateGuard.EnsureRequiredUtcDateTime(rejectedAtUtc, "Rejected at UTC");
         Status = RequisitionStatus.Rejected;
         RejectedById = rejectedBy.Id;
         RejectedByNameSnapshot = rejectedBy.NameSnapshot;
-        RejectedAtUtc = rejectedAtUtc;
         RejectionNotes = rejectionNotes;
 
         ClearApproval();

@@ -309,6 +309,48 @@ public sealed class StdRequisitionSubmissionWorkflowTests
 
         Assert.Equal("rejectionNotes", exception.ParamName);
     }
+    
+    [Fact]
+    public void Submit_WhenSubmittedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.Submit(
+                StdRequisitionTestData.CreateAuditUser(),
+                submittedAtUtc: default,
+                snapshotJson: "{}"));
+    }
+
+    [Fact]
+    public void ApproveSubmission_WhenApprovedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.ApproveSubmission(
+                StdRequisitionTestData.CreateAuditUser(),
+                approvedAtUtc: default,
+                poNumber: "PO-123"));
+    }
+
+    [Fact]
+    public void RejectSubmission_WhenRejectedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.RejectSubmission(
+                StdRequisitionTestData.CreateAuditUser(),
+                rejectedAtUtc: default,
+                rejectionNotes: "Incorrect rate."));
+    }
 
     private static StdRequisition CreateRequisition()
     {

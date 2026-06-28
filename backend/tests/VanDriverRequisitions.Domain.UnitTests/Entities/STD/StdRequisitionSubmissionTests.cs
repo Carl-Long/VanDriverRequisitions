@@ -272,6 +272,58 @@ public sealed class StdRequisitionSubmissionTests
 
         Assert.Equal("rejectionNotes", exception.ParamName);
     }
+    
+    [Fact]
+    public void Create_WhenSubmittedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            StdRequisitionSubmission.Create(
+                submissionNumber: 1,
+                FeRequisitionTestData.CreateAuditUser(),
+                submittedAtUtc: default,
+                snapshotJson: "{}"));
+    }
+
+    [Fact]
+    public void Create_WhenSubmittedAtUtcIsNotUtc_ThrowsInvalidOperationException()
+    {
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            StdRequisitionSubmission.Create(
+                submissionNumber: 1,
+                FeRequisitionTestData.CreateAuditUser(),
+                submittedAtUtc: new DateTime(2026, 6, 13, 10, 0, 0, DateTimeKind.Unspecified),
+                snapshotJson: "{}"));
+    }
+
+    [Fact]
+    public void Approve_WhenReviewedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var submission = CreateSubmission();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            submission.Approve(
+                StdRequisitionTestData.CreateAuditUser(),
+                reviewedAtUtc: default,
+                poNumber: "PO-123"));
+    }
+
+    [Fact]
+    public void Reject_WhenReviewedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var submission = CreateSubmission();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            submission.Reject(
+                StdRequisitionTestData.CreateAuditUser(),
+                reviewedAtUtc: default,
+                rejectionNotes: "Incorrect rate."));
+    }
 
     private static StdRequisitionSubmission CreateSubmission()
     {
