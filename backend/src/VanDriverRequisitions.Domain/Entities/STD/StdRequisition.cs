@@ -92,9 +92,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
         if (!CanEdit)
         {
-            throw new InvalidOperationException(
-                "This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
+            throw new InvalidOperationException("This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
         }
+
+        EnsureUpdateModelIsComplete(model);
 
         UpdateDetails(model.Details);
 
@@ -182,6 +183,16 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         ShopName = shop.Name;
 
         IsVatApplicable = driver.HasVat;
+    }
+    
+    private static void EnsureUpdateModelIsComplete(StdRequisitionUpdateModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model.Details, nameof(model.Details));
+        ArgumentNullException.ThrowIfNull(model.Pickups, nameof(model.Pickups));
+        ArgumentNullException.ThrowIfNull(model.Transfers, nameof(model.Transfers));
+        ArgumentNullException.ThrowIfNull(model.CollectionChargesBanksAndBins, nameof(model.CollectionChargesBanksAndBins));
+        ArgumentNullException.ThrowIfNull(model.CollectionVanPacks, nameof(model.CollectionVanPacks));
+        ArgumentNullException.ThrowIfNull(model.AdditionalCosts, nameof(model.AdditionalCosts));
     }
     
     private void SyncPickups(IEnumerable<StdPickupUpdateModel> incomingPickups)

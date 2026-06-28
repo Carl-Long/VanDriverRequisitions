@@ -6,6 +6,15 @@ namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
 
 public sealed class FeRequisitionUpdateTests
 {
+    public static TheoryData<string, Func<FeRequisitionUpdateModel, FeRequisitionUpdateModel>> NullCollectionCases =>
+        new()
+        {
+            { "GeneralTasks", model => model with { GeneralTasks = null! } },
+            { "Mileages", model => model with { Mileages = null! } },
+            { "Transfers", model => model with { Transfers = null! } },
+            { "AdditionalCosts", model => model with { AdditionalCosts = null! } }
+        };
+    
     [Fact]
     public void Update_WhenDetailsChange_UpdatesDetails()
     {
@@ -197,7 +206,7 @@ public sealed class FeRequisitionUpdateTests
         var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
 
         // Assert
-        Assert.Equal("details", exception.ParamName);
+        Assert.Equal("Details", exception.ParamName);
     }
 
     [Fact]
@@ -283,6 +292,24 @@ public sealed class FeRequisitionUpdateTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Theory]
+    [MemberData(nameof(NullCollectionCases))]
+    public void Update_WhenChildCollectionIsNull_ThrowsArgumentNullException(
+        string expectedParamName,
+        Func<FeRequisitionUpdateModel, FeRequisitionUpdateModel> mutate)
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var updateModel = mutate(FeRequisitionTestData.CreateUpdateModel());
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal(expectedParamName, exception.ParamName);
     }
     
     private static FeRequisition CreateRequisition()
