@@ -13,6 +13,7 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Application.Common.Requisitions;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 
@@ -88,7 +89,10 @@ public class FeRequisitionService(
         var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
         
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
-
+        
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+        
         var requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
@@ -128,7 +132,7 @@ public class FeRequisitionService(
         await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
         
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
-
+        
         FeRequisition requisition;
 
         if (id.HasValue)
@@ -141,6 +145,9 @@ public class FeRequisitionService(
         }
         else
         {
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+           
             var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
             requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
             

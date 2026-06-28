@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
+using VanDriverRequisitions.Application.Common.Requisitions;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
@@ -89,7 +90,10 @@ public sealed class StdRequisitionService(
         var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
 
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
-
+        
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+        
         var requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
@@ -142,6 +146,9 @@ public sealed class StdRequisitionService(
         }
         else
         {
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+            
             var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
             requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
             context.StdRequisitions.Add(requisition);
