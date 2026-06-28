@@ -247,15 +247,15 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             "Additional cost");
     }
 
-    private void EnsureLocationBelongsToSelectedShop(
-        StdCollectionChargeBanksAndBinsUpdateModel incoming)
+    private void EnsureLocationBelongsToSelectedShop(StdCollectionChargeBanksAndBinsUpdateModel incoming)
     {
-        if (incoming.LocationShopId != ShopId)
+        var locationShopId = SnapshotGuard.EnsureRequiredId(incoming.LocationShopId, "Location shop id");
+
+        if (locationShopId != ShopId)
         {
             throw new InvalidOperationException("Location does not belong to the selected requisition shop.");
         }
     }
-
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)

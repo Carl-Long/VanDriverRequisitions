@@ -42,24 +42,11 @@ public sealed class StdCollectionChargeBanksAndBins : AuditableEntity, IStdRequi
     public void Update(StdCollectionChargeBanksAndBinsUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        
-        if (model.CollectionTypeId == Guid.Empty)
-        {
-            throw new InvalidOperationException("Collection type is required.");
-        }
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.CollectionTypeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.CollectionTypeCode);
+        var collectionTypeId = SnapshotGuard.EnsureRequiredId(model.CollectionTypeId, "Collection type id");
+        var locationCollectionTypeId = SnapshotGuard.EnsureRequiredId(model.LocationCollectionTypeId, "Location collection type id");
 
-        if (model.LocationId == Guid.Empty)
-        {
-            throw new InvalidOperationException("Location is required.");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.LocationName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.LocationPostCode);
-
-        if (model.LocationCollectionTypeId != model.CollectionTypeId)
+        if (locationCollectionTypeId != collectionTypeId)
         {
             throw new InvalidOperationException("Location does not belong to the selected collection type.");
         }
@@ -71,16 +58,15 @@ public sealed class StdCollectionChargeBanksAndBins : AuditableEntity, IStdRequi
 
         Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
 
-        CollectionTypeId = model.CollectionTypeId;
-        CollectionTypeNameSnapshot = model.CollectionTypeName.Trim();
-        CollectionTypeCodeSnapshot = model.CollectionTypeCode.Trim();
+        CollectionTypeId = collectionTypeId;
+        CollectionTypeNameSnapshot = SnapshotGuard.EnsureRequiredText(model.CollectionTypeName, "Collection type name");
+        CollectionTypeCodeSnapshot = SnapshotGuard.EnsureRequiredText(model.CollectionTypeCode, "Collection type code");
 
-        LocationId = model.LocationId;
-        LocationNameSnapshot = model.LocationName.Trim();
-        LocationPostCodeSnapshot = model.LocationPostCode.Trim();
+        LocationId = SnapshotGuard.EnsureRequiredId(model.LocationId, "Location id");
+        LocationNameSnapshot = SnapshotGuard.EnsureRequiredText(model.LocationName, "Location name");
+        LocationPostCodeSnapshot = SnapshotGuard.EnsureRequiredText(model.LocationPostCode, "Location post code");
 
         NumberOfBags = model.NumberOfBags;
-        ChargeType = model.ChargeType;
 
         var charge = StdChargeCalculator.Calculate(model.ChargeType, model.Miles, model.RatePerMile, model.FlatCharge);
 
