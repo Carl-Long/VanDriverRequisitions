@@ -1,5 +1,7 @@
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.ValueObjects;
+using static VanDriverRequisitions.Domain.UnitTests.TestData.WeeklyQuantitiesTestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
 
@@ -14,10 +16,9 @@ public sealed class FeMileageTests
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var mileage = FeMileage.Create(
-            WeekEndingDate,
-            week,
-            ratePerMile: 0.50m);
+        var mileage = FeMileage.Create(CreateModel(
+            week: week,
+            ratePerMile: 0.50m));
 
         // Assert
         Assert.Equal(WeekEndingDate, mileage.WeekEndingDate);
@@ -34,10 +35,9 @@ public sealed class FeMileageTests
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var mileage = FeMileage.Create(
-            WeekEndingDate,
-            week,
-            ratePerMile: null);
+        var mileage = FeMileage.Create(CreateModel(
+            week: week,
+            ratePerMile: null));
 
         // Assert
         Assert.Equal(28, mileage.TotalMiles);
@@ -59,10 +59,9 @@ public sealed class FeMileageTests
             saturday: null);
 
         // Act
-        var mileage = FeMileage.Create(
-            WeekEndingDate,
-            week,
-            ratePerMile: 0.50m);
+        var mileage = FeMileage.Create(CreateModel(
+            week: week,
+            ratePerMile: 0.50m));
 
         // Assert
         Assert.Equal(12, mileage.TotalMiles);
@@ -74,14 +73,15 @@ public sealed class FeMileageTests
     {
         // Arrange
         var mileage = CreateMileage();
+
         var newWeekEndingDate = new DateOnly(2026, 6, 20);
         var newWeek = CreateWeek(10, 20, 30, 40, 50, 60, 70);
 
         // Act
-        mileage.Update(
-            newWeekEndingDate,
-            newWeek,
-            ratePerMile: 0.25m);
+        mileage.Update(CreateModel(
+            weekEndingDate: newWeekEndingDate,
+            week: newWeek,
+            ratePerMile: 0.25m));
 
         // Assert
         Assert.Equal(newWeekEndingDate, mileage.WeekEndingDate);
@@ -94,15 +94,15 @@ public sealed class FeMileageTests
     [Fact]
     public void Create_WhenWeekIsNull_ThrowsArgumentNullException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeMileage.Create(
-                WeekEndingDate,
-                null!,
-                ratePerMile: 0.50m));
+        // Arrange
+        var model = new FeMileageUpdateModel(
+            Id: null,
+            WeekEndingDate,
+            Week: null!,
+            RatePerMile: 0.50m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => FeMileage.Create(model));
     }
 
     [Fact]
@@ -111,15 +111,14 @@ public sealed class FeMileageTests
         // Arrange
         var mileage = CreateMileage();
 
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            mileage.Update(
-                new DateOnly(2026, 6, 20),
-                null!,
-                ratePerMile: 0.50m));
+        var model = new FeMileageUpdateModel(
+            Id: null,
+            new DateOnly(2026, 6, 20),
+            Week: null!,
+            RatePerMile: 0.50m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => mileage.Update(model));
     }
 
     [Fact]
@@ -127,10 +126,7 @@ public sealed class FeMileageTests
     {
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeMileage.Create(
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerMile: -0.01m));
+            FeMileage.Create(CreateModel(ratePerMile: -0.01m)));
     }
 
     [Fact]
@@ -141,48 +137,38 @@ public sealed class FeMileageTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            mileage.Update(
-                new DateOnly(2026, 6, 20),
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerMile: -0.01m));
+            mileage.Update(CreateModel(
+                weekEndingDate: new DateOnly(2026, 6, 20),
+                ratePerMile: -0.01m)));
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(0.001)]
     public void Create_WhenRateIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerMile)
     {
+        // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeMileage.Create(
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerMile));
+            FeMileage.Create(CreateModel(ratePerMile: ratePerMile)));
     }
 
     private static FeMileage CreateMileage()
     {
-        return FeMileage.Create(
-            WeekEndingDate,
-            CreateWeek(1, 1, 1, 1, 1, 1, 1),
-            ratePerMile: 0.50m);
+        return FeMileage.Create(CreateModel(
+            week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerMile: 0.50m));
     }
 
-    private static WeeklyQuantities CreateWeek(
-        int? sunday = 0,
-        int? monday = 0,
-        int? tuesday = 0,
-        int? wednesday = 0,
-        int? thursday = 0,
-        int? friday = 0,
-        int? saturday = 0)
+    private static FeMileageUpdateModel CreateModel(
+        Guid? id = null,
+        DateOnly? weekEndingDate = null,
+        WeeklyQuantities? week = null,
+        decimal? ratePerMile = 0.50m)
     {
-        return new WeeklyQuantities(
-            sunday,
-            monday,
-            tuesday,
-            wednesday,
-            thursday,
-            friday,
-            saturday);
+        return new FeMileageUpdateModel(
+            id,
+            weekEndingDate ?? WeekEndingDate,
+            week ?? CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerMile);
     }
 }

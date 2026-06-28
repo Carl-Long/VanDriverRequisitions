@@ -174,7 +174,7 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         IsVatApplicable = details.Driver.HasVat;
     }
-
+    
     private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
         ChildCollectionSyncHelper.Sync(
@@ -184,19 +184,9 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             (existing, incoming) =>
             {
                 EnsureGeneralTaskTypeHasNotChanged(existing, incoming);
-
-                existing.Update(
-                    incoming.WeekEndingDate,
-                    incoming.Week,
-                    incoming.RatePerJob);
+                existing.Update(incoming);
             },
-            incoming => FeGeneralTask.Create(
-                incoming.FeTaskTypeId,
-                incoming.TaskTypeName,
-                incoming.TaskTypeCode,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
+            FeGeneralTask.Create,
             "Task");
     }
     
@@ -216,14 +206,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             _feMileages,
             incomingMileages,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerMile),
-            incoming => FeMileage.Create(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerMile),
+            (existing, incoming) => existing.Update(incoming),
+            FeMileage.Create,
             "Mileage");
     }
 
@@ -233,18 +217,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             _feTransfers,
             incomingTransfers,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.FromShop,
-                incoming.ToShop,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
-            incoming => FeTransfer.Create(
-                incoming.FromShop,
-                incoming.ToShop,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
+            (existing, incoming) => existing.Update(incoming),
+            FeTransfer.Create,
             "Transfer");
     }
 
@@ -254,26 +228,8 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             _feAdditionalCosts,
             incomingAdditionalCosts,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.ReasonId,
-                incoming.ReasonCodeSnapshot,
-                incoming.ReasonTextSnapshot,
-                incoming.ChargingOption,
-                incoming.TotalNumber,
-                incoming.RatePerJob,
-                incoming.Miles,
-                incoming.RatePerMile),
-            incoming => FeAdditionalCost.Create(
-                incoming.WeekEndingDate,
-                incoming.ReasonId,
-                incoming.ReasonCodeSnapshot,
-                incoming.ReasonTextSnapshot,
-                incoming.ChargingOption,
-                incoming.TotalNumber,
-                incoming.RatePerJob,
-                incoming.Miles,
-                incoming.RatePerMile),
+            (existing, incoming) => existing.Update(incoming),
+            FeAdditionalCost.Create,
             "Additional cost");
     }
 

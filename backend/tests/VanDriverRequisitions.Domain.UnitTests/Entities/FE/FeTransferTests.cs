@@ -1,6 +1,8 @@
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.ValueObjects;
+using static VanDriverRequisitions.Domain.UnitTests.TestData.WeeklyQuantitiesTestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
 
@@ -18,7 +20,11 @@ public sealed class FeTransferTests
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var transfer = FeTransfer.Create(fromShop, toShop, WeekEndingDate, week, ratePerJob: 2m);
+        var transfer = FeTransfer.Create(CreateModel(
+            fromShop: fromShop,
+            toShop: toShop,
+            week: week,
+            ratePerJob: 2m));
 
         // Assert
         Assert.Equal(WeekEndingDate, transfer.WeekEndingDate);
@@ -41,12 +47,16 @@ public sealed class FeTransferTests
     public void Create_WhenRateIsNull_CalculatesTotalNumberAndZeroTotalValue()
     {
         // Arrange
-        var fromShop = CreateShopSnapshot();
-        var toShop = CreateShopSnapshot();
+        var fromShop = CreateShopSnapshot(code: "S001", name: "From Shop");
+        var toShop = CreateShopSnapshot(code: "S002", name: "To Shop");
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var transfer = FeTransfer.Create(fromShop, toShop, WeekEndingDate, week, ratePerJob: null);
+        var transfer = FeTransfer.Create(CreateModel(
+            fromShop: fromShop,
+            toShop: toShop,
+            week: week,
+            ratePerJob: null));
 
         // Assert
         Assert.Equal(28, transfer.TotalNumber);
@@ -58,13 +68,17 @@ public sealed class FeTransferTests
     public void Create_WhenWeekHasNullValues_TreatsNullValuesAsZero()
     {
         // Arrange
-        var fromShop = CreateShopSnapshot();
-        var toShop = CreateShopSnapshot();
+        var fromShop = CreateShopSnapshot(code: "S001", name: "From Shop");
+        var toShop = CreateShopSnapshot(code: "S002", name: "To Shop");
 
-        var week = CreateWeek(null, 2, null,4, null, 6,  null);
+        var week = CreateWeek(null, 2, null, 4, null, 6, null);
 
         // Act
-        var transfer = FeTransfer.Create(fromShop, toShop, WeekEndingDate, week, ratePerJob: 3m);
+        var transfer = FeTransfer.Create(CreateModel(
+            fromShop: fromShop,
+            toShop: toShop,
+            week: week,
+            ratePerJob: 3m));
 
         // Assert
         Assert.Equal(12, transfer.TotalNumber);
@@ -84,12 +98,12 @@ public sealed class FeTransferTests
         var newWeek = CreateWeek(10, 20, 30, 40, 50, 60, 70);
 
         // Act
-        transfer.Update(
-            newFromShop,
-            newToShop,
-            newWeekEndingDate,
-            newWeek,
-            ratePerJob: 0.25m);
+        transfer.Update(CreateModel(
+            fromShop: newFromShop,
+            toShop: newToShop,
+            weekEndingDate: newWeekEndingDate,
+            week: newWeek,
+            ratePerJob: 0.25m));
 
         // Assert
         Assert.Equal(newWeekEndingDate, transfer.WeekEndingDate);
@@ -111,49 +125,49 @@ public sealed class FeTransferTests
     [Fact]
     public void Create_WhenFromShopIsNull_ThrowsArgumentNullException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeTransfer.Create(
-                null!,
-                CreateShopSnapshot(),
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+        // Arrange
+        var model = new FeTransferUpdateModel(
+            Id: null,
+            FromShop: null!,
+            ToShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+            WeekEndingDate,
+            CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("fromShop", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => FeTransfer.Create(model));
     }
 
     [Fact]
     public void Create_WhenToShopIsNull_ThrowsArgumentNullException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeTransfer.Create(
-                CreateShopSnapshot(),
-                null!,
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+        // Arrange
+        var model = new FeTransferUpdateModel(
+            Id: null,
+            FromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+            ToShop: null!,
+            WeekEndingDate,
+            CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("toShop", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => FeTransfer.Create(model));
     }
 
     [Fact]
     public void Create_WhenWeekIsNull_ThrowsArgumentNullException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeTransfer.Create(
-                CreateShopSnapshot(),
-                CreateShopSnapshot(),
-                WeekEndingDate,
-                null!,
-                ratePerJob: 1m));
+        // Arrange
+        var model = new FeTransferUpdateModel(
+            Id: null,
+            FromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+            ToShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+            WeekEndingDate,
+            Week: null!,
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => FeTransfer.Create(model));
     }
 
     [Fact]
@@ -162,17 +176,16 @@ public sealed class FeTransferTests
         // Arrange
         var transfer = CreateTransfer();
 
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            transfer.Update(
-                CreateShopSnapshot(),
-                CreateShopSnapshot(),
-                new DateOnly(2026, 6, 20),
-                null!,
-                ratePerJob: 1m));
+        var model = new FeTransferUpdateModel(
+            Id: null,
+            FromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+            ToShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+            new DateOnly(2026, 6, 20),
+            Week: null!,
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => transfer.Update(model));
     }
 
     [Fact]
@@ -186,12 +199,10 @@ public sealed class FeTransferTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeTransfer.Create(
-                fromShop,
-                toShop,
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+            FeTransfer.Create(CreateModel(
+                fromShop: fromShop,
+                toShop: toShop,
+                ratePerJob: 1m)));
     }
 
     [Fact]
@@ -200,18 +211,17 @@ public sealed class FeTransferTests
         // Arrange
         var transfer = CreateTransfer();
         var sameShopId = Guid.NewGuid();
-        
+
         var fromShop = CreateShopSnapshot(id: sameShopId, code: "S001", name: "From Shop");
         var toShop = CreateShopSnapshot(id: sameShopId, code: "S002", name: "To Shop");
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            transfer.Update(
-                fromShop,
-                toShop,
-                new DateOnly(2026, 6, 20),
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+            transfer.Update(CreateModel(
+                fromShop: fromShop,
+                toShop: toShop,
+                weekEndingDate: new DateOnly(2026, 6, 20),
+                ratePerJob: 1m)));
     }
 
     [Fact]
@@ -219,12 +229,10 @@ public sealed class FeTransferTests
     {
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeTransfer.Create(
-                CreateShopSnapshot(),
-                CreateShopSnapshot(),
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: -0.01m));
+            FeTransfer.Create(CreateModel(
+                fromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+                toShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+                ratePerJob: -0.01m)));
     }
 
     [Fact]
@@ -235,59 +243,54 @@ public sealed class FeTransferTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            transfer.Update(
-                CreateShopSnapshot(),
-                CreateShopSnapshot(),
-                new DateOnly(2026, 6, 20),
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: -0.01m));
+            transfer.Update(CreateModel(
+                fromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+                toShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+                weekEndingDate: new DateOnly(2026, 6, 20),
+                ratePerJob: -0.01m)));
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(0.001)]
     public void Create_WhenRateIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerJob)
     {
+        // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeTransfer.Create(
-                CreateShopSnapshot(),
-                CreateShopSnapshot(),
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob));
+            FeTransfer.Create(CreateModel(
+                fromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+                toShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+                ratePerJob: ratePerJob)));
     }
 
     private static FeTransfer CreateTransfer()
     {
-        return FeTransfer.Create(
-            CreateShopSnapshot(code: "S001", name: "From Shop"),
-            CreateShopSnapshot(code: "S002", name: "To Shop"),
-            WeekEndingDate,
-            CreateWeek(1, 1, 1, 1, 1, 1, 1),
-            ratePerJob: 1m);
+        return FeTransfer.Create(CreateModel(
+            fromShop: CreateShopSnapshot(code: "S001", name: "From Shop"),
+            toShop: CreateShopSnapshot(code: "S002", name: "To Shop"),
+            week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerJob: 1m));
+    }
+
+    private static FeTransferUpdateModel CreateModel(
+        Guid? id = null,
+        ShopSnapshot? fromShop = null,
+        ShopSnapshot? toShop = null,
+        DateOnly? weekEndingDate = null,
+        WeeklyQuantities? week = null,
+        decimal? ratePerJob = 1m)
+    {
+        return new FeTransferUpdateModel(
+            id,
+            fromShop ?? CreateShopSnapshot(code: "S001", name: "From Shop"),
+            toShop ?? CreateShopSnapshot(code: "S002", name: "To Shop"),
+            weekEndingDate ?? WeekEndingDate,
+            week ?? CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerJob);
     }
 
     private static ShopSnapshot CreateShopSnapshot(Guid? id = null, string code = "S001", string name = "Test Shop")
     {
         return new ShopSnapshot(id ?? Guid.NewGuid(), code, name);
-    }
-
-    private static WeeklyQuantities CreateWeek(
-        int? sunday = 0,
-        int? monday = 0,
-        int? tuesday = 0,
-        int? wednesday = 0,
-        int? thursday = 0,
-        int? friday = 0,
-        int? saturday = 0)
-    {
-        return new WeeklyQuantities(
-            sunday,
-            monday,
-            tuesday,
-            wednesday,
-            thursday,
-            friday,
-            saturday);
     }
 }

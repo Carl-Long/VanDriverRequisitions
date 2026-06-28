@@ -1,4 +1,6 @@
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
+using VanDriverRequisitions.Domain.ValueObjects;
 using static VanDriverRequisitions.Domain.UnitTests.TestData.WeeklyQuantitiesTestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
@@ -15,13 +17,12 @@ public sealed class FeGeneralTaskTests
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var task = FeGeneralTask.Create(
-            taskTypeId,
+        var task = FeGeneralTask.Create(CreateModel(
+            feTaskTypeId: taskTypeId,
             taskTypeName: "Collections",
             taskTypeCode: "23707",
-            WeekEndingDate,
-            week,
-            ratePerJob: 2m);
+            week: week,
+            ratePerJob: 2m));
 
         // Assert
         Assert.Equal(taskTypeId, task.FeTaskTypeId);
@@ -42,13 +43,9 @@ public sealed class FeGeneralTaskTests
         var week = CreateWeek(1, 2, 3, 4, 5, 6, 7);
 
         // Act
-        var task = FeGeneralTask.Create(
-            Guid.NewGuid(),
-            taskTypeName: "Collections",
-            taskTypeCode: "23707",
-            WeekEndingDate,
-            week,
-            ratePerJob: null);
+        var task = FeGeneralTask.Create(CreateModel(
+            week: week,
+            ratePerJob: null));
 
         // Assert
         Assert.Equal(28, task.TotalNumber);
@@ -70,13 +67,9 @@ public sealed class FeGeneralTaskTests
             saturday: null);
 
         // Act
-        var task = FeGeneralTask.Create(
-            Guid.NewGuid(),
-            taskTypeName: "Collections",
-            taskTypeCode: "23707",
-            WeekEndingDate,
-            week,
-            ratePerJob: 3m);
+        var task = FeGeneralTask.Create(CreateModel(
+            week: week,
+            ratePerJob: 3m));
 
         // Assert
         Assert.Equal(12, task.TotalNumber);
@@ -93,7 +86,10 @@ public sealed class FeGeneralTaskTests
         var newWeek = CreateWeek(10, 20, 30, 40, 50, 60, 70);
 
         // Act
-        task.Update(newWeekEndingDate, newWeek, ratePerJob: 0.25m);
+        task.Update(CreateModel(
+            weekEndingDate: newWeekEndingDate,
+            week: newWeek,
+            ratePerJob: 0.25m));
 
         // Assert
         Assert.Equal(newWeekEndingDate, task.WeekEndingDate);
@@ -109,18 +105,9 @@ public sealed class FeGeneralTaskTests
     [Fact]
     public void Create_WhenTaskTypeIdIsEmpty_ThrowsArgumentException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentException>(() =>
-            FeGeneralTask.Create(
-                Guid.Empty,
-                taskTypeName: "Collections",
-                taskTypeCode: "23707",
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
-
-        // Assert
-        Assert.Equal("feTaskTypeId", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentException>(() =>
+            FeGeneralTask.Create(CreateModel(feTaskTypeId: Guid.Empty)));
     }
 
     [Theory]
@@ -131,13 +118,7 @@ public sealed class FeGeneralTaskTests
     {
         // Act / Assert
         Assert.ThrowsAny<ArgumentException>(() =>
-            FeGeneralTask.Create(
-                Guid.NewGuid(),
-                taskTypeName!,
-                taskTypeCode: "23707",
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+            FeGeneralTask.Create(CreateModel(taskTypeName: taskTypeName!)));
     }
 
     [Theory]
@@ -148,30 +129,24 @@ public sealed class FeGeneralTaskTests
     {
         // Act / Assert
         Assert.ThrowsAny<ArgumentException>(() =>
-            FeGeneralTask.Create(
-                Guid.NewGuid(),
-                taskTypeName: "Collections",
-                taskTypeCode!,
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: 1m));
+            FeGeneralTask.Create(CreateModel(taskTypeCode: taskTypeCode!)));
     }
 
     [Fact]
     public void Create_WhenWeekIsNull_ThrowsArgumentNullException()
     {
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeGeneralTask.Create(
-                Guid.NewGuid(),
-                taskTypeName: "Collections",
-                taskTypeCode: "23707",
-                WeekEndingDate,
-                null!,
-                ratePerJob: 1m));
+        // Arrange
+        var model = new FeGeneralTaskUpdateModel(
+            Id: null,
+            FeTaskTypeId: Guid.NewGuid(),
+            TaskTypeName: "Collections",
+            TaskTypeCode: "23707",
+            WeekEndingDate,
+            Week: null!,
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => FeGeneralTask.Create(model));
     }
 
     [Fact]
@@ -180,15 +155,17 @@ public sealed class FeGeneralTaskTests
         // Arrange
         var task = CreateTask();
 
-        // Act
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            task.Update(
-                new DateOnly(2026, 6, 20),
-                null!,
-                ratePerJob: 1m));
+        var model = new FeGeneralTaskUpdateModel(
+            Id: null,
+            FeTaskTypeId: Guid.NewGuid(),
+            TaskTypeName: "Collections",
+            TaskTypeCode: "23707",
+            new DateOnly(2026, 6, 20),
+            Week: null!,
+            RatePerJob: 1m);
 
-        // Assert
-        Assert.Equal("week", exception.ParamName);
+        // Act / Assert
+        Assert.Throws<ArgumentNullException>(() => task.Update(model));
     }
 
     [Fact]
@@ -196,13 +173,7 @@ public sealed class FeGeneralTaskTests
     {
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeGeneralTask.Create(
-                Guid.NewGuid(),
-                taskTypeName: "Collections",
-                taskTypeCode: "23707",
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: -0.01m));
+            FeGeneralTask.Create(CreateModel(ratePerJob: -0.01m)));
     }
 
     [Fact]
@@ -213,37 +184,46 @@ public sealed class FeGeneralTaskTests
 
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            task.Update(
-                new DateOnly(2026, 6, 20),
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob: -0.01m));
+            task.Update(CreateModel(
+                weekEndingDate: new DateOnly(2026, 6, 20),
+                ratePerJob: -0.01m)));
     }
-    
+
     [Theory]
     [InlineData(0)]
     [InlineData(0.001)]
     public void Create_WhenRateIsBelowMinimum_ThrowsInvalidOperationException(decimal ratePerJob)
     {
+        // Act / Assert
         Assert.Throws<InvalidOperationException>(() =>
-            FeGeneralTask.Create(
-                Guid.NewGuid(),
-                taskTypeName: "Collections",
-                taskTypeCode: "23707",
-                WeekEndingDate,
-                CreateWeek(1, 1, 1, 1, 1, 1, 1),
-                ratePerJob));
+            FeGeneralTask.Create(CreateModel(ratePerJob: ratePerJob)));
     }
 
     private static FeGeneralTask CreateTask()
     {
-        return FeGeneralTask.Create(
-            Guid.NewGuid(),
+        return FeGeneralTask.Create(CreateModel(
             taskTypeName: "Collections",
             taskTypeCode: "23707",
-            WeekEndingDate,
-            CreateWeek(1, 1, 1, 1, 1, 1, 1),
-            ratePerJob: 1m);
+            week: CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerJob: 1m));
     }
 
-   
+    private static FeGeneralTaskUpdateModel CreateModel(
+        Guid? id = null,
+        Guid? feTaskTypeId = null,
+        string taskTypeName = "Collections",
+        string taskTypeCode = "23707",
+        DateOnly? weekEndingDate = null,
+        WeeklyQuantities? week = null,
+        decimal? ratePerJob = 1m)
+    {
+        return new FeGeneralTaskUpdateModel(
+            id,
+            feTaskTypeId ?? Guid.NewGuid(),
+            taskTypeName,
+            taskTypeCode,
+            weekEndingDate ?? WeekEndingDate,
+            week ?? CreateWeek(1, 1, 1, 1, 1, 1, 1),
+            ratePerJob);
+    }
 }
