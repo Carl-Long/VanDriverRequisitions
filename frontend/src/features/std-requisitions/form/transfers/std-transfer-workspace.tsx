@@ -29,6 +29,7 @@ import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 
 type Props = {
     readonly: boolean;
@@ -247,8 +248,14 @@ function TransfersTable({
                                 flatChargeLimitRule,
                             );
 
+                            const hasInactiveLookup =
+                                transfer.isShopFromActive === false ||
+                                transfer.isShopToActive === false;
+
                             const hasLimitIssue =
                                 !readonly && limitStatus.state !== "ok";
+
+                            const hasIssue = hasLimitIssue || hasInactiveLookup;
 
                             return (
                                 <TableRow
@@ -256,7 +263,7 @@ function TransfersTable({
                                     onClick={readonly ? undefined : () => onEdit(transfer)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue: hasLimitIssue,
+                                        hasIssue: hasIssue,
                                     })}
                                 >
                                     <TableCell>
@@ -279,15 +286,25 @@ function TransfersTable({
                                     </TableCell>
 
                                     <TableCell>
-                                        <span className="block text-sm">
-                                            <span className="text-muted-foreground">From: </span>
-                                            <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
-                                        </span>
+                                        <div className="space-y-1">
+                                            <div className="text-sm">
+                                                <span className="text-muted-foreground">From: </span>
+                                                <span className="font-medium">{transfer.shopLabelFrom ?? "-"}</span>
 
-                                        <span className="block text-sm">
-                                            <span className="text-muted-foreground">To: </span>
-                                            <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
-                                        </span>
+                                                {transfer.isShopFromActive === false && (
+                                                    <InactiveLookupWarning label="from shop" />
+                                                )}
+                                            </div>
+
+                                            <div className="text-sm">
+                                                <span className="text-muted-foreground">To: </span>
+                                                <span className="font-medium">{transfer.shopLabelTo ?? "-"}</span>
+
+                                                {transfer.isShopToActive === false && (
+                                                    <InactiveLookupWarning label="to shop" />
+                                                )}
+                                            </div>
+                                        </div>
                                     </TableCell>
 
                                     <TableCell align="right" className="tabular-nums">

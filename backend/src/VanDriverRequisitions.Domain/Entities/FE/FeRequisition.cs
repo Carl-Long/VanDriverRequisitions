@@ -2,6 +2,7 @@ using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
+using VanDriverRequisitions.Domain.Helpers;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
 
@@ -89,9 +90,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         if (!CanEdit)
         {
-            throw new InvalidOperationException(
-                "This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
+            throw new InvalidOperationException("This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
         }
+
+        EnsureUpdateModelIsComplete(model);
 
         UpdateDetails(model.Details);
         SyncGeneralTasks(model.GeneralTasks);
@@ -117,15 +119,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         {
             throw new InvalidOperationException("A pending submission already exists.");
         }
+        
 
         var submission = FeRequisitionSubmission.Create(NextSubmissionNumber, submittedBy, submittedAtUtc, snapshotJson);
 
         _submissions.Add(submission);
 
+        SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC");
         Status = RequisitionStatus.Submitted;
         SubmittedById = submittedBy.Id;
         SubmittedByNameSnapshot = submittedBy.NameSnapshot;
-        SubmittedAtUtc = submittedAtUtc;
 
         ClearRejection();
     }
@@ -160,168 +163,88 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
     {
         ArgumentNullException.ThrowIfNull(details);
 
-        RequisitionDate = details.RequisitionDate;
+        var driver = SnapshotGuard.EnsureRequiredVanDriver(details.Driver, "Driver");
+        var shop = SnapshotGuard.EnsureRequiredShop(details.Shop, "Shop");
 
-        VanDriverId = details.Driver.Id;
-        VanDriverCode = details.Driver.Code;
-        VanDriverName = details.Driver.Name;
-        TradersName = details.Driver.TradersName;
+        RequisitionDate = DateGuard.EnsureRequiredDate(details.RequisitionDate, "Requisition date");
 
-        ShopId = details.Shop.Id;
-        ShopCode = details.Shop.Code;
-        ShopName = details.Shop.Name;
+        VanDriverId = driver.Id;
+        VanDriverCode = driver.Code;
+        VanDriverName = driver.Name;
+        TradersName = driver.TradersName;
 
-        IsVatApplicable = details.Driver.HasVat;
+        ShopId = shop.Id;
+        ShopCode = shop.Code;
+        ShopName = shop.Name;
+
+        IsVatApplicable = driver.HasVat;
     }
-
+    
+    private static void EnsureUpdateModelIsComplete(FeRequisitionUpdateModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model.Details, nameof(model.Details));
+        ArgumentNullException.ThrowIfNull(model.GeneralTasks, nameof(model.GeneralTasks));
+        ArgumentNullException.ThrowIfNull(model.Mileages, nameof(model.Mileages));
+        ArgumentNullException.ThrowIfNull(model.Transfers, nameof(model.Transfers));
+        ArgumentNullException.ThrowIfNull(model.AdditionalCosts, nameof(model.AdditionalCosts));
+    }
+    
     private void SyncGeneralTasks(IEnumerable<FeGeneralTaskUpdateModel> incomingTasks)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feGeneralTasks,
             incomingTasks,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
-            incoming => FeGeneralTask.Create(
-                incoming.FeTaskTypeId,
-                incoming.TaskTypeName,
-                incoming.TaskTypeCode,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
+            (existing, incoming) =>
+            {
+                EnsureGeneralTaskTypeHasNotChanged(existing, incoming);
+                existing.Update(incoming);
+            },
+            FeGeneralTask.Create,
             "Task");
+    }
+    
+    private static void EnsureGeneralTaskTypeHasNotChanged(FeGeneralTask existing, FeGeneralTaskUpdateModel incoming)
+    {
+        if (existing.FeTaskTypeId == incoming.FeTaskTypeId)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException("An existing FE general task row cannot be changed to a different task type.");
     }
 
     private void SyncMileages(IEnumerable<FeMileageUpdateModel> incomingMileages)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feMileages,
             incomingMileages,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerMile),
-            incoming => FeMileage.Create(
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerMile),
+            (existing, incoming) => existing.Update(incoming),
+            FeMileage.Create,
             "Mileage");
     }
 
     private void SyncTransfers(IEnumerable<FeTransferUpdateModel> incomingTransfers)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feTransfers,
             incomingTransfers,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.FromShop,
-                incoming.ToShop,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
-            incoming => FeTransfer.Create(
-                incoming.FromShop,
-                incoming.ToShop,
-                incoming.WeekEndingDate,
-                incoming.Week,
-                incoming.RatePerJob),
+            (existing, incoming) => existing.Update(incoming),
+            FeTransfer.Create,
             "Transfer");
     }
 
     private void SyncAdditionalCosts(IEnumerable<FeAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _feAdditionalCosts,
             incomingAdditionalCosts,
             x => x.Id,
-            (existing, incoming) => existing.Update(
-                incoming.WeekEndingDate,
-                incoming.ReasonId,
-                incoming.ReasonCodeSnapshot,
-                incoming.ReasonTextSnapshot,
-                incoming.ChargingOption,
-                incoming.TotalNumber,
-                incoming.RatePerJob,
-                incoming.Miles,
-                incoming.RatePerMile),
-            incoming => FeAdditionalCost.Create(
-                incoming.WeekEndingDate,
-                incoming.ReasonId,
-                incoming.ReasonCodeSnapshot,
-                incoming.ReasonTextSnapshot,
-                incoming.ChargingOption,
-                incoming.TotalNumber,
-                incoming.RatePerJob,
-                incoming.Miles,
-                incoming.RatePerMile),
+            (existing, incoming) => existing.Update(incoming),
+            FeAdditionalCost.Create,
             "Additional cost");
-    }
-
-    private static void SyncChildren<TChild, TIncoming>(
-        List<TChild> children,
-        IEnumerable<TIncoming> incomingItems,
-        Func<TIncoming, Guid?> getId,
-        Action<TChild, TIncoming> updateExisting,
-        Func<TIncoming, TChild> createNew,
-        string childName)
-        where TChild : AuditableEntity
-    {
-        ArgumentNullException.ThrowIfNull(incomingItems);
-
-        var incomingList = incomingItems.ToList();
-        var existingChildren = GetPersistedChildrenById(children);
-        var incomingIds = GetIncomingIds(incomingList, getId);
-
-        var childrenToRemove = children
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var child in childrenToRemove)
-        {
-            children.Remove(child);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            var id = getId(incoming);
-
-            if (IsExistingChild(id))
-            {
-                if (!existingChildren.TryGetValue(id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"{childName} '{id}' not found.");
-                }
-
-                updateExisting(existing, incoming);
-            }
-            else
-            {
-                children.Add(createNew(incoming));
-            }
-        }
-    }
-
-    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
-    {
-        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
-    }
-
-    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
-    {
-        return incomingItems
-            .Select(getId)
-            .Where(IsExistingChild)
-            .Select(id => id!.Value)
-            .ToHashSet();
-    }
-
-    private static bool IsExistingChild(Guid? id)
-    {
-        return id.HasValue && id.Value != Guid.Empty;
     }
 
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
@@ -331,10 +254,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be approved.");
         }
 
+        ApprovedAtUtc = DateGuard.EnsureRequiredUtcDateTime(approvedAtUtc, "Approved at UTC");
         Status = RequisitionStatus.Approved;
         ApprovedById = approvedBy.Id;
         ApprovedByNameSnapshot = approvedBy.NameSnapshot;
-        ApprovedAtUtc = approvedAtUtc;
         PoNumber = poNumber;
 
         ClearRejection();
@@ -347,10 +270,10 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be rejected.");
         }
 
+        RejectedAtUtc = DateGuard.EnsureRequiredUtcDateTime(rejectedAtUtc, "Rejected at UTC");
         Status = RequisitionStatus.Rejected;
         RejectedById = rejectedBy.Id;
         RejectedByNameSnapshot = rejectedBy.NameSnapshot;
-        RejectedAtUtc = rejectedAtUtc;
         RejectionNotes = rejectionNotes;
 
         ClearApproval();

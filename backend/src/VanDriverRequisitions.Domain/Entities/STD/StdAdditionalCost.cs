@@ -38,29 +38,18 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
     public void Update(StdAdditionalCostUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-
-        if (model.Date == default)
-        {
-            throw new InvalidOperationException("Date is required.");
-        }
-
-        if (model.ReasonId == Guid.Empty)
-        {
-            throw new InvalidOperationException("Reason is required.");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonCodeSnapshot);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ReasonTextSnapshot);
-
+        
         if (model.NumberOfBags < 1)
         {
             throw new InvalidOperationException("Number of bags must be at least 1.");
         }
 
-        Date = model.Date;
-        ReasonId = model.ReasonId;
-        ReasonCodeSnapshot = model.ReasonCodeSnapshot.Trim();
-        ReasonTextSnapshot = model.ReasonTextSnapshot.Trim();
+        Date = DateGuard.EnsureRequiredDate(model.Date, "Date");
+        
+        ReasonId = SnapshotGuard.EnsureRequiredId(model.ReasonId, "Reason id");
+        ReasonCodeSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonCodeSnapshot, "Reason code");
+        ReasonTextSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonTextSnapshot, "Reason text");
+        
         NumberOfBags = model.NumberOfBags;
 
         ChargeType = model.ChargeType;

@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
@@ -9,30 +8,41 @@ using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Builders;
 
-public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context, IRequisitionLookupLoader lookupLoader) : IFeRequisitionSaveDataBuilder
+public sealed class FeRequisitionSaveDataBuilder(IRequisitionLookupLoader lookupLoader) : IFeRequisitionSaveDataBuilder
 {
-    public async Task<FeRequisitionSaveData> BuildAsync(SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
+    public async Task<FeRequisitionSaveData> BuildAsync(SaveFeRequisitionDto saveFeRequisitionDto,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(saveFeRequisitionDto);
 
-        var driverSummary = await lookupLoader.LoadDriverLookupAsync(saveFeRequisitionDto.VanDriverId, cancellationToken, includeInactive: true);
-        var shop = await lookupLoader.LoadShopRequisitionSnapshotAsync(saveFeRequisitionDto.ShopId, cancellationToken, includeInactive: true);
-        
-        var taskTypeMap = await LoadTaskTypeMapAsync(saveFeRequisitionDto.FeGeneralTasks, cancellationToken);
-        
-        var transferShopIds = saveFeRequisitionDto.FeTransfers.SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo });
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(saveFeRequisitionDto.VanDriverId,
+            cancellationToken, includeInactive: true);
+
+        var shop = await lookupLoader.LoadShopRequisitionSnapshotAsync(
+            saveFeRequisitionDto.ShopId,
+            cancellationToken,
+            includeInactive: true);
+
+        var taskTypeMap = await lookupLoader.LoadFeTaskTypeMapAsync(
+            saveFeRequisitionDto.FeGeneralTasks.Select(x => x.FeTaskTypeId),
+            cancellationToken,
+            includeInactive: true);
+
+        var transferShopIds = saveFeRequisitionDto.FeTransfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo });
 
         var transferShopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
             transferShopIds,
             cancellationToken,
             includeInactive: true);
-        
-        
-        var reasonMap = await LoadReasonMapAsync(saveFeRequisitionDto.FeAdditionalCosts, cancellationToken);
+
+        var reasonMap = await lookupLoader.LoadCostReasonMapAsync(
+            saveFeRequisitionDto.FeAdditionalCosts.Select(x => x.ReasonId),
+            cancellationToken,
+            includeInactive: true);
 
         var details = FeRequisitionMapper.MapToRequisitionDetails(saveFeRequisitionDto, driverSummary, shop);
 
@@ -41,39 +51,18 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context, 
         var transferModels = BuildTransferModels(saveFeRequisitionDto.FeTransfers, transferShopMap);
         var additionalCostModels = BuildAdditionalCostModels(saveFeRequisitionDto.FeAdditionalCosts, reasonMap);
 
-        var updateModel = new FeRequisitionUpdateModel(details, taskModels, mileageModels, transferModels, additionalCostModels);
+        var updateModel = new FeRequisitionUpdateModel(
+            details,
+            taskModels,
+            mileageModels,
+            transferModels,
+            additionalCostModels);
 
         return new FeRequisitionSaveData(driverSummary, updateModel, shop.IsActive);
     }
 
-    private async Task<Dictionary<Guid, FeTaskType>> LoadTaskTypeMapAsync(IEnumerable<SaveFeGeneralTaskDto> tasks, CancellationToken cancellationToken)
-    {
-        var taskTypeIds = tasks
-            .Select(x => x.FeTaskTypeId)
-            .Distinct()
-            .ToList();
-
-        return await context.FeTaskTypes
-            .IgnoreQueryFilters()
-            .Where(x => taskTypeIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-    }
-
-    private async Task<Dictionary<Guid, CostReason>> LoadReasonMapAsync(IEnumerable<SaveFeAdditionalCostDto> additionalCosts, CancellationToken cancellationToken)
-    {
-        var reasonIds = additionalCosts
-            .Select(x => x.ReasonId)
-            .Distinct()
-            .ToList();
-
-        return await context.CostReasons
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => reasonIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-    }
-
-    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks, IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
+    private static List<FeGeneralTaskUpdateModel> BuildGeneralTaskModels(IEnumerable<SaveFeGeneralTaskDto> tasks,
+        IReadOnlyDictionary<Guid, FeTaskType> taskTypeMap)
     {
         return tasks
             .Select(dto =>
@@ -83,10 +72,8 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context, 
                     throw new NotFoundException($"Task type '{dto.FeTaskTypeId}' was not found.");
                 }
 
-                if (!taskType.IsActive && dto.Id is null)
-                {
-                    throw new BadRequestException($"Task type '{taskType.Code} - {taskType.Name}' is inactive and cannot be added to a requisition.");
-                }
+                EnsureActiveForNewRow(isActive: taskType.IsActive, rowId: dto.Id,
+                    lookupDescription: $"Task type '{taskType.Code} - {taskType.Name}'");
 
                 return FeGeneralTaskMapper.ToUpdateModel(dto, taskType);
             })
@@ -98,15 +85,14 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context, 
         return mileages.Select(FeMileageMapper.ToUpdateModel).ToList();
     }
 
-    private static List<FeTransferUpdateModel> BuildTransferModels(
-        IEnumerable<SaveFeTransferDto> transfers,
+    private static List<FeTransferUpdateModel> BuildTransferModels(IEnumerable<SaveFeTransferDto> transfers,
         IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
     {
         return transfers
             .Select(dto =>
             {
-                var fromShop = MapShopSnapshot(dto.ShopIdFrom, shopMap);
-                var toShop = MapShopSnapshot(dto.ShopIdTo, shopMap);
+                var fromShop = MapShopSnapshot(dto.ShopIdFrom, shopMap, dto.Id, "From");
+                var toShop = MapShopSnapshot(dto.ShopIdTo, shopMap, dto.Id, "To");
 
                 return FeTransferMapper.ToUpdateModel(dto, fromShop, toShop);
             })
@@ -114,34 +100,51 @@ public sealed class FeRequisitionSaveDataBuilder(IApplicationDbContext context, 
     }
 
     private static List<FeAdditionalCostUpdateModel> BuildAdditionalCostModels(
-        IEnumerable<SaveFeAdditionalCostDto> additionalCosts,
-        IReadOnlyDictionary<Guid, CostReason> reasonMap)
+        IEnumerable<SaveFeAdditionalCostDto> additionalCosts, IReadOnlyDictionary<Guid, CostReason> reasonMap)
     {
-        {
-            return additionalCosts
-                .Select(dto =>
+        return additionalCosts
+            .Select(dto =>
+            {
+                if (!reasonMap.TryGetValue(dto.ReasonId, out var reason))
                 {
-                    if (!reasonMap.TryGetValue(dto.ReasonId, out var reason))
-                    {
-                        throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.");
-                    }
+                    throw new NotFoundException($"Additional cost reason '{dto.ReasonId}' was not found.");
+                }
 
-                    if (reason.Scope is not CostReasonScope.Fe and not CostReasonScope.Shared)
-                    {
-                        throw new BadRequestException(
-                            $"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for FE requisitions.");
-                    }
+                if (!reason.AppliesToFe())
+                {
+                    throw new BadRequestException(
+                        $"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for FE requisitions.");
+                }
 
-                    return FeAdditionalCostMapper.ToUpdateModel(dto, reason);
-                })
-                .ToList();
-        }
+                EnsureActiveForNewRow(isActive: reason.IsActive, rowId: dto.Id,
+                    lookupDescription: $"Additional cost reason '{reason.Code} - {reason.Reason}'");
+
+                return FeAdditionalCostMapper.ToUpdateModel(dto, reason);
+            })
+            .ToList();
     }
 
-    private static ShopSnapshot MapShopSnapshot(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap)
+    private static ShopSnapshot MapShopSnapshot(Guid shopId,
+        IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> shopMap,
+        Guid? rowId,
+        string direction)
     {
-        return !shopMap.TryGetValue(shopId, out var shop)
-            ? throw new NotFoundException($"Shop '{shopId}' was not found.")
-            : new ShopSnapshot(shop.Id, shop.Code, shop.Name);
+        if (!shopMap.TryGetValue(shopId, out var shop))
+        {
+            throw new NotFoundException($"Shop '{shopId}' was not found.");
+        }
+
+        EnsureActiveForNewRow(isActive: shop.IsActive, rowId: rowId,
+            lookupDescription: $"{direction} shop '{shop.Code} - {shop.Name}'");
+
+        return new ShopSnapshot(shop.Id, shop.Code, shop.Name);
+    }
+
+    private static void EnsureActiveForNewRow(bool isActive, Guid? rowId, string lookupDescription)
+    {
+        if (!isActive && rowId is null)
+        {
+            throw new BadRequestException($"{lookupDescription} is inactive and cannot be added to a requisition.");
+        }
     }
 }

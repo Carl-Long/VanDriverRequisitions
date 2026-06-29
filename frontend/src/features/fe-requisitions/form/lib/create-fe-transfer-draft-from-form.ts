@@ -13,9 +13,11 @@ export function createFeTransferDraftFromForm({ form }: Params): FeTransferDraft
 
         shopIdFrom: form.shopIdFrom,
         shopLabelFrom: form.shopLabelFrom,
+        isShopFromActive: form.isShopFromActive,
 
         shopIdTo: form.shopIdTo,
         shopLabelTo: form.shopLabelTo,
+        isShopToActive: form.isShopToActive,
 
         weekEndingDate: form.weekEndingDate,
 

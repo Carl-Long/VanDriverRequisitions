@@ -19,6 +19,7 @@ import { DayInput } from "../form-fields/day-input";
 import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
 import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -148,12 +149,18 @@ export function FeTransferDrawer({
                         placeholder="Select from shop"
                         value={form.shopIdFrom}
                         label={form.shopLabelFrom}
+                        isShopActive={form.isShopFromActive}
                         error={errors["shopIdFrom"]}
                         onChange={(value, label) => {
                             setForm((prev) => ({
                                 ...prev,
                                 shopIdFrom: value,
                                 shopLabelFrom: label,
+                                isShopFromActive: resolveSelectedLookupActiveState({
+                                    previousId: prev.shopIdFrom,
+                                    previousIsActive: prev.isShopFromActive,
+                                    nextId: value,
+                                }),
                             }));
 
                             clearError("shopIdFrom");
@@ -168,12 +175,18 @@ export function FeTransferDrawer({
                         placeholder="Select to shop"
                         value={form.shopIdTo}
                         label={form.shopLabelTo}
+                        isShopActive={form.isShopToActive}
                         error={errors["shopIdTo"]}
                         onChange={(value, label) => {
                             setForm((prev) => ({
                                 ...prev,
                                 shopIdTo: value,
                                 shopLabelTo: label,
+                                isShopToActive: resolveSelectedLookupActiveState({
+                                    previousId: prev.shopIdTo,
+                                    previousIsActive: prev.isShopToActive,
+                                    nextId: value,
+                                }),
                             }));
 
                             clearError("shopIdTo");

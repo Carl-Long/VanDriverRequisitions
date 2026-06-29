@@ -11,10 +11,12 @@ public sealed record StdTransferDetailDto
     public Guid ShopIdFrom { get; init; }
     public required string ShopCodeFrom { get; init; }
     public required string ShopNameFrom { get; init; }
+    public bool IsShopFromActive { get; init; }
 
     public Guid ShopIdTo { get; init; }
     public required string ShopCodeTo { get; init; }
     public required string ShopNameTo { get; init; }
+    public bool IsShopToActive { get; init; }
 
     public int? NumberOfBags { get; init; }
     public int? NumberOfBoxes { get; init; }

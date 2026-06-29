@@ -1,10 +1,21 @@
 using VanDriverRequisitions.Domain.Entities.STD;
+using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.UnitTests.TestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.STD;
 
 public sealed class StdRequisitionUpdateTests
 {
+    public static TheoryData<string, Func<StdRequisitionUpdateModel, StdRequisitionUpdateModel>> NullCollectionCases =>
+        new()
+        {
+            { "Pickups", model => model with { Pickups = null! } },
+            { "Transfers", model => model with { Transfers = null! } },
+            { "CollectionChargesBanksAndBins", model => model with { CollectionChargesBanksAndBins = null! } },
+            { "CollectionVanPacks", model => model with { CollectionVanPacks = null! } },
+            { "AdditionalCosts", model => model with { AdditionalCosts = null! } }
+        };
+    
     [Fact]
     public void Update_WhenDetailsChange_UpdatesDetails()
     {
@@ -215,7 +226,126 @@ public sealed class StdRequisitionUpdateTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
     }
+    
+    [Fact]
+    public void Update_WhenDetailsIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
 
+        var validModel = StdRequisitionTestData.CreateUpdateModel();
+        var updateModel = validModel with { Details = null! };
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Details", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenDriverSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            StdRequisitionTestData.RequisitionDate,
+            Driver: null!,
+            Shop: StdRequisitionTestData.CreateShopSnapshot(id: StdRequisitionTestData.DefaultShopId));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Driver", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            StdRequisitionTestData.RequisitionDate,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: null!);
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Shop", exception.ParamName);
+    }
+    
+    [Fact]
+    public void Update_WhenRequisitionDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new StdRequisitionDetails(
+            RequisitionDate: default,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: StdRequisitionTestData.CreateShopSnapshot());
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
+    [Fact]
+    public void Update_WhenDriverSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = StdRequisitionTestData.CreateDetails(driver: StdRequisitionTestData.CreateDriverSnapshot(id: Guid.Empty));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = StdRequisitionTestData.CreateDetails(shop: StdRequisitionTestData.CreateShopSnapshot(id: Guid.Empty));
+
+        var updateModel = StdRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
+    [Theory]
+    [MemberData(nameof(NullCollectionCases))]
+    public void Update_WhenChildCollectionIsNull_ThrowsArgumentNullException(
+        string expectedParamName,
+        Func<StdRequisitionUpdateModel, StdRequisitionUpdateModel> mutate)
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var updateModel = mutate(StdRequisitionTestData.CreateUpdateModel());
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal(expectedParamName, exception.ParamName);
+    }
+    
     private static StdRequisition CreateRequisition()
     {
         return StdRequisition.Create(StdRequisitionTestData.RequisitionNumber, StdRequisitionTestData.CreateUpdateModel());

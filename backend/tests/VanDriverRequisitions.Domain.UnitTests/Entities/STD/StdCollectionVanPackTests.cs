@@ -99,4 +99,17 @@ public sealed class StdCollectionVanPackTests
 
         Assert.Throws<InvalidOperationException>(() => StdCollectionVanPack.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenDeliveryDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = StdRequisitionTestData.CreateCollectionVanPackModel() with
+        {
+            DeliveryDate = default(DateOnly)
+        };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdCollectionVanPack.Create(model));
+    }
 }

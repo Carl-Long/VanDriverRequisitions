@@ -74,9 +74,11 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
 
             shopIdFrom: transfer.shopIdFrom,
             shopLabelFrom: `${transfer.shopCodeFrom} - ${transfer.shopNameFrom}`,
+            isShopFromActive: transfer.isShopFromActive,
 
             shopIdTo: transfer.shopIdTo,
             shopLabelTo: `${transfer.shopCodeTo} - ${transfer.shopNameTo}`,
+            isShopToActive: transfer.isShopToActive,
 
             weekEndingDate: new Date(transfer.weekEndingDate),
 

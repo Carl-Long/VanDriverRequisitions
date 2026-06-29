@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
 
 namespace VanDriverRequisitions.Domain.Entities.Common;
@@ -22,12 +23,15 @@ public class SubmitWindow : AuditableEntity, ISoftDeletable
 
     public void Update(DateTime openFrom, DateTime openTo)
     {
-        if (openTo <= openFrom)
+        var guardedOpenFrom = DateGuard.EnsureRequiredUtcDateTime(openFrom, "Open from");
+        var guardedOpenTo = DateGuard.EnsureRequiredUtcDateTime(openTo, "Open to");
+
+        if (guardedOpenTo <= guardedOpenFrom)
         {
             throw new InvalidOperationException("Submit window end must be after start.");
         }
-        
-        OpenFrom = openFrom;
-        OpenTo = openTo;
+
+        OpenFrom = guardedOpenFrom;
+        OpenTo = guardedOpenTo;
     }
 }

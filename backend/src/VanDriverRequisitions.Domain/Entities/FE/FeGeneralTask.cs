@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -22,49 +23,40 @@ public sealed class FeGeneralTask : AuditableEntity, IFeRequisitionChild
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
 
-    public static FeGeneralTask Create(
-        Guid feTaskTypeId,
-        string taskTypeName,
-        string taskTypeCode,
-        DateOnly weekEndingDate,
-        WeeklyQuantities week,
-        decimal? ratePerJob)
+    public static FeGeneralTask Create(FeGeneralTaskUpdateModel model)
     {
+        ArgumentNullException.ThrowIfNull(model);
+
         var task = new FeGeneralTask();
 
-        task.SetTaskType(feTaskTypeId, taskTypeName, taskTypeCode);
-        task.Update(weekEndingDate, week, ratePerJob);
+        task.SetTaskType(model.FeTaskTypeId, model.TaskTypeName, model.TaskTypeCode);
+        task.Update(model);
 
         return task;
     }
 
-    public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerJob)
+    public void Update(FeGeneralTaskUpdateModel model)
     {
-        ArgumentNullException.ThrowIfNull(week);
-        MoneyGuard.EnsureOptionalMoneyAmount(ratePerJob, "Rate per job");
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
 
-        WeekEndingDate = weekEndingDate;
-        Week = week;
-        RatePerJob = ratePerJob;
+        MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerJob, "Rate per job");
+
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
+        Week = model.Week;
+        RatePerJob = model.RatePerJob;
 
         RecalculateTotals();
     }
 
     private void SetTaskType(Guid feTaskTypeId, string taskTypeName, string taskTypeCode)
     {
-        if (feTaskTypeId == Guid.Empty)
-        {
-            throw new ArgumentException("Task type id is required.", nameof(feTaskTypeId));
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskTypeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(taskTypeCode);
-
-        FeTaskTypeId = feTaskTypeId;
-        TaskTypeName = taskTypeName;
-        TaskTypeCode = taskTypeCode;
+        FeTaskTypeId = SnapshotGuard.EnsureRequiredId(feTaskTypeId, "Task type id");
+        TaskTypeName = SnapshotGuard.EnsureRequiredText(taskTypeName, "Task type name");
+        TaskTypeCode = SnapshotGuard.EnsureRequiredText(taskTypeCode, "Task type code");
     }
-
+    
     private void RecalculateTotals()
     {
         TotalNumber = Week.Total;

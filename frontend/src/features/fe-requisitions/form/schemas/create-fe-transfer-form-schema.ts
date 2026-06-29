@@ -13,6 +13,7 @@ export function createFeTransferFormSchema(limitRule?: RequisitionLimitRuleSumma
                 .refine((x) => x !== null, "From shop is required"),
 
             shopLabelFrom: z.string().nullable(),
+            isShopFromActive: z.boolean(),
 
             shopIdTo: z
                 .string()
@@ -20,6 +21,7 @@ export function createFeTransferFormSchema(limitRule?: RequisitionLimitRuleSumma
                 .refine((x) => x !== null, "To shop is required"),
 
             shopLabelTo: z.string().nullable(),
+            isShopToActive: z.boolean(),
 
             weekEndingDate: z.date({
                 error: "Week ending date is required",

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Extensions;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Common.Models;
+using VanDriverRequisitions.Application.Common.Requisitions;
 using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
@@ -10,6 +11,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.STD;
 
@@ -24,6 +26,7 @@ public sealed class StdRequisitionService(
     IStdRequisitionSaveDataBuilder saveDataBuilder,
     IStdRequisitionLimitValidator limitValidator,
     TimeProvider timeProvider,
+    ISubmitWindowSubmissionGuard submitWindowGuard,
     IRequisitionLookupLoader lookupLoader) : IStdRequisitionService
 {
     public async Task<PagedResult<StdRequisitionSummaryDto>> GetAllAsync(StdRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -87,7 +90,10 @@ public sealed class StdRequisitionService(
         var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
 
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
-
+        
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+        
         var requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
@@ -124,7 +130,8 @@ public sealed class StdRequisitionService(
         var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
-
+        await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
+        
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
 
         StdRequisition requisition;
@@ -139,6 +146,9 @@ public sealed class StdRequisitionService(
         }
         else
         {
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+            
             var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
             requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
             context.StdRequisitions.Add(requisition);
@@ -222,14 +232,16 @@ public sealed class StdRequisitionService(
         var additionalCostReasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
         var collectionTypeActiveMap = await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
         var locationActiveMap = await LoadLocationActiveMapAsync(requisition, cancellationToken);
-
+        var transferShopActiveMap = await LoadTransferShopActiveMapAsync(requisition, cancellationToken);
+        
         return StdRequisitionMapper.MapRequisitionToDetailDto(
             requisition,
             driverSummary,
             shopActive,
             additionalCostReasonActiveMap,
             collectionTypeActiveMap,
-            locationActiveMap);
+            locationActiveMap,
+            transferShopActiveMap);
     }
     
     private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
@@ -286,5 +298,29 @@ public sealed class StdRequisitionService(
             .AsNoTracking()
             .Where(x => locationIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(
+        StdRequisition requisition,
+        CancellationToken cancellationToken)
+    {
+        var shopIds = requisition.Transfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+
+        if (shopIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        var shopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            shopIds,
+            cancellationToken,
+            includeInactive: true);
+
+        return shopMap.ToDictionary(
+            x => x.Key,
+            x => x.Value.IsActive);
     }
 }

@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
@@ -21,69 +22,35 @@ public sealed class FeAdditionalCost : AuditableEntity, IFeRequisitionChild
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
 
-    public static FeAdditionalCost Create(
-        DateOnly weekEndingDate,
-        Guid reasonId,
-        string reasonCodeSnapshot,
-        string reasonTextSnapshot,
-        ChargingOption chargingOption,
-        int? totalNumber,
-        decimal? ratePerJob,
-        int? miles,
-        decimal? ratePerMile)
+    public static FeAdditionalCost Create(FeAdditionalCostUpdateModel model)
     {
         var cost = new FeAdditionalCost();
-
-        cost.Update(
-            weekEndingDate,
-            reasonId,
-            reasonCodeSnapshot,
-            reasonTextSnapshot,
-            chargingOption,
-            totalNumber,
-            ratePerJob,
-            miles,
-            ratePerMile);
-
+        cost.Update(model);
         return cost;
     }
 
-    public void Update(
-        DateOnly weekEndingDate,
-        Guid reasonId,
-        string reasonCodeSnapshot,
-        string reasonTextSnapshot,
-        ChargingOption chargingOption,
-        int? totalNumber,
-        decimal? ratePerJob,
-        int? miles,
-        decimal? ratePerMile)
+    public void Update(FeAdditionalCostUpdateModel model)
     {
-        if (reasonId == Guid.Empty)
-        {
-            throw new InvalidOperationException("Reason is required.");
-        }
+        ArgumentNullException.ThrowIfNull(model);
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(reasonCodeSnapshot);
-        ArgumentException.ThrowIfNullOrWhiteSpace(reasonTextSnapshot);
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
 
-        WeekEndingDate = weekEndingDate;
-        ReasonId = reasonId;
-        ReasonCodeSnapshot = reasonCodeSnapshot.Trim();
-        ReasonTextSnapshot = reasonTextSnapshot.Trim();
-
-        switch (chargingOption)
+        ReasonId = SnapshotGuard.EnsureRequiredId(model.ReasonId, "Reason id");
+        ReasonCodeSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonCodeSnapshot, "Reason code");
+        ReasonTextSnapshot = SnapshotGuard.EnsureRequiredText(model.ReasonTextSnapshot, "Reason text");
+        
+        switch (model.ChargingOption)
         {
             case ChargingOption.Mileage:
-                SetMileage(miles, ratePerMile);
+                SetMileage(model.Miles, model.RatePerMile);
                 break;
 
             case ChargingOption.Job:
-                SetJobs(totalNumber, ratePerJob);
+                SetJobs(model.TotalNumber, model.RatePerJob);
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(chargingOption), chargingOption, "Unknown charging option.");
+                throw new ArgumentOutOfRangeException(nameof(model.ChargingOption), model.ChargingOption, "Unknown charging option.");
         }
     }
 

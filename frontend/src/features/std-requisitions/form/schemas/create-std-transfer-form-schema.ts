@@ -23,11 +23,13 @@ export function createStdTransferFormSchema({
             shopLabelFrom: z.string().nullable(),
             shopCodeFrom: z.string().nullable(),
             shopNameFrom: z.string().nullable(),
+            isShopFromActive: z.boolean(),
 
             shopIdTo: z.string().nullable(),
             shopLabelTo: z.string().nullable(),
             shopCodeTo: z.string().nullable(),
             shopNameTo: z.string().nullable(),
+            isShopToActive: z.boolean(),
 
             numberOfBags: z
                 .number()

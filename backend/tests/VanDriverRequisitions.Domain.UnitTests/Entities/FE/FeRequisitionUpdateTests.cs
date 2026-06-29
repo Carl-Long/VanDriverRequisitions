@@ -1,10 +1,20 @@
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.UnitTests.TestData;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
 
 public sealed class FeRequisitionUpdateTests
 {
+    public static TheoryData<string, Func<FeRequisitionUpdateModel, FeRequisitionUpdateModel>> NullCollectionCases =>
+        new()
+        {
+            { "GeneralTasks", model => model with { GeneralTasks = null! } },
+            { "Mileages", model => model with { Mileages = null! } },
+            { "Transfers", model => model with { Transfers = null! } },
+            { "AdditionalCosts", model => model with { AdditionalCosts = null! } }
+        };
+    
     [Fact]
     public void Update_WhenDetailsChange_UpdatesDetails()
     {
@@ -182,7 +192,126 @@ public sealed class FeRequisitionUpdateTests
         Assert.False(requisition.CanEdit);
         Assert.False(requisition.CanSubmit);
     }
+    
+    [Fact]
+    public void Update_WhenDetailsIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
 
+        var validModel = FeRequisitionTestData.CreateUpdateModel();
+        var updateModel = validModel with { Details = null! };
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Details", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenDriverSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new RequisitionDetails(
+            FeRequisitionTestData.RequisitionDate,
+            Driver: null!,
+            Shop: FeRequisitionTestData.CreateShopSnapshot());
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Driver", exception.ParamName);
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new RequisitionDetails(
+            FeRequisitionTestData.RequisitionDate,
+            Driver: FeRequisitionTestData.CreateDriverSnapshot(),
+            Shop: null!);
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal("Shop", exception.ParamName);
+    }
+    
+    [Fact]
+    public void Update_WhenRequisitionDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = new RequisitionDetails(
+            RequisitionDate: default,
+            Driver: StdRequisitionTestData.CreateDriverSnapshot(),
+            Shop: StdRequisitionTestData.CreateShopSnapshot());
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+    
+    [Fact]
+    public void Update_WhenDriverSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = FeRequisitionTestData.CreateDetails(driver: FeRequisitionTestData.CreateDriverSnapshot(id: Guid.Empty));
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Fact]
+    public void Update_WhenShopSnapshotIdIsEmpty_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var details = FeRequisitionTestData.CreateDetails(shop: FeRequisitionTestData.CreateShopSnapshot(id: Guid.Empty));
+
+        var updateModel = FeRequisitionTestData.CreateUpdateModel(details: details);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => requisition.Update(updateModel));
+    }
+
+    [Theory]
+    [MemberData(nameof(NullCollectionCases))]
+    public void Update_WhenChildCollectionIsNull_ThrowsArgumentNullException(
+        string expectedParamName,
+        Func<FeRequisitionUpdateModel, FeRequisitionUpdateModel> mutate)
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        var updateModel = mutate(FeRequisitionTestData.CreateUpdateModel());
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => requisition.Update(updateModel));
+
+        // Assert
+        Assert.Equal(expectedParamName, exception.ParamName);
+    }
+    
     private static FeRequisition CreateRequisition()
     {
         return FeRequisition.Create(FeRequisitionTestData.RequisitionNumber, FeRequisitionTestData.CreateUpdateModel());

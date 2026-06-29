@@ -5,9 +5,11 @@ export function mapFeTransferDraftToForm(row: FeTransferDraft): FeTransferForm {
     return {
         shopIdFrom: row.shopIdFrom,
         shopLabelFrom: row.shopLabelFrom,
+        isShopFromActive: row.isShopFromActive,
 
         shopIdTo: row.shopIdTo,
         shopLabelTo: row.shopLabelTo,
+        isShopToActive: row.isShopToActive,
 
         weekEndingDate: row.weekEndingDate,
 
