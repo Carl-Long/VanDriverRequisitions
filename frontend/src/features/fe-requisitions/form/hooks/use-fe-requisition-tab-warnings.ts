@@ -73,7 +73,11 @@ export function useFeRequisitionTabWarnings({
                     category: REQUISITION_ROW_CATEGORIES.TRANSFER,
                 });
 
-                return getFeTransferLimitStatus(row, limitRule).state !== "ok";
+                return (
+                    row.isShopFromActive === false ||
+                    row.isShopToActive === false ||
+                    getFeTransferLimitStatus(row, limitRule).state !== "ok"
+                );
             }),
 
             additionalCostsHasWarning: draft.feAdditionalCosts.some((row) => {
@@ -109,17 +113,17 @@ export function useFeRequisitionTabWarnings({
 
 type LimitStatus =
     | {
-          state: "ok";
-          messages: string[];
-      }
+        state: "ok";
+        messages: string[];
+    }
     | {
-          state: "missing-limit";
-          messages: string[];
-      }
+        state: "missing-limit";
+        messages: string[];
+    }
     | {
-          state: "exceeds-limit";
-          messages: string[];
-      };
+        state: "exceeds-limit";
+        messages: string[];
+    };
 
 function getFeTransferLimitStatus(
     row: FeTransferDraft,
