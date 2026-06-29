@@ -264,6 +264,48 @@ public sealed class FeRequisitionSubmissionWorkflowTests
         // Assert
         Assert.Equal("rejectionNotes", exception.ParamName);
     }
+    
+    [Fact]
+    public void Submit_WhenSubmittedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.Submit(
+                FeRequisitionTestData.CreateAuditUser(),
+                submittedAtUtc: default,
+                snapshotJson: "{}"));
+    }
+
+    [Fact]
+    public void ApproveSubmission_WhenApprovedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.ApproveSubmission(
+                FeRequisitionTestData.CreateAuditUser(),
+                approvedAtUtc: default,
+                poNumber: "PO-123"));
+    }
+
+    [Fact]
+    public void RejectSubmission_WhenRejectedAtUtcIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.RejectSubmission(
+                FeRequisitionTestData.CreateAuditUser(),
+                rejectedAtUtc: default,
+                rejectionNotes: "Incorrect rate."));
+    }
 
     private static FeRequisition CreateRequisition()
     {

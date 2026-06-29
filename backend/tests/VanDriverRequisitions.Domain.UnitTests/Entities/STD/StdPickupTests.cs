@@ -146,4 +146,17 @@ public sealed class StdPickupTests
         // Act / Assert
         Assert.Throws<ArgumentOutOfRangeException>(() => StdPickup.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = StdRequisitionTestData.CreatePickupMileageModel() with
+        {
+            Date = default(DateOnly)
+        };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdPickup.Create(model));
+    }
 }

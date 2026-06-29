@@ -21,7 +21,7 @@ public static class FeTransferMapper
             saveFeTransferDto.RatePerJob);
     }
     
-    public static FeTransferDetailDto ToDetailDto(FeTransfer transfer)
+    public static FeTransferDetailDto ToDetailDto(FeTransfer transfer, bool isShopFromActive, bool isShopToActive)
     {
         return new FeTransferDetailDto
         {
@@ -31,10 +31,12 @@ public static class FeTransferMapper
             ShopIdFrom = transfer.ShopIdFrom,
             ShopCodeFrom = transfer.ShopCodeFrom,
             ShopNameFrom = transfer.ShopNameFrom,
+            IsShopFromActive = isShopFromActive,
 
             ShopIdTo = transfer.ShopIdTo,
             ShopCodeTo = transfer.ShopCodeTo,
             ShopNameTo = transfer.ShopNameTo,
+            IsShopToActive = isShopToActive,
 
             Week = WeeklyQuantitiesMapper.ToDto(transfer.Week),
             TotalNumber = transfer.TotalNumber,

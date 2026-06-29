@@ -2,6 +2,7 @@ using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
 using VanDriverRequisitions.Domain.ValueObjects;
+using VanDriverRequisitions.Domain.Helpers;
 
 namespace VanDriverRequisitions.Domain.Entities.STD;
 
@@ -91,9 +92,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
         if (!CanEdit)
         {
-            throw new InvalidOperationException(
-                "This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
+            throw new InvalidOperationException("This requisition can no longer be edited because it is not in Draft or Rejected status. Refresh the page to see the latest status.");
         }
+
+        EnsureUpdateModelIsComplete(model);
 
         UpdateDetails(model.Details);
 
@@ -126,10 +128,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
         _submissions.Add(submission);
 
+        SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC");
         Status = RequisitionStatus.Submitted;
         SubmittedById = submittedBy.Id;
         SubmittedByNameSnapshot = submittedBy.NameSnapshot;
-        SubmittedAtUtc = submittedAtUtc;
 
         ClearRejection();
     }
@@ -165,26 +167,37 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
     private void UpdateDetails(StdRequisitionDetails details)
     {
         ArgumentNullException.ThrowIfNull(details);
-        ArgumentNullException.ThrowIfNull(details.Driver);
-        ArgumentNullException.ThrowIfNull(details.Shop);
 
-        RequisitionDate = details.RequisitionDate;
+        var driver = SnapshotGuard.EnsureRequiredVanDriver(details.Driver, "Driver");
+        var shop = SnapshotGuard.EnsureRequiredShop(details.Shop, "Shop");
 
-        VanDriverId = details.Driver.Id;
-        VanDriverCode = details.Driver.Code;
-        VanDriverName = details.Driver.Name;
-        TradersName = details.Driver.TradersName;
+        RequisitionDate = DateGuard.EnsureRequiredDate(details.RequisitionDate, "Requisition date");
 
-        ShopId = details.Shop.Id;
-        ShopCode = details.Shop.Code;
-        ShopName = details.Shop.Name;
+        VanDriverId = driver.Id;
+        VanDriverCode = driver.Code;
+        VanDriverName = driver.Name;
+        TradersName = driver.TradersName;
 
-        IsVatApplicable = details.Driver.HasVat;
+        ShopId = shop.Id;
+        ShopCode = shop.Code;
+        ShopName = shop.Name;
+
+        IsVatApplicable = driver.HasVat;
     }
-
+    
+    private static void EnsureUpdateModelIsComplete(StdRequisitionUpdateModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model.Details, nameof(model.Details));
+        ArgumentNullException.ThrowIfNull(model.Pickups, nameof(model.Pickups));
+        ArgumentNullException.ThrowIfNull(model.Transfers, nameof(model.Transfers));
+        ArgumentNullException.ThrowIfNull(model.CollectionChargesBanksAndBins, nameof(model.CollectionChargesBanksAndBins));
+        ArgumentNullException.ThrowIfNull(model.CollectionVanPacks, nameof(model.CollectionVanPacks));
+        ArgumentNullException.ThrowIfNull(model.AdditionalCosts, nameof(model.AdditionalCosts));
+    }
+    
     private void SyncPickups(IEnumerable<StdPickupUpdateModel> incomingPickups)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _pickups,
             incomingPickups,
             x => x.Id,
@@ -195,7 +208,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncTransfers(IEnumerable<StdTransferUpdateModel> incomingTransfers)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _transfers,
             incomingTransfers,
             x => x.Id,
@@ -204,10 +217,9 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             "Transfer");
     }
 
-    private void SyncCollectionChargesBanksAndBins(
-        IEnumerable<StdCollectionChargeBanksAndBinsUpdateModel> incomingCollectionCharges)
+    private void SyncCollectionChargesBanksAndBins(IEnumerable<StdCollectionChargeBanksAndBinsUpdateModel> incomingCollectionCharges)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _collectionChargesBanksAndBins,
             incomingCollectionCharges,
             x => x.Id,
@@ -226,7 +238,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncCollectionVanPacks(IEnumerable<StdCollectionVanPackUpdateModel> incomingVanPacks)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _collectionVanPacks,
             incomingVanPacks,
             x => x.Id,
@@ -237,7 +249,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void SyncAdditionalCosts(IEnumerable<StdAdditionalCostUpdateModel> incomingAdditionalCosts)
     {
-        SyncChildren(
+        ChildCollectionSyncHelper.Sync(
             _additionalCosts,
             incomingAdditionalCosts,
             x => x.Id,
@@ -246,78 +258,15 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             "Additional cost");
     }
 
-    private void EnsureLocationBelongsToSelectedShop(
-        StdCollectionChargeBanksAndBinsUpdateModel incoming)
+    private void EnsureLocationBelongsToSelectedShop(StdCollectionChargeBanksAndBinsUpdateModel incoming)
     {
-        if (incoming.LocationShopId != ShopId)
+        var locationShopId = SnapshotGuard.EnsureRequiredId(incoming.LocationShopId, "Location shop id");
+
+        if (locationShopId != ShopId)
         {
             throw new InvalidOperationException("Location does not belong to the selected requisition shop.");
         }
     }
-
-    private static void SyncChildren<TChild, TIncoming>(
-        List<TChild> children,
-        IEnumerable<TIncoming> incomingItems,
-        Func<TIncoming, Guid?> getId,
-        Action<TChild, TIncoming> updateExisting,
-        Func<TIncoming, TChild> createNew,
-        string childName)
-        where TChild : AuditableEntity
-    {
-        ArgumentNullException.ThrowIfNull(incomingItems);
-
-        var incomingList = incomingItems.ToList();
-        var existingChildren = GetPersistedChildrenById(children);
-        var incomingIds = GetIncomingIds(incomingList, getId);
-
-        var childrenToRemove = children
-            .Where(x => x.Id == Guid.Empty || !incomingIds.Contains(x.Id))
-            .ToList();
-
-        foreach (var child in childrenToRemove)
-        {
-            children.Remove(child);
-        }
-
-        foreach (var incoming in incomingList)
-        {
-            var id = getId(incoming);
-
-            if (IsExistingChild(id))
-            {
-                if (!existingChildren.TryGetValue(id!.Value, out var existing))
-                {
-                    throw new InvalidOperationException($"{childName} '{id}' not found.");
-                }
-
-                updateExisting(existing, incoming);
-            }
-            else
-            {
-                children.Add(createNew(incoming));
-            }
-        }
-    }
-
-    private static Dictionary<Guid, TChild> GetPersistedChildrenById<TChild>(IEnumerable<TChild> children) where TChild : AuditableEntity
-    {
-        return children.Where(x => x.Id != Guid.Empty).ToDictionary(x => x.Id);
-    }
-
-    private static HashSet<Guid> GetIncomingIds<TIncoming>(IEnumerable<TIncoming> incomingItems, Func<TIncoming, Guid?> getId)
-    {
-        return incomingItems
-            .Select(getId)
-            .Where(IsExistingChild)
-            .Select(id => id!.Value)
-            .ToHashSet();
-    }
-
-    private static bool IsExistingChild(Guid? id)
-    {
-        return id.HasValue && id.Value != Guid.Empty;
-    }
-
     private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
     {
         if (Status != RequisitionStatus.Submitted)
@@ -325,10 +274,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be approved.");
         }
 
+        ApprovedAtUtc = DateGuard.EnsureRequiredUtcDateTime(approvedAtUtc, "Approved at UTC");
         Status = RequisitionStatus.Approved;
         ApprovedById = approvedBy.Id;
         ApprovedByNameSnapshot = approvedBy.NameSnapshot;
-        ApprovedAtUtc = approvedAtUtc;
         PoNumber = poNumber;
 
         ClearRejection();
@@ -341,10 +290,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
             throw new InvalidOperationException("Only submitted requisitions can be rejected.");
         }
 
+        RejectedAtUtc = DateGuard.EnsureRequiredUtcDateTime(rejectedAtUtc, "Rejected at UTC");
         Status = RequisitionStatus.Rejected;
         RejectedById = rejectedBy.Id;
         RejectedByNameSnapshot = rejectedBy.NameSnapshot;
-        RejectedAtUtc = rejectedAtUtc;
         RejectionNotes = rejectionNotes;
 
         ClearApproval();

@@ -91,4 +91,17 @@ public sealed class StdCollectionChargeBanksAndBinsTests
         // Act / Assert
         Assert.Throws<InvalidOperationException>(() => StdCollectionChargeBanksAndBins.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = StdRequisitionTestData.CreateCollectionChargeMileageModel() with
+        {
+            Date = default(DateOnly)
+        };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdCollectionChargeBanksAndBins.Create(model));
+    }
 }

@@ -73,6 +73,8 @@ export function useStdRequisitionTabWarnings({
 
             transfersHasWarning: draft.transfers.some(
                 (row) =>
+                    row.isShopFromActive === false ||
+                    row.isShopToActive === false ||
                     getStdChargeLimitStatus(
                         row,
                         stdMileageLimitRule,

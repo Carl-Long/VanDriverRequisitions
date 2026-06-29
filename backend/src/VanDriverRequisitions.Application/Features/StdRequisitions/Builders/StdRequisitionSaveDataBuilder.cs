@@ -1,8 +1,8 @@
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.EntityFrameworkCore;
 using VanDriverRequisitions.Application.Common.Interfaces;
 using VanDriverRequisitions.Application.Exceptions;
+using VanDriverRequisitions.Application.Features.Shops.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
@@ -10,20 +10,29 @@ using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
-using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 
-public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context, IRequisitionLookupLoader lookupLoader) : IStdRequisitionSaveDataBuilder
+public sealed class StdRequisitionSaveDataBuilder(IRequisitionLookupLoader lookupLoader) : IStdRequisitionSaveDataBuilder
 {
     public async Task<StdRequisitionSaveData> BuildAsync(SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(saveStdRequisitionDto);
 
-        var driverSummary = await lookupLoader.LoadDriverLookupAsync(saveStdRequisitionDto.VanDriverId, cancellationToken, includeInactive: true);
-        var shop = await lookupLoader.LoadShopRequisitionSnapshotAsync(saveStdRequisitionDto.ShopId, cancellationToken, includeInactive: true);
-        
-        var details = StdRequisitionMapper.MapToRequisitionDetails(saveStdRequisitionDto, driverSummary, shop);
+        var driverSummary = await lookupLoader.LoadDriverLookupAsync(
+            saveStdRequisitionDto.VanDriverId,
+            cancellationToken,
+            includeInactive: true);
+
+        var shop = await lookupLoader.LoadShopRequisitionSnapshotAsync(
+            saveStdRequisitionDto.ShopId,
+            cancellationToken,
+            includeInactive: true);
+
+        var details = StdRequisitionMapper.MapToRequisitionDetails(
+            saveStdRequisitionDto,
+            driverSummary,
+            shop);
 
         var collectionChargeModels = await BuildCollectionChargeModelsAsync(
             saveStdRequisitionDto.CollectionChargesBanksAndBins,
@@ -33,9 +42,16 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
             saveStdRequisitionDto.CollectionVanPacks,
             cancellationToken);
 
-        var pickups = BuildPickupModels(saveStdRequisitionDto.Pickups);
-        var transfers = await BuildTransferModelsAsync(saveStdRequisitionDto.Transfers, cancellationToken);
-        var additionalCosts = await BuildAdditionalCostModelsAsync(saveStdRequisitionDto.AdditionalCosts, cancellationToken);
+        var pickups = BuildPickupModels(
+            saveStdRequisitionDto.Pickups);
+
+        var transfers = await BuildTransferModelsAsync(
+            saveStdRequisitionDto.Transfers,
+            cancellationToken);
+
+        var additionalCosts = await BuildAdditionalCostModelsAsync(
+            saveStdRequisitionDto.AdditionalCosts,
+            cancellationToken);
 
         var updateModel = new StdRequisitionUpdateModel(
             details,
@@ -47,55 +63,7 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
 
         return new StdRequisitionSaveData(driverSummary, updateModel, shop.IsActive);
     }
-    
-    private async Task<Dictionary<Guid, StdCollectionType>> LoadCollectionTypeMapAsync(
-        IEnumerable<SaveStdCollectionChargeBanksAndBinsDto> collectionCharges,
-        CancellationToken cancellationToken)
-    {
-        var collectionTypeIds = collectionCharges
-            .Select(x => x.CollectionTypeId)
-            .Distinct()
-            .ToList();
 
-        return await context.StdCollectionTypes
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => collectionTypeIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-    }
-
-    private async Task<Dictionary<Guid, StdLocation>> LoadLocationMapAsync(
-        IEnumerable<SaveStdCollectionChargeBanksAndBinsDto> collectionCharges,
-        CancellationToken cancellationToken)
-    {
-        var locationIds = collectionCharges
-            .Select(x => x.LocationId)
-            .Distinct()
-            .ToList();
-
-        return await context.StdLocations
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => locationIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-    }
-    
-    private async Task<Dictionary<Guid, CostReason>> LoadReasonMapAsync(
-        IEnumerable<SaveStdAdditionalCostDto> additionalCosts,
-        CancellationToken cancellationToken)
-    {
-        var reasonIds = additionalCosts
-            .Select(x => x.ReasonId)
-            .Distinct()
-            .ToList();
-
-        return await context.CostReasons
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => reasonIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
-    }
-    
     private async Task<List<StdCollectionChargeBanksAndBinsUpdateModel>> BuildCollectionChargeModelsAsync(
         IReadOnlyCollection<SaveStdCollectionChargeBanksAndBinsDto> collectionCharges,
         CancellationToken cancellationToken)
@@ -104,20 +72,28 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
         {
             return [];
         }
-        
-        var collectionTypeMap = await LoadCollectionTypeMapAsync(collectionCharges, cancellationToken);
-        var locationMap = await LoadLocationMapAsync(collectionCharges, cancellationToken);
+
+        var collectionTypeMap = await lookupLoader.LoadStdCollectionTypeMapAsync(
+            collectionCharges.Select(x => x.CollectionTypeId),
+            cancellationToken,
+            includeInactive: true);
+
+        var locationMap = await lookupLoader.LoadStdLocationMapAsync(
+            collectionCharges.Select(x => x.LocationId),
+            cancellationToken,
+            includeInactive: true);
 
         return collectionCharges
             .Select(dto =>
             {
-                var collectionType = MapCollectionType(dto.CollectionTypeId, collectionTypeMap);
-                var location = MapLocation(dto.LocationId, locationMap);
+                var collectionType = MapCollectionType(dto.CollectionTypeId, collectionTypeMap, dto.Id);
+                var location = MapLocation(dto.LocationId, locationMap, dto.Id);
+
                 return StdCollectionChargeBanksAndBinsMapper.ToUpdateModel(dto, collectionType, location);
             })
             .ToList();
     }
-    
+
     private async Task<List<StdCollectionVanPackUpdateModel>> BuildCollectionVanPackModelsAsync(
         IReadOnlyCollection<SaveStdCollectionVanPackDto> collectionVanPacks,
         CancellationToken cancellationToken)
@@ -133,12 +109,12 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
             .Select(x => StdCollectionVanPackMapper.ToUpdateModel(x, vanPackRate))
             .ToList();
     }
-    
+
     private static List<StdPickupUpdateModel> BuildPickupModels(IReadOnlyCollection<SaveStdPickupDto> pickups)
     {
         return pickups.Select(StdPickupMapper.ToUpdateModel).ToList();
     }
-    
+
     private async Task<List<StdTransferUpdateModel>> BuildTransferModelsAsync(
         IReadOnlyCollection<SaveStdTransferDto> transfers,
         CancellationToken cancellationToken)
@@ -148,42 +124,23 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
             return [];
         }
 
-        var transferShops = await LoadTransferShopSnapshotsAsync(transfers, cancellationToken);
+        var transferShopIds = transfers.SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo });
+
+        var transferShopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            transferShopIds,
+            cancellationToken,
+            includeInactive: true);
 
         return transfers
             .Select(dto =>
             {
-                var fromShop = MapTransferShop(dto.ShopIdFrom, transferShops, "From");
-                var toShop = MapTransferShop(dto.ShopIdTo, transferShops, "To");
+                var fromShop = MapTransferShop( dto.ShopIdFrom, transferShopMap, dto.Id, "From");
+                var toShop = MapTransferShop(dto.ShopIdTo, transferShopMap, dto.Id, "To");
                 return StdTransferMapper.ToUpdateModel(dto, fromShop, toShop);
             })
             .ToList();
     }
 
-    private async Task<Dictionary<Guid, ShopSnapshot>> LoadTransferShopSnapshotsAsync(
-        IReadOnlyCollection<SaveStdTransferDto> transfers,
-        CancellationToken cancellationToken)
-    {
-        var transferShopIds = transfers
-            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo });
-
-        var shops = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
-            transferShopIds,
-            cancellationToken,
-            includeInactive: true);
-
-        return shops.ToDictionary(
-            x => x.Key,
-            x => new ShopSnapshot(x.Value.Id, x.Value.Code, x.Value.Name));
-    }
-
-    private static ShopSnapshot MapTransferShop(Guid shopId, IReadOnlyDictionary<Guid, ShopSnapshot> transferShops, string direction)
-    {
-        return transferShops.TryGetValue(shopId, out var shop)
-            ? shop
-            : throw new BadRequestException($"{direction} shop '{shopId}' was not found.");
-    }
-    
     private async Task<List<StdAdditionalCostUpdateModel>> BuildAdditionalCostModelsAsync(
         IReadOnlyCollection<SaveStdAdditionalCostDto> additionalCosts,
         CancellationToken cancellationToken)
@@ -193,53 +150,80 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
             return [];
         }
 
-        var reasonMap = await LoadReasonMapAsync(additionalCosts, cancellationToken);
+        var reasonMap = await lookupLoader.LoadCostReasonMapAsync(
+            additionalCosts.Select(x => x.ReasonId),
+            cancellationToken,
+            includeInactive: true);
 
         return additionalCosts
             .Select(dto =>
             {
-                var reason = MapAdditionalCostReason(dto.ReasonId, reasonMap);
+                var reason = MapAdditionalCostReason(dto.ReasonId, reasonMap, dto.Id);
                 return StdAdditionalCostMapper.ToUpdateModel(dto, reason);
             })
             .ToList();
     }
 
-    private static CostReason MapAdditionalCostReason(Guid reasonId, IReadOnlyDictionary<Guid, CostReason> reasonMap)
+    private static CostReason MapAdditionalCostReason(Guid reasonId, IReadOnlyDictionary<Guid, CostReason> reasonMap, Guid? rowId)
     {
         if (!reasonMap.TryGetValue(reasonId, out var reason))
         {
             throw new NotFoundException($"Additional cost reason '{reasonId}' was not found.");
         }
 
-        return reason.Scope is not CostReasonScope.Std and not CostReasonScope.Shared 
-            ? throw new BadRequestException($"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for STD requisitions.") 
-            : reason;
-    }
-    
-    private static StdCollectionType MapCollectionType(Guid collectionTypeId, IReadOnlyDictionary<Guid, StdCollectionType> collectionTypeMap)
-    {
-        return !collectionTypeMap.TryGetValue(collectionTypeId, out var collectionType)
-            ? throw new NotFoundException($"STD collection type '{collectionTypeId}' was not found.")
-            : collectionType;
+        if (!reason.AppliesToStd())
+        {
+            throw new BadRequestException($"Additional cost reason '{reason.Code} - {reason.Reason}' is not valid for STD requisitions.");
+        }
+
+        EnsureActiveForNewRow(isActive: reason.IsActive, rowId: rowId, lookupDescription: $"Additional cost reason '{reason.Code} - {reason.Reason}'");
+
+        return reason;
     }
 
-    private static StdLocation MapLocation(Guid locationId, IReadOnlyDictionary<Guid, StdLocation> locationMap)
+    private static StdCollectionType MapCollectionType(Guid collectionTypeId, IReadOnlyDictionary<Guid, StdCollectionType> collectionTypeMap, Guid? rowId)
     {
-        return !locationMap.TryGetValue(locationId, out var location)
-            ? throw new NotFoundException($"STD location '{locationId}' was not found.")
-            : location;
+        if (!collectionTypeMap.TryGetValue(collectionTypeId, out var collectionType))
+        {
+            throw new NotFoundException($"STD collection type '{collectionTypeId}' was not found.");
+        }
+
+        EnsureActiveForNewRow(isActive: collectionType.IsActive, rowId: rowId, lookupDescription: $"STD collection type '{collectionType.Code} - {collectionType.Name}'");
+
+        return collectionType;
     }
-    
+
+    private static StdLocation MapLocation(Guid locationId, IReadOnlyDictionary<Guid, StdLocation> locationMap, Guid? rowId)
+    {
+        if (!locationMap.TryGetValue(locationId, out var location))
+        {
+            throw new NotFoundException($"STD location '{locationId}' was not found.");
+        }
+
+        EnsureActiveForNewRow(isActive: location.IsActive, rowId: rowId, lookupDescription: $"STD location '{location.LocationName}'");
+
+        return location;
+    }
+
+    private static ShopSnapshot MapTransferShop(Guid shopId, IReadOnlyDictionary<Guid, ShopRequisitionSnapshotDto> transferShops,
+        Guid? rowId,
+        string direction)
+    {
+        if (!transferShops.TryGetValue(shopId, out var shop))
+        {
+            throw new NotFoundException($"Shop '{shopId}' was not found.");
+        }
+
+        EnsureActiveForNewRow(isActive: shop.IsActive, rowId: rowId, lookupDescription: $"{direction} shop '{shop.Code} - {shop.Name}'");
+
+        return new ShopSnapshot(shop.Id, shop.Code, shop.Name);
+    }
+
     private async Task<decimal> GetRequiredVanPackRateAsync(CancellationToken cancellationToken)
     {
-        var rule = await context.RequisitionLimitRules
-            .AsNoTracking()
-            .SingleOrDefaultAsync(
-                x => x.Fascia == Fascia.Std &&
-                     x.Category == RequisitionRowCategory.VanPack,
-                cancellationToken);
+        var vanPackRate = await lookupLoader.LoadStdVanPackRateAsync(cancellationToken);
 
-        if (rule is null)
+        if (vanPackRate is null)
         {
             throw new ValidationException(
             [
@@ -249,6 +233,14 @@ public sealed class StdRequisitionSaveDataBuilder(IApplicationDbContext context,
             ]);
         }
 
-        return rule.MaxRate;
+        return vanPackRate.Value;
+    }
+
+    private static void EnsureActiveForNewRow(bool isActive, Guid? rowId, string lookupDescription)
+    {
+        if (!isActive && rowId is null)
+        {
+            throw new BadRequestException($"{lookupDescription} is inactive and cannot be added to a requisition.");
+        }
     }
 }

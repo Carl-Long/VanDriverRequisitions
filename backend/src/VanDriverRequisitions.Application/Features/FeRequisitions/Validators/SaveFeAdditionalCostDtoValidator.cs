@@ -29,8 +29,9 @@ public sealed class SaveFeAdditionalCostDtoValidator
                 .WithMessage("Total number must be greater than zero.");
 
             RuleFor(x => x.RatePerJob)
+                .NotNull()
+                .WithMessage("Rate per job is required.")
                 .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)
-                .When(x => x.RatePerJob.HasValue)
                 .WithMessage("Rate per job must be at least £0.01.")
                 .Must(x => x is null || MoneyValidationRules.HasMaxTwoDecimalPlaces(x.Value))
                 .WithMessage("Rate per job can have a maximum of 2 decimal places.");
@@ -53,8 +54,9 @@ public sealed class SaveFeAdditionalCostDtoValidator
                 .WithMessage("Miles must be greater than zero.");
 
             RuleFor(x => x.RatePerMile)
+                .NotNull()
+                .WithMessage("Rate per mile is required.")
                 .GreaterThanOrEqualTo(MoneyValidationRules.MinimumMoneyAmount)
-                .When(x => x.RatePerMile.HasValue)
                 .WithMessage("Rate per mile must be at least £0.01.")
                 .Must(x => x is null || MoneyValidationRules.HasMaxTwoDecimalPlaces(x.Value))
                 .WithMessage("Rate per mile can have a maximum of 2 decimal places.");

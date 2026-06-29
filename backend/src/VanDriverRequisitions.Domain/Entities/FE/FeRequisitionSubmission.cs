@@ -1,5 +1,6 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Domain.Entities.FE;
@@ -32,9 +33,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
     {
         if (submissionNumber <= 0)
         {
-            throw new ArgumentOutOfRangeException(
-                nameof(submissionNumber),
-                "Submission number must be greater than zero.");
+            throw new ArgumentOutOfRangeException(nameof(submissionNumber), "Submission number must be greater than zero.");
         }
 
         ArgumentNullException.ThrowIfNull(submittedBy);
@@ -46,7 +45,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
             Status = SubmissionStatus.Pending,
             SubmittedById = submittedBy.Id,
             SubmittedByNameSnapshot = submittedBy.NameSnapshot,
-            SubmittedAtUtc = submittedAtUtc,
+            SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC"),
             SnapshotJson = snapshotJson
         };
     }
@@ -61,7 +60,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
         Status = SubmissionStatus.Approved;
         ReviewedById = reviewedBy.Id;
         ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
-        ReviewedAtUtc = reviewedAtUtc;
+        ReviewedAtUtc = DateGuard.EnsureRequiredUtcDateTime(reviewedAtUtc, "Reviewed at UTC");
 
         PoNumber = poNumber;
         RejectionNotes = null;
@@ -77,8 +76,7 @@ public sealed class FeRequisitionSubmission : AuditableEntity
         Status = SubmissionStatus.Rejected;
         ReviewedById = reviewedBy.Id;
         ReviewedByNameSnapshot = reviewedBy.NameSnapshot;
-        ReviewedAtUtc = reviewedAtUtc;
-
+        ReviewedAtUtc = DateGuard.EnsureRequiredUtcDateTime(reviewedAtUtc, "Reviewed at UTC");
         RejectionNotes = rejectionNotes;
         PoNumber = null;
     }

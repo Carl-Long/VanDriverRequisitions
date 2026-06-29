@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Domain.UnitTests.Entities.FE;
@@ -24,16 +25,11 @@ public sealed class FeAdditionalCostTests
     [Fact]
     public void Create_WhenJobBased_SnapshotsReasonAndCalculatesTotalValue()
     {
-        var cost = FeAdditionalCost.Create(
-            WeekEndingDate,
-            ParkingReasonId,
-            ParkingReasonCode,
-            ParkingReasonText,
-            ChargingOption.Job,
+        var cost = FeAdditionalCost.Create(CreateJobModel(
             totalNumber: 3,
             ratePerJob: 10m,
             miles: 999,
-            ratePerMile: 999m);
+            ratePerMile: 999m));
 
         Assert.Equal(WeekEndingDate, cost.WeekEndingDate);
         Assert.Equal(ParkingReasonId, cost.ReasonId);
@@ -52,16 +48,11 @@ public sealed class FeAdditionalCostTests
     [Fact]
     public void Create_WhenMileageBased_SnapshotsReasonCalculatesTotalValueAndClearsJobFields()
     {
-        var cost = FeAdditionalCost.Create(
-            WeekEndingDate,
-            ExtraMileageReasonId,
-            ExtraMileageReasonCode,
-            ExtraMileageReasonText,
-            ChargingOption.Mileage,
+        var cost = FeAdditionalCost.Create(CreateMileageModel(
             totalNumber: 999,
             ratePerJob: 999m,
             miles: 20,
-            ratePerMile: 0.45m);
+            ratePerMile: 0.45m));
 
         Assert.Equal(WeekEndingDate, cost.WeekEndingDate);
         Assert.Equal(ExtraMileageReasonId, cost.ReasonId);
@@ -84,16 +75,15 @@ public sealed class FeAdditionalCostTests
 
         var newWeekEndingDate = new DateOnly(2026, 6, 20);
 
-        cost.Update(
-            newWeekEndingDate,
-            ExtraMileageReasonId,
-            ExtraMileageReasonCode,
-            ExtraMileageReasonText,
-            ChargingOption.Mileage,
+        cost.Update(CreateMileageModel(
+            weekEndingDate: newWeekEndingDate,
+            reasonId: ExtraMileageReasonId,
+            reasonCode: ExtraMileageReasonCode,
+            reasonText: ExtraMileageReasonText,
             totalNumber: 999,
             ratePerJob: 999m,
             miles: 50,
-            ratePerMile: 0.50m);
+            ratePerMile: 0.50m));
 
         Assert.Equal(newWeekEndingDate, cost.WeekEndingDate);
         Assert.Equal(ExtraMileageReasonId, cost.ReasonId);
@@ -116,16 +106,15 @@ public sealed class FeAdditionalCostTests
 
         var newWeekEndingDate = new DateOnly(2026, 6, 20);
 
-        cost.Update(
-            newWeekEndingDate,
-            ParkingReasonId,
-            ParkingReasonCode,
-            ParkingReasonText,
-            ChargingOption.Job,
+        cost.Update(CreateJobModel(
+            weekEndingDate: newWeekEndingDate,
+            reasonId: ParkingReasonId,
+            reasonCode: ParkingReasonCode,
+            reasonText: ParkingReasonText,
             totalNumber: 4,
             ratePerJob: 12.50m,
             miles: 999,
-            ratePerMile: 999m);
+            ratePerMile: 999m));
 
         Assert.Equal(newWeekEndingDate, cost.WeekEndingDate);
         Assert.Equal(ParkingReasonId, cost.ReasonId);
@@ -148,16 +137,15 @@ public sealed class FeAdditionalCostTests
 
         var newWeekEndingDate = new DateOnly(2026, 6, 20);
 
-        cost.Update(
-            newWeekEndingDate,
-            TollReasonId,
-            TollReasonCode,
-            TollReasonText,
-            ChargingOption.Job,
+        cost.Update(CreateJobModel(
+            weekEndingDate: newWeekEndingDate,
+            reasonId: TollReasonId,
+            reasonCode: TollReasonCode,
+            reasonText: TollReasonText,
             totalNumber: 6,
             ratePerJob: 7.50m,
             miles: null,
-            ratePerMile: null);
+            ratePerMile: null));
 
         Assert.Equal(newWeekEndingDate, cost.WeekEndingDate);
         Assert.Equal(TollReasonId, cost.ReasonId);
@@ -177,16 +165,11 @@ public sealed class FeAdditionalCostTests
     public void Create_WhenJobTotalNumberIsMissingOrNotPositive_ThrowsInvalidOperationException(int? totalNumber)
     {
         Assert.Throws<InvalidOperationException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                ParkingReasonCode,
-                ParkingReasonText,
-                ChargingOption.Job,
-                totalNumber,
+            FeAdditionalCost.Create(CreateJobModel(
+                totalNumber: totalNumber,
                 ratePerJob: 10m,
                 miles: null,
-                ratePerMile: null));
+                ratePerMile: null)));
     }
 
     [Theory]
@@ -194,16 +177,11 @@ public sealed class FeAdditionalCostTests
     public void Create_WhenJobRateIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? ratePerJob)
     {
         Assert.Throws<InvalidOperationException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                ParkingReasonCode,
-                ParkingReasonText,
-                ChargingOption.Job,
+            FeAdditionalCost.Create(CreateJobModel(
                 totalNumber: 1,
-                ratePerJob,
+                ratePerJob: ratePerJob,
                 miles: null,
-                ratePerMile: null));
+                ratePerMile: null)));
     }
 
     [Theory]
@@ -213,16 +191,11 @@ public sealed class FeAdditionalCostTests
     public void Create_WhenMilesIsMissingOrNotPositive_ThrowsInvalidOperationException(int? miles)
     {
         Assert.Throws<InvalidOperationException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ExtraMileageReasonId,
-                ExtraMileageReasonCode,
-                ExtraMileageReasonText,
-                ChargingOption.Mileage,
+            FeAdditionalCost.Create(CreateMileageModel(
                 totalNumber: null,
                 ratePerJob: null,
-                miles,
-                ratePerMile: 0.45m));
+                miles: miles,
+                ratePerMile: 0.45m)));
     }
 
     [Theory]
@@ -230,31 +203,23 @@ public sealed class FeAdditionalCostTests
     public void Create_WhenRatePerMileIsMissingOrInvalid_ThrowsInvalidOperationException(decimal? ratePerMile)
     {
         Assert.Throws<InvalidOperationException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ExtraMileageReasonId,
-                ExtraMileageReasonCode,
-                ExtraMileageReasonText,
-                ChargingOption.Mileage,
+            FeAdditionalCost.Create(CreateMileageModel(
                 totalNumber: null,
                 ratePerJob: null,
                 miles: 10,
-                ratePerMile));
+                ratePerMile: ratePerMile)));
     }
 
     [Fact]
     public void Create_WhenReasonSnapshotsHaveWhitespace_TrimsReasonSnapshots()
     {
-        var cost = FeAdditionalCost.Create(
-            WeekEndingDate,
-            ParkingReasonId,
-            "  10001  ",
-            "  Parking  ",
-            ChargingOption.Job,
+        var cost = FeAdditionalCost.Create(CreateJobModel(
+            reasonCode: "  10001  ",
+            reasonText: "  Parking  ",
             totalNumber: 1,
             ratePerJob: 10m,
             miles: null,
-            ratePerMile: null);
+            ratePerMile: null));
 
         Assert.Equal(ParkingReasonCode, cost.ReasonCodeSnapshot);
         Assert.Equal(ParkingReasonText, cost.ReasonTextSnapshot);
@@ -263,19 +228,8 @@ public sealed class FeAdditionalCostTests
     [Fact]
     public void Create_WhenReasonCodeSnapshotIsNull_ThrowsArgumentNullException()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                null!,
-                ParkingReasonText,
-                ChargingOption.Job,
-                totalNumber: 1,
-                ratePerJob: 10m,
-                miles: null,
-                ratePerMile: null));
-
-        Assert.Equal("reasonCodeSnapshot", exception.ParamName);
+        Assert.Throws<ArgumentNullException>(() =>
+            FeAdditionalCost.Create(CreateJobModel(reasonCode: null!)));
     }
 
     [Theory]
@@ -283,37 +237,15 @@ public sealed class FeAdditionalCostTests
     [InlineData("   ")]
     public void Create_WhenReasonCodeSnapshotIsEmptyOrWhitespace_ThrowsArgumentException(string reasonCodeSnapshot)
     {
-        var exception = Assert.Throws<ArgumentException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                reasonCodeSnapshot,
-                ParkingReasonText,
-                ChargingOption.Job,
-                totalNumber: 1,
-                ratePerJob: 10m,
-                miles: null,
-                ratePerMile: null));
-
-        Assert.Equal("reasonCodeSnapshot", exception.ParamName);
+        Assert.Throws<ArgumentException>(() =>
+            FeAdditionalCost.Create(CreateJobModel(reasonCode: reasonCodeSnapshot)));
     }
 
     [Fact]
     public void Create_WhenReasonTextSnapshotIsNull_ThrowsArgumentNullException()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                ParkingReasonCode,
-                null!,
-                ChargingOption.Job,
-                totalNumber: 1,
-                ratePerJob: 10m,
-                miles: null,
-                ratePerMile: null));
-
-        Assert.Equal("reasonTextSnapshot", exception.ParamName);
+        Assert.Throws<ArgumentNullException>(() =>
+            FeAdditionalCost.Create(CreateJobModel(reasonText: null!)));
     }
 
     [Theory]
@@ -321,63 +253,109 @@ public sealed class FeAdditionalCostTests
     [InlineData("   ")]
     public void Create_WhenReasonTextSnapshotIsEmptyOrWhitespace_ThrowsArgumentException(string reasonTextSnapshot)
     {
-        var exception = Assert.Throws<ArgumentException>(() =>
-            FeAdditionalCost.Create(
-                WeekEndingDate,
-                ParkingReasonId,
-                ParkingReasonCode,
-                reasonTextSnapshot,
-                ChargingOption.Job,
-                totalNumber: 1,
-                ratePerJob: 10m,
-                miles: null,
-                ratePerMile: null));
-
-        Assert.Equal("reasonTextSnapshot", exception.ParamName);
+        Assert.Throws<ArgumentException>(() =>
+            FeAdditionalCost.Create(CreateJobModel(reasonText: reasonTextSnapshot)));
     }
 
     [Fact]
     public void Create_WhenChargingOptionIsUnknown_ThrowsArgumentOutOfRangeException()
     {
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            FeAdditionalCost.Create(
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            FeAdditionalCost.Create(new FeAdditionalCostUpdateModel(
+                Id: null,
                 WeekEndingDate,
                 ParkingReasonId,
                 ParkingReasonCode,
                 ParkingReasonText,
                 (ChargingOption)999,
-                totalNumber: 1,
-                ratePerJob: 10m,
-                miles: null,
-                ratePerMile: null));
-
-        Assert.Equal("chargingOption", exception.ParamName);
+                TotalNumber: 1,
+                RatePerJob: 10m,
+                Miles: null,
+                RatePerMile: null)));
     }
-
-    private static FeAdditionalCost CreateJobCost(int? totalNumber = 3, decimal? ratePerJob = 10m)
+    
+    [Fact]
+    public void Create_WhenWeekEndingDateIsDefault_ThrowsInvalidOperationException()
     {
-        return FeAdditionalCost.Create(
-            WeekEndingDate,
+        // Arrange
+        var model = new FeAdditionalCostUpdateModel(
+            Id: null,
+            WeekEndingDate: default(DateOnly),
             ParkingReasonId,
             ParkingReasonCode,
             ParkingReasonText,
             ChargingOption.Job,
-            totalNumber,
-            ratePerJob,
+            TotalNumber: 1,
+            RatePerJob: 10m,
+            Miles: null,
+            RatePerMile: null);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => FeAdditionalCost.Create(model));
+    }
+
+    private static FeAdditionalCost CreateJobCost(int? totalNumber = 3, decimal? ratePerJob = 10m)
+    {
+        return FeAdditionalCost.Create(CreateJobModel(
+            totalNumber: totalNumber,
+            ratePerJob: ratePerJob,
             miles: null,
-            ratePerMile: null);
+            ratePerMile: null));
     }
 
     private static FeAdditionalCost CreateMileageCost(int? miles = 20, decimal? ratePerMile = 0.45m)
     {
-        return FeAdditionalCost.Create(
-            WeekEndingDate,
-            ExtraMileageReasonId,
-            ExtraMileageReasonCode,
-            ExtraMileageReasonText,
-            ChargingOption.Mileage,
+        return FeAdditionalCost.Create(CreateMileageModel(
             totalNumber: null,
             ratePerJob: null,
+            miles: miles,
+            ratePerMile: ratePerMile));
+    }
+
+    private static FeAdditionalCostUpdateModel CreateJobModel(
+        Guid? id = null,
+        DateOnly? weekEndingDate = null,
+        Guid? reasonId = null,
+        string reasonCode = ParkingReasonCode,
+        string reasonText = ParkingReasonText,
+        int? totalNumber = 3,
+        decimal? ratePerJob = 10m,
+        int? miles = null,
+        decimal? ratePerMile = null)
+    {
+        return new FeAdditionalCostUpdateModel(
+            id,
+            weekEndingDate ?? WeekEndingDate,
+            reasonId ?? ParkingReasonId,
+            reasonCode,
+            reasonText,
+            ChargingOption.Job,
+            totalNumber,
+            ratePerJob,
+            miles,
+            ratePerMile);
+    }
+
+    private static FeAdditionalCostUpdateModel CreateMileageModel(
+        Guid? id = null,
+        DateOnly? weekEndingDate = null,
+        Guid? reasonId = null,
+        string reasonCode = ExtraMileageReasonCode,
+        string reasonText = ExtraMileageReasonText,
+        int? totalNumber = null,
+        decimal? ratePerJob = null,
+        int? miles = 20,
+        decimal? ratePerMile = 0.45m)
+    {
+        return new FeAdditionalCostUpdateModel(
+            id,
+            weekEndingDate ?? WeekEndingDate,
+            reasonId ?? ExtraMileageReasonId,
+            reasonCode,
+            reasonText,
+            ChargingOption.Mileage,
+            totalNumber,
+            ratePerJob,
             miles,
             ratePerMile);
     }

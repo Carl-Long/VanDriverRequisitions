@@ -16,11 +16,13 @@ export function updateStdTransferDraftFromForm(
         shopLabelFrom: form.shopLabelFrom,
         shopCodeFrom: form.shopCodeFrom,
         shopNameFrom: form.shopNameFrom,
+        isShopFromActive: form.isShopFromActive,
 
         shopIdTo: form.shopIdTo,
         shopLabelTo: form.shopLabelTo,
         shopCodeTo: form.shopCodeTo,
         shopNameTo: form.shopNameTo,
+        isShopToActive: form.isShopToActive,
 
         numberOfBags: form.numberOfBags,
         numberOfBoxes: form.numberOfBoxes,

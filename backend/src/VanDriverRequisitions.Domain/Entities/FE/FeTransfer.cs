@@ -1,5 +1,6 @@
 using VanDriverRequisitions.Domain.Entities.Base;
 using VanDriverRequisitions.Domain.Entities.Common.Models;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -26,43 +27,29 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
     public int TotalNumber { get; private set; }
     public decimal? RatePerJob { get; private set; }
     public decimal? TotalValue { get; private set; }
-
-    public static FeTransfer Create(
-        ShopSnapshot fromShop,
-        ShopSnapshot toShop,
-        DateOnly weekEndingDate,
-        WeeklyQuantities week,
-        decimal? ratePerJob)
+    
+    public static FeTransfer Create(FeTransferUpdateModel model)
     {
         var transfer = new FeTransfer();
-
-        transfer.Update(
-            fromShop,
-            toShop,
-            weekEndingDate,
-            week,
-            ratePerJob);
-
+        transfer.Update(model);
         return transfer;
     }
 
-    public void Update(
-        ShopSnapshot fromShop,
-        ShopSnapshot toShop,
-        DateOnly weekEndingDate,
-        WeeklyQuantities week,
-        decimal? ratePerJob)
+    public void Update(FeTransferUpdateModel model)
     {
-        ArgumentNullException.ThrowIfNull(fromShop);
-        ArgumentNullException.ThrowIfNull(toShop);
-        ArgumentNullException.ThrowIfNull(week);
-        MoneyGuard.EnsureOptionalMoneyAmount(ratePerJob, "Rate per job");
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
+
+        var fromShop = SnapshotGuard.EnsureRequiredShop(model.FromShop, "From shop");
+        var toShop = SnapshotGuard.EnsureRequiredShop(model.ToShop, "To shop");
+
+        MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerJob, "Rate per job");
 
         if (fromShop.Id == toShop.Id)
         {
             throw new InvalidOperationException("From shop and to shop must be different.");
         }
-        
+
         ShopIdFrom = fromShop.Id;
         ShopCodeFrom = fromShop.Code;
         ShopNameFrom = fromShop.Name;
@@ -71,9 +58,10 @@ public sealed class FeTransfer : AuditableEntity, IFeRequisitionChild
         ShopCodeTo = toShop.Code;
         ShopNameTo = toShop.Name;
 
-        WeekEndingDate = weekEndingDate;
-        Week = week;
-        RatePerJob = ratePerJob;
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
+        Week = model.Week;
+        RatePerJob = model.RatePerJob;
 
         RecalculateTotals();
     }

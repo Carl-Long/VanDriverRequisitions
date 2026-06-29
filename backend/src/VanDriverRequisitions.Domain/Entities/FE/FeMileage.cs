@@ -1,4 +1,5 @@
 using VanDriverRequisitions.Domain.Entities.Base;
+using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Helpers;
 using VanDriverRequisitions.Domain.Interfaces;
 using VanDriverRequisitions.Domain.ValueObjects;
@@ -16,21 +17,24 @@ public sealed class FeMileage : AuditableEntity, IFeRequisitionChild
     public decimal? RatePerMile { get; private set; }
     public decimal? TotalValue { get; private set; }
 
-    public static FeMileage Create(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerMile)
+    public static FeMileage Create(FeMileageUpdateModel model)
     {
         var mileage = new FeMileage();
-        mileage.Update(weekEndingDate, week, ratePerMile);
+        mileage.Update(model);
         return mileage;
     }
 
-    public void Update(DateOnly weekEndingDate, WeeklyQuantities week, decimal? ratePerMile)
+    public void Update(FeMileageUpdateModel model)
     {
-        ArgumentNullException.ThrowIfNull(week);
-        MoneyGuard.EnsureOptionalMoneyAmount(ratePerMile, "Rate per mile");
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model.Week, nameof(model.Week));
 
-        WeekEndingDate = weekEndingDate;
-        Week = week;
-        RatePerMile = ratePerMile;
+        MoneyGuard.EnsureOptionalMoneyAmount(model.RatePerMile, "Rate per mile");
+
+        WeekEndingDate = DateGuard.EnsureRequiredDate(model.WeekEndingDate, "Week ending date");
+
+        Week = model.Week;
+        RatePerMile = model.RatePerMile;
 
         RecalculateTotals();
     }

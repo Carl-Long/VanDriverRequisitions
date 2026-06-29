@@ -20,6 +20,7 @@ import { StdChargeTypeToggle } from "../components/std-charge-type-toggle";
 import { StdTotalValueCard } from "../components/std-total-value-card";
 import { RequisitionDrawerFormActions } from "@/features/requisitions-shared/components/requisition-drawer-form-actions";
 import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-first-form-control";
+import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
 
 type Props = {
     open: boolean;
@@ -173,14 +174,18 @@ export function StdTransferDrawer({
                         placeholder="Select from shop"
                         value={form.shopIdFrom}
                         label={form.shopLabelFrom}
+                        isShopActive={form.isShopFromActive}
                         error={errors.shopIdFrom}
                         onChange={(value, label) => {
                             setForm((prev) => ({
                                 ...prev,
                                 shopIdFrom: value,
                                 shopLabelFrom: label,
-                                shopCodeFrom: null,
-                                shopNameFrom: null,
+                                isShopFromActive: resolveSelectedLookupActiveState({
+                                    previousId: prev.shopIdFrom,
+                                    previousIsActive: prev.isShopFromActive,
+                                    nextId: value,
+                                }),
                             }));
 
                             clearError("shopIdFrom");
@@ -195,14 +200,18 @@ export function StdTransferDrawer({
                         placeholder="Select to shop"
                         value={form.shopIdTo}
                         label={form.shopLabelTo}
+                        isShopActive={form.isShopToActive}
                         error={errors.shopIdTo}
                         onChange={(value, label) => {
                             setForm((prev) => ({
                                 ...prev,
                                 shopIdTo: value,
                                 shopLabelTo: label,
-                                shopCodeTo: null,
-                                shopNameTo: null,
+                                isShopToActive: resolveSelectedLookupActiveState({
+                                    previousId: prev.shopIdTo,
+                                    previousIsActive: prev.isShopToActive,
+                                    nextId: value,
+                                }),
                             }));
 
                             clearError("shopIdTo");

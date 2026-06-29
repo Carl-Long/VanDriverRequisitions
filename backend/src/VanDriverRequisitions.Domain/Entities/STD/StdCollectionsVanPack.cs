@@ -38,14 +38,7 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
     public void Update(StdCollectionVanPackUpdateModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-
-        if (model.DeliveryDate == default)
-        {
-            throw new InvalidOperationException("Delivery date is required.");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.PostCodeZone);
-
+        
         if (model.VanPacksOut < 1)
         {
             throw new InvalidOperationException("Van packs out must be at least 1.");
@@ -62,9 +55,13 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
         }
 
         MoneyGuard.EnsureMoneyAmount(model.RatePerVanPack, "Rate per van pack");
+        
+        DeliveryDate = DateGuard.EnsureRequiredDate(model.DeliveryDate, "Delivery date");
+        PostCodeZone = SnapshotGuard.EnsureRequiredText(model.PostCodeZone, "Post code zone");
 
-        DeliveryDate = model.DeliveryDate;
-        PostCodeZone = model.PostCodeZone.Trim();
+        VanPacksOut = model.VanPacksOut;
+        FilledBags = model.FilledBags;
+        RatePerVanPack = model.RatePerVanPack;
         VanPacksOut = model.VanPacksOut;
         FilledBags = model.FilledBags;
         RatePerVanPack = model.RatePerVanPack;

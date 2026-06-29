@@ -7,11 +7,13 @@ export type StdTransferForm = {
     shopLabelFrom: string | null;
     shopCodeFrom: string | null;
     shopNameFrom: string | null;
+    isShopFromActive: boolean;
 
     shopIdTo: string | null;
     shopLabelTo: string | null;
     shopCodeTo: string | null;
     shopNameTo: string | null;
+    isShopToActive: boolean;
 
     numberOfBags: number | null;
     numberOfBoxes: number | null;

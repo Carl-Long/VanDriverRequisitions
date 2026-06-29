@@ -10,8 +10,10 @@ using VanDriverRequisitions.Application.Features.FeRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Mappings;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
+using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
 using VanDriverRequisitions.Application.Features.VanDrivers.Dtos;
 using VanDriverRequisitions.Domain.Entities.FE;
+using VanDriverRequisitions.Application.Common.Requisitions;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Services;
 
@@ -24,6 +26,7 @@ public class FeRequisitionService(
     IFeRequisitionNumberGenerator feRequisitionNumberGenerator,
     IFeRequisitionSaveDataBuilder saveDataBuilder,
     TimeProvider timeProvider,
+    ISubmitWindowSubmissionGuard submitWindowGuard,
     IRequisitionLookupLoader lookupLoader) : IFeRequisitionService
 {
     public async Task<PagedResult<FeRequisitionSummaryDto>> GetAllAsync(FeRequisitionQueryDto query, CancellationToken cancellationToken = default)
@@ -86,7 +89,10 @@ public class FeRequisitionService(
         var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
         
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
-
+        
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+        InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+        
         var requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
 
         await limitValidator.ValidateAsync(requisition, cancellationToken);
@@ -123,9 +129,10 @@ public class FeRequisitionService(
         var auditUser = currentUser.RequireAuditUser();
 
         await validator.ValidateAsync(saveFeRequisitionDto, cancellationToken);
-
+        await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
+        
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, cancellationToken);
-
+        
         FeRequisition requisition;
 
         if (id.HasValue)
@@ -138,6 +145,9 @@ public class FeRequisitionService(
         }
         else
         {
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+            InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
+           
             var requisitionNumber = await feRequisitionNumberGenerator.GenerateAsync(cancellationToken);
             requisition = FeRequisition.Create(requisitionNumber, saveData.UpdateModel);
             
@@ -218,9 +228,14 @@ public class FeRequisitionService(
         driverSummary ??= await lookupLoader.LoadDriverLookupAsync(requisition.VanDriverId, cancellationToken, includeInactive: true);
         var shopActive = isShopActive ?? await lookupLoader.IsShopActiveAsync(requisition.ShopId, cancellationToken);
         var reasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
-
-        return FeRequisitionMapper.MapRequisitionToDetailDto(requisition, driverSummary, shopActive, reasonActiveMap);
-    }
+        var transferShopActiveMap = await LoadTransferShopActiveMapAsync(requisition, cancellationToken);
+        
+        return FeRequisitionMapper.MapRequisitionToDetailDto(
+            requisition,
+            driverSummary,
+            shopActive,
+            reasonActiveMap,
+            transferShopActiveMap);    }
     
     private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
     {
@@ -239,5 +254,27 @@ public class FeRequisitionService(
             .AsNoTracking()
             .Where(x => reasonIds.Contains(x.Id))
             .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+    }
+    
+    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(FeRequisition requisition, CancellationToken cancellationToken)
+    {
+        var shopIds = requisition.FeTransfers
+            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
+            .Distinct()
+            .ToList();
+
+        if (shopIds.Count == 0)
+        {
+            return new Dictionary<Guid, bool>();
+        }
+
+        var shopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
+            shopIds,
+            cancellationToken,
+            includeInactive: true);
+
+        return shopMap.ToDictionary(
+            x => x.Key,
+            x => x.Value.IsActive);
     }
 }

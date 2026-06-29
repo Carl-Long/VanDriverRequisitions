@@ -11,11 +11,13 @@ export function createEmptyStdTransferForm(
         shopLabelFrom: null,
         shopCodeFrom: null,
         shopNameFrom: null,
+        isShopFromActive: true,
 
         shopIdTo: null,
         shopLabelTo: null,
         shopCodeTo: null,
         shopNameTo: null,
+        isShopToActive: true,
 
         numberOfBags: null,
         numberOfBoxes: null,

@@ -94,4 +94,17 @@ public sealed class StdAdditionalCostTests
 
         Assert.Throws<InvalidOperationException>(() => StdAdditionalCost.Create(model));
     }
+    
+    [Fact]
+    public void Create_WhenDateIsDefault_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var model = StdRequisitionTestData.CreateAdditionalFlatChargeCostModel() with
+        {
+            Date = default(DateOnly)
+        };
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() => StdAdditionalCost.Create(model));
+    }
 }
