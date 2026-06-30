@@ -557,13 +557,27 @@ public sealed class StdRequisitionServiceTests
             Pickups: [],
             Transfers: [],
             CollectionChargesBanksAndBins: [],
-            CollectionVanPacks: [],
+            CollectionVanPacks:
+            [
+                CreateCollectionVanPackModel()
+            ],
             AdditionalCosts: []);
 
         return new StdRequisitionSaveData(
             driver,
             updateModel,
             isShopActive);
+    }
+    
+    private static StdCollectionVanPackUpdateModel CreateCollectionVanPackModel()
+    {
+        return new StdCollectionVanPackUpdateModel(
+            Id: null,
+            DeliveryDate: new DateOnly(2026, 6, 13),
+            PostCodeZone: "AB",
+            VanPacksOut: 1,
+            FilledBags: 1,
+            RatePerVanPack: 10m);
     }
 
     private sealed record TestFixture(

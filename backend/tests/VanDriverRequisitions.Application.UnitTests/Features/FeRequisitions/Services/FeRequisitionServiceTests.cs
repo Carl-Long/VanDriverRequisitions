@@ -14,6 +14,7 @@ using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Entities.FE.Models;
 using VanDriverRequisitions.Domain.Enums;
+using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.UnitTests.Features.FeRequisitions.Services;
 
@@ -553,7 +554,10 @@ public sealed class FeRequisitionServiceTests
 
         var updateModel = new FeRequisitionUpdateModel(
             details,
-            GeneralTasks: [],
+            GeneralTasks:
+            [
+                CreateGeneralTaskModel()
+            ],
             Mileages: [],
             Transfers: [],
             AdditionalCosts: []);
@@ -562,6 +566,18 @@ public sealed class FeRequisitionServiceTests
             driver,
             updateModel,
             isShopActive);
+    }
+    
+    private static FeGeneralTaskUpdateModel CreateGeneralTaskModel()
+    {
+        return new FeGeneralTaskUpdateModel(
+            Id: null,
+            FeTaskTypeId: Guid.NewGuid(),
+            TaskTypeName: "Collections",
+            TaskTypeCode: "23707",
+            WeekEndingDate: new DateOnly(2026, 6, 13),
+            Week: new WeeklyQuantities(sunday: 1, monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0),
+            RatePerJob: 10m);
     }
 
     private sealed record TestFixture(
