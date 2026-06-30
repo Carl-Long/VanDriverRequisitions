@@ -178,6 +178,54 @@ public static class StdRequisitionDtoTestData
         };
     }
     
+    public static SaveStdTransferDto CreateTransferFlatChargeDto(
+        DateOnly? date = null,
+        Guid? shopIdFrom = null,
+        Guid? shopIdTo = null,
+        int? numberOfBags = 1,
+        int? numberOfBoxes = 1,
+        int? miles = null,
+        decimal? ratePerMile = null,
+        decimal? flatCharge = 10m)
+    {
+        var fromShopId = shopIdFrom ?? Guid.NewGuid();
+
+        return new SaveStdTransferDto
+        {
+            Date = date ?? Date,
+            ShopIdFrom = fromShopId,
+            ShopIdTo = shopIdTo ?? Guid.NewGuid(),
+            NumberOfBags = numberOfBags,
+            NumberOfBoxes = numberOfBoxes,
+            ChargeType = StdChargeType.FlatCharge,
+            Miles = miles,
+            RatePerMile = ratePerMile,
+            FlatCharge = flatCharge
+        };
+    }
+    
+    public static SaveStdCollectionChargeBanksAndBinsDto CreateBanksAndBinsFlatChargeDto(
+        DateOnly? date = null,
+        Guid? collectionTypeId = null,
+        Guid? locationId = null,
+        int? numberOfBags = 1,
+        int? miles = null,
+        decimal? ratePerMile = null,
+        decimal? flatCharge = 10m)
+    {
+        return new SaveStdCollectionChargeBanksAndBinsDto
+        {
+            Date = date ?? Date,
+            CollectionTypeId = collectionTypeId ?? Guid.NewGuid(),
+            LocationId = locationId ?? Guid.NewGuid(),
+            NumberOfBags = numberOfBags,
+            ChargeType = StdChargeType.FlatCharge,
+            Miles = miles,
+            RatePerMile = ratePerMile,
+            FlatCharge = flatCharge
+        };
+    }
+    
     public static SaveStdAdditionalCostDto CreateAdditionalFlatChargeDto(
         DateOnly? date = null,
         Guid? reasonId = null,
