@@ -62,10 +62,7 @@ public sealed class StdCollectionVanPack : AuditableEntity, IStdRequisitionChild
         VanPacksOut = model.VanPacksOut;
         FilledBags = model.FilledBags;
         RatePerVanPack = model.RatePerVanPack;
-        VanPacksOut = model.VanPacksOut;
-        FilledBags = model.FilledBags;
-        RatePerVanPack = model.RatePerVanPack;
-
+        
         RecalculateTotals();
     }
 

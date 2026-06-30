@@ -13,7 +13,8 @@ public sealed class StdRequisitionLimitValidator(IRequisitionLimitRuleProvider l
     {
         ArgumentNullException.ThrowIfNull(requisition);
 
-        var rules = await limitRuleProvider.GetStdLimitRulesAsync(cancellationToken);        var failures = new List<ValidationFailure>();
+        var rules = await limitRuleProvider.GetStdLimitRulesAsync(cancellationToken);   
+        var failures = new List<ValidationFailure>();
 
         ValidatePickups(requisition.Pickups, rules, failures);
         ValidateTransfers(requisition.Transfers, rules, failures);

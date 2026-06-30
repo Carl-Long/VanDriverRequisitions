@@ -55,8 +55,7 @@ public sealed class StdAdditionalCost : AuditableEntity, IStdRequisitionChild
         ChargeType = model.ChargeType;
 
         var charge = StdChargeCalculator.Calculate(model.ChargeType, model.Miles, model.RatePerMile, model.FlatCharge);
-
-        ChargeType = model.ChargeType;
+        
         Miles = charge.Miles;
         RatePerMile = charge.RatePerMile;
         FlatCharge = charge.FlatCharge;
