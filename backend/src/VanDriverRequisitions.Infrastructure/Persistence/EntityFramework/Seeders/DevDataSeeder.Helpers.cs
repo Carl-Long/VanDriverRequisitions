@@ -67,9 +67,4 @@ public static partial class DevDataSeeder
             ? parts[0]
             : "AA1";
     }
-
-    private static string Esc(string value)
-    {
-        return value.Replace("'", "''");
-    }
 }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using FluentValidation;
 using Moq;
 using VanDriverRequisitions.Application.Common.Interfaces;
@@ -7,7 +8,9 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.UnitTests.TestData;
 using VanDriverRequisitions.Domain.Entities.Common;
+using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.STD;
+using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.UnitTests.Features.StdRequisitions.Builders;
@@ -32,7 +35,7 @@ public sealed class StdRequisitionSaveDataBuilderTests
         var dto = CreateDto();
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None);
 
         // Assert
         Assert.Equal(DriverId, result.DriverSummary.Id);
@@ -74,22 +77,14 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, StdLocation>
             {
-                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(
-                    LocationId,
-                    ShopId,
-                    CollectionTypeId)
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto()
-            ]);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto()]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None);
 
         // Assert
         var charge = Assert.Single(result.UpdateModel.CollectionChargesBanksAndBins);
@@ -118,23 +113,15 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, StdLocation>
             {
-                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(
-                    LocationId,
-                    ShopId,
-                    CollectionTypeId)
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto()
-            ]);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -150,9 +137,7 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, StdCollectionType>
             {
-                [CollectionTypeId] = RequisitionBuilderTestData.CreateStdCollectionType(
-                    CollectionTypeId,
-                    isActive: false)
+                [CollectionTypeId] = RequisitionBuilderTestData.CreateStdCollectionType(CollectionTypeId, isActive: false)
             });
 
         loader
@@ -162,23 +147,15 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, StdLocation>
             {
-                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(
-                    LocationId,
-                    ShopId,
-                    CollectionTypeId)
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto(id: null)
-            ]);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: null)]);
 
         // Act / Assert
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -186,6 +163,55 @@ public sealed class StdRequisitionSaveDataBuilderTests
     {
         // Arrange
         var loader = CreateLoaderMock();
+
+        loader
+            .Setup(x => x.LoadStdCollectionTypeMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, StdCollectionType>
+            {
+                [CollectionTypeId] = RequisitionBuilderTestData.CreateStdCollectionType(CollectionTypeId, isActive: false)
+            });
+
+        loader
+            .Setup(x => x.LoadStdLocationMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, StdLocation>
+            {
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId)
+            });
+
+        var builder = new StdRequisitionSaveDataBuilder(loader.Object);
+        var existingRowId = Guid.NewGuid();
+        
+        var existingRequisition = CreateExistingRequisition(
+            collectionChargeId: existingRowId,
+            collectionTypeId: CollectionTypeId,
+            locationId: LocationId);
+
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: existingRowId)]);
+
+        // Act
+        var result = await builder.BuildAsync(dto, existingRequisition, CancellationToken.None);
+
+        // Assert
+        var charge = Assert.Single(result.UpdateModel.CollectionChargesBanksAndBins);
+
+        Assert.Equal(CollectionTypeId, charge.CollectionTypeId);
+        Assert.Equal("2389", charge.CollectionTypeCode);
+        Assert.Equal("Banks & Bins", charge.CollectionTypeName);
+    }
+    
+    [Fact]
+    public async Task BuildAsync_WhenExistingCollectionChargeChangesToInactiveCollectionType_ThrowsBadRequestException()
+    {
+        // Arrange
+        var loader = CreateLoaderMock();
+
+        var existingCollectionTypeId = Guid.NewGuid();
 
         loader
             .Setup(x => x.LoadStdCollectionTypeMapAsync(
@@ -213,22 +239,21 @@ public sealed class StdRequisitionSaveDataBuilderTests
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
+        var existingRowId = Guid.NewGuid();
 
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto(id: Guid.NewGuid())
-            ]);
+        var existingRequisition = CreateExistingRequisition(
+            collectionChargeId: existingRowId,
+            collectionTypeId: existingCollectionTypeId,
+            locationId: LocationId);
+
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: existingRowId)]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
+            builder.BuildAsync(dto, existingRequisition, CancellationToken.None));
 
         // Assert
-        var charge = Assert.Single(result.UpdateModel.CollectionChargesBanksAndBins);
-
-        Assert.Equal(CollectionTypeId, charge.CollectionTypeId);
-        Assert.Equal("2389", charge.CollectionTypeCode);
-        Assert.Equal("Banks & Bins", charge.CollectionTypeName);
+        Assert.Equal("STD collection type '2389 - Banks & Bins' is inactive and cannot be selected.", exception.Message);
     }
 
     [Fact]
@@ -248,16 +273,11 @@ public sealed class StdRequisitionSaveDataBuilderTests
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto()
-            ]);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -292,15 +312,11 @@ public sealed class StdRequisitionSaveDataBuilderTests
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
 
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto(id: null)
-            ]);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: null)]);
 
         // Act / Assert
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -326,23 +342,16 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, StdLocation>
             {
-                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(
-                    LocationId,
-                    ShopId,
-                    CollectionTypeId,
-                    isActive: false)
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId, isActive: false)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionCharges:
-            [
-                CreateCollectionChargeDto(id: Guid.NewGuid())
-            ]);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(collectionChargeId: existingRowId, collectionTypeId: CollectionTypeId, locationId: LocationId);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: existingRowId)]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, existingRequisition, CancellationToken.None);
 
         // Assert
         var charge = Assert.Single(result.UpdateModel.CollectionChargesBanksAndBins);
@@ -351,6 +360,47 @@ public sealed class StdRequisitionSaveDataBuilderTests
         Assert.Equal("Test Location", charge.LocationName);
         Assert.Equal("AB1 2CD", charge.LocationPostCode);
     }
+    
+    [Fact]
+    public async Task BuildAsync_WhenExistingCollectionChargeChangesToInactiveLocation_ThrowsBadRequestException()
+    {
+        // Arrange
+        var loader = CreateLoaderMock();
+        var existingLocationId = Guid.NewGuid();
+
+        loader
+            .Setup(x => x.LoadStdCollectionTypeMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, StdCollectionType>
+            {
+                [CollectionTypeId] = RequisitionBuilderTestData.CreateStdCollectionType(CollectionTypeId)
+            });
+
+        loader
+            .Setup(x => x.LoadStdLocationMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, StdLocation>
+            {
+                [LocationId] = RequisitionBuilderTestData.CreateStdLocation(LocationId, ShopId, CollectionTypeId, isActive: false) 
+            });
+
+        var builder = new StdRequisitionSaveDataBuilder(loader.Object);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(collectionChargeId: existingRowId, collectionTypeId: CollectionTypeId, locationId: existingLocationId);
+        var dto = CreateDto(collectionCharges: [CreateCollectionChargeDto(id: existingRowId)]);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
+            builder.BuildAsync(dto, existingRequisition, CancellationToken.None));
+
+        // Assert
+        Assert.Equal("STD location 'Test Location' is inactive and cannot be selected.", exception.Message);
+    }
+    
 
     [Fact]
     public async Task BuildAsync_WhenAdditionalCostReasonExists_MapsReasonSnapshot()
@@ -365,21 +415,14 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, CostReason>
             {
-                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(
-                    ReasonId,
-                    CostReasonScope.Std)
+                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(ReasonId, CostReasonScope.Std)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            additionalCosts:
-            [
-                CreateAdditionalCostDto()
-            ]);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto()]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None);
 
         // Assert
         var cost = Assert.Single(result.UpdateModel.AdditionalCosts);
@@ -395,16 +438,11 @@ public sealed class StdRequisitionSaveDataBuilderTests
         // Arrange
         var loader = CreateLoaderMock();
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            additionalCosts:
-            [
-                CreateAdditionalCostDto()
-            ]);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -420,22 +458,15 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, CostReason>
             {
-                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(
-                    ReasonId,
-                    CostReasonScope.Fe)
+                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(ReasonId, CostReasonScope.Fe)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            additionalCosts:
-            [
-                CreateAdditionalCostDto()
-            ]);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -451,23 +482,15 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, CostReason>
             {
-                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(
-                    ReasonId,
-                    CostReasonScope.Std,
-                    isActive: false)
+                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(ReasonId, CostReasonScope.Std, isActive: false)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            additionalCosts:
-            [
-                CreateAdditionalCostDto(id: null)
-            ]);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto(id: null)]);
 
         // Act / Assert
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -483,22 +506,16 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, CostReason>
             {
-                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(
-                    ReasonId,
-                    CostReasonScope.Std,
-                    isActive: false)
+                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(ReasonId, CostReasonScope.Std, isActive: false)
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            additionalCosts:
-            [
-                CreateAdditionalCostDto(id: Guid.NewGuid())
-            ]);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(additionalCostId: existingRowId, reasonId: ReasonId);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto(id: existingRowId)]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, existingRequisition, CancellationToken.None);
 
         // Assert
         var cost = Assert.Single(result.UpdateModel.AdditionalCosts);
@@ -506,6 +523,38 @@ public sealed class StdRequisitionSaveDataBuilderTests
         Assert.Equal(ReasonId, cost.ReasonId);
         Assert.Equal("10001", cost.ReasonCodeSnapshot);
         Assert.Equal("Parking", cost.ReasonTextSnapshot);
+    }
+    
+    [Fact]
+    public async Task BuildAsync_WhenExistingAdditionalCostChangesToInactiveReason_ThrowsBadRequestException()
+    {
+        // Arrange
+        var loader = CreateLoaderMock();
+        var existingReasonId = Guid.NewGuid();
+
+        loader
+            .Setup(x => x.LoadCostReasonMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, CostReason>
+            {
+                [ReasonId] = RequisitionBuilderTestData.CreateCostReason(ReasonId, CostReasonScope.Std, isActive: false)
+            });
+
+        var builder = new StdRequisitionSaveDataBuilder(loader.Object);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(additionalCostId: existingRowId, reasonId: existingReasonId);
+        var dto = CreateDto(additionalCosts: [CreateAdditionalCostDto(id: existingRowId)]);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
+            builder.BuildAsync(dto, existingRequisition, CancellationToken.None));
+
+        // Assert
+        Assert.Equal(
+            "Additional cost reason '10001 - Parking' is inactive and cannot be selected.",
+            exception.Message);
     }
 
     [Fact]
@@ -521,23 +570,15 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, ShopRequisitionSnapshotDto>
             {
-                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(
-                    ToShopId,
-                    "S003",
-                    "To Shop")
+                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(ToShopId, "S003", "To Shop")
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            transfers:
-            [
-                CreateTransferDto()
-            ]);
+        var dto = CreateDto(transfers: [CreateTransferDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -553,28 +594,16 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, ShopRequisitionSnapshotDto>
             {
-                [FromShopId] = RequisitionBuilderTestData.CreateShopSnapshot(
-                    FromShopId,
-                    "S002",
-                    "From Shop",
-                    isActive: false),
-                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(
-                    ToShopId,
-                    "S003",
-                    "To Shop")
+                [FromShopId] = RequisitionBuilderTestData.CreateShopSnapshot(FromShopId, "S002", "From Shop", isActive: false),
+                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(ToShopId, "S003", "To Shop")
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            transfers:
-            [
-                CreateTransferDto(id: null)
-            ]);
+        var dto = CreateDto(transfers: [CreateTransferDto(id: null)]);
 
         // Act / Assert
         await Assert.ThrowsAsync<BadRequestException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     [Fact]
@@ -590,27 +619,17 @@ public sealed class StdRequisitionSaveDataBuilderTests
                 true))
             .ReturnsAsync(new Dictionary<Guid, ShopRequisitionSnapshotDto>
             {
-                [FromShopId] = RequisitionBuilderTestData.CreateShopSnapshot(
-                    FromShopId,
-                    "S002",
-                    "From Shop",
-                    isActive: false),
-                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(
-                    ToShopId,
-                    "S003",
-                    "To Shop")
+                [FromShopId] = RequisitionBuilderTestData.CreateShopSnapshot(FromShopId, "S002", "From Shop", isActive: false),
+                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(ToShopId, "S003", "To Shop")
             });
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            transfers:
-            [
-                CreateTransferDto(id: Guid.NewGuid())
-            ]);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(transferId: existingRowId, fromShopId: FromShopId, toShopId: ToShopId);
+        var dto = CreateDto(transfers: [CreateTransferDto(id: existingRowId)]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, existingRequisition, CancellationToken.None);
 
         // Assert
         var transfer = Assert.Single(result.UpdateModel.Transfers);
@@ -622,6 +641,37 @@ public sealed class StdRequisitionSaveDataBuilderTests
         Assert.Equal(ToShopId, transfer.ToShop.Id);
         Assert.Equal("S003", transfer.ToShop.Code);
         Assert.Equal("To Shop", transfer.ToShop.Name);
+    }
+    
+    [Fact]
+    public async Task BuildAsync_WhenExistingTransferChangesToInactiveFromShop_ThrowsBadRequestException()
+    {
+        // Arrange
+        var loader = CreateLoaderMock();
+        var existingFromShopId = Guid.NewGuid();
+
+        loader
+            .Setup(x => x.LoadShopRequisitionSnapshotMapAsync(
+                It.IsAny<IEnumerable<Guid>>(),
+                It.IsAny<CancellationToken>(),
+                true))
+            .ReturnsAsync(new Dictionary<Guid, ShopRequisitionSnapshotDto>
+            {
+                [FromShopId] = RequisitionBuilderTestData.CreateShopSnapshot(FromShopId, "S002", "From Shop", isActive: false),
+                [ToShopId] = RequisitionBuilderTestData.CreateShopSnapshot(ToShopId, "S003", "To Shop")
+            });
+
+        var builder = new StdRequisitionSaveDataBuilder(loader.Object);
+        var existingRowId = Guid.NewGuid();
+        var existingRequisition = CreateExistingRequisition(transferId: existingRowId, fromShopId: existingFromShopId, toShopId: ToShopId);
+        var dto = CreateDto(transfers: [CreateTransferDto(id: existingRowId)]);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() =>
+            builder.BuildAsync(dto, existingRequisition, CancellationToken.None));
+
+        // Assert
+        Assert.Equal("From shop 'S002 - From Shop' is inactive and cannot be selected.", exception.Message);
     }
 
     [Fact]
@@ -636,15 +686,10 @@ public sealed class StdRequisitionSaveDataBuilderTests
             .ReturnsAsync(4.25m);
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionVanPacks:
-            [
-                CreateCollectionVanPackDto()
-            ]);
+        var dto = CreateDto(collectionVanPacks: [CreateCollectionVanPackDto()]);
 
         // Act
-        var result = await builder.BuildAsync(dto, CancellationToken.None);
+        var result = await builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None);
 
         // Assert
         var vanPack = Assert.Single(result.UpdateModel.CollectionVanPacks);
@@ -668,16 +713,11 @@ public sealed class StdRequisitionSaveDataBuilderTests
             .ReturnsAsync((decimal?)null);
 
         var builder = new StdRequisitionSaveDataBuilder(loader.Object);
-
-        var dto = CreateDto(
-            collectionVanPacks:
-            [
-                CreateCollectionVanPackDto()
-            ]);
+        var dto = CreateDto(collectionVanPacks: [CreateCollectionVanPackDto()]);
 
         // Act / Assert
         await Assert.ThrowsAsync<ValidationException>(() =>
-            builder.BuildAsync(dto, CancellationToken.None));
+            builder.BuildAsync(dto, It.IsAny<StdRequisition?>(), CancellationToken.None));
     }
 
     private static Mock<IRequisitionLookupLoader> CreateLoaderMock()
@@ -811,5 +851,127 @@ public sealed class StdRequisitionSaveDataBuilderTests
             ChargeType = StdChargeType.FlatCharge,
             FlatCharge = 5.75m
         };
+    }
+
+    private static StdRequisition CreateExistingRequisition(
+        Guid? collectionChargeId = null,
+        Guid? collectionTypeId = null,
+        Guid? locationId = null,
+        Guid? transferId = null,
+        Guid? fromShopId = null,
+        Guid? toShopId = null,
+        Guid? additionalCostId = null,
+        Guid? reasonId = null)
+    {
+        var requisition = StdRequisition.Create(
+            "S000000001",
+            new StdRequisitionUpdateModel(
+                CreateDetails(),
+                Pickups: [],
+                Transfers: transferId.HasValue
+                    ?
+                    [
+                        new StdTransferUpdateModel(
+                            Id: null,
+                            Date: new DateOnly(2026, 6, 14),
+                            FromShop: new ShopSnapshot(
+                                fromShopId ?? FromShopId,
+                                "S002",
+                                "From Shop"),
+                            ToShop: new ShopSnapshot(
+                                toShopId ?? ToShopId,
+                                "S003",
+                                "To Shop"),
+                            NumberOfBags: 2,
+                            NumberOfBoxes: 1,
+                            ChargeType: StdChargeType.Mileage,
+                            NumberOfMiles: 12,
+                            RatePerMile: 1.50m,
+                            FlatCharge: null)
+                    ]
+                    : [],
+                CollectionChargesBanksAndBins: collectionChargeId.HasValue
+                    ?
+                    [
+                        new StdCollectionChargeBanksAndBinsUpdateModel(
+                            Id: null,
+                            Date: new DateOnly(2026, 6, 14),
+                            CollectionTypeId: collectionTypeId ?? CollectionTypeId,
+                            CollectionTypeName: "Banks & Bins",
+                            CollectionTypeCode: "2389",
+                            LocationId: locationId ?? LocationId,
+                            LocationShopId: ShopId,
+                            LocationCollectionTypeId: collectionTypeId ?? CollectionTypeId,
+                            LocationName: "Test Location",
+                            LocationPostCode: "AB1 2CD",
+                            NumberOfBags: 2,
+                            ChargeType: StdChargeType.Mileage,
+                            Miles: 10,
+                            RatePerMile: 1.25m,
+                            FlatCharge: null)
+                    ]
+                    : [],
+                CollectionVanPacks: [],
+                AdditionalCosts: additionalCostId.HasValue
+                    ?
+                    [
+                        new StdAdditionalCostUpdateModel(
+                            Id: null,
+                            Date: new DateOnly(2026, 6, 14),
+                            ReasonId: reasonId ?? ReasonId,
+                            ReasonCodeSnapshot: "10001",
+                            ReasonTextSnapshot: "Parking",
+                            NumberOfBags: 2,
+                            ChargeType: StdChargeType.FlatCharge,
+                            Miles: null,
+                            RatePerMile: null,
+                            FlatCharge: 5.75m)
+                    ]
+                    : []));
+
+        if (collectionChargeId.HasValue)
+        {
+            SetEntityId(Assert.Single(requisition.CollectionChargesBanksAndBins), collectionChargeId.Value);
+        }
+
+        if (transferId.HasValue)
+        {
+            SetEntityId(Assert.Single(requisition.Transfers), transferId.Value);
+        }
+
+        if (additionalCostId.HasValue)
+        {
+            SetEntityId(Assert.Single(requisition.AdditionalCosts), additionalCostId.Value);
+        }
+
+        return requisition;
+    }
+
+    private static StdRequisitionDetails CreateDetails()
+    {
+        return new StdRequisitionDetails(
+            new DateOnly(2026, 6, 13),
+            new VanDriverSnapshot(DriverId, "VD001", "Standard Driver", "Test Driver Trading", HasVat: true),
+            new ShopSnapshot(ShopId, "S001", "Main Shop"));
+    }
+
+    private static void SetEntityId<TEntity>(TEntity entity, Guid id)
+    {
+        var type = typeof(TEntity);
+
+        while (type is not null)
+        {
+            var property = type.GetProperty("Id", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+            if (property is not null)
+            {
+                property.SetValue(entity, id);
+                return;
+            }
+
+            type = type.BaseType;
+        }
+
+        throw new InvalidOperationException($"Could not find Id property on entity type '{typeof(TEntity).Name}'.");
     }
 }

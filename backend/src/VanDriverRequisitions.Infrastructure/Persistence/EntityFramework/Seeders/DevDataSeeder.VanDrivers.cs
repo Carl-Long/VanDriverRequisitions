@@ -1,6 +1,5 @@
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Domain.Entities.Common;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Seeders;
 
@@ -27,9 +26,7 @@ public static partial class DevDataSeeder
         const int count = 1000;
         var rng = new Random(99);
 
-        var sb = new StringBuilder();
-        sb.AppendLine(
-            "INSERT INTO VanDrivers (Id, Code, TradersName, Address1, Address2, Town, County, Postcode, Phone, VatNumber, IsActive) VALUES");
+        var drivers = new List<VanDriver>(count);
 
         for (var i = 0; i < count; i++)
         {
@@ -46,16 +43,30 @@ public static partial class DevDataSeeder
                 $"{(char)('A' + (i + 5) % 26)}{(char)('A' + (i / 26 + 3) % 26)}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
             var phone = $"07{rng.Next(100, 999)} {rng.Next(100000, 999999)}";
             var hasVat = i % 3 == 0;
-            var vatNumber = hasVat ? $"GB{rng.Next(100000000, 999999999)}" : "NULL";
-            var vatValue = hasVat ? $"'{vatNumber}'" : "NULL";
-            var isActive = i < 800 ? 1 : 0;
+            var vatNumber = hasVat
+                ? $"GB{rng.Next(100000000, 999999999)}"
+                : null;
+            var isActive = i < 800;
 
-            var separator = i < count - 1 ? "," : ";";
-            sb.AppendLine(
-                $"    ('{id}', '{Esc(code)}', '{Esc(tradersName)}', '{Esc(address1)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {vatValue}, {isActive}){separator}");
+            drivers.Add(new VanDriver
+            {
+                Id = id,
+                Code = code,
+                TradersName = tradersName,
+                Address1 = address1,
+                Address2 = null,
+                Town = town,
+                County = county,
+                Postcode = postcode,
+                Phone = phone,
+                VatNumber = vatNumber,
+                IsActive = isActive
+            });
         }
 
-        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        context.VanDrivers.AddRange(drivers);
+
+        await context.SaveChangesAsync();
 
         logger?.LogInformation("Seeded {Count} van drivers ({Active} active, {Inactive} inactive).", count, 800, 200);
     }

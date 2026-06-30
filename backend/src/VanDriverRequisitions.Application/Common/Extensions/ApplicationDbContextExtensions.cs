@@ -14,37 +14,40 @@ public static class ApplicationDbContextExtensions
         "Refresh the page to load the latest version. " +
         "Any changes you have made since opening the requisition will need to be re-entered.";
 
-    public static async Task SaveChangesWithConcurrencyHandlingAsync(this IApplicationDbContext context, CancellationToken cancellationToken)
+    extension(IApplicationDbContext context)
     {
-        try
+        public async Task SaveChangesWithConcurrencyHandlingAsync(CancellationToken cancellationToken)
         {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException(DefaultConcurrencyMessage);
-        }
-    }
-    
-    public static void SetOriginalRowVersion<TEntity>(this IApplicationDbContext context, TEntity entity, byte[]? rowVersion) where TEntity : ConcurrencyAwareEntity
-    {
-        if (rowVersion is null)
-        {
-            return;
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new ConflictException(DefaultConcurrencyMessage);
+            }
         }
 
-        context.Entry(entity).Property(nameof(ConcurrencyAwareEntity.RowVersion)).OriginalValue = rowVersion;
-    }
-    
-    public static async Task SaveChangesWithUniqueConstraintValidationAsync(this IApplicationDbContext context, string propertyName, string message, CancellationToken cancellationToken)
-    {
-        try
+        public void SetRequiredOriginalRowVersion<TEntity>(TEntity entity, byte[]? rowVersion) where TEntity : ConcurrencyAwareEntity
         {
-            await context.SaveChangesAsync(cancellationToken);
+            if (rowVersion is null || rowVersion.Length == 0)
+            {
+                throw new BadRequestException("RowVersion is required for this operation.");
+            }
+
+            context.Entry(entity).Property(nameof(ConcurrencyAwareEntity.RowVersion)).OriginalValue = rowVersion;
         }
-        catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+
+        public async Task SaveChangesWithUniqueConstraintValidationAsync(string propertyName, string message, CancellationToken cancellationToken)
         {
-            throw new ValidationException([new ValidationFailure(propertyName, message)]);
+            try
+            {
+                await context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex) when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+            {
+                throw new ValidationException([new ValidationFailure(propertyName, message)]);
+            }
         }
     }
 }

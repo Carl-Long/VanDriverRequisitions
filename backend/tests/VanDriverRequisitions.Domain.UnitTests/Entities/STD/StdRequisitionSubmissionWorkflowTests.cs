@@ -51,6 +51,29 @@ public sealed class StdRequisitionSubmissionWorkflowTests
                 SubmittedAtUtc.AddHours(1),
                 snapshotJson: "{}"));
     }
+    
+    [Fact]
+    public void Submit_WhenSubtotalIsZero_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var zeroValueModel = StdRequisitionTestData.CreateUpdateModel(
+            pickups: [],
+            transfers: [],
+            collectionChargesBanksAndBins: [],
+            collectionVanPacks: [],
+            additionalCosts: []);
+
+        var requisition = StdRequisition.Create(StdRequisitionTestData.RequisitionNumber, zeroValueModel);
+
+        Assert.Equal(0m, requisition.Subtotal);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.Submit(StdRequisitionTestData.CreateAuditUser(), SubmittedAtUtc, snapshotJson: "{}"));
+
+        Assert.Equal(RequisitionStatus.Draft, requisition.Status);
+        Assert.Empty(requisition.Submissions);
+    }
 
     [Fact]
     public void Submit_WhenSubmittedByIsNull_ThrowsArgumentNullException()
@@ -229,6 +252,98 @@ public sealed class StdRequisitionSubmissionWorkflowTests
     }
 
     [Fact]
+    public void ApproveSubmission_WhenAlreadyApproved_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        requisition.ApproveSubmission(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver"),
+            ReviewedAtUtc,
+            poNumber: "PO-123");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.ApproveSubmission(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Second Approver"),
+                ReviewedAtUtc.AddHours(1),
+                poNumber: "PO-456"));
+
+        Assert.Equal(RequisitionStatus.Approved, requisition.Status);
+        Assert.Null(requisition.PendingSubmission);
+        Assert.Equal(SubmissionStatus.Approved, requisition.LatestSubmission!.Status);
+    }
+
+    [Fact]
+    public void RejectSubmission_WhenAlreadyApproved_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        requisition.ApproveSubmission(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver"),
+            ReviewedAtUtc,
+            poNumber: "PO-123");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.RejectSubmission(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter"),
+                ReviewedAtUtc.AddHours(1),
+                rejectionNotes: "Reject after approval."));
+
+        Assert.Equal(RequisitionStatus.Approved, requisition.Status);
+        Assert.Null(requisition.PendingSubmission);
+        Assert.Equal(SubmissionStatus.Approved, requisition.LatestSubmission!.Status);
+    }
+
+    [Fact]
+    public void ApproveSubmission_WhenRejectedWithoutResubmission_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        requisition.RejectSubmission(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter"),
+            ReviewedAtUtc,
+            rejectionNotes: "Incorrect rate.");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.ApproveSubmission(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Approver"),
+                ReviewedAtUtc.AddHours(1),
+                poNumber: "PO-123"));
+
+        Assert.Equal(RequisitionStatus.Rejected, requisition.Status);
+        Assert.Null(requisition.PendingSubmission);
+        Assert.Equal(SubmissionStatus.Rejected, requisition.LatestSubmission!.Status);
+    }
+
+    [Fact]
+    public void RejectSubmission_WhenRejectedWithoutResubmission_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var requisition = CreateSubmittedRequisition();
+
+        requisition.RejectSubmission(
+            StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Rejecter"),
+            ReviewedAtUtc,
+            rejectionNotes: "Incorrect rate.");
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.RejectSubmission(
+                StdRequisitionTestData.CreateAuditUser(nameSnapshot: "Second Rejecter"),
+                ReviewedAtUtc.AddHours(1),
+                rejectionNotes: "Reject again."));
+
+        Assert.Equal(RequisitionStatus.Rejected, requisition.Status);
+        Assert.Null(requisition.PendingSubmission);
+        Assert.Equal(SubmissionStatus.Rejected, requisition.LatestSubmission!.Status);
+    }
+
+    [Fact]
     public void ApproveSubmission_WhenApprovedByIsNull_ThrowsArgumentNullException()
     {
         var requisition = CreateSubmittedRequisition();
@@ -309,7 +424,7 @@ public sealed class StdRequisitionSubmissionWorkflowTests
 
         Assert.Equal("rejectionNotes", exception.ParamName);
     }
-    
+
     [Fact]
     public void Submit_WhenSubmittedAtUtcIsDefault_ThrowsInvalidOperationException()
     {
