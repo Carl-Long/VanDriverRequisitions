@@ -1,6 +1,5 @@
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VanDriverRequisitions.Domain.Entities.Common;
 
 namespace VanDriverRequisitions.Infrastructure.Persistence.EntityFramework.Seeders;
 
@@ -50,16 +49,12 @@ public static partial class DevDataSeeder
         "Centre", "Point", "Hub", "Place", "Corner", "Square", "Yard",
     ];
 
-    private static async Task SeedShopsAsync(
-        VanDriverDbContext context,
-        ILogger? logger)
+    private static async Task SeedShopsAsync(VanDriverDbContext context, ILogger? logger)
     {
         const int count = 1000;
         var rng = new Random(42);
 
-        var sb = new StringBuilder();
-        sb.AppendLine(
-            "INSERT INTO Shops (Id, Code, Name, Address, Address2, Town, County, Postcode, Phone, IsActive) VALUES");
+        var shops = new List<Shop>(count);
 
         for (var i = 0; i < count; i++)
         {
@@ -75,14 +70,26 @@ public static partial class DevDataSeeder
             var postcode =
                 $"{(char)('A' + i % 26)}{(char)('A' + i / 26 % 26)}{rng.Next(1, 20)} {rng.Next(1, 10)}{(char)('A' + rng.Next(26))}{(char)('A' + rng.Next(26))}";
             var phone = $"0{rng.Next(1000, 9999)} {rng.Next(100000, 999999)}";
-            var isActive = i < 800 ? 1 : 0;
+            var isActive = i < 800;
 
-            var separator = i < count - 1 ? "," : ";";
-            sb.AppendLine(
-                $"    ('{id}', '{Esc(code)}', '{Esc(name)}', '{Esc(address)}', NULL, '{Esc(town)}', '{Esc(county)}', '{Esc(postcode)}', '{Esc(phone)}', {isActive}){separator}");
+            shops.Add(new Shop
+            {
+                Id = id,
+                Code = code,
+                Name = name,
+                Address = address,
+                Address2 = null,
+                Town = town,
+                County = county,
+                Postcode = postcode,
+                Phone = phone,
+                IsActive = isActive
+            });
         }
 
-        await context.Database.ExecuteSqlRawAsync(sb.ToString());
+        context.Shops.AddRange(shops);
+
+        await context.SaveChangesAsync();
 
         logger?.LogInformation("Seeded {Count} shops ({Active} active, {Inactive} inactive).", count, 800, 200);
     }
