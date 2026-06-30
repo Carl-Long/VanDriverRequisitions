@@ -138,12 +138,14 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(approvedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(poNumber);
 
+        EnsureCanApprove();
+
         var submission = PendingSubmission 
                          ?? throw new InvalidOperationException("This requisition can no longer be approved because there is no pending submission. It may already have been approved or rejected by another user. Refresh the page to see the latest status");
 
         submission.Approve(approvedBy, approvedAtUtc, poNumber);
 
-        Approve(approvedBy, approvedAtUtc, poNumber);
+        ApplyApproval(approvedBy, approvedAtUtc, poNumber);
     }
 
     public void RejectSubmission(AuditUser rejectedBy, DateTime rejectedAtUtc, string rejectionNotes)
@@ -151,12 +153,14 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(rejectedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(rejectionNotes);
 
+        EnsureCanReject();
+
         var submission = PendingSubmission 
                          ?? throw new InvalidOperationException("This requisition can no longer be rejected because there is no pending submission. It may already have been approved or rejected by another user. Refresh the page to see the latest status.");
 
         submission.Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
 
-        Reject(rejectedBy, rejectedAtUtc, rejectionNotes);
+        ApplyRejection(rejectedBy, rejectedAtUtc, rejectionNotes);
     }
 
     private void UpdateDetails(RequisitionDetails details)
@@ -247,13 +251,16 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
             "Additional cost");
     }
 
-    private void Approve(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
+    private void EnsureCanApprove()
     {
         if (Status != RequisitionStatus.Submitted)
         {
             throw new InvalidOperationException("Only submitted requisitions can be approved.");
         }
+    }
 
+    private void ApplyApproval(AuditUser approvedBy, DateTime approvedAtUtc, string poNumber)
+    {
         ApprovedAtUtc = DateGuard.EnsureRequiredUtcDateTime(approvedAtUtc, "Approved at UTC");
         Status = RequisitionStatus.Approved;
         ApprovedById = approvedBy.Id;
@@ -262,14 +269,17 @@ public sealed class FeRequisition : ConcurrencyAwareEntity
 
         ClearRejection();
     }
-
-    private void Reject(AuditUser rejectedBy, DateTime rejectedAtUtc, string rejectionNotes)
+    
+    private void EnsureCanReject()
     {
         if (Status != RequisitionStatus.Submitted)
         {
             throw new InvalidOperationException("Only submitted requisitions can be rejected.");
         }
+    }
 
+    private void ApplyRejection(AuditUser rejectedBy, DateTime rejectedAtUtc, string rejectionNotes)
+    {
         RejectedAtUtc = DateGuard.EnsureRequiredUtcDateTime(rejectedAtUtc, "Rejected at UTC");
         Status = RequisitionStatus.Rejected;
         RejectedById = rejectedBy.Id;
