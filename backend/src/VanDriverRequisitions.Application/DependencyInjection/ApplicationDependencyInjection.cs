@@ -43,6 +43,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ISubmitWindowService, SubmitWindowService>();
         services.AddScoped<ISubmitWindowSubmissionGuard, SubmitWindowSubmissionGuard>();
         services.AddScoped<IRequisitionLimitRuleService, RequisitionLimitRuleService>();
+        services.AddScoped<IRequisitionLimitRuleProvider, RequisitionLimitRuleProvider>();
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IVanDriverService, VanDriverService>();
         services.AddScoped<IValidatorService, ValidatorService>();
