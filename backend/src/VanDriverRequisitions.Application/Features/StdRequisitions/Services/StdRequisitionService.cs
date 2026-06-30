@@ -9,6 +9,7 @@ using VanDriverRequisitions.Application.Features.StdRequisitions.Builders;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Extensions;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Mappings;
+using VanDriverRequisitions.Application.Features.StdRequisitions.Models;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Snapshots;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 using VanDriverRequisitions.Application.Features.SubmitWindows.Services;
@@ -89,7 +90,7 @@ public sealed class StdRequisitionService(
 
         var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
 
-        var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
+        var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, existingRequisition: null, cancellationToken);
         
         InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
         InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
@@ -110,11 +111,14 @@ public sealed class StdRequisitionService(
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
 
         var requisition = await LoadFullAsync(id, cancellationToken)
-            ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
         context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
 
-        var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
+        var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, requisition, cancellationToken);
+
+        InactiveLookupGuard.EnsureActiveOrUnchangedForExistingLookup(requisition.VanDriverId, saveData.UpdateModel.Details.Driver.Id, saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+        InactiveLookupGuard.EnsureActiveOrUnchangedForExistingLookup(requisition.ShopId, saveData.UpdateModel.Details.Shop.Id, saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
 
         requisition.Update(saveData.UpdateModel);
 
@@ -132,25 +136,33 @@ public sealed class StdRequisitionService(
         await validator.ValidateAsync(saveStdRequisitionDto, cancellationToken);
         await submitWindowGuard.EnsureSubmissionWindowIsOpenAsync(cancellationToken);
         
-        var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, cancellationToken);
-
         StdRequisition requisition;
+        StdRequisitionSaveData saveData;
 
         if (id.HasValue)
         {
             requisition = await LoadFullAsync(id.Value, cancellationToken)
-                          ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
+                          ?? throw new NotFoundException($"Requisition with ID '{id}' was not found.");
 
             context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+
+            saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, requisition, cancellationToken);
+
+            InactiveLookupGuard.EnsureActiveOrUnchangedForExistingLookup(requisition.VanDriverId, saveData.UpdateModel.Details.Driver.Id, saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
+            InactiveLookupGuard.EnsureActiveOrUnchangedForExistingLookup(requisition.ShopId, saveData.UpdateModel.Details.Shop.Id, saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
             requisition.Update(saveData.UpdateModel);
         }
         else
         {
+            saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, existingRequisition: null, cancellationToken);
+            
             InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.DriverSummary.IsActive, $"Van driver '{saveData.DriverSummary.Code} - {saveData.DriverSummary.TradersName}'");
             InactiveLookupGuard.EnsureActiveForNewRequisition(saveData.IsShopActive, $"Shop '{saveData.UpdateModel.Details.Shop.Code} - {saveData.UpdateModel.Details.Shop.Name}'");
-            
+
             var requisitionNumber = await stdRequisitionNumberGenerator.GenerateAsync(cancellationToken);
+
             requisition = StdRequisition.Create(requisitionNumber, saveData.UpdateModel);
+
             context.StdRequisitions.Add(requisition);
         }
 

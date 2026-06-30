@@ -33,7 +33,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         FeRequisition? addedRequisition = null;
@@ -62,7 +62,7 @@ public sealed class FeRequisitionServiceTests
             Times.Once);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(dto, It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
         fixture.LimitValidator.Verify(
@@ -86,7 +86,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData(isDriverActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -121,7 +121,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData(isShopActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -156,7 +156,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         fixture.LimitValidator
@@ -197,7 +197,8 @@ public sealed class FeRequisitionServiceTests
         Assert.Equal("DTO validation failure.", exception.Message);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<FeRequisition?>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.NumberGenerator.Verify(
@@ -223,7 +224,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         FeRequisition? addedRequisition = null;
@@ -307,7 +308,8 @@ public sealed class FeRequisitionServiceTests
         Assert.Equal("Submission window is closed.", exception.Message);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<FeRequisition?>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.FeRequisitions.Verify(
@@ -329,7 +331,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData(isDriverActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -360,7 +362,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         fixture.LimitValidator
@@ -405,7 +407,8 @@ public sealed class FeRequisitionServiceTests
             Times.Never);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveFeRequisitionDto>(), It.IsAny<FeRequisition?>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.FeRequisitions.Verify(
@@ -427,7 +430,7 @@ public sealed class FeRequisitionServiceTests
         var saveData = CreateSaveData(isShopActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<FeRequisition?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act

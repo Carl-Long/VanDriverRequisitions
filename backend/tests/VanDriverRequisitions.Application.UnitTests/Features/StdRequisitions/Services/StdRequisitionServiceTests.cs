@@ -14,7 +14,6 @@ using VanDriverRequisitions.Domain.Entities.Common.Models;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Entities.STD.Models;
 using VanDriverRequisitions.Domain.Enums;
-using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.UnitTests.Features.StdRequisitions.Services;
 
@@ -34,7 +33,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         StdRequisition? addedRequisition = null;
@@ -63,7 +62,7 @@ public sealed class StdRequisitionServiceTests
             Times.Once);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(dto, It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()),
             Times.Once);
 
         fixture.LimitValidator.Verify(
@@ -97,7 +96,7 @@ public sealed class StdRequisitionServiceTests
         Assert.Equal("DTO validation failure.", exception.Message);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.NumberGenerator.Verify(
@@ -123,7 +122,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData(isDriverActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -158,7 +157,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData(isShopActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -193,7 +192,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         fixture.LimitValidator
@@ -224,7 +223,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         RequisitionStatus? statusAtLimitValidation = null;
@@ -311,7 +310,7 @@ public sealed class StdRequisitionServiceTests
             Times.Never);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.StdRequisitions.Verify(
@@ -343,7 +342,7 @@ public sealed class StdRequisitionServiceTests
         Assert.Equal("Submission window is closed.", exception.Message);
 
         fixture.SaveDataBuilder.Verify(
-            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<CancellationToken>()),
+            x => x.BuildAsync(It.IsAny<SaveStdRequisitionDto>(), It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()),
             Times.Never);
 
         fixture.StdRequisitions.Verify(
@@ -365,7 +364,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData(isDriverActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -400,7 +399,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData(isShopActive: false);
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         // Act
@@ -435,7 +434,7 @@ public sealed class StdRequisitionServiceTests
         var saveData = CreateSaveData();
 
         fixture.SaveDataBuilder
-            .Setup(x => x.BuildAsync(dto, It.IsAny<CancellationToken>()))
+            .Setup(x => x.BuildAsync(dto, It.IsAny<StdRequisition?>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(saveData);
 
         fixture.LimitValidator
