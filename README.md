@@ -13,6 +13,10 @@ This README is for developers setting up and working on the project locally. For
 docs/requisition-design-decisions.md
 ```
 
+## Live Demo (Azure)
+
+### https://vdr-web-carl-demo.azurewebsites.net/
+
 ## Tech stack
 
 ### Backend
