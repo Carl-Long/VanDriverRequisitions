@@ -113,19 +113,10 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         ArgumentNullException.ThrowIfNull(submittedBy);
         ArgumentException.ThrowIfNullOrWhiteSpace(snapshotJson);
 
-        if (!CanSubmit)
-        {
-            throw new InvalidOperationException(
-                "This requisition can no longer be submitted because it is not in Draft or Rejected status. It may have already been submitted by another user. Refresh the page to see the latest status.");
-        }
-
-        if (PendingSubmission is not null)
-        {
-            throw new InvalidOperationException("A pending submission already exists.");
-        }
+        EnsureCanSubmit();
 
         var submission = StdRequisitionSubmission.Create(NextSubmissionNumber, submittedBy, submittedAtUtc, snapshotJson);
-
+        
         _submissions.Add(submission);
 
         SubmittedAtUtc = DateGuard.EnsureRequiredUtcDateTime(submittedAtUtc, "Submitted at UTC");
@@ -272,9 +263,28 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
         }
     }
     
+    private void EnsureCanSubmit()
+    {
+        if (!CanSubmit)
+        {
+            throw new InvalidOperationException(
+                "This requisition can no longer be submitted because it is not in Draft or Rejected status. It may have already been submitted by another user. Refresh the page to see the latest status.");
+        }
+
+        if (PendingSubmission is not null)
+        {
+            throw new InvalidOperationException("A pending submission already exists.");
+        }
+
+        if (Subtotal <= 0)
+        {
+            throw new InvalidOperationException("A requisition must have a subtotal greater than zero before it can be submitted.");
+        }
+    }
+    
     private void EnsureCanApprove()
     {
-        if (Status != RequisitionStatus.Submitted)
+        if (Status is not RequisitionStatus.Submitted)
         {
             throw new InvalidOperationException("Only submitted requisitions can be approved.");
         }
@@ -293,7 +303,7 @@ public sealed class StdRequisition : ConcurrencyAwareEntity
 
     private void EnsureCanReject()
     {
-        if (Status != RequisitionStatus.Submitted)
+        if (Status is not RequisitionStatus.Submitted)
         {
             throw new InvalidOperationException("Only submitted requisitions can be rejected.");
         }

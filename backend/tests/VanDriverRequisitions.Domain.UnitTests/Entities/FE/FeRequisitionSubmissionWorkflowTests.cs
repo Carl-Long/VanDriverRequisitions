@@ -147,7 +147,32 @@ public sealed class FeRequisitionSubmissionWorkflowTests
         // Assert
         Assert.Equal("submittedBy", exception.ParamName);
     }
+    
+    [Fact]
+    public void Submit_WhenSubtotalIsZero_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var zeroValueModel = FeRequisitionTestData.CreateUpdateModel(
+            generalTasks:
+            [
+                FeRequisitionTestData.CreateGeneralTaskModel(week: WeeklyQuantitiesTestData.CreateWeek(), ratePerJob: 10m)
+            ],
+            mileages: [],
+            transfers: [],
+            additionalCosts: []);
 
+        var requisition = FeRequisition.Create(FeRequisitionTestData.RequisitionNumber, zeroValueModel);
+
+        Assert.Equal(0m, requisition.Subtotal);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.Submit(FeRequisitionTestData.CreateAuditUser(), SubmittedAtUtc, snapshotJson: "{}"));
+
+        Assert.Equal(RequisitionStatus.Draft, requisition.Status);
+        Assert.Empty(requisition.Submissions);
+    }
+    
     [Fact]
     public void ApproveSubmission_WhenPendingSubmissionExists_ApprovesSubmissionAndRequisition()
     {

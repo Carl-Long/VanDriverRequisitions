@@ -51,6 +51,29 @@ public sealed class StdRequisitionSubmissionWorkflowTests
                 SubmittedAtUtc.AddHours(1),
                 snapshotJson: "{}"));
     }
+    
+    [Fact]
+    public void Submit_WhenSubtotalIsZero_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var zeroValueModel = StdRequisitionTestData.CreateUpdateModel(
+            pickups: [],
+            transfers: [],
+            collectionChargesBanksAndBins: [],
+            collectionVanPacks: [],
+            additionalCosts: []);
+
+        var requisition = StdRequisition.Create(StdRequisitionTestData.RequisitionNumber, zeroValueModel);
+
+        Assert.Equal(0m, requisition.Subtotal);
+
+        // Act / Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            requisition.Submit(StdRequisitionTestData.CreateAuditUser(), SubmittedAtUtc, snapshotJson: "{}"));
+
+        Assert.Equal(RequisitionStatus.Draft, requisition.Status);
+        Assert.Empty(requisition.Submissions);
+    }
 
     [Fact]
     public void Submit_WhenSubmittedByIsNull_ThrowsArgumentNullException()
