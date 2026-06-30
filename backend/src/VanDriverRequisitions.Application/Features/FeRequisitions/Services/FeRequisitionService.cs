@@ -147,7 +147,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"FE Requisition with ID '{id}' was not found.");
 
-        context.SetOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, approveFeRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
@@ -171,7 +171,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"FE requisition with ID '{id}' was not found.");
 
-        context.SetOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, rejectFeRequisitionDto.RowVersion);
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectFeRequisitionDto.RejectionNotes);
 
@@ -237,7 +237,7 @@ public class FeRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"Fe requisition with ID '{id}' was not found.");
 
-        context.SetOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, saveFeRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveFeRequisitionDto, requisition, cancellationToken);
 

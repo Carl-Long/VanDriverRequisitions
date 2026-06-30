@@ -138,7 +138,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        context.SetOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, approveStdRequisitionDto.RowVersion);
 
         var poNumber = await poNumberGenerator.GenerateAsync(cancellationToken);
 
@@ -160,7 +160,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
                           ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
         
-        context.SetOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, rejectStdRequisitionDto.RowVersion);
 
         requisition.RejectSubmission(auditUser, timeProvider.GetUtcDateTime(), rejectStdRequisitionDto.RejectionNotes);
 
@@ -254,7 +254,7 @@ public sealed class StdRequisitionService(
         var requisition = await LoadFullAsync(id, cancellationToken)
             ?? throw new NotFoundException($"STD requisition with ID '{id}' was not found.");
 
-        context.SetOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
+        context.SetRequiredOriginalRowVersion(requisition, saveStdRequisitionDto.RowVersion);
 
         var saveData = await saveDataBuilder.BuildAsync(saveStdRequisitionDto, requisition, cancellationToken);
 
