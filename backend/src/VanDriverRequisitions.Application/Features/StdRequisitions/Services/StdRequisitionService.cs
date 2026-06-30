@@ -246,81 +246,29 @@ public sealed class StdRequisitionService(
     
     private async Task<Dictionary<Guid, bool>> LoadAdditionalCostReasonActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
-        var reasonIds = requisition.AdditionalCosts
-            .Select(x => x.ReasonId)
-            .Distinct()
-            .ToList();
-
-        if (reasonIds.Count == 0)
-        {
-            return new Dictionary<Guid, bool>();
-        }
-
-        return await context.CostReasons
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => reasonIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+        return await lookupLoader.LoadCostReasonActiveMapAsync(
+            requisition.AdditionalCosts.Select(x => x.ReasonId),
+            cancellationToken);
     }
 
     private async Task<Dictionary<Guid, bool>> LoadCollectionTypeActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
-        var collectionTypeIds = requisition.CollectionChargesBanksAndBins
-            .Select(x => x.CollectionTypeId)
-            .Distinct()
-            .ToList();
-
-        if (collectionTypeIds.Count == 0)
-        {
-            return new Dictionary<Guid, bool>();
-        }
-
-        return await context.StdCollectionTypes
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => collectionTypeIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
+        return await lookupLoader.LoadStdCollectionTypeActiveMapAsync(
+            requisition.CollectionChargesBanksAndBins.Select(x => x.CollectionTypeId),
+            cancellationToken);
     }
 
-    private async Task<Dictionary<Guid, bool>> LoadLocationActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken) {
-        var locationIds = requisition.CollectionChargesBanksAndBins
-            .Select(x => x.LocationId)
-            .Distinct()
-            .ToList();
-
-        if (locationIds.Count == 0)
-        {
-            return new Dictionary<Guid, bool>();
-        }
-
-        return await context.StdLocations
-            .IgnoreQueryFilters()
-            .AsNoTracking()
-            .Where(x => locationIds.Contains(x.Id))
-            .ToDictionaryAsync(x => x.Id, x => x.IsActive, cancellationToken);
-    }
-    
-    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(
-        StdRequisition requisition,
-        CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, bool>> LoadLocationActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
-        var shopIds = requisition.Transfers
-            .SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo })
-            .Distinct()
-            .ToList();
+        return await lookupLoader.LoadStdLocationActiveMapAsync(
+            requisition.CollectionChargesBanksAndBins.Select(x => x.LocationId),
+            cancellationToken);
+    }
 
-        if (shopIds.Count == 0)
-        {
-            return new Dictionary<Guid, bool>();
-        }
-
-        var shopMap = await lookupLoader.LoadShopRequisitionSnapshotMapAsync(
-            shopIds,
-            cancellationToken,
-            includeInactive: true);
-
-        return shopMap.ToDictionary(
-            x => x.Key,
-            x => x.Value.IsActive);
+    private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
+    {
+        return await lookupLoader.LoadShopActiveMapAsync(
+            requisition.Transfers.SelectMany(x => new[] { x.ShopIdFrom, x.ShopIdTo }),
+            cancellationToken);
     }
 }

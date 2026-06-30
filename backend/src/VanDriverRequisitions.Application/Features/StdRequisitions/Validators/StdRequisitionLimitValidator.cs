@@ -1,22 +1,19 @@
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.STD;
 using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.StdRequisitions.Validators;
 
-public sealed class StdRequisitionLimitValidator(IApplicationDbContext context)
-    : IStdRequisitionLimitValidator
+public sealed class StdRequisitionLimitValidator(IRequisitionLimitRuleProvider limitRuleProvider) : IStdRequisitionLimitValidator
 {
     public async Task ValidateAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(requisition);
 
-        var rules = await LoadRulesAsync(cancellationToken);
-        var failures = new List<ValidationFailure>();
+        var rules = await limitRuleProvider.GetStdLimitRulesAsync(cancellationToken);        var failures = new List<ValidationFailure>();
 
         ValidatePickups(requisition.Pickups, rules, failures);
         ValidateTransfers(requisition.Transfers, rules, failures);
@@ -32,21 +29,7 @@ public sealed class StdRequisitionLimitValidator(IApplicationDbContext context)
             throw new ValidationException(failures);
         }
     }
-
-    private async Task<List<RequisitionLimitRule>> LoadRulesAsync(CancellationToken cancellationToken)
-    {
-        return await context.RequisitionLimitRules
-            .AsNoTracking()
-            .Where(x =>
-                x.Fascia == Fascia.Std &&
-                (
-                    x.Category == RequisitionRowCategory.Mileage ||
-                    x.Category == RequisitionRowCategory.FlatCharge ||
-                    x.Category == RequisitionRowCategory.VanPack
-                ))
-            .ToListAsync(cancellationToken);
-    }
-
+    
     private static void ValidatePickups(
         IEnumerable<StdPickup> pickups,
         IReadOnlyCollection<RequisitionLimitRule> rules,

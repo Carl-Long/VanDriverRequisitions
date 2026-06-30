@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.EntityFrameworkCore;
-using VanDriverRequisitions.Application.Common.Interfaces;
+using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Services;
 using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.FE;
 using VanDriverRequisitions.Domain.Enums;
@@ -9,13 +8,13 @@ using VanDriverRequisitions.Domain.ValueObjects;
 
 namespace VanDriverRequisitions.Application.Features.FeRequisitions.Validators;
 
-public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) : IFeRequisitionLimitValidator
+public sealed class FeRequisitionLimitValidator(IRequisitionLimitRuleProvider limitRuleProvider) : IFeRequisitionLimitValidator
 {
     public async Task ValidateAsync(FeRequisition requisition, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(requisition);
 
-        var rules = await LoadRulesAsync(cancellationToken);
+        var rules = await limitRuleProvider.GetFeLimitRulesAsync(cancellationToken);
         var failures = new List<ValidationFailure>();
 
         ValidateGeneralTasks(requisition.FeGeneralTasks, rules, failures);
@@ -28,22 +27,7 @@ public sealed class FeRequisitionLimitValidator(IApplicationDbContext context) :
             throw new ValidationException(failures);
         }
     }
-
-    private async Task<List<RequisitionLimitRule>> LoadRulesAsync(CancellationToken cancellationToken)
-    {
-        return await context.RequisitionLimitRules
-            .AsNoTracking()
-            .Where(x =>
-                x.Fascia == Fascia.Fe &&
-                (
-                    x.Category == RequisitionRowCategory.GeneralTask ||
-                    x.Category == RequisitionRowCategory.Mileage ||
-                    x.Category == RequisitionRowCategory.Transfer ||
-                    x.Category == RequisitionRowCategory.AdditionalCost
-                ))
-            .ToListAsync(cancellationToken);
-    }
-
+    
     private static void ValidateGeneralTasks(
         IEnumerable<FeGeneralTask> tasks,
         IReadOnlyCollection<RequisitionLimitRule> rules,
