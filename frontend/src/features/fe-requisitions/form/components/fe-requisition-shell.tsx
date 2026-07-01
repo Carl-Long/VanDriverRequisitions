@@ -5,7 +5,7 @@ import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
-import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
+import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
