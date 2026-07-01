@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Field } from "@/components/ui/field/field";
 import { Input } from "@/components/ui/field/input";
 import { Modal } from "@/components/ui/modal";
@@ -38,7 +38,20 @@ type Props = {
     initial?: StdLocation | null;
 };
 
-export function StdLocationFormModal({
+export function StdLocationFormModal(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <StdLocationFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function StdLocationFormModalContent({
     open,
     onClose,
     onSubmit,
@@ -47,58 +60,37 @@ export function StdLocationFormModal({
     const isEditing = !!initial;
 
     const [serverError, setServerError] = useState<string | null>(null);
-    const [shopLabel, setShopLabel] = useState<string | null>(null);
-    const [collectionTypeLabel, setCollectionTypeLabel] = useState<string | null>(null);
+    const [shopLabel, setShopLabel] = useState<string | null>(() =>
+        initial ? `${initial.shopCode} - ${initial.shopName}` : null,
+    );
+    const [collectionTypeLabel, setCollectionTypeLabel] = useState<string | null>(() =>
+        initial
+            ? `${initial.collectionTypeCode} - ${initial.collectionTypeName}`
+            : null,
+    );
 
     const {
         register,
         handleSubmit,
-        reset,
+        control,
         setError,
         setValue,
-        watch,
         formState: { errors, isSubmitting },
     } = useForm<StdLocationFormData>({
         resolver: zodResolver(stdLocationSchema),
         defaultValues: {
-            shopId: "",
-            collectionTypeId: "",
-            locationName: "",
-            postCode: "",
-        },
-    });
-
-    const shopId = watch("shopId");
-    const collectionTypeId = watch("collectionTypeId");
-
-    useEffect(() => {
-        if (!open) return;
-
-        reset({
             shopId: initial?.shopId ?? "",
             collectionTypeId: initial?.collectionTypeId ?? "",
             locationName: initial?.locationName ?? "",
             postCode: initial?.postCode ?? "",
-        });
+        },
+    });
 
-        setShopLabel(
-            initial ? `${initial.shopCode} - ${initial.shopName}` : null,
-        );
+    const shopId = useWatch({ control, name: "shopId" });
 
-        setCollectionTypeLabel(
-            initial
-                ? `${initial.collectionTypeCode} - ${initial.collectionTypeName}`
-                : null,
-        );
-
-        setServerError(null);
-    }, [open, initial, reset]);
+    const collectionTypeId = useWatch({ control, name: "collectionTypeId" });
 
     function handleClose() {
-        reset();
-        setShopLabel(null);
-        setCollectionTypeLabel(null);
-        setServerError(null);
         onClose();
     }
 
@@ -148,10 +140,7 @@ export function StdLocationFormModal({
         }
     }
 
-    const title = useMemo(
-        () => (isEditing ? "Edit STD Location" : "Create STD Location"),
-        [isEditing],
-    );
+    const title = isEditing ? "Edit STD Location" : "Create STD Location";
 
     return (
         <Modal open={open} onClose={handleClose} title={title}>
