@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -36,7 +36,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdAdditionalCostDrawer({
+export function StdAdditionalCostDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <StdAdditionalCostDrawerContent {...props} />;
+}
+
+function StdAdditionalCostDrawerContent({
     open,
     title,
     mileageLimitRule,
@@ -45,32 +53,15 @@ export function StdAdditionalCostDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdAdditionalCostForm>(
-        createEmptyStdAdditionalCostForm(),
+    const [form, setForm] = useState<StdAdditionalCostForm>(() =>
+        initialValues ?? createEmptyStdAdditionalCostForm(),
     );
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    const schema = createStdAdditionalCostFormSchema({
-        mileageLimitRule,
-        flatChargeLimitRule,
-    });
-
+    const schema = createStdAdditionalCostFormSchema({ mileageLimitRule, flatChargeLimitRule });
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setForm(initialValues ?? createEmptyStdAdditionalCostForm());
-        setErrors({});
-    }, [open, initialValues]);
-
-    const totalValue = useMemo(
-        () => calculateStdAdditionalCostFormTotal(form),
-        [form],
-    );
+    const totalValue = useMemo(() => calculateStdAdditionalCostFormTotal(form), [form]);
 
     function clearError(field: string) {
         setErrors((prev) => {
@@ -97,7 +88,7 @@ export function StdAdditionalCostDrawer({
         }
 
         setForm(createEmptyStdAdditionalCostForm(result.data.date));
-        focusFirstFormControl(formRef.current)
+        focusFirstFormControl(formRef.current);
     }
 
     function setChargeType(chargeType: StdAdditionalCostForm["chargeType"]) {
@@ -126,10 +117,6 @@ export function StdAdditionalCostDrawer({
 
         Object.keys(patch).forEach(clearError);
         clearError("form");
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

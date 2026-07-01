@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -30,7 +30,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function FeMileageDrawer({
+export function FeMileageDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <FeMileageDrawerContent {...props} />;
+}
+
+function FeMileageDrawerContent({
     open,
     title,
     limitRule,
@@ -38,20 +46,16 @@ export function FeMileageDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<FeMileageForm>(createEmptyFeMileageForm());
+    const [form, setForm] = useState<FeMileageForm>(() =>
+        initialValues ?? createEmptyFeMileageForm(),
+    );
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
 
     const schema = createFeMileageFormSchema(limitRule);
     const isEditMode = initialValues !== undefined;
 
-    useEffect(() => {
-        if (!open) return;
-
-        setForm(initialValues ?? createEmptyFeMileageForm());
-        setErrors({});
-    }, [open, initialValues]);
-
+   
     const totals = useMemo(() => calculateFeMileageFormTotals(form), [form]);
 
     function saveForm(intent: SubmitIntent) {
@@ -80,10 +84,6 @@ export function FeMileageDrawer({
             delete next[field];
             return next;
         });
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

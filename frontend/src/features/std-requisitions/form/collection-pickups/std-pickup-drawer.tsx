@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -32,7 +32,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdPickupDrawer({
+export function StdPickupDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <StdPickupDrawerContent {...props} />;
+}
+
+function StdPickupDrawerContent({
     open,
     title,
     mileageLimitRule,
@@ -41,26 +49,14 @@ export function StdPickupDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdPickupForm>(createEmptyStdPickupForm());
+    const [form, setForm] = useState<StdPickupForm>(() =>
+        initialValues ?? createEmptyStdPickupForm(),
+    );
+    
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    const schema = createStdPickupFormSchema({
-        mileageLimitRule,
-        flatChargeLimitRule,
-    });
-
+    const schema = createStdPickupFormSchema({ mileageLimitRule, flatChargeLimitRule, });
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setForm(initialValues ?? createEmptyStdPickupForm());
-        setErrors({});
-    }, [open, initialValues]);
-
     const totalValue = useMemo(() => calculateStdPickupFormTotal(form), [form]);
 
     function clearError(field: string) {
@@ -121,10 +117,6 @@ export function StdPickupDrawer({
 
         Object.keys(patch).forEach(clearError);
         clearError("form");
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

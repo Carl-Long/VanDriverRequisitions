@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -30,7 +30,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function FeGeneralTaskDrawer({
+export function FeGeneralTaskDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <FeGeneralTaskDrawerContent {...props} />;
+}
+
+function FeGeneralTaskDrawerContent({
     open,
     title,
     limitRule,
@@ -38,20 +46,14 @@ export function FeGeneralTaskDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<FeGeneralTaskForm>(createEmptyFeGeneralTaskForm());
+    const [form, setForm] = useState<FeGeneralTaskForm>(() =>
+        initialValues ?? createEmptyFeGeneralTaskForm(),
+    );
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
     const schema = createFeGeneralTaskFormSchema(limitRule);
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) return;
-
-        setForm(initialValues ?? createEmptyFeGeneralTaskForm());
-        setErrors({});
-    }, [open, initialValues]);
-
     const totals = useMemo(() => calculateFeGeneralTaskFormTotals(form), [form]);
 
     function saveForm(intent: SubmitIntent) {
