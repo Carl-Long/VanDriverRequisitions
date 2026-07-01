@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -107,7 +107,20 @@ type Props = {
     taskTypes: FeTaskType[];
 };
 
-export function RequisitionLimitRuleFormModal({
+export function RequisitionLimitRuleFormModal(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <RequisitionLimitRuleFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function RequisitionLimitRuleFormModalContent({
     open,
     onClose,
     onSubmit,
@@ -120,24 +133,34 @@ export function RequisitionLimitRuleFormModal({
     const {
         register,
         handleSubmit,
-        reset,
         control,
         setValue,
         formState: { isSubmitting, errors },
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
-            category: "",
-            fascia: "",
-            feTaskTypeId: null,
-            maxQuantity: 0,
-            maxRate: 0,
+            category: initial?.category ?? "",
+            fascia: initial?.fascia ?? "",
+            feTaskTypeId: initial?.feTaskTypeId ?? null,
+            maxQuantity: initial?.maxQuantity ?? 0,
+            maxRate: initial?.maxRate ?? 0,
         },
     });
 
     const category = useWatch({ control, name: "category" });
     const isGeneralTask = category === "GeneralTask";
     const maxRateLabel = category === "VanPack" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
+
+    const categoryRegistration = register("category", {
+        onChange: (event) => {
+            if (event.target.value !== "GeneralTask") {
+                setValue("feTaskTypeId", null, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+            }
+        },
+    });
 
     const visibleTaskTypes = useMemo(
         () =>
@@ -163,31 +186,8 @@ export function RequisitionLimitRuleFormModal({
         Boolean(initial?.feTaskTypeId) &&
         selectedTaskType?.isActive === false;
 
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        reset({
-            category: initial ? initial.category : "",
-            fascia: initial ? initial.fascia : "",
-            feTaskTypeId: initial?.feTaskTypeId ?? null,
-            maxQuantity: initial?.maxQuantity ?? 0,
-            maxRate: initial?.maxRate ?? 0,
-        });
-
-        setServerError(null);
-    }, [open, initial, reset]);
-
-    useEffect(() => {
-        if (!isGeneralTask) {
-            setValue("feTaskTypeId", null);
-        }
-    }, [isGeneralTask, setValue]);
 
     function handleClose() {
-        reset();
-        setServerError(null);
         onClose();
     }
 
@@ -228,7 +228,7 @@ export function RequisitionLimitRuleFormModal({
                 <AdminFormServerError message={serverError} />
 
                 <Field label="Category" required error={errors.category?.message}>
-                    <select className={fieldBase} {...register("category")}>
+                    <select className={fieldBase} {...categoryRegistration}>
                         <option value="">Select category</option>
 
                         {categoryOptions.map((opt) => (
