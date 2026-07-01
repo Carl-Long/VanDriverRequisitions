@@ -73,9 +73,8 @@ export default function StdRequisitionApprovalDetailPage() {
         };
     }, [params.id, authLoading, canApprove]);
 
-    const pageLoading = loading || limitRulesLoading || authLoading;
 
-    if (pageLoading) {
+    if (authLoading) {
         return (
             <PageContainer>
                 <StdRequisitionShellSkeleton />
@@ -85,6 +84,16 @@ export default function StdRequisitionApprovalDetailPage() {
 
     if (!canApprove) {
         return <NotFound />;
+    }
+
+    const pageLoading = loading || limitRulesLoading;
+
+    if (pageLoading) {
+        return (
+            <PageContainer>
+                <StdRequisitionShellSkeleton />
+            </PageContainer>
+        );
     }
 
     if (notFound) {
