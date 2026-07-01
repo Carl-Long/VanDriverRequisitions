@@ -34,6 +34,7 @@ import { useStdRequisitionTabWarnings } from "../hooks/use-std-requisition-tab-w
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -158,7 +159,7 @@ export function StdRequisitionShell({
             } else {
                 router.push(backHref ?? "/standard-van-drivers");
             }
-            
+
             return saved;
         } catch (err) {
             if (err instanceof ApiError) {
@@ -183,6 +184,16 @@ export function StdRequisitionShell({
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
             setActiveKey("details");
+            return;
+        }
+
+        const subtotalError = getSubmitSubtotalError(subtotal);
+
+        if (subtotalError) {
+            setErrors({
+                form: subtotalError,
+            });
+
             return;
         }
 

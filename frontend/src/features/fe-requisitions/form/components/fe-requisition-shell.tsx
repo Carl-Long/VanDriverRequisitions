@@ -32,6 +32,7 @@ import { RequisitionRejectModal } from "@/features/requisitions-shared/component
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 
 
 type Props = {
@@ -181,6 +182,16 @@ export function FeRequisitionShell({
             setErrors(mapZodErrors(result.error));
 
             setActiveKey("details");
+            return;
+        }
+
+        const subtotalError = getSubmitSubtotalError(subtotal);
+
+        if (subtotalError) {
+            setErrors({
+                form: subtotalError,
+            });
+
             return;
         }
 
@@ -436,8 +447,16 @@ export function FeRequisitionShell({
                             rules: limitRules,
                             category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
-                        onAdd={addAdditionalCost}
-                        onUpdate={updateAdditionalCost}
+                        onAdd={(form) => {
+                            addAdditionalCost(form);
+                            clearError("feAdditionalCosts");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateAdditionalCost(clientId, form);
+                            clearError("feAdditionalCosts");
+                            clearError("form");
+                        }}
                         onDelete={removeAdditionalCost}
                     />
                 }
@@ -470,13 +489,13 @@ export function FeRequisitionShell({
                             tasks={tasks}
                             onAdd={(form) => {
                                 addGeneralTask(taskType.id, taskType.name, form);
-                                clearError("generalTasks");
+                                clearError("feGeneralTasks");
                                 clearError("form");
                             }}
                             onUpdate={(clientId, form) => {
                                 updateGeneralTask(clientId, form);
 
-                                clearError("generalTasks");
+                                clearError("feGeneralTasks");
                                 clearError("form");
                             }}
                             onDelete={removeGeneralTask}
