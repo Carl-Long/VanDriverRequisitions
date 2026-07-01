@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
 import { StdCollectionTypeLookup, stdCollectionTypesApi } from "./std-collection-types-api";
-import { Alert } from "@/components/ui/alert";
 import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 
 const ALL_COLLECTION_TYPES_VALUE = "__ALL__";

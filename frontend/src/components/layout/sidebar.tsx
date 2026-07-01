@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
 
 import { SidebarBrand } from "@/components/layout/sidebar-brand";
@@ -10,12 +10,13 @@ import { SIDEBAR_COLLAPSE_KEY } from "@/lib/constants/constants";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(() => {
+        if (globalThis.window === undefined) {
+            return false;
+        }
 
-    useEffect(() => {
-        const saved = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
-        setCollapsed(saved === "true");
-    }, []);
+        return localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "true";
+    });
 
     const collapseSidebar = () => {
         setCollapsed(true);

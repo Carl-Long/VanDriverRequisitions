@@ -6,12 +6,16 @@ import {
 } from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 
-function isValidStatus(value: string | null) {
-    return value !== null && REQUISITION_STATUSES.includes(value as any);
+function isValidStatus(value: string | null): value is RequisitionStatus {
+    return (
+        value !== null &&
+        REQUISITION_STATUSES.some((status) => status === value)
+    );
 }
 
 export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequisitionFilters {
     const createdBy = searchParams.get("createdBy");
+    const status = searchParams.get("status");
 
     let createdByFilter: CreatedByFilter = {
         type: "me",
@@ -37,9 +41,7 @@ export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequis
 
         requisitionNumber: searchParams.get("requisitionNumber") ?? "",
 
-        status: isValidStatus(searchParams.get("status"))
-            ? (searchParams.get("status") as RequisitionStatus)
-            : "",
+        status: isValidStatus(status) ? status : "",
 
         shopId: searchParams.get("shopId"),
         shopLabel: searchParams.get("shopLabel"),
