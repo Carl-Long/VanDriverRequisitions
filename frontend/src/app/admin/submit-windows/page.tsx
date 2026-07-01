@@ -94,27 +94,49 @@ export default function SubmitWindowsPage() {
         }
     })();
 
-    const load = useCallback(async () => {
+    const fetchSubmitWindows = useCallback(
+        () => submitWindowsApi.getAll(page, PAGE_SIZE, filter),
+        [page, filter],
+    );
+
+    async function reloadSubmitWindows() {
         setLoading(true);
         setError(null);
 
         try {
-            const result = await submitWindowsApi.getAll(page, PAGE_SIZE, filter);
+            const result = await fetchSubmitWindows();
             setData(result);
         } catch (err) {
             setError(getApiErrorMessage(err, "Failed to load submit windows."));
         } finally {
             setLoading(false);
         }
-    }, [page, filter]);
+    }
 
     useEffect(() => {
-        load();
-    }, [load]);
+        let cancelled = false;
 
-    useEffect(() => {
-        setPage(1);
-    }, [filter]);
+        fetchSubmitWindows()
+            .then((result) => {
+                if (!cancelled) {
+                    setData(result);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(err, "Failed to load submit windows."));
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchSubmitWindows]);
 
     async function handleSubmit(data: { openFrom: string; openTo: string }) {
         setError(null);
@@ -128,7 +150,7 @@ export default function SubmitWindowsPage() {
         }
 
         modal.close();
-        await Promise.all([load(), refreshStatus()]);
+        await Promise.all([reloadSubmitWindows(), refreshStatus()]);
     }
 
     async function handleDelete(window: SubmitWindow) {
@@ -137,18 +159,26 @@ export default function SubmitWindowsPage() {
         try {
             await submitWindowsApi.delete(window.id);
             toast.success("Submit window deleted");
-
-            await Promise.all([load(), refreshStatus()]);
+            await Promise.all([reloadSubmitWindows(), refreshStatus()]);
         } catch (err) {
             setError(getApiErrorMessage(err, "Failed to delete submit window."));
         }
     }
 
     function handleFilterChange(nextFilter: SubmitWindowFilter) {
+        if (nextFilter === filter) {
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setPage(1);
         setFilter(nextFilter);
     }
 
     function handlePageChange(newPage: number) {
+        setLoading(true);
+        setError(null);
         setPage(newPage);
     }
 

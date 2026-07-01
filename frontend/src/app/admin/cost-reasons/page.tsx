@@ -50,23 +50,47 @@ export default function CostReasonsPage() {
         },
     });
 
-    const load = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const data = await costReasonsApi.getAll(showInactive);
-            setReasons(data);
-        } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to load cost reasons."));
-        } finally {
-            setLoading(false);
-        }
-    }, [showInactive]);
+    const fetchReasons = useCallback(
+        () => costReasonsApi.getAll(showInactive),
+        [showInactive],
+    );
 
     useEffect(() => {
-        load();
-    }, [load]);
+        let cancelled = false;
+
+        fetchReasons()
+            .then((data) => {
+                if (!cancelled) {
+                    setReasons(data);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(err, "Failed to load cost reasons."));
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchReasons]);
+    
+    async function reloadReasons() {
+        setLoading(true);
+        setError(null);
+        await fetchReasons();
+    }
+
+    function handleIncludeInactiveChange() {
+        setLoading(true);
+        setError(null);
+        setShowInactive((active) => !active);
+    }
 
     const filtered = useMemo(() => {
         if (!search.trim()) return reasons;
@@ -98,7 +122,7 @@ export default function CostReasonsPage() {
         );
 
         modal.close();
-        await load();
+        await reloadReasons();
     }
 
     const emptyState = search.trim()
@@ -138,7 +162,7 @@ export default function CostReasonsPage() {
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() => setShowInactive((active) => !active)}
+                        onChange={handleIncludeInactiveChange}
                         ariaLabel="Toggle inactive cost reasons"
                     />
                 </Surface>

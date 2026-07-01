@@ -67,35 +67,91 @@ export default function StdLocationsPage() {
         },
     });
 
-    const load = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const result = await stdLocationsApi.getAll({
+    const fetchLocations = useCallback(
+        () =>
+            stdLocationsApi.getAll({
                 page,
                 pageSize: PAGE_SIZE,
                 search: debouncedSearch,
                 shopId,
                 collectionTypeId,
                 includeInactive,
-            });
+            }),
+        [page, debouncedSearch, shopId, collectionTypeId, includeInactive],
+    );
 
+    async function reloadLocations() {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const result = await fetchLocations();
             setData(result);
         } catch (err) {
             setError(getApiErrorMessage(err, "Failed to load STD locations."));
         } finally {
             setLoading(false);
         }
-    }, [page, debouncedSearch, shopId, collectionTypeId, includeInactive]);
+    }
 
     useEffect(() => {
-        load();
-    }, [load]);
+        let cancelled = false;
 
-    useEffect(() => {
+        fetchLocations()
+            .then((result) => {
+                if (!cancelled) {
+                    setData(result);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(err, "Failed to load STD locations."));
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchLocations]);
+
+    function resetPageForFilterChange() {
         setPage(1);
-    }, [debouncedSearch, shopId, collectionTypeId, includeInactive]);
+        setLoading(true);
+        setError(null);
+    }
+
+    function handleSearchChange(value: string) {
+        resetPageForFilterChange();
+        setSearch(value);
+    }
+
+    function handleShopChange(value: string | null, label: string | null) {
+        resetPageForFilterChange();
+        setShopId(value);
+        setShopLabel(label);
+    }
+
+    function handleCollectionTypeChange(value: string | null, label: string | null) {
+        resetPageForFilterChange();
+        setCollectionTypeId(value);
+        setCollectionTypeLabel(label);
+    }
+
+    function handleIncludeInactiveChange() {
+        resetPageForFilterChange();
+        setIncludeInactive((value) => !value);
+    }
+
+    function handlePageChange(nextPage: number) {
+        setLoading(true);
+        setError(null);
+        setPage(nextPage);
+    }
 
     async function handleSubmit(form: CreateStdLocation) {
         if (modal.editing) {
@@ -113,10 +169,12 @@ export default function StdLocationsPage() {
         );
 
         modal.close();
-        await load();
+        await reloadLocations();
     }
 
     function handleResetFilters() {
+        setLoading(true);
+        setError(null);
         setSearch("");
         setShopId(null);
         setShopLabel(null);
@@ -161,7 +219,7 @@ export default function StdLocationsPage() {
                             <Input
                                 value={search}
                                 onChange={(event) => {
-                                    setSearch(event.target.value);
+                                    handleSearchChange(event.target.value);
                                 }}
                                 placeholder="Search location or postcode..."
                                 className={cn(fieldBase, "pl-9")}
@@ -189,10 +247,7 @@ export default function StdLocationsPage() {
                                 value={shopId}
                                 label={shopLabel}
                                 placeholder="Filter by shop"
-                                onChange={(value, label) => {
-                                    setShopId(value);
-                                    setShopLabel(label);
-                                }}
+                                onChange={handleShopChange}
                             />
                         </div>
 
@@ -203,10 +258,7 @@ export default function StdLocationsPage() {
                                 prefixLabel
                                 value={collectionTypeId}
                                 label={collectionTypeLabel}
-                                onChange={(value, label) => {
-                                    setCollectionTypeId(value);
-                                    setCollectionTypeLabel(label);
-                                }}
+                                onChange={handleCollectionTypeChange}
                             />
                         </div>
 
@@ -217,7 +269,7 @@ export default function StdLocationsPage() {
 
                             <Toggle
                                 checked={includeInactive}
-                                onChange={() => setIncludeInactive((value) => !value)}
+                                onChange={handleIncludeInactiveChange}
                                 ariaLabel="Toggle inactive STD locations"
                             />
                         </div>
@@ -257,7 +309,7 @@ export default function StdLocationsPage() {
                 <Pagination
                     page={data.page}
                     totalPages={data.totalPages}
-                    onPageChange={setPage}
+                    onPageChange={handlePageChange}
                     className="mt-6"
                 />
             )}

@@ -18,6 +18,20 @@ import { RequisitionLimitRuleTable } from "@/features/requisition-limit-rules/re
 import { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, RequisitionLimitRuleSummary, requisitionLimitRulesApi, } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { RequisitionFascia, FASCIAS } from "@/lib/constants/fascias";
 
+
+const FASCIA_ORDER: Record<RequisitionFascia, number> = {
+    [FASCIAS.FE]: 0,
+    [FASCIAS.STD]: 1,
+};
+
+const CATEGORY_ORDER: Record<string, number> = {
+    "General Task": 0,
+    Mileage: 1,
+    Transfer: 2,
+    "Additional Cost": 3,
+};
+
+
 export default function RequisitionLimitRulesPage() {
     const [rules, setRules] = useState<RequisitionLimitRuleSummary[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,23 +43,55 @@ export default function RequisitionLimitRulesPage() {
     const [editing, setEditing] = useState<RequisitionLimitRuleSummary | null>(null);
     const toast = useToast();
 
-    const load = useCallback(async () => {
+    const fetchRules = useCallback(
+        () => requisitionLimitRulesApi.getAll(),
+        [],
+    );
+
+    async function reloadRules() {
         setLoading(true);
         setError(null);
 
         try {
-            const data = await requisitionLimitRulesApi.getAll();
+            const data = await fetchRules();
             setRules(data);
         } catch (err) {
-            setError(getApiErrorMessage(err, "Failed to load submit windows."));
+            setError(getApiErrorMessage(err, "Failed to load requisition limit rules."));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }
 
     useEffect(() => {
-        load();
-    }, [load]);
+        let cancelled = false;
+
+        fetchRules()
+            .then((data) => {
+                if (!cancelled) {
+                    setRules(data);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(
+                        getApiErrorMessage(
+                            err,
+                            "Failed to load requisition limit rules.",
+                        ),
+                    );
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchRules]);
+
 
     useEffect(() => {
         async function loadTaskTypes() {
@@ -60,18 +106,6 @@ export default function RequisitionLimitRulesPage() {
         loadTaskTypes();
     }, []);
 
-    const fasciaOrder: Record<RequisitionFascia, number> = {
-        [FASCIAS.FE]: 0,
-        [FASCIAS.STD]: 1,
-    };
-
-    const categoryOrder: Record<string, number> = {
-        "General Task": 0,
-        Mileage: 1,
-        Transfer: 2,
-        "Additional Cost": 3,
-    };
-
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
 
@@ -85,14 +119,13 @@ export default function RequisitionLimitRulesPage() {
             : rules;
 
         return [...results].sort((a, b) => {
-            const fasciaCompare = (fasciaOrder[a.fascia] ?? 999) - (fasciaOrder[b.fascia] ?? 999);
+            const fasciaCompare = (FASCIA_ORDER[a.fascia] ?? 999) - (FASCIA_ORDER[b.fascia] ?? 999);
 
             if (fasciaCompare !== 0) {
                 return fasciaCompare;
             }
 
-            const categoryCompare =
-                (categoryOrder[a.categoryName] ?? 999) - (categoryOrder[b.categoryName] ?? 999);
+            const categoryCompare = (CATEGORY_ORDER[a.categoryName] ?? 999) - (CATEGORY_ORDER[b.categoryName] ?? 999);
 
             if (categoryCompare !== 0) {
                 return categoryCompare;
@@ -130,7 +163,7 @@ export default function RequisitionLimitRulesPage() {
         );
         setModalOpen(false);
         setEditing(null);
-        await load();
+        await reloadRules();
     }
 
     const emptyState = search.trim()
