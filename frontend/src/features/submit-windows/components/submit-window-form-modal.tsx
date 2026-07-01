@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,7 +40,20 @@ type SubmitWindowFormModalProps = {
     initial?: SubmitWindow | null;
 };
 
-export function SubmitWindowFormModal({
+export function SubmitWindowFormModal(props: Readonly<SubmitWindowFormModalProps>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <SubmitWindowFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function SubmitWindowFormModalContent({
     open,
     onClose,
     onSubmit,
@@ -57,7 +70,6 @@ export function SubmitWindowFormModal({
     const {
         control,
         handleSubmit,
-        reset,
         setError,
         setValue,
         formState: { errors, isSubmitting },
@@ -69,28 +81,7 @@ export function SubmitWindowFormModal({
         },
     });
 
-    useEffect(() => {
-        if (!open) return;
-
-        reset({
-            openFrom: initial ? new Date(initial.openFrom) : undefined,
-            openTo: initial ? new Date(initial.openTo) : undefined,
-        });
-
-        // Only reset auto-behavior flags in CREATE mode
-        if (!isEditing) {
-            setOpenFromTouched(false);
-            setOpenToTouched(false);
-        }
-
-        setServerError(null);
-    }, [open, initial, reset, isEditing]);
-
     function handleClose() {
-        reset();
-        setServerError(null);
-        setOpenFromTouched(false);
-        setOpenToTouched(false);
         onClose();
     }
 
