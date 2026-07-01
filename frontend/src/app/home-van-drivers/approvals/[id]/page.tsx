@@ -78,11 +78,11 @@ export default function Page() {
         };
     }, [params.id, authLoading, canApprove]);
 
-    const pageLoading = loading || limitRulesLoading || taskTypesLoading;
+
 
     const errors = [error, limitRulesError, taskTypesError].filter((e): e is string => Boolean(e));
 
-    if (authLoading || pageLoading) {
+    if (authLoading) {
         return (
             <PageContainer>
                 <FeRequisitionShellSkeleton />
@@ -92,6 +92,16 @@ export default function Page() {
 
     if (!canApprove) {
         return <NotFound />;
+    }
+
+    const pageLoading = loading || limitRulesLoading || taskTypesLoading;
+
+    if (pageLoading) {
+        return (
+            <PageContainer>
+                <FeRequisitionShellSkeleton />
+            </PageContainer>
+        );
     }
 
     if (notFound) {

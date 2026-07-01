@@ -25,7 +25,7 @@ import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams, } fro
 import { getApiErrorMessage } from "@/lib/api/client";
 
 export default function HomeVanDriversPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
 
     const pathname = usePathname();
@@ -40,10 +40,15 @@ export default function HomeVanDriversPage() {
     const currentUserId = user?.id;
 
     useEffect(() => {
-        if (!canCreate || !currentUserId) return;
+        if (authLoading || !canCreate || !currentUserId) {
+            return;
+        }
+
         let cancelled = false;
 
-        async function run() {
+        const userId = currentUserId;
+
+        async function load() {
             setLoading(true);
             setError(null);
 
@@ -55,7 +60,7 @@ export default function HomeVanDriversPage() {
                             ...filters,
                             requisitionNumber: debouncedReqNumber,
                         },
-                        user!.id,
+                        userId,
                     ),
                 );
 
@@ -73,12 +78,13 @@ export default function HomeVanDriversPage() {
             }
         }
 
-        run();
+        load();
 
         return () => {
             cancelled = true;
         };
     }, [
+        authLoading,
         canCreate,
         currentUserId,
         page,
@@ -110,7 +116,15 @@ export default function HomeVanDriversPage() {
         router.replace(pathname);
     }
 
-    if (!canCreateRequisitions(user)) {
+    if (authLoading) {
+        return (
+            <PageContainer>
+                <FeRequisitionTableSkeleton />
+            </PageContainer>
+        );
+    }
+
+    if (!canCreate) {
         return <NotFound />;
     }
 

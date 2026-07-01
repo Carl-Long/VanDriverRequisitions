@@ -11,16 +11,16 @@ import { createEmptyFeRequisitionDraft } from "../lib/create-empty-fe-requisitio
 import { createFeGeneralTaskDraftFromForm } from "../lib/create-fe-general-task-draft-from-form";
 import { createFeMileageDraftFromForm } from "../lib/create-fe-mileage-draft-from-form";
 
-import { calculateFeGeneralTaskFormTotals } from "../lib/calculate-fe-general-task-form";
-import { calculateFeMileageFormTotals } from "../lib/calculate-fe-mileage-form";
 import { calculateFeRequisitionSubtotal } from "../utils/fe-requisition-calculations";
-import { calculateFeTransferFormTotals } from "../lib/calculate-fe-transfer-form";
 import { createFeTransferDraftFromForm } from "../lib/create-fe-transfer-draft-from-form";
 import { FeTransferForm } from "../types/fe-transfer-form";
-import { calculateFeAdditionalCostFormTotals } from "../lib/calculate-fe-additional-cost.form";
 import { createFeAdditionalCostDraftFromForm } from "../lib/create-fe-additional-cost-draft-from-form";
 import { FeAdditionalCostForm } from "../types/fe-additional-cost-form";
 import { resolveSelectedLookupActiveState } from "@/features/requisitions-shared/lib/resolve-selected-lookup-active-state";
+import { updateFeGeneralTaskDraftFromForm } from "../lib/update-fe-general-task-draft-from-form";
+import { updateFeAdditionalCostDraftFromForm } from "../lib/update-fe-additional-cost-draft-from-form";
+import { updateFeMileageDraftFromForm } from "../lib/update-fe-mileage-draft-from-form";
+import { updateFeTransferDraftFromForm } from "../lib/update-fe-transfer-draft-from-form";
 
 export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     const [draft, setDraft] = useState<FeRequisitionDraft>(
@@ -90,26 +90,13 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }
 
     function updateGeneralTask(clientId: string, form: FeGeneralTaskForm) {
-        const totals = calculateFeGeneralTaskFormTotals(form);
-
         setDraft((prev) => ({
             ...prev,
-            feGeneralTasks: prev.feGeneralTasks.map((task) => {
-                if (task.clientId !== clientId) {
-                    return task;
-                }
-
-                return {
-                    ...task,
-                    weekEndingDate: form.weekEndingDate,
-                    quantities: {
-                        ...form.quantities,
-                    },
-                    ratePerJob: form.ratePerJob,
-                    totalNumber: totals.totalJobs,
-                    totalValue: totals.totalValue,
-                };
-            }),
+            feGeneralTasks: prev.feGeneralTasks.map((row) =>
+                row.clientId === clientId
+                    ? updateFeGeneralTaskDraftFromForm(row, form)
+                    : row,
+            ),
         }));
     }
 
@@ -130,26 +117,13 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }
 
     function updateMileage(clientId: string, form: FeMileageForm) {
-        const totals = calculateFeMileageFormTotals(form);
-
         setDraft((prev) => ({
             ...prev,
-            feMileages: prev.feMileages.map((mileage) => {
-                if (mileage.clientId !== clientId) {
-                    return mileage;
-                }
-
-                return {
-                    ...mileage,
-                    weekEndingDate: form.weekEndingDate,
-                    quantities: {
-                        ...form.quantities,
-                    },
-                    ratePerMile: form.ratePerMile,
-                    totalMiles: totals.totalMiles,
-                    totalValue: totals.totalValue,
-                };
-            }),
+            feMileages: prev.feMileages.map((row) =>
+                row.clientId === clientId
+                    ? updateFeMileageDraftFromForm(row, form)
+                    : row,
+            ),
         }));
     }
 
@@ -170,38 +144,13 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }
 
     function updateTransfer(clientId: string, form: FeTransferForm) {
-        const totals = calculateFeTransferFormTotals(form);
-
         setDraft((prev) => ({
             ...prev,
-            feTransfers: prev.feTransfers.map((transfer) => {
-                if (transfer.clientId !== clientId) {
-                    return transfer;
-                }
-
-                return {
-                    ...transfer,
-
-                    shopIdFrom: form.shopIdFrom,
-                    shopLabelFrom: form.shopLabelFrom,
-                    isShopFromActive: form.isShopFromActive,
-
-                    shopIdTo: form.shopIdTo,
-                    shopLabelTo: form.shopLabelTo,
-                    isShopToActive: form.isShopToActive,
-
-                    weekEndingDate: form.weekEndingDate,
-
-                    quantities: {
-                        ...form.quantities,
-                    },
-
-                    ratePerJob: form.ratePerJob,
-
-                    totalNumber: totals.totalNumber,
-                    totalValue: totals.totalValue,
-                };
-            }),
+            feTransfers: prev.feTransfers.map((row) =>
+                row.clientId === clientId
+                    ? updateFeTransferDraftFromForm(row, form)
+                    : row,
+            ),
         }));
     }
 
@@ -222,36 +171,13 @@ export function useFeRequisitionDraft(initialDraft?: FeRequisitionDraft) {
     }
 
     function updateAdditionalCost(clientId: string, form: FeAdditionalCostForm) {
-        const totals = calculateFeAdditionalCostFormTotals(form);
-
         setDraft((prev) => ({
             ...prev,
-            feAdditionalCosts: prev.feAdditionalCosts.map((row) => {
-                if (row.clientId !== clientId) {
-                    return row;
-                }
-
-                return {
-                    ...row,
-
-                    weekEndingDate: form.weekEndingDate,
-
-                    reasonId: form.reasonId,
-                    reasonText: form.reasonText,
-                    reasonCode: form.reasonCode,
-                    isReasonActive: form.isReasonActive,
-
-                    chargingOption: form.chargingOption,
-
-                    totalNumber: form.chargingOption === "Job" ? form.totalNumber : null,
-                    ratePerJob: form.chargingOption === "Job" ? form.ratePerJob : null,
-
-                    miles: form.chargingOption === "Mileage" ? form.miles : null,
-                    ratePerMile: form.chargingOption === "Mileage" ? form.ratePerMile : null,
-
-                    totalValue: totals.totalValue,
-                };
-            }),
+            feAdditionalCosts: prev.feAdditionalCosts.map((row) =>
+                row.clientId === clientId
+                    ? updateFeAdditionalCostDraftFromForm(row, form)
+                    : row,
+            ),
         }));
     }
 

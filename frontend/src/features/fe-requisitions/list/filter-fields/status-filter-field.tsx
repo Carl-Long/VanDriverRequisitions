@@ -1,17 +1,13 @@
 "use client";
 
 import { Field } from "@/components/ui/field/field";
-import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
+import { Combobox } from "@/components/ui/field/combobox";
+
 import {
     REQUISITION_STATUSES,
     requisitionStatusConfig,
     RequisitionStatus,
 } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
-
-const options: ComboboxOption[] = REQUISITION_STATUSES.map((x) => ({
-    value: x,
-    label: requisitionStatusConfig[x].label,
-}));
 
 type Props = {
     value: RequisitionStatus | "";

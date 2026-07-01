@@ -5,7 +5,7 @@ import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-r
 import { REQUISITION_ROW_CATEGORIES } from "../../constants/requisition-row-categories";
 import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-status";
 import { getMileageLimitStatus } from "../lib/get-fe-mileage-limit-status";
-import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
+import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import type { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import type { FeAdditionalCostDraft } from "../types/fe-additional-cost-draft";
 import type { FeTransferDraft } from "../types/fe-transfer-draft";

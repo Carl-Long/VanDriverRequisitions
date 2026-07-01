@@ -17,7 +17,6 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
-import { cn } from "@/lib/utils";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 

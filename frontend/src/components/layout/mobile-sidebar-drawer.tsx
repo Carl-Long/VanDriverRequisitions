@@ -18,7 +18,6 @@ export function MobileSidebarDrawer({
     onClose,
 }: Readonly<MobileSidebarDrawerProps>) {
     const dialogRef = useRef<HTMLDialogElement>(null);
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const dialog = dialogRef.current;

@@ -18,7 +18,7 @@ export default function NotFoundPage() {
                 <h1 className="text-2xl font-semibold">Page not found</h1>
 
                 <p className="text-muted-foreground mt-3">
-                    The page or resource you're looking for doesn't exist or may have been removed.
+                    The page or resource you are looking for does not exist or may have been removed.
                 </p>
 
                 <div className="mt-6">

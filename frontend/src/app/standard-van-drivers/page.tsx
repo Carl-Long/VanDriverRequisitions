@@ -27,7 +27,7 @@ import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, } fro
 import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 
 export default function StandardDriversPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
 
     const pathname = usePathname();
@@ -45,7 +45,7 @@ export default function StandardDriversPage() {
     const currentUserId = user?.id;
 
     useEffect(() => {
-        if (!canCreate || !currentUserId) {
+        if (authLoading || !canCreate || !currentUserId) {
             return;
         }
 
@@ -106,8 +106,7 @@ export default function StandardDriversPage() {
         router.replace(`${pathname}?${params.toString()}`);
     }
 
-    const currentListUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""
-        }`;
+    const currentListUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
     function getRequisitionHref(req: StdRequisitionSummary) {
         return `/standard-van-drivers/${req.id}?returnTo=${encodeURIComponent(currentListUrl)}`;
@@ -119,7 +118,15 @@ export default function StandardDriversPage() {
         router.replace(pathname);
     }
 
-    if (!canCreateRequisitions(user)) {
+    if (authLoading) {
+        return (
+            <PageContainer>
+                <StdRequisitionTableSkeleton />
+            </PageContainer>
+        );
+    }
+
+    if (!canCreate) {
         return <NotFound />;
     }
 

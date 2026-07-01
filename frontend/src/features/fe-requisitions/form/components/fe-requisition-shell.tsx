@@ -5,7 +5,7 @@ import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
-import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisiton-limit-rule";
+import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
 import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
@@ -32,6 +32,7 @@ import { RequisitionRejectModal } from "@/features/requisitions-shared/component
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 
 
 type Props = {
@@ -95,7 +96,6 @@ export function FeRequisitionShell({
         setIsApproveModalOpen,
         isRejectModalOpen,
         setIsRejectModalOpen,
-        setIsSaving,
     } = useRequisitionShellUiState({ initialActiveTabKey });
 
 
@@ -134,17 +134,12 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
-            let saved: FeRequisitionDetail;
-
-            if (draft.requisitionId) {
-                saved = await feRequisitionsApi.update(draft.requisitionId, request);
-            } else {
-                saved = await feRequisitionsApi.create(request);
-            }
+            const saved = draft.requisitionId
+                ? await feRequisitionsApi.update(draft.requisitionId, request)
+                : await feRequisitionsApi.create(request);
 
             replaceDraft(mapFeRequisitionDetailToDraft(saved));
 
@@ -169,8 +164,6 @@ export function FeRequisitionShell({
             setErrors({
                 form: "Failed to save requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -179,14 +172,22 @@ export function FeRequisitionShell({
 
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
-
             setActiveKey("details");
+            return;
+        }
+
+        const subtotalError = getSubmitSubtotalError(subtotal);
+
+        if (subtotalError) {
+            setErrors({
+                form: subtotalError,
+            });
+
             return;
         }
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
@@ -208,8 +209,6 @@ export function FeRequisitionShell({
             setErrors({
                 form: "Failed to submit requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -274,7 +273,6 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const approved = await feRequisitionsApi.approve(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -295,7 +293,6 @@ export function FeRequisitionShell({
                 form: "Failed to approve requisition",
             });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }
@@ -310,7 +307,6 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const rejected = await feRequisitionsApi.reject(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -332,7 +328,6 @@ export function FeRequisitionShell({
                 form: "Failed to reject requisition",
             });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }
@@ -436,8 +431,16 @@ export function FeRequisitionShell({
                             rules: limitRules,
                             category: REQUISITION_ROW_CATEGORIES.MILEAGE,
                         })}
-                        onAdd={addAdditionalCost}
-                        onUpdate={updateAdditionalCost}
+                        onAdd={(form) => {
+                            addAdditionalCost(form);
+                            clearError("feAdditionalCosts");
+                            clearError("form");
+                        }}
+                        onUpdate={(clientId, form) => {
+                            updateAdditionalCost(clientId, form);
+                            clearError("feAdditionalCosts");
+                            clearError("form");
+                        }}
                         onDelete={removeAdditionalCost}
                     />
                 }
@@ -470,13 +473,13 @@ export function FeRequisitionShell({
                             tasks={tasks}
                             onAdd={(form) => {
                                 addGeneralTask(taskType.id, taskType.name, form);
-                                clearError("generalTasks");
+                                clearError("feGeneralTasks");
                                 clearError("form");
                             }}
                             onUpdate={(clientId, form) => {
                                 updateGeneralTask(clientId, form);
 
-                                clearError("generalTasks");
+                                clearError("feGeneralTasks");
                                 clearError("form");
                             }}
                             onDelete={removeGeneralTask}

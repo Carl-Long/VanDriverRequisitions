@@ -33,3 +33,7 @@ export function canApproveRequisitions(user?: AuthUser | null): boolean {
 export function canManageConfiguration(user?: AuthUser | null): boolean {
     return isAdmin(user);
 }
+
+export function canViewRequisitionSubmissions(user?: AuthUser | null): boolean {
+    return canCreateRequisitions(user) || canApproveRequisitions(user);
+}

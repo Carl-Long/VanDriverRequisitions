@@ -1,3 +1,4 @@
+import { parseDateOnly } from "@/lib/format/date";
 import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
@@ -8,7 +9,7 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
         rowVersion: detail.rowVersion,
         requisitionNumber: detail.requisitionNumber,
         status: detail.status as RequisitionStatus,
-        requisitionDate: new Date(detail.requisitionDate),
+        requisitionDate: parseDateOnly(detail.requisitionDate),
         vanDriverId: detail.vanDriverId,
         vanDriverLabel: `${detail.vanDriverSummary.code} - ${detail.vanDriverSummary.tradersName}`,
         vanDriverSummary: detail.vanDriverSummary,
@@ -31,7 +32,7 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             clientId: crypto.randomUUID(),
             taskTypeId: task.feTaskTypeId,
             taskTypeLabel: task.taskTypeName,
-            weekEndingDate: new Date(task.weekEndingDate),
+            weekEndingDate: parseDateOnly(task.weekEndingDate),
 
             quantities: {
                 sunday: task.week.sunday,
@@ -51,7 +52,7 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
         feMileages: detail.feMileages.map((mileage) => ({
             id: mileage.id,
             clientId: crypto.randomUUID(),
-            weekEndingDate: new Date(mileage.weekEndingDate),
+            weekEndingDate: parseDateOnly(mileage.weekEndingDate),
 
             quantities: {
                 sunday: mileage.week.sunday,
@@ -80,7 +81,7 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             shopLabelTo: `${transfer.shopCodeTo} - ${transfer.shopNameTo}`,
             isShopToActive: transfer.isShopToActive,
 
-            weekEndingDate: new Date(transfer.weekEndingDate),
+            weekEndingDate: parseDateOnly(transfer.weekEndingDate),
 
             quantities: {
                 sunday: transfer.week.sunday,
@@ -101,7 +102,7 @@ export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRe
             id: cost.id,
             clientId: crypto.randomUUID(),
 
-            weekEndingDate: new Date(cost.weekEndingDate),
+            weekEndingDate: parseDateOnly(cost.weekEndingDate),
 
             reasonId: cost.reasonId,
             reasonCode: cost.reasonCode,

@@ -1,47 +1,23 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/page-container";
-import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
-import { Alert } from "@/components/ui/alert";
+import { useSearchParams } from "next/navigation";
+
 import NotFound from "@/app/not-found";
+import { PageContainer } from "@/components/layout/page-container";
+import { Alert } from "@/components/ui/alert";
 import { canCreateRequisitions } from "@/features/auth/roles";
-import { useAuth } from "@/providers/auth-provider";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
 import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
-import { useSearchParams } from "next/navigation";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
+import { useAuth } from "@/providers/auth-provider";
 
-export default function NewRequisitionPage() {
-    const {
-        limitRules,
-        loading: limitRulesLoading,
-        error: limitRulesError,
-    } = useRequisitionLimitRules();
-
-    const { taskTypes, loading: taskTypesLoading, error: taskTypesError } = useFeTaskTypes();
-
-    const {
-        status: submitStatus,
-        loading: submitWindowStatusLoading,
-        error: submitWindowStatusError,
-    } = useSubmitWindowStatus();
-
-    const searchParams = useSearchParams();
-
-    const backHref = getSafeReturnTo(searchParams.get("returnTo"), ["/home-van-drivers"], "/home-van-drivers");
-
-    const errors = [limitRulesError, taskTypesError, submitWindowStatusError].filter(Boolean);
-
+export default function NewFeRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
 
-    const canCreate = canCreateRequisitions(user);
-
-    const loading =
-        authLoading || limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
-
-    if (loading) {
+    if (authLoading) {
         return (
             <PageContainer>
                 <FeRequisitionShellSkeleton />
@@ -49,8 +25,52 @@ export default function NewRequisitionPage() {
         );
     }
 
-    if (!canCreate) {
+    if (!canCreateRequisitions(user)) {
         return <NotFound />;
+    }
+
+    return <NewFeRequisitionContent />;
+}
+
+function NewFeRequisitionContent() {
+    const searchParams = useSearchParams();
+
+    const backHref = getSafeReturnTo(
+        searchParams.get("returnTo"),
+        ["/home-van-drivers"],
+        "/home-van-drivers",
+    );
+
+    const {
+        limitRules,
+        loading: limitRulesLoading,
+        error: limitRulesError,
+    } = useRequisitionLimitRules();
+
+    const {
+        taskTypes,
+        loading: taskTypesLoading,
+        error: taskTypesError,
+    } = useFeTaskTypes();
+
+    const {
+        status: submitWindowStatus,
+        loading: submitWindowStatusLoading,
+        error: submitWindowStatusError,
+    } = useSubmitWindowStatus();
+
+    const errors = [limitRulesError, taskTypesError, submitWindowStatusError].filter(
+        (error): error is string => Boolean(error),
+    );
+
+    const pageLoading = limitRulesLoading || taskTypesLoading || submitWindowStatusLoading;
+
+    if (pageLoading) {
+        return (
+            <PageContainer>
+                <FeRequisitionShellSkeleton />
+            </PageContainer>
+        );
     }
 
     if (errors.length > 0) {
@@ -72,7 +92,7 @@ export default function NewRequisitionPage() {
                 backHref={backHref}
                 taskTypes={taskTypes}
                 limitRules={limitRules}
-                submitWindowStatus={submitStatus}
+                submitWindowStatus={submitWindowStatus}
                 submitWindowStatusLoading={submitWindowStatusLoading}
             />
         </PageContainer>

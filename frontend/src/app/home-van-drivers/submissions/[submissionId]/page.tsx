@@ -1,32 +1,59 @@
 "use client";
 
+import { Printer } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
-import { PageContainer } from "@/components/layout/page-container";
-import { Alert } from "@/components/ui/alert";
+
 import NotFound from "@/app/not-found";
-import { useSubmission } from "@/features/fe-requisitions/fe-submissions-view/use-submission";
+import { PageContainer } from "@/components/layout/page-container";
+import { Button } from "@/components/ui/button/button";
+import { BackLink } from "@/components/ui/navigation-back-link";
+import { Alert } from "@/components/ui/alert";
+import { canViewRequisitionSubmissions } from "@/features/auth/roles";
+import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
 import { FeSubmissionGeneralTasksTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-general-tasks-table";
 import { FeSubmissionHeader } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-header";
+import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
 import { FeSubmissionPageSkeleton } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";
 import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-snapshot-summary";
-import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
 import { FeSubmissionTransfersTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-transfers-table";
-import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
-import { Printer } from "lucide-react";
-import { BackLink } from "@/components/ui/navigation-back-link";
-import { Button } from "@/components/ui/button/button";
+import { useSubmission } from "@/features/fe-requisitions/fe-submissions-view/use-submission";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { useAuth } from "@/providers/auth-provider";
 
-export default function SubmissionPage() {
+export default function FeSubmissionPage() {
+    const { user, loading: authLoading } = useAuth();
+
+    if (authLoading) {
+        return (
+            <PageContainer>
+                <FeSubmissionPageSkeleton />
+            </PageContainer>
+        );
+    }
+
+    if (!canViewRequisitionSubmissions(user)) {
+        return <NotFound />;
+    }
+
+    return <FeSubmissionContent />;
+}
+
+function FeSubmissionContent() {
     const params = useParams<{ submissionId: string }>();
-
-    const { data: submission, loading, error, notFound } = useSubmission(params.submissionId);
-
-    const errors = [error].filter((e): e is string => Boolean(e));
-
     const searchParams = useSearchParams();
 
-    const safeReturnTo = getSafeReturnTo(searchParams.get("returnTo"), ["/home-van-drivers"], "/home-van-drivers");
+    const {
+        data: submission,
+        loading,
+        error,
+        notFound,
+    } = useSubmission(params.submissionId);
+
+    const safeReturnTo = getSafeReturnTo(
+        searchParams.get("returnTo"),
+        ["/home-van-drivers"],
+        "/home-van-drivers",
+    );
 
     const cameFromApprovals = safeReturnTo.startsWith("/home-van-drivers/approvals");
 
@@ -53,20 +80,16 @@ export default function SubmissionPage() {
         return <NotFound />;
     }
 
-    if (errors.length > 0) {
+    if (error) {
         return (
             <PageContainer>
-                <div className="space-y-4">
-                    {errors.map((error, index) => (
-                        <Alert key={`${index}-${error}`}>{error}</Alert>
-                    ))}
-                </div>
+                <Alert tone="danger">{error}</Alert>
             </PageContainer>
         );
     }
 
     if (!submission) {
-        return null;
+        return <NotFound />;
     }
 
     return (
@@ -77,7 +100,12 @@ export default function SubmissionPage() {
                         Back to requisition
                     </BackLink>
 
-                    <Button type="button" variant="solid" tone="accent" onClick={() => globalThis.print()}>
+                    <Button
+                        type="button"
+                        variant="solid"
+                        tone="accent"
+                        onClick={() => globalThis.print()}
+                    >
                         <Printer className="size-[1em]" />
                         Print / Save PDF
                     </Button>
