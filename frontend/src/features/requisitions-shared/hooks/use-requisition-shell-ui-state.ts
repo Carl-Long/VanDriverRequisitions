@@ -21,8 +21,6 @@ export function useRequisitionShellUiState({
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
-    const [isSaving, setIsSaving] = useState(false);
-
     const clearError = useCallback((field: string) => {
         setErrors((prev) => {
             if (!prev[field]) {
@@ -59,8 +57,5 @@ export function useRequisitionShellUiState({
 
         isRejectModalOpen,
         setIsRejectModalOpen,
-
-        isSaving,
-        setIsSaving,
     };
 }

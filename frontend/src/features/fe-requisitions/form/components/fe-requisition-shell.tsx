@@ -96,7 +96,6 @@ export function FeRequisitionShell({
         setIsApproveModalOpen,
         isRejectModalOpen,
         setIsRejectModalOpen,
-        setIsSaving,
     } = useRequisitionShellUiState({ initialActiveTabKey });
 
 
@@ -135,17 +134,12 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
-            let saved: FeRequisitionDetail;
-
-            if (draft.requisitionId) {
-                saved = await feRequisitionsApi.update(draft.requisitionId, request);
-            } else {
-                saved = await feRequisitionsApi.create(request);
-            }
+            const saved = draft.requisitionId
+                ? await feRequisitionsApi.update(draft.requisitionId, request)
+                : await feRequisitionsApi.create(request);
 
             replaceDraft(mapFeRequisitionDetailToDraft(saved));
 
@@ -170,8 +164,6 @@ export function FeRequisitionShell({
             setErrors({
                 form: "Failed to save requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -180,7 +172,6 @@ export function FeRequisitionShell({
 
         if (!result.success) {
             setErrors(mapZodErrors(result.error));
-
             setActiveKey("details");
             return;
         }
@@ -197,7 +188,6 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapFeRequisitionDraftToSaveRequest(draft);
 
@@ -219,8 +209,6 @@ export function FeRequisitionShell({
             setErrors({
                 form: "Failed to submit requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -285,7 +273,6 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const approved = await feRequisitionsApi.approve(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -306,7 +293,6 @@ export function FeRequisitionShell({
                 form: "Failed to approve requisition",
             });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }
@@ -321,7 +307,6 @@ export function FeRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const rejected = await feRequisitionsApi.reject(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -343,7 +328,6 @@ export function FeRequisitionShell({
                 form: "Failed to reject requisition",
             });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }

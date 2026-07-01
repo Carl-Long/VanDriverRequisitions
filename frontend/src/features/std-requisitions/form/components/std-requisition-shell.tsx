@@ -102,7 +102,6 @@ export function StdRequisitionShell({
         setIsApproveModalOpen,
         isRejectModalOpen,
         setIsRejectModalOpen,
-        setIsSaving,
     } = useRequisitionShellUiState({ initialActiveTabKey });
 
 
@@ -138,17 +137,12 @@ export function StdRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapStdRequisitionDraftToSaveRequest(draft);
 
-            let saved: StdRequisitionDetail;
-
-            if (draft.requisitionId) {
-                saved = await stdRequisitionsApi.update(draft.requisitionId, request);
-            } else {
-                saved = await stdRequisitionsApi.create(request);
-            }
+            const saved = draft.requisitionId
+                ? await stdRequisitionsApi.update(draft.requisitionId, request)
+                : await stdRequisitionsApi.create(request);
 
             replaceDraft(mapStdRequisitionDetailToDraft(saved));
 
@@ -173,8 +167,6 @@ export function StdRequisitionShell({
             setErrors({
                 form: "Failed to save requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -199,7 +191,6 @@ export function StdRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const request = mapStdRequisitionDraftToSaveRequest(draft);
 
@@ -208,7 +199,6 @@ export function StdRequisitionShell({
                 : await stdRequisitionsApi.submitNew(request);
 
             toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
-
             router.push(backHref ?? "/standard-van-drivers");
         } catch (err) {
             if (err instanceof ApiError) {
@@ -222,8 +212,6 @@ export function StdRequisitionShell({
             setErrors({
                 form: "Failed to submit requisition",
             });
-        } finally {
-            setIsSaving(false);
         }
     }
 
@@ -288,7 +276,6 @@ export function StdRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const approved = await stdRequisitionsApi.approve(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -305,9 +292,10 @@ export function StdRequisitionShell({
                 return;
             }
 
-            setErrors({ form: "Failed to approve requisition", });
+            setErrors({
+                form: "Failed to approve requisition",
+            });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }
@@ -322,7 +310,6 @@ export function StdRequisitionShell({
 
         try {
             clearAllErrors();
-            setIsSaving(true);
 
             const rejected = await stdRequisitionsApi.reject(draft.requisitionId, {
                 rowVersion: draft.rowVersion,
@@ -340,9 +327,10 @@ export function StdRequisitionShell({
                 return;
             }
 
-            setErrors({ form: "Failed to reject requisition", });
+            setErrors({
+                form: "Failed to reject requisition",
+            });
         } finally {
-            setIsSaving(false);
             setActiveAction(null);
         }
     }
