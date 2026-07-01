@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,7 +26,7 @@ const costReasonSchema = z.object({
         .trim()
         .min(1, "Code is required.")
         .max(20, "Code must be between 1 and 20 characters.")
-        .regex(/^[0-9]+$/, "Code must contain numbers only."),
+        .regex(/^\d+$/, "Code must contain numbers only."),
 
     reason: z
         .string()
@@ -48,7 +48,20 @@ type Props = {
     initial?: CostReason | null;
 };
 
-export function CostReasonFormModal({
+export function CostReasonFormModal(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <CostReasonFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function CostReasonFormModalContent({
     open,
     onClose,
     onSubmit,
@@ -60,33 +73,19 @@ export function CostReasonFormModal({
     const {
         register,
         handleSubmit,
-        reset,
         setError,
         formState: { errors, isSubmitting },
     } = useForm<CostReasonFormData>({
         resolver: zodResolver(costReasonSchema),
         defaultValues: {
-            code: "",
-            reason: "",
-            scope: "Shared",
-        },
-    });
-
-    useEffect(() => {
-        if (!open) return;
-
-        reset({
             code: initial?.code ?? "",
             reason: initial?.reason ?? "",
             scope: initial?.scope ?? "Shared",
-        });
+        },
+    });
 
-        setServerError(null);
-    }, [open, initial, reset]);
 
     function handleClose() {
-        reset();
-        setServerError(null);
         onClose();
     }
 
