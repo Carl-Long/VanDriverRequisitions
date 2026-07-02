@@ -29,7 +29,7 @@ export function getStdChargeLimitStatus(
         }
 
         if ((row.ratePerMile ?? 0) > mileageLimitRule.maxRate) {
-            messages.push(`Rate per mile exceeds maximum of ${formatCurrencyGB(mileageLimitRule.maxRate,)}.`);
+            messages.push(`Rate per mile exceeds maximum of ${formatCurrencyGB(mileageLimitRule.maxRate)}.`);
         }
 
         if (messages.length > 0) {
@@ -56,9 +56,7 @@ export function getStdChargeLimitStatus(
         return {
             state: "exceeds-limit",
             messages: [
-                `Flat charge exceeds maximum of ${formatCurrencyGB(
-                    flatChargeLimitRule.maxRate,
-                )}.`,
+                `Flat charge exceeds maximum of ${formatCurrencyGB(flatChargeLimitRule.maxRate)}.`,
             ],
         };
     }

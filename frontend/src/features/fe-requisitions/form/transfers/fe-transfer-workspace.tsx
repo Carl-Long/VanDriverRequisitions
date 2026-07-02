@@ -17,6 +17,7 @@ import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { getFeTransferLimitStatus } from "../lib/get-fe-transfer-limit-status";
 
 type Props = {
     readonly: boolean;
@@ -184,7 +185,7 @@ function TransfersTable({
 
                     <TableBody>
                         {transfers.map((transfer) => {
-                            const limitStatus = getTransferLimitStatus(transfer, limitRule);
+                            const limitStatus = getFeTransferLimitStatus(transfer, limitRule);
                             const hasInactiveLookup =
                                 transfer.isShopFromActive === false ||
                                 transfer.isShopToActive === false;
@@ -332,64 +333,4 @@ function TransfersTable({
             </div>
         </div>
     );
-}
-
-type TransferLimitStatus =
-    | {
-        state: "ok";
-        messages: string[];
-    }
-    | {
-        state: "missing-limit";
-        messages: string[];
-    }
-    | {
-        state: "exceeds-limit";
-        messages: string[];
-    };
-
-function getTransferLimitStatus(
-    row: FeTransferDraft,
-    limitRule?: RequisitionLimitRuleSummary,
-): TransferLimitStatus {
-    if (!limitRule) {
-        return {
-            state: "missing-limit",
-            messages: ["No transfer limit rule is configured."],
-        };
-    }
-
-    const messages: string[] = [];
-
-    const dailyValues = [
-        ["Sunday", row.quantities.sunday],
-        ["Monday", row.quantities.monday],
-        ["Tuesday", row.quantities.tuesday],
-        ["Wednesday", row.quantities.wednesday],
-        ["Thursday", row.quantities.thursday],
-        ["Friday", row.quantities.friday],
-        ["Saturday", row.quantities.saturday],
-    ] as const;
-
-    for (const [day, value] of dailyValues) {
-        if ((value ?? 0) > limitRule.maxQuantity) {
-            messages.push(`${day} exceeds max quantity of ${limitRule.maxQuantity}.`);
-        }
-    }
-
-    if ((row.ratePerJob ?? 0) > limitRule.maxRate) {
-        messages.push(`Rate exceeds maximum of ${formatCurrencyGB(limitRule.maxRate)}.`);
-    }
-
-    if (messages.length === 0) {
-        return {
-            state: "ok",
-            messages: [],
-        };
-    }
-
-    return {
-        state: "exceeds-limit",
-        messages,
-    };
 }

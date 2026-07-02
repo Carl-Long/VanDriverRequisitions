@@ -52,7 +52,7 @@ export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequis
 export function pageFromSearchParams(searchParams: URLSearchParams): number {
     const page = Number(searchParams.get("page"));
 
-    if (Number.isNaN(page) || page < 1) {
+    if (!Number.isInteger(page) || page < 1) {
         return 1;
     }
 

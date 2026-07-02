@@ -7,9 +7,9 @@ import { getGeneralTaskLimitStatus } from "../lib/get-fe-general-task-limit-stat
 import { getMileageLimitStatus } from "../lib/get-fe-mileage-limit-status";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import type { FeRequisitionDraft } from "../types/fe-requisition-draft";
-import type { FeAdditionalCostDraft } from "../types/fe-additional-cost-draft";
-import type { FeTransferDraft } from "../types/fe-transfer-draft";
-import { formatCurrencyGB } from "@/lib/format/currency";
+import { getFeAdditionalCostLimitStatus } from "../lib/get-fe-additional-cost-limit-status";
+import { getFeTransferLimitStatus } from "../lib/get-fe-transfer-limit-status";
+
 
 type Params = {
     draft: FeRequisitionDraft;
@@ -109,115 +109,4 @@ export function useFeRequisitionTabWarnings({
         isReadonly,
         limitRules,
     ]);
-}
-
-type LimitStatus =
-    | {
-        state: "ok";
-        messages: string[];
-    }
-    | {
-        state: "missing-limit";
-        messages: string[];
-    }
-    | {
-        state: "exceeds-limit";
-        messages: string[];
-    };
-
-function getFeTransferLimitStatus(
-    row: FeTransferDraft,
-    limitRule?: RequisitionLimitRuleSummary,
-): LimitStatus {
-    if (!limitRule) {
-        return {
-            state: "missing-limit",
-            messages: ["No transfer limit rule is configured."],
-        };
-    }
-
-    const messages: string[] = [];
-
-    const dailyValues = [
-        ["Sunday", row.quantities.sunday],
-        ["Monday", row.quantities.monday],
-        ["Tuesday", row.quantities.tuesday],
-        ["Wednesday", row.quantities.wednesday],
-        ["Thursday", row.quantities.thursday],
-        ["Friday", row.quantities.friday],
-        ["Saturday", row.quantities.saturday],
-    ] as const;
-
-    for (const [day, value] of dailyValues) {
-        if ((value ?? 0) > limitRule.maxQuantity) {
-            messages.push(`${day} exceeds max quantity of ${limitRule.maxQuantity}.`);
-        }
-    }
-
-    if ((row.ratePerJob ?? 0) > limitRule.maxRate) {
-        messages.push(`Rate exceeds maximum of ${formatCurrencyGB(limitRule.maxRate)}.`);
-    }
-
-    if (messages.length === 0) {
-        return {
-            state: "ok",
-            messages: [],
-        };
-    }
-
-    return {
-        state: "exceeds-limit",
-        messages,
-    };
-}
-
-function getFeAdditionalCostLimitStatus(
-    row: FeAdditionalCostDraft,
-    additionalCostLimitRule?: RequisitionLimitRuleSummary,
-    mileageLimitRule?: RequisitionLimitRuleSummary,
-): LimitStatus {
-    const rule = row.chargingOption === "Mileage" ? mileageLimitRule : additionalCostLimitRule;
-
-    if (!rule) {
-        return {
-            state: "missing-limit",
-            messages: [
-                row.chargingOption === "Mileage"
-                    ? "No mileage limit rule is configured."
-                    : "No additional cost limit rule is configured.",
-            ],
-        };
-    }
-
-    const messages: string[] = [];
-
-    if (row.chargingOption === "Mileage") {
-        if ((row.miles ?? 0) > rule.maxQuantity) {
-            messages.push(`Miles exceed maximum of ${rule.maxQuantity}.`);
-        }
-
-        if ((row.ratePerMile ?? 0) > rule.maxRate) {
-            messages.push(`Rate exceeds maximum of ${formatCurrencyGB(rule.maxRate)}.`);
-        }
-    } else {
-        if ((row.totalNumber ?? 0) > rule.maxQuantity) {
-            messages.push(`Quantity exceeds maximum of ${rule.maxQuantity}.`);
-        }
-
-        if ((row.ratePerJob ?? 0) > rule.maxRate) {
-            messages.push(`Rate exceeds maximum of ${formatCurrencyGB(rule.maxRate)}.`);
-        }
-    }
-
-    if (messages.length === 0) {
-        return {
-            state: "ok",
-            messages: [],
-        };
-    }
-
-    return {
-        state: "exceeds-limit",
-        messages,
-    };
 }
