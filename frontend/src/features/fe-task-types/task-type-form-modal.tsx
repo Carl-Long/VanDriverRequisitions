@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,38 +38,43 @@ type Props = {
     initial?: FeTaskType | null;
 };
 
-export function TaskTypeFormModal({ open, onClose, onSubmit, initial }: Readonly<Props>) {
+export function TaskTypeFormModal(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <TaskTypeFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function TaskTypeFormModalContent({
+    open,
+    onClose,
+    onSubmit,
+    initial,
+}: Readonly<Props>) {
     const isEditing = !!initial;
     const [serverError, setServerError] = useState<string | null>(null);
 
     const {
         register,
         handleSubmit,
-        reset,
         setError,
         formState: { errors, isSubmitting },
     } = useForm<TaskTypeFormData>({
         resolver: zodResolver(taskTypeSchema),
         defaultValues: {
-            name: "",
-            code: "",
+            name: initial?.name ?? "",
+            code: initial?.code ?? "",
         },
     });
 
-    useEffect(() => {
-        if (!open) return;
-
-        reset({
-            name: initial?.name ?? "",
-            code: initial?.code ?? "",
-        });
-
-        setServerError(null);
-    }, [open, initial, reset]);
 
     function handleClose() {
-        reset();
-        setServerError(null);
         onClose();
     }
 

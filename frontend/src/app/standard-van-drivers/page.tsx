@@ -44,6 +44,15 @@ export default function StandardDriversPage() {
     const canCreate = canCreateRequisitions(user);
     const currentUserId = user?.id;
 
+    const status = filters.status;
+    const shopId = filters.shopId;
+    const shopLabel = filters.shopLabel;
+    const createdByType = filters.createdBy.type;
+    const createdByUserId =
+        filters.createdBy.type === "user" ? filters.createdBy.userId : "";
+    const createdByLabel =
+        filters.createdBy.type === "user" ? filters.createdBy.label : "";
+
     useEffect(() => {
         if (authLoading || !canCreate || !currentUserId) {
             return;
@@ -58,12 +67,26 @@ export default function StandardDriversPage() {
             setError(null);
 
             try {
+                const createdByFilter: StdRequisitionFilters["createdBy"] =
+                    createdByType === "user"
+                        ? {
+                            type: "user",
+                            userId: createdByUserId,
+                            label: createdByLabel,
+                        }
+                        : {
+                            type: createdByType,
+                        };
+
                 const result = await stdRequisitionsApi.getAll(
                     buildStdRequisitionQuery(
                         page,
                         {
-                            ...filters,
                             requisitionNumber: debouncedReqNumber,
+                            status,
+                            shopId,
+                            shopLabel,
+                            createdBy: createdByFilter,
                         },
                         userId,
                     ),
@@ -89,14 +112,17 @@ export default function StandardDriversPage() {
             cancelled = true;
         };
     }, [
+        authLoading,
         canCreate,
         currentUserId,
         page,
-        filters.status,
-        filters.shopId,
-        filters.createdBy.type,
-        filters.createdBy.type === "user" ? filters.createdBy.userId : "",
         debouncedReqNumber,
+        status,
+        shopId,
+        shopLabel,
+        createdByType,
+        createdByUserId,
+        createdByLabel,
     ]);
 
     const items = data?.items ?? [];
@@ -106,7 +132,8 @@ export default function StandardDriversPage() {
         router.replace(`${pathname}?${params.toString()}`);
     }
 
-    const currentListUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const queryString = searchParams.toString();
+    const currentListUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
     function getRequisitionHref(req: StdRequisitionSummary) {
         return `/standard-van-drivers/${req.id}?returnTo=${encodeURIComponent(currentListUrl)}`;

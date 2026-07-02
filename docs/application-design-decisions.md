@@ -1,4 +1,4 @@
-# Van Driver Requisitions — Design Decisions and Data Flow
+# Van Driver Requisitions - Design Decisions and Data Flow
 
 This document explains the main technical design choices in the Van Driver Requisitions application. It is intended for developers reviewing or extending the codebase, not as a setup/run guide.
 

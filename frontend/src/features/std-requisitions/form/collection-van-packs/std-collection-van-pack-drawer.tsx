@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -33,7 +33,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdCollectionVanPackDrawer({
+export function StdCollectionVanPackDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <StdCollectionVanPackDrawerContent {...props} />;
+}
+
+function StdCollectionVanPackDrawerContent({
     open,
     title,
     vanPackLimitRule,
@@ -41,33 +49,16 @@ export function StdCollectionVanPackDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdCollectionVanPackForm>(
-        createEmptyStdCollectionVanPackForm(),
+    const [form, setForm] = useState<StdCollectionVanPackForm>(() =>
+        initialValues ?? createEmptyStdCollectionVanPackForm(),
     );
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
     const isEditMode = initialValues !== undefined;
     const schema = createStdCollectionVanPackFormSchema(vanPackLimitRule);
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setForm(initialValues ?? createEmptyStdCollectionVanPackForm());
-        setErrors({});
-    }, [open, initialValues]);
-
-    const unusedVanPacks = useMemo(
-        () => calculateStdCollectionVanPackUnusedVanPacks(form),
-        [form],
-    );
-
-    const percentReturned = useMemo(
-        () => calculateStdCollectionVanPackPercentReturned(form),
-        [form],
-    );
+    const unusedVanPacks = useMemo(() => calculateStdCollectionVanPackUnusedVanPacks(form), [form]);
+    const percentReturned = useMemo(() => calculateStdCollectionVanPackPercentReturned(form), [form]);
 
     const totalValue = useMemo(
         () =>
@@ -104,10 +95,6 @@ export function StdCollectionVanPackDrawer({
 
         setForm(createEmptyStdCollectionVanPackForm(result.data.deliveryDate));
         focusFirstFormControl(formRef.current);
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

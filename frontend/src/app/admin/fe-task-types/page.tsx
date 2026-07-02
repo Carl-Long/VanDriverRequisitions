@@ -48,23 +48,55 @@ export default function FeTaskTypesPage() {
         },
     });
 
-    const load = useCallback(async () => {
+    const fetchTaskTypes = useCallback(
+        () => feTaskTypesApi.getAll(showInactive),
+        [showInactive],
+    );
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchTaskTypes()
+            .then((data) => {
+                if (!cancelled) {
+                    setTaskTypes(data);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(err, "Failed to load task types limit rules."));
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchTaskTypes]);
+
+    async function reloadTaskTypes() {
         setLoading(true);
         setError(null);
 
         try {
-            const data = await feTaskTypesApi.getAll(showInactive);
+            const data = await fetchTaskTypes();
             setTaskTypes(data);
         } catch (err) {
             setError(getApiErrorMessage(err, "Failed to load task types limit rules."));
         } finally {
             setLoading(false);
         }
-    }, [showInactive]);
+    }
 
-    useEffect(() => {
-        load();
-    }, [load]);
+    function handleIncludeInactiveChange() {
+        setLoading(true);
+        setError(null);
+        setShowInactive((active) => !active);
+    }
 
     const filtered = useMemo(() => {
         if (!search.trim()) return taskTypes;
@@ -88,7 +120,7 @@ export default function FeTaskTypesPage() {
         );
 
         modal.close();
-        await load();
+        await reloadTaskTypes();
     }
 
     const emptyState = search.trim()
@@ -125,7 +157,7 @@ export default function FeTaskTypesPage() {
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() => setShowInactive((active) => !active)}
+                        onChange={handleIncludeInactiveChange}
                         ariaLabel="Toggle inactive task types"
                     />
                 </Surface>

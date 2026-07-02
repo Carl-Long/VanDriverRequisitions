@@ -10,7 +10,7 @@ Both flows support draft save/update, submit, approve/reject, submission history
 This README is for developers setting up and working on the project locally. For design rationale and data-flow decisions, see:
 
 ```text
-docs/requisition-design-decisions.md
+docs/application-design-decisions.md
 ```
 
 ## Live Demo (Azure)
@@ -72,7 +72,7 @@ Install these before running locally:
 - .NET 10 SDK
 - Node.js 20 or later
 - npm
-- Docker Desktop or another Docker-compatible runtime
+- Docker Desktop or another Docker-compatible runtime if you want to use SQL Server on Mac
 - SQL Server tooling is optional, but useful for inspecting the local database
 
 For HTTPS local development, trust the .NET development certificate:
@@ -106,7 +106,7 @@ SQL_PASSWORD=YourStrong!Passw0rd
 
 The Docker Compose file uses this value for the local SQL Server `sa` password.
 
-### 3. Start SQL Server
+### 3. Start SQL Server (Optional, needed to use SQL Server on Mac OS)
 
 From the repository root:
 
@@ -377,7 +377,7 @@ This means some fields appear in more than one type, but the duplication is deli
 For deeper design rationale, trade-offs, and data-flow diagrams, see:
 
 ```text
-docs/requisition-design-decisions.md
+docs/application-design-decisions.md
 ```
 
 ## Database notes
@@ -431,7 +431,7 @@ Keep these docs aligned as the project evolves:
 | Document | Purpose |
 |---|---|
 | `README.md` | setup, run, test, project map, common development workflow |
-| `docs/requisition-design-decisions.md` | design rationale, frontend/backend data flow, trade-offs |
+| `docs/application-design-decisions.md` | design rationale, frontend/backend data flow, trade-offs |
 | feature-specific docs, if added later | deeper notes for complex areas such as approval flow, limits, or deployment |
 
 ## Contribution notes

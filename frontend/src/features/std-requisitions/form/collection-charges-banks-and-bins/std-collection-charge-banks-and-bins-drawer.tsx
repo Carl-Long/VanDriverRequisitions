@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { DatePicker } from "@/components/ui/date/date-picker";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -38,7 +38,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdCollectionChargeBanksAndBinsDrawer({
+export function StdCollectionChargeBanksAndBinsDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <StdCollectionChargeBanksAndBinsDrawerContent {...props} />;
+}
+
+function StdCollectionChargeBanksAndBinsDrawerContent({
     open,
     title,
     shopId,
@@ -48,33 +56,16 @@ export function StdCollectionChargeBanksAndBinsDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdCollectionChargeBanksAndBinsForm>(
-        createEmptyStdCollectionChargeBanksAndBinsForm(),
+    const [form, setForm] = useState<StdCollectionChargeBanksAndBinsForm>(() =>
+        initialValues ?? createEmptyStdCollectionChargeBanksAndBinsForm(),
     );
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    const schema = createStdCollectionChargeBanksAndBinsFormSchema({
-        mileageLimitRule,
-        flatChargeLimitRule,
-    });
-
+    const schema = createStdCollectionChargeBanksAndBinsFormSchema({ mileageLimitRule, flatChargeLimitRule, });
     const isEditMode = initialValues !== undefined;
 
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setForm(initialValues ?? createEmptyStdCollectionChargeBanksAndBinsForm());
-        setErrors({});
-    }, [open, initialValues]);
-
-    const totalValue = useMemo(
-        () => calculateStdCollectionChargeBanksAndBinsFormTotal(form),
-        [form],
-    );
+    const totalValue = useMemo(() => calculateStdCollectionChargeBanksAndBinsFormTotal(form), [form]);
 
     function saveForm(intent: SubmitIntent) {
         const result = schema.safeParse(form);
@@ -132,10 +123,6 @@ export function StdCollectionChargeBanksAndBinsDrawer({
 
         Object.keys(patch).forEach(clearError);
         clearError("form");
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

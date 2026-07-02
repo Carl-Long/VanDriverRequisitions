@@ -1,7 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import { Info } from "lucide-react";
+import { type Dispatch, type SetStateAction, useMemo, useRef, useState } from "react"; import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -37,7 +36,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function FeAdditionalCostDrawer({
+export function FeAdditionalCostDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <FeAdditionalCostDrawerContent {...props} />;
+}
+
+function FeAdditionalCostDrawerContent({
     open,
     title,
     additionalCostLimitRule,
@@ -46,24 +53,14 @@ export function FeAdditionalCostDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<FeAdditionalCostForm>(createEmptyFeAdditionalCostForm());
+    const [form, setForm] = useState<FeAdditionalCostForm>(() =>
+        initialValues ?? createEmptyFeAdditionalCostForm(),
+    );
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    const schema = createFeAdditionalCostFormSchema({
-        additionalCostLimitRule,
-        mileageLimitRule,
-    });
-
+    const schema = createFeAdditionalCostFormSchema({ additionalCostLimitRule, mileageLimitRule, });
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) return;
-
-        setForm(initialValues ?? createEmptyFeAdditionalCostForm());
-        setErrors({});
-    }, [open, initialValues]);
-
     const totals = useMemo(() => calculateFeAdditionalCostFormTotals(form), [form]);
 
     function saveForm(intent: SubmitIntent) {
@@ -107,10 +104,6 @@ export function FeAdditionalCostDrawer({
             delete next[field];
             return next;
         });
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (
