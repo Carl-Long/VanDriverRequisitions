@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
 import { DatePicker } from "@/components/ui/date/date-picker";
@@ -34,7 +34,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function StdTransferDrawer({
+export function StdTransferDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <StdTransferDrawerContent {...props} />;
+}
+
+function StdTransferDrawerContent({
     open,
     title,
     mileageLimitRule,
@@ -43,28 +51,14 @@ export function StdTransferDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<StdTransferForm>(
-        createEmptyStdTransferForm(),
+    const [form, setForm] = useState<StdTransferForm>(() =>
+        initialValues ?? createEmptyStdTransferForm(),
     );
+
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    const schema = createStdTransferFormSchema({
-        mileageLimitRule,
-        flatChargeLimitRule,
-    });
-
+    const schema = createStdTransferFormSchema({ mileageLimitRule, flatChargeLimitRule, });
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        setForm(initialValues ?? createEmptyStdTransferForm());
-        setErrors({});
-    }, [open, initialValues]);
-
     const totalValue = useMemo(() => calculateStdTransferFormTotal(form), [form]);
 
     function clearError(field: string) {
@@ -121,10 +115,6 @@ export function StdTransferDrawer({
 
         Object.keys(patch).forEach(clearError);
         clearError("form");
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (

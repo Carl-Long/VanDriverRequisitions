@@ -54,7 +54,7 @@ export function StdLocationField({
         placeholder = "Select a shop first";
     } else if (!collectionTypeId) {
         placeholder = "Select a collection type first";
-    } else if (loading) {
+    } else if (canLoad && loading) {
         placeholder = "Loading locations...";
     }
 
@@ -80,8 +80,6 @@ export function StdLocationField({
 
     useEffect(() => {
         if (!shopId || !collectionTypeId) {
-            setItems([]);
-            setLoading(false);
             return;
         }
 
@@ -124,14 +122,17 @@ export function StdLocationField({
         }));
     }, [items]);
 
+    const effectiveLoading = canLoad && loading;
+    const effectiveOptions = canLoad ? options : [];
+    
     return (
         <Field label="Location" error={error} required={required}>
             <div className="space-y-2">
                 <Combobox<StdLocationLookup>
-                    disabled={disabled || loading || !canLoad}
+                    disabled={disabled || effectiveLoading || !canLoad}
                     value={value}
                     label={displayLabel}
-                    options={options}
+                    options={effectiveOptions}
                     pinnedOptions={pinnedOptions}
                     placeholder={placeholder}
                     noMatchesText="No matching location found"

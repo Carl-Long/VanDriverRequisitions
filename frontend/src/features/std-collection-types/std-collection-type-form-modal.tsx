@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -18,7 +18,7 @@ const stdCollectionTypeSchema = z.object({
         .trim()
         .min(1, "Code is required.")
         .max(20, "Code must be between 1 and 20 characters.")
-        .regex(/^[0-9]+$/, "Code must contain numbers only."),
+        .regex(/^\d+$/, "Code must contain numbers only."),
 
     name: z
         .string()
@@ -36,7 +36,20 @@ type Props = {
     initial?: StdCollectionType | null;
 };
 
-export function StdCollectionTypeFormModal({
+export function StdCollectionTypeFormModal(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return (
+        <StdCollectionTypeFormModalContent
+            key={props.initial?.id ?? "new"}
+            {...props}
+        />
+    );
+}
+
+function StdCollectionTypeFormModalContent({
     open,
     onClose,
     onSubmit,
@@ -48,31 +61,17 @@ export function StdCollectionTypeFormModal({
     const {
         register,
         handleSubmit,
-        reset,
         setError,
         formState: { errors, isSubmitting },
     } = useForm<StdCollectionTypeFormData>({
         resolver: zodResolver(stdCollectionTypeSchema),
         defaultValues: {
-            code: "",
-            name: "",
+            code: initial?.code ?? "",
+            name: initial?.name ?? "",
         },
     });
 
-    useEffect(() => {
-        if (!open) return;
-
-        reset({
-            code: initial?.code ?? "",
-            name: initial?.name ?? "",
-        });
-
-        setServerError(null);
-    }, [open, initial, reset]);
-
     function handleClose() {
-        reset();
-        setServerError(null);
         onClose();
     }
 

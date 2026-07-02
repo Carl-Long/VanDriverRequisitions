@@ -49,24 +49,57 @@ export default function StdCollectionTypesPage() {
             setError(getApiErrorMessage(err, "Failed to update STD collection type."));
         },
     });
-    const load = useCallback(async () => {
+
+    const fetchCollectionTypes = useCallback(
+        () => stdCollectionTypesApi.getAll(showInactive),
+        [showInactive],
+    );
+
+    useEffect(() => {
+        let cancelled = false;
+
+        fetchCollectionTypes()
+            .then((data) => {
+                if (!cancelled) {
+                    setCollectionTypes(data);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(err, "Failed to load STD collection types."));
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchCollectionTypes]);
+
+    async function reloadCollectionTypes() {
         setLoading(true);
         setError(null);
 
         try {
-            const data = await stdCollectionTypesApi.getAll(showInactive);
+            const data = await fetchCollectionTypes();
             setCollectionTypes(data);
         } catch (err) {
             setError(getApiErrorMessage(err, "Failed to load STD collection types."));
         } finally {
             setLoading(false);
         }
-    }, [showInactive]);
+    }
 
-    useEffect(() => {
-        load();
-    }, [load]);
-
+    function handleIncludeInactiveChange() {
+        setLoading(true);
+        setError(null);
+        setShowInactive((active) => !active);
+    }
+    
     const filtered = useMemo(() => {
         if (!search.trim()) return collectionTypes;
 
@@ -95,7 +128,7 @@ export default function StdCollectionTypesPage() {
         );
 
         modal.close();
-        await load();
+        await reloadCollectionTypes();
     }
 
     const emptyState = search.trim()
@@ -135,7 +168,7 @@ export default function StdCollectionTypesPage() {
 
                     <Toggle
                         checked={showInactive}
-                        onChange={() => setShowInactive((active) => !active)}
+                        onChange={handleIncludeInactiveChange}
                         ariaLabel="Toggle inactive STD collection types"
                     />
                 </Surface>

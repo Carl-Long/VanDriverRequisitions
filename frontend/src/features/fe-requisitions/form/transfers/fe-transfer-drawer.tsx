@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Info } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { AppDrawer } from "@/components/ui/drawer";
@@ -32,7 +32,15 @@ type Props = {
 
 type SubmitIntent = "close" | "add-another";
 
-export function FeTransferDrawer({
+export function FeTransferDrawer(props: Readonly<Props>) {
+    if (!props.open) {
+        return null;
+    }
+
+    return <FeTransferDrawerContent {...props} />;
+}
+
+function FeTransferDrawerContent({
     open,
     title,
     limitRule,
@@ -40,20 +48,13 @@ export function FeTransferDrawer({
     onClose,
     onSave,
 }: Readonly<Props>) {
-    const [form, setForm] = useState<FeTransferForm>(createEmptyFeTransferForm());
+    const [form, setForm] = useState<FeTransferForm>(() =>
+        initialValues ?? createEmptyFeTransferForm(),
+    );
     const [errors, setErrors] = useState<Record<string, string>>({});
     const formRef = useRef<HTMLFormElement | null>(null);
-
     const schema = createFeTransferFormSchema(limitRule);
     const isEditMode = initialValues !== undefined;
-
-    useEffect(() => {
-        if (!open) return;
-
-        setForm(initialValues ?? createEmptyFeTransferForm());
-        setErrors({});
-    }, [open, initialValues]);
-
     const totals = useMemo(() => calculateFeTransferFormTotals(form), [form]);
 
     function saveForm(intent: SubmitIntent) {
@@ -73,7 +74,7 @@ export function FeTransferDrawer({
         }
 
         setForm(createEmptyFeTransferForm(result.data.weekEndingDate));
-        focusFirstFormControl(formRef.current)
+        focusFirstFormControl(formRef.current);
     }
 
     function clearError(field: string) {
@@ -82,10 +83,6 @@ export function FeTransferDrawer({
             delete next[field];
             return next;
         });
-    }
-
-    if (!open) {
-        return null;
     }
 
     return (
