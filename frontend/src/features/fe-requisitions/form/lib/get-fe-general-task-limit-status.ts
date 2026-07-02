@@ -1,5 +1,6 @@
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import type { FeGeneralTaskDraft } from "../types/fe-general-task-draft";
+import { formatCurrencyGB } from "@/lib/format/currency";
 
 export type LimitStatus =
     | { state: "ok" }
@@ -36,7 +37,7 @@ export function getGeneralTaskLimitStatus(
     }
 
     if (task.ratePerJob !== null && task.ratePerJob > limitRule.maxRate) {
-        messages.push(`Rate exceeds max rate of £${limitRule.maxRate}.`);
+        messages.push(`Rate exceeds maximum of ${formatCurrencyGB(limitRule.maxRate)}.`);
     }
 
     if (messages.length > 0) {

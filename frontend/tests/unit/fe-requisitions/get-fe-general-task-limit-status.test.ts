@@ -126,7 +126,7 @@ describe("getGeneralTaskLimitStatus", () => {
             messages: [
                 "Sunday exceeds max quantity of 5.",
                 "Thursday exceeds max quantity of 5.",
-                "Rate exceeds max rate of £2.",
+                "Rate exceeds maximum of £2.00.",
             ],
         });
     });
