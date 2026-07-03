@@ -22,6 +22,7 @@ import { focusFirstFormControl } from "@/features/requisitions-shared/lib/focus-
 type Props = {
     open: boolean;
     title: string;
+    limitTitle?: string;
     limitRule?: RequisitionLimitRuleSummary;
     initialValues?: FeGeneralTaskForm;
     onClose: () => void;
@@ -41,6 +42,7 @@ export function FeGeneralTaskDrawer(props: Readonly<Props>) {
 function FeGeneralTaskDrawerContent({
     open,
     title,
+    limitTitle,
     limitRule,
     initialValues,
     onClose,
@@ -109,7 +111,9 @@ function FeGeneralTaskDrawerContent({
                         <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
 
                         <div className="text-sm">
-                            <div className="font-medium">Requisition Item Limits</div>
+                            <div className="font-medium">
+                                {limitTitle ?? "Requisition Item Limits"}
+                            </div>
 
                             <div className="mt-1 text-muted-foreground">
                                 Maximum quantity per day:{" "}

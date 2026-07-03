@@ -99,6 +99,7 @@ export function FeGeneralTaskWorkspace({
                 key={editingTask ? editingTask.clientId : "new"}
                 open={open}
                 title={editingTask ? `Edit ${title}` : `Add ${title}`}
+                limitTitle={`${title} Limits`}
                 limitRule={limitRule}
                 initialValues={editingTask ? mapFeGeneralTaskDraftToForm(editingTask) : undefined}
                 onClose={() => {
