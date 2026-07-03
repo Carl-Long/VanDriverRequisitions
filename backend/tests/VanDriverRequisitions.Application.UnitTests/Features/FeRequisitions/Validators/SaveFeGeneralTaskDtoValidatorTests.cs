@@ -5,9 +5,9 @@ using VanDriverRequisitions.Application.UnitTests.TestData;
 
 namespace VanDriverRequisitions.Application.UnitTests.Features.FeRequisitions.Validators;
 
-public sealed class SaveFeTransferDtoValidatorTests
+public sealed class SaveFeGeneralTaskDtoValidatorTests
 {
-    private readonly SaveFeTransferDtoValidator _validator = new();
+    private readonly SaveFeGeneralTaskDtoValidator _validator = new();
 
     public static TheoryData<decimal?> MissingOrInvalidRates => [null, 0m, 0.001m, -0.01m];
 
@@ -15,7 +15,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenDtoIsValid_HasNoValidationErrors()
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto();
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto();
 
         // Act
         var result = _validator.TestValidate(dto);
@@ -25,14 +25,26 @@ public sealed class SaveFeTransferDtoValidatorTests
     }
 
     [Fact]
+    public void Validate_WhenFeTaskTypeIdIsEmpty_HasValidationError()
+    {
+        // Arrange
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(feTaskTypeId: Guid.Empty);
+
+        // Act
+        var result = _validator.TestValidate(dto);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.FeTaskTypeId);
+    }
+
+    [Fact]
     public void Validate_WhenWeekEndingDateIsDefault_HasValidationError()
     {
         // Arrange
-        var dto = new SaveFeTransferDto
+        var dto = new SaveFeGeneralTaskDto
         {
+            FeTaskTypeId = Guid.NewGuid(),
             WeekEndingDate = default,
-            ShopIdFrom = Guid.NewGuid(),
-            ShopIdTo = Guid.NewGuid(),
             Week = FeRequisitionDtoTestData.CreateWeek(),
             RatePerJob = 1m
         };
@@ -45,55 +57,13 @@ public sealed class SaveFeTransferDtoValidatorTests
     }
 
     [Fact]
-    public void Validate_WhenFromShopIsEmpty_HasValidationError()
-    {
-        // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(shopIdFrom: Guid.Empty);
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.ShopIdFrom);
-    }
-
-    [Fact]
-    public void Validate_WhenToShopIsEmpty_HasValidationError()
-    {
-        // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(shopIdTo: Guid.Empty);
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.ShopIdTo);
-    }
-
-    [Fact]
-    public void Validate_WhenFromAndToShopAreSame_HasValidationError()
-    {
-        // Arrange
-        var shopId = Guid.NewGuid();
-
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(shopIdFrom: shopId, shopIdTo: shopId);
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x);
-    }
-
-    [Fact]
     public void Validate_WhenWeekIsNull_HasValidationError()
     {
         // Arrange
-        var dto = new SaveFeTransferDto
+        var dto = new SaveFeGeneralTaskDto
         {
+            FeTaskTypeId = Guid.NewGuid(),
             WeekEndingDate = FeRequisitionDtoTestData.WeekEndingDate,
-            ShopIdFrom = Guid.NewGuid(),
-            ShopIdTo = Guid.NewGuid(),
             Week = null!,
             RatePerJob = 1m
         };
@@ -109,7 +79,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenWeekHasNoPositiveQuantities_HasValidationError()
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(
             week: FeRequisitionDtoTestData.CreateWeek(
                 sunday: 0,
                 monday: 0,
@@ -130,7 +100,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenWeekHasOnlyNullQuantities_HasValidationError()
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(
             week: FeRequisitionDtoTestData.CreateWeek(
                 sunday: null,
                 monday: null,
@@ -151,7 +121,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenWeekHasNegativeQuantity_HasValidationError()
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(
             week: FeRequisitionDtoTestData.CreateWeek(sunday: -1));
 
         // Act
@@ -166,7 +136,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenRatePerJobIsMissingOrInvalid_HasValidationError(decimal? ratePerJob)
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(ratePerJob: ratePerJob);
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(ratePerJob: ratePerJob);
 
         // Act
         var result = _validator.TestValidate(dto);
@@ -179,7 +149,7 @@ public sealed class SaveFeTransferDtoValidatorTests
     public void Validate_WhenRatePerJobHasMoreThanTwoDecimalPlaces_HasValidationError()
     {
         // Arrange
-        var dto = FeRequisitionDtoTestData.CreateTransferDto(ratePerJob: 1.555m);
+        var dto = FeRequisitionDtoTestData.CreateGeneralTaskDto(ratePerJob: 1.555m);
 
         // Act
         var result = _validator.TestValidate(dto);
