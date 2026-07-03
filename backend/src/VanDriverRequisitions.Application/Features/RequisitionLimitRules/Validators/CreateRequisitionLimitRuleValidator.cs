@@ -5,8 +5,7 @@ using VanDriverRequisitions.Domain.Enums;
 
 namespace VanDriverRequisitions.Application.Features.RequisitionLimitRules.Validators;
 
-public class CreateRequisitionLimitRuleDtoValidator
-    : AbstractValidator<CreateRequisitionLimitRuleDto>
+public class CreateRequisitionLimitRuleDtoValidator : AbstractValidator<CreateRequisitionLimitRuleDto>
 {
     public CreateRequisitionLimitRuleDtoValidator()
     {
@@ -14,16 +13,27 @@ public class CreateRequisitionLimitRuleDtoValidator
             .IsInEnum()
             .WithMessage("Category is required and must be valid.");
 
-        RuleFor(x => x.FeTaskTypeId)
-            .Must((dto, id) =>
-                dto.Category == RequisitionRowCategory.GeneralTask
-                    ? id != null
-                    : id == null)
-            .WithMessage("FeTaskTypeId is required only for GeneralTask and must be null for other categories.");
-
         RuleFor(x => x.Fascia)
             .IsInEnum()
             .WithMessage("Fascia is required and must be valid.");
+
+        RuleFor(x => x.Category)
+            .Must((dto, category) =>
+                RequisitionLimitRuleCategoryCompatibility.IsAllowed(dto.Fascia, category))
+            .WithMessage("Category is not supported for the selected fascia.");
+
+        RuleFor(x => x.FeTaskTypeId)
+            .Must((dto, id) =>
+            {
+                var isFeGeneralTask =
+                    dto.Fascia == Fascia.Fe &&
+                    dto.Category == RequisitionRowCategory.GeneralTask;
+
+                return isFeGeneralTask
+                    ? id is not null
+                    : id is null;
+            })
+            .WithMessage("FeTaskTypeId is required only for FE GeneralTask and must be null for other categories.");
 
         RuleFor(x => x.MaxQuantity)
             .GreaterThan(0)
