@@ -11,7 +11,7 @@ function buildLookupCacheKey(query: StdLocationLookupQuery) {
     return `${query.shopId}:${query.collectionTypeId}`;
 }
 
-function buildAdminQueryString(query: StdLocationAdminQuery) {
+export function buildStdLocationAdminQueryString(query: StdLocationAdminQuery) {
     const params = new URLSearchParams();
 
     params.set("page", String(query.page ?? 1));
@@ -36,7 +36,7 @@ function buildAdminQueryString(query: StdLocationAdminQuery) {
 export const stdLocationsApi = {
     getAll: (query: StdLocationAdminQuery) => {
         return apiFetch<PagedResult<StdLocation>>(
-            `${BASE}?${buildAdminQueryString(query)}`,
+            `${BASE}?${buildStdLocationAdminQueryString(query)}`,
         );
     },
 
