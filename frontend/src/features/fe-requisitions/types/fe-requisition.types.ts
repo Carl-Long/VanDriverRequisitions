@@ -35,9 +35,7 @@ export type FeRequisitionDetail = {
     requisitionDate: string;
     vanDriverSummary: VanDriverLookup;
     vanDriverId: string;
-    vanDriverCode: string;
     vanDriverName: string;
-    tradersName: string;
     shopId: string;
     shopCode: string;
     shopName: string;
