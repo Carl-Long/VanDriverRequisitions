@@ -2,10 +2,10 @@ import { VanDriverLookup } from "@/lib/api/van-drivers";
 
 import { FeGeneralTaskDraft } from "./fe-general-task-draft";
 import { FeSubmissionHistoryDraft } from "./fe-submission-history-draft";
-import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeMileageDraft } from "./fe-mileage-draft";
 import { FeTransferDraft } from "./fe-transfer-draft";
 import { FeAdditionalCostDraft } from "./fe-additional-cost-draft";
+import { RequisitionStatus } from "@/features/requisitions-shared/constants/requisition-status.constants";
 
 export type FeRequisitionDraft = {
     requisitionId: string | null;

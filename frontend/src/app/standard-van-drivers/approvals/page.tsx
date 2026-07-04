@@ -10,7 +10,7 @@ export default function StdRequisitionApprovalsPage() {
             title="Standard Approvals"
             description="Review submitted standard van driver requisitions awaiting approval."
             detailBasePath="/standard-van-drivers/approvals"
-            emptySearchDescription="No submitted STD requisitions match that requisition number."
+            emptySearchDescription="No submitted requisitions match that requisition number."
             emptyDefaultDescription="There are no submitted requisitions awaiting approval."
             loadApprovals={stdRequisitionsApi.getAll}
         />

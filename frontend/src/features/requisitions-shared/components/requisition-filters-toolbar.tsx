@@ -7,25 +7,27 @@ import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { PageSizeSelect } from "@/components/ui/page-size-select";
 import { Surface } from "@/components/ui/surface";
+import { RequisitionStatusFilterField } from "@/features/requisitions-shared/components/filter-fields/requisition-status-filter-field";
 import { CreatedByUserFilterField } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
 import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
+import { REQUISITION_LIST_PAGE_SIZE_OPTIONS } from "@/features/requisitions-shared/constants/requisition-list.constants";
+import type { RequisitionFascia } from "@/lib/constants/fascias";
 import { cn } from "@/lib/utils";
-
-import { PAGE_SIZE_OPTIONS } from "../../constants/fe-requisition-status.constants";
-import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
-import { StatusFilterField } from "../filter-fields/status-filter-field";
+import { RequisitionListFilters } from "../types/requisition-list-filters.types";
 
 type Props = {
-    filters: FeRequisitionFilters;
+    filters: RequisitionListFilters;
     pageSize: number;
-    onFiltersChange: (filters: FeRequisitionFilters) => void;
+    fascia: RequisitionFascia;
+    onFiltersChange: (filters: RequisitionListFilters) => void;
     onPageSizeChange: (pageSize: number) => void;
     onReset: () => void;
 };
 
-export function FeRequisitionFiltersToolbar({
+export function RequisitionFiltersToolbar({
     filters,
     pageSize,
+    fascia,
     onFiltersChange,
     onPageSizeChange,
     onReset,
@@ -53,10 +55,10 @@ export function FeRequisitionFiltersToolbar({
 
                         <Input
                             value={filters.requisitionNumber}
-                            onChange={(e) => {
+                            onChange={(event) => {
                                 onFiltersChange({
                                     ...filters,
-                                    requisitionNumber: e.target.value,
+                                    requisitionNumber: event.target.value,
                                 });
                             }}
                             placeholder="Search by requisition number..."
@@ -73,7 +75,7 @@ export function FeRequisitionFiltersToolbar({
 
                     <PageSizeSelect
                         pageSize={pageSize}
-                        options={PAGE_SIZE_OPTIONS}
+                        options={REQUISITION_LIST_PAGE_SIZE_OPTIONS}
                         onPageSizeChange={onPageSizeChange}
                     />
                 </div>
@@ -81,7 +83,7 @@ export function FeRequisitionFiltersToolbar({
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_220px_minmax(260px,1fr)]">
                     <CreatedByUserFilterField
                         hideLabel
-                        fascia="Fe"
+                        fascia={fascia}
                         value={filters.createdBy}
                         onChange={(value) => {
                             onFiltersChange({
@@ -91,7 +93,7 @@ export function FeRequisitionFiltersToolbar({
                         }}
                     />
 
-                    <StatusFilterField
+                    <RequisitionStatusFilterField
                         hideLabel
                         value={filters.status}
                         onChange={(value) => {

@@ -1,17 +1,17 @@
 import type { VanDriverLookup } from "@/lib/api/van-drivers";
-import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
 import type { StdCollectionChargeBanksAndBinsDraft } from "./std-collection-charge-banks-and-bins-draft";
 import type { StdSubmissionHistoryDraft } from "./std-submission-history-draft";
 import type { StdCollectionVanPackDraft } from "./std-collection-van-pack-draft";
 import { StdPickupDraft } from "./std-pickup-draft";
 import { StdTransferDraft } from "./std-transfer-draft";
 import { StdAdditionalCostDraft } from "./std-additional-cost-draft";
+import { RequisitionStatus } from "@/features/requisitions-shared/constants/requisition-status.constants";
 
 export type StdRequisitionDraft = {
     requisitionId: string | null;
     rowVersion: string | null;
     requisitionNumber: string | null;
-    status: StdRequisitionStatus | null;
+    status: RequisitionStatus | null;
 
     requisitionDate: Date | null;
 

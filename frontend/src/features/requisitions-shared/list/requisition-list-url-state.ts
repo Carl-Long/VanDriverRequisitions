@@ -1,22 +1,39 @@
-import { appendCreatedBySearchParams, createdByFromSearchParams } from "@/features/requisitions-shared/list/created-by-url-state";
-import { appendPageSearchParam, appendPageSizeSearchParam, pageFromSearchParams as sharedPageFromSearchParams, pageSizeFromSearchParams as sharedPageSizeFromSearchParams } from "@/features/requisitions-shared/list/page-url-state";
-import { INITIAL_STD_REQUISITION_FILTERS, STD_REQUISITION_PAGE_SIZE, STD_REQUISITION_PAGE_SIZE_OPTIONS, STD_REQUISITION_STATUSES, type StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
-import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
+import {
+    appendCreatedBySearchParams,
+    createdByFromSearchParams,
+} from "./created-by-url-state";
+import {
+    appendPageSearchParam,
+    appendPageSizeSearchParam,
+    pageFromSearchParams as sharedPageFromSearchParams,
+    pageSizeFromSearchParams as sharedPageSizeFromSearchParams,
+} from "./page-url-state";
 
-function isValidStatus(value: string | null): value is StdRequisitionStatus {
+import {
+    INITIAL_REQUISITION_LIST_FILTERS,
+    REQUISITION_LIST_PAGE_SIZE,
+    REQUISITION_LIST_PAGE_SIZE_OPTIONS,
+} from "../constants/requisition-list.constants";
+import {
+    REQUISITION_STATUSES,
+    type RequisitionStatus,
+} from "../constants/requisition-status.constants";
+import { RequisitionListFilters } from "../types/requisition-list-filters.types";
+
+function isValidStatus(value: string | null): value is RequisitionStatus {
     return (
         value !== null &&
-        (STD_REQUISITION_STATUSES as readonly string[]).includes(value)
+        (REQUISITION_STATUSES as readonly string[]).includes(value)
     );
 }
 
 export function filtersFromSearchParams(
     searchParams: URLSearchParams,
-): StdRequisitionFilters {
+): RequisitionListFilters {
     const status = searchParams.get("status");
 
     return {
-        ...INITIAL_STD_REQUISITION_FILTERS,
+        ...INITIAL_REQUISITION_LIST_FILTERS,
 
         requisitionNumber: searchParams.get("requisitionNumber") ?? "",
 
@@ -35,15 +52,15 @@ export function pageFromSearchParams(searchParams: URLSearchParams): number {
 export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
     return sharedPageSizeFromSearchParams(
         searchParams,
-        STD_REQUISITION_PAGE_SIZE,
-        STD_REQUISITION_PAGE_SIZE_OPTIONS,
+        REQUISITION_LIST_PAGE_SIZE,
+        REQUISITION_LIST_PAGE_SIZE_OPTIONS,
     );
 }
 
 export function buildSearchParams(
-    filters: StdRequisitionFilters,
+    filters: RequisitionListFilters,
     page: number,
-    pageSize: number = STD_REQUISITION_PAGE_SIZE,
+    pageSize: number = REQUISITION_LIST_PAGE_SIZE,
 ) {
     const params = new URLSearchParams();
 
@@ -65,7 +82,11 @@ export function buildSearchParams(
 
     appendCreatedBySearchParams(params, filters.createdBy);
     appendPageSearchParam(params, page);
-    appendPageSizeSearchParam(params, pageSize, STD_REQUISITION_PAGE_SIZE);
+    appendPageSizeSearchParam(
+        params,
+        pageSize,
+        REQUISITION_LIST_PAGE_SIZE,
+    );
 
     return params;
 }
