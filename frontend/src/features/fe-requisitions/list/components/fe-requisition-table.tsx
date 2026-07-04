@@ -12,9 +12,9 @@ import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionStatus } from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionSummary } from "../../types/fe-requisition.types";
-import { StatusPill } from "./status-pill";
 import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import { VanDriverIdentityCell } from "@/features/requisitions-shared/components/van-driver-identity-cell";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -92,7 +92,7 @@ export function FeRequisitionTable({ items, getHref, onRowClick }: Readonly<Prop
                                 
                                 <TableCell align="center" nowrap>
                                     <div className="flex justify-center">
-                                        <StatusPill status={req.status as RequisitionStatus} />
+                                        <RequisitionStatusPill status={req.status as RequisitionStatus} />
                                     </div>
                                 </TableCell>
 

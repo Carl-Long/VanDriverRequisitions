@@ -2,12 +2,12 @@
 
 import type { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
-import { StdStatusPill } from "../../list/components/std-status-pill";
 import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
 import { RequisitionActions } from "@/features/requisitions-shared/components/requisition-actions";
 import { RequisitionHeader } from "@/features/requisitions-shared/components/requisition-header";
 import { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
 import { RequisitionApprovalActions } from "@/features/requisitions-shared/components/requisition-approval-actions";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -90,7 +90,7 @@ export function StdRequisitionHeader({
             backHref={backHref}
             backLabel="Requisitions"
             requisitionNumber={mode === "create" ? null : requisitionNumber}
-            statusNode={status ? <StdStatusPill status={status} /> : <UnsavedPill />}
+            statusNode={status ? <RequisitionStatusPill status={status} /> : <UnsavedPill />}
             subtotal={subtotal}
             submitWindowStatus={submitWindowStatus}
             submitStatusLoading={submitStatusLoading}

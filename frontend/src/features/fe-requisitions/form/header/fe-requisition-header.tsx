@@ -2,12 +2,12 @@
 
 import type { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import type { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
-import { StatusPill } from "../../list/components/status-pill";
 import type { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionHeader } from "@/features/requisitions-shared/components/requisition-header";
 import { RequisitionActions } from "@/features/requisitions-shared/components/requisition-actions";
 import { RequisitionApprovalActions } from "@/features/requisitions-shared/components/requisition-approval-actions";
 import type { RequisitionSaveAction } from "@/features/requisitions-shared/types/requisition-save-action";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 type Props = {
     mode: FeRequisitionPageMode;
@@ -93,7 +93,7 @@ export function FeRequisitionHeader({
             backHref={backHref}
             backLabel="Requisitions"
             requisitionNumber={mode === "create" ? null : requisitionNumber}
-            statusNode={status ? <StatusPill status={status} /> : <UnsavedPill />}
+            statusNode={status ? <RequisitionStatusPill status={status} /> : <UnsavedPill />}
             subtotal={subtotal}
             submitWindowStatus={submitWindowStatus}
             submitStatusLoading={submitStatusLoading}

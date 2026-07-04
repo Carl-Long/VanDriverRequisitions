@@ -14,8 +14,8 @@ import { formatDateGB } from "@/lib/format/date";
 import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import type { StdRequisitionSummary } from "../../types/std-requisition.types";
 import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
-import { StdStatusPill } from "./std-status-pill";
 import { VanDriverIdentityCell } from "@/features/requisitions-shared/components/van-driver-identity-cell";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 type Props = {
     items: StdRequisitionSummary[];
@@ -96,7 +96,7 @@ export function StdRequisitionTable({ items, getHref, onRowClick }: Readonly<Pro
 
                                 <TableCell align="center" nowrap>
                                     <div className="flex justify-center">
-                                        <StdStatusPill status={req.status as StdRequisitionStatus} />
+                                        <RequisitionStatusPill status={req.status as StdRequisitionStatus} />
                                     </div>
                                 </TableCell>
 

@@ -1,13 +1,16 @@
 import { cn } from "@/lib/utils";
+
 import {
-    RequisitionStatus,
     requisitionStatusConfig,
     statusVariants,
-} from "../../constants/fe-requisition-status.constants";
+    type RequisitionStatus,
+} from "../constants/requisition-status.constants";
 
-type Props = { status: RequisitionStatus };
+type Props = {
+    status: RequisitionStatus;
+};
 
-export function StatusPill({ status }: Readonly<Props>) {
+export function RequisitionStatusPill({ status }: Readonly<Props>) {
     const config = requisitionStatusConfig[status];
 
     return (

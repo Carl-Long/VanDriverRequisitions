@@ -3,9 +3,9 @@
 import { VanDriverSummaryCard } from "@/features/van-drivers/components/van-driver-summary-card";
 import type { VanDriverLookup } from "@/lib/api/van-drivers";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
-import { StdStatusPill } from "../../list/components/std-status-pill";
 import { RequisitionDetailsFields } from "@/features/requisitions-shared/components/requisition-details-fields";
 import { RequisitionProcessingInfo } from "@/features/requisitions-shared/components/requisition-processing-info";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 type Props = {
     readonly: boolean;
@@ -70,7 +70,7 @@ export function StdRequisitionDetailsTab({
 
                     <RequisitionProcessingInfo
                         status={processingStatus}
-                        statusNode={processingStatus ? <StdStatusPill status={processingStatus} /> : null}
+                        statusNode={processingStatus ? <RequisitionStatusPill status={processingStatus} /> : null}
                         processedByName={processedByName}
                         processedAtUtc={processedAtUtc}
                         poNumber={draft.poNumber}

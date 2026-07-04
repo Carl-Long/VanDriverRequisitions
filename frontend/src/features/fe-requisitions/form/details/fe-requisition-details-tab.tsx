@@ -3,9 +3,9 @@
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { VanDriverLookup } from "@/lib/api/van-drivers";
 import { VanDriverSummaryCard } from "../../../van-drivers/components/van-driver-summary-card";
-import { StatusPill } from "../../list/components/status-pill";
 import { RequisitionDetailsFields } from "@/features/requisitions-shared/components/requisition-details-fields";
 import { RequisitionProcessingInfo } from "@/features/requisitions-shared/components/requisition-processing-info";
+import { RequisitionStatusPill } from "@/features/requisitions-shared/components/requisition-status-pill";
 
 
 type Props = {
@@ -69,7 +69,7 @@ export function FeRequisitionDetailsTab({
 
                     <RequisitionProcessingInfo
                         status={processingStatus}
-                        statusNode={processingStatus ? <StatusPill status={processingStatus} /> : null}
+                        statusNode={processingStatus ? <RequisitionStatusPill status={processingStatus} /> : null}
                         processedByName={processedByName}
                         processedAtUtc={processedAtUtc}
                         poNumber={draft.poNumber}
