@@ -6,7 +6,7 @@ using VanDriverRequisitions.Application.Exceptions;
 using VanDriverRequisitions.Application.Features.StdLocations.Dtos;
 using VanDriverRequisitions.Application.Features.StdLocations.Extensions;
 using VanDriverRequisitions.Application.Features.StdLocations.Mappings;
-
+using VanDriverRequisitions.Domain.Entities.Common;
 using VanDriverRequisitions.Domain.Entities.STD;
 
 namespace VanDriverRequisitions.Application.Features.StdLocations.Services;
@@ -71,8 +71,11 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
     {
         await validator.ValidateAsync(createStdLocationDto, cancellationToken);
 
-        await EnsureShopExistsAsync(createStdLocationDto.ShopId, cancellationToken);
-        await EnsureCollectionTypeExistsAsync(createStdLocationDto.CollectionTypeId, cancellationToken);
+        var shop = await LoadShopForValidationAsync(createStdLocationDto.ShopId, cancellationToken);
+        var collectionType = await LoadCollectionTypeForValidationAsync(createStdLocationDto.CollectionTypeId, cancellationToken);
+
+        EnsureActiveForNewStdLocationParent(shop.IsActive, $"Shop '{shop.Code} - {shop.Name}'");
+        EnsureActiveForNewStdLocationParent(collectionType.IsActive, $"STD Collection Type '{collectionType.Code} - {collectionType.Name}'");
 
         var location = StdLocation.Create(createStdLocationDto.ShopId, createStdLocationDto.CollectionTypeId, createStdLocationDto.LocationName, createStdLocationDto.PostCode);
 
@@ -87,10 +90,22 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
     {
         await validator.ValidateAsync(updateStdLocationDto, cancellationToken);
 
-        await EnsureShopExistsAsync(updateStdLocationDto.ShopId, cancellationToken);
-        await EnsureCollectionTypeExistsAsync(updateStdLocationDto.CollectionTypeId, cancellationToken);
-
         var location = await LoadForUpdateAsync(id, cancellationToken);
+
+        var shop = await LoadShopForValidationAsync(updateStdLocationDto.ShopId, cancellationToken);
+        var collectionType = await LoadCollectionTypeForValidationAsync(updateStdLocationDto.CollectionTypeId, cancellationToken);
+
+        EnsureActiveOrUnchangedForExistingStdLocationParent(
+            existingParentId: location.ShopId,
+            incomingParentId: updateStdLocationDto.ShopId,
+            incomingParentIsActive: shop.IsActive,
+            lookupDescription: $"Shop '{shop.Code} - {shop.Name}'");
+
+        EnsureActiveOrUnchangedForExistingStdLocationParent(
+            existingParentId: location.CollectionTypeId,
+            incomingParentId: updateStdLocationDto.CollectionTypeId,
+            incomingParentIsActive: collectionType.IsActive,
+            lookupDescription: $"STD Collection Type '{collectionType.Code} - {collectionType.Name}'");
 
         location.UpdateDetails(updateStdLocationDto.ShopId, updateStdLocationDto.CollectionTypeId, updateStdLocationDto.LocationName, updateStdLocationDto.PostCode);
 
@@ -121,27 +136,44 @@ public sealed class StdLocationService(IApplicationDbContext context, IValidator
                ?? throw new NotFoundException($"STD Location with ID '{id}' was not found.");
     }
 
-    private async Task EnsureShopExistsAsync(Guid shopId, CancellationToken cancellationToken)
+    private async Task<Shop> LoadShopForValidationAsync(Guid shopId, CancellationToken cancellationToken)
     {
-        var exists = await context.Shops
-            .IgnoreQueryFilters()
-            .AnyAsync(x => x.Id == shopId, cancellationToken);
+        return await context.Shops
+                   .IgnoreQueryFilters()
+                   .AsNoTracking()
+                   .FirstOrDefaultAsync(x => x.Id == shopId, cancellationToken)
+               ?? throw new NotFoundException($"Shop with ID '{shopId}' was not found.");
+    }
 
-        if (!exists)
+    private async Task<StdCollectionType> LoadCollectionTypeForValidationAsync(Guid collectionTypeId, CancellationToken cancellationToken)
+    {
+        return await context.StdCollectionTypes
+                   .IgnoreQueryFilters()
+                   .AsNoTracking()
+                   .FirstOrDefaultAsync(x => x.Id == collectionTypeId, cancellationToken)
+               ?? throw new NotFoundException($"STD Collection Type with ID '{collectionTypeId}' was not found.");
+    }
+
+    private static void EnsureActiveForNewStdLocationParent(bool isActive, string lookupDescription)
+    {
+        if (!isActive)
         {
-            throw new NotFoundException($"Shop with ID '{shopId}' was not found.");
+            throw new BadRequestException($"{lookupDescription} is inactive and cannot be used for a STD location.");
         }
     }
 
-    private async Task EnsureCollectionTypeExistsAsync(Guid collectionTypeId, CancellationToken cancellationToken)
+    private static void EnsureActiveOrUnchangedForExistingStdLocationParent(Guid existingParentId, Guid incomingParentId, bool incomingParentIsActive, string lookupDescription)
     {
-        var exists = await context.StdCollectionTypes
-            .IgnoreQueryFilters()
-            .AnyAsync(x => x.Id == collectionTypeId, cancellationToken);
-
-        if (!exists)
+        if (incomingParentIsActive)
         {
-            throw new NotFoundException($"STD Collection Type with ID '{collectionTypeId}' was not found.");
+            return;
         }
+
+        if (existingParentId == incomingParentId)
+        {
+            return;
+        }
+
+        throw new BadRequestException($"{lookupDescription} is inactive and cannot be selected.");
     }
 }

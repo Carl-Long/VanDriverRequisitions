@@ -24,10 +24,12 @@ public static class StdLocationProjections
             ShopId = x.ShopId,
             ShopCode = x.Shop.Code,
             ShopName = x.Shop.Name,
+            IsShopActive = x.Shop.IsActive,
 
             CollectionTypeId = x.CollectionTypeId,
             CollectionTypeCode = x.CollectionType.Code,
             CollectionTypeName = x.CollectionType.Name,
+            IsCollectionTypeActive = x.CollectionType.IsActive,
 
             LocationName = x.LocationName,
             PostCode = x.PostCode,

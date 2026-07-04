@@ -1,13 +1,15 @@
 export type StdLocation = {
     id: string;
-
+    
     shopId: string;
     shopCode: string;
     shopName: string;
+    isShopActive: boolean;
 
     collectionTypeId: string;
     collectionTypeCode: string;
     collectionTypeName: string;
+    isCollectionTypeActive: boolean;
 
     locationName: string;
     postCode: string;
