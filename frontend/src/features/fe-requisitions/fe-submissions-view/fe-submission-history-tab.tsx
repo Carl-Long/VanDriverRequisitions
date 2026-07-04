@@ -3,9 +3,9 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { FeRequisitionSubmissionHistory } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
+import { SubmissionStatusPill } from "@/features/requisitions-shared/components/submission-status-pill";
 
 type Props = { submissions: FeRequisitionSubmissionHistory[]; returnTo?: string; };
 

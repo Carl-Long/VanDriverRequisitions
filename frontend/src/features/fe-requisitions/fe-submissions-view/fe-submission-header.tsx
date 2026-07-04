@@ -1,9 +1,9 @@
 "use client";
 
-import { SubmissionStatusPill } from "./submission-status-pill";
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
+import { SubmissionStatusPill } from "@/features/requisitions-shared/components/submission-status-pill";
 
 type Props = { submission: FeRequisitionSubmissionDetail };
 

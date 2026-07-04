@@ -1,4 +1,4 @@
-import { SubmissionStatus } from "../../fe-submissions-view/submission-status";
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
 
 export type FeSubmissionHistoryDraft = {
     id: string;

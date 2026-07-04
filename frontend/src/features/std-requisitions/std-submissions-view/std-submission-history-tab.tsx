@@ -5,8 +5,8 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/ui/empty-state";
 import { AuditField } from "@/components/ui/field/audit-field";
-import { StdSubmissionStatusPill } from "./submission-status-pill";
 import { StdRequisitionSubmissionHistory } from "../types/std-requisition-submission.types";
+import { SubmissionStatusPill } from "@/features/requisitions-shared/components/submission-status-pill";
 
 
 
@@ -78,7 +78,7 @@ function SubmissionCard({ submission, returnTo }: Readonly<SubmissionCardProps>)
                 <div className="flex items-center gap-3">
                     <h3 className="font-semibold">Submission #{submission.submissionNumber}</h3>
 
-                    <StdSubmissionStatusPill status={submission.status} />
+                    <SubmissionStatusPill status={submission.status} />
                 </div>
 
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated">

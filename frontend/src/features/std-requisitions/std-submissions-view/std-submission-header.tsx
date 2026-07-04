@@ -3,7 +3,7 @@
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
 import type { StdRequisitionSubmissionDetail } from "../types/std-requisition-submission.types";
-import { StdSubmissionStatusPill } from "./submission-status-pill";
+import { SubmissionStatusPill } from "@/features/requisitions-shared/components/submission-status-pill";
 
 type Props = {
     submission: StdRequisitionSubmissionDetail;
@@ -24,7 +24,7 @@ export function StdSubmissionHeader({ submission }: Readonly<Props>) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <StdSubmissionStatusPill status={submission.status} />
+                    <SubmissionStatusPill status={submission.status} />
                 </div>
             </div>
 

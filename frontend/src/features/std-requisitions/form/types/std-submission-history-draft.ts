@@ -1,9 +1,9 @@
-import { StdSubmissionStatus } from "../../std-submissions-view/submission-status";
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
 
 export type StdSubmissionHistoryDraft = {
     id: string;
     submissionNumber: number;
-    status: StdSubmissionStatus;
+    status: SubmissionStatus;
     submittedByNameSnapshot: string;
     submittedAtUtc: string;
     reviewedByNameSnapshot: string | null;

@@ -1,8 +1,14 @@
-import { statusVariants } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { cn } from "@/lib/utils";
-import { SubmissionStatus, submissionStatusConfig } from "./submission-status";
 
-type Props = { status: SubmissionStatus };
+import { statusVariants } from "../constants/requisition-status.constants";
+import {
+    submissionStatusConfig,
+    type SubmissionStatus,
+} from "../constants/submission-status.constants";
+
+type Props = {
+    status: SubmissionStatus;
+};
 
 export function SubmissionStatusPill({ status }: Readonly<Props>) {
     const config = submissionStatusConfig[status];

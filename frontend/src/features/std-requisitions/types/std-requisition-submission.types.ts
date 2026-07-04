@@ -1,5 +1,6 @@
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
+
 import { StdChargeType } from "../constants/std-charge-type.constants";
-import type { StdSubmissionStatus } from "../std-submissions-view/submission-status";
 
 export type StdRequisitionSubmissionDetail = {
     id: string;
@@ -7,7 +8,7 @@ export type StdRequisitionSubmissionDetail = {
 
     submissionNumber: number;
 
-    status: StdSubmissionStatus;
+    status: SubmissionStatus;
 
     submittedByName: string;
     submittedAtUtc: string;
@@ -34,7 +35,7 @@ export type RejectStdRequisitionRequest = {
 export type StdRequisitionSubmissionHistory = {
     id: string;
     submissionNumber: number;
-    status: StdSubmissionStatus;
+    status: SubmissionStatus;
     submittedByNameSnapshot: string;
     submittedAtUtc: string;
     reviewedByNameSnapshot: string | null;
@@ -138,7 +139,7 @@ export type StdAdditionalCostSnapshot = {
     reasonId: string;
     reasonCode: string;
     reasonText: string;
-    
+
     numberOfBags: number;
 
     chargeType: StdChargeType;

@@ -1,4 +1,5 @@
-import { SubmissionStatus } from "../fe-submissions-view/submission-status";
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
+
 import { ChargingOption, WeeklyQuantities } from "./fe-requisition.types";
 
 export type FeRequisitionSubmissionDetail = {
