@@ -9,9 +9,9 @@ import { canCreateRequisitions } from "@/features/auth/roles";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { StdRequisitionShell } from "@/features/std-requisitions/form/components/std-requisition-shell";
-import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { useAuth } from "@/providers/auth-provider";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 
 export default function NewStdRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -19,7 +19,7 @@ export default function NewStdRequisitionPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
@@ -61,7 +61,7 @@ function NewStdRequisitionContent() {
     if (pageLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }

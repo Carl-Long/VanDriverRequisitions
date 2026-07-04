@@ -7,12 +7,12 @@ import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import { canCreateRequisitions } from "@/features/auth/roles";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
-import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { useAuth } from "@/providers/auth-provider";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 
 export default function NewFeRequisitionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -20,7 +20,7 @@ export default function NewFeRequisitionPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <FeRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
@@ -68,7 +68,7 @@ function NewFeRequisitionContent() {
     if (pageLoading) {
         return (
             <PageContainer>
-                <FeRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }

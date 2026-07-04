@@ -9,12 +9,12 @@ import { Alert } from "@/components/ui/alert";
 import { canApproveRequisitions } from "@/features/auth/roles";
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
 import { StdRequisitionShell } from "@/features/std-requisitions/form/components/std-requisition-shell";
-import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std-requisition.types";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 
 export default function StdRequisitionApprovalDetailPage() {
     const params = useParams<{ id: string }>();
@@ -77,7 +77,7 @@ export default function StdRequisitionApprovalDetailPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
@@ -91,7 +91,7 @@ export default function StdRequisitionApprovalDetailPage() {
     if (pageLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
