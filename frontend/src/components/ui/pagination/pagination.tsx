@@ -1,9 +1,11 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import { cn } from "@/lib/utils";
-import { Button } from "./button/button";
-import { IconButton } from "./button/icon-button";
+import { getPaginationItems } from "./get-pagination-items";
+import { Button } from "../button/button";
+import { IconButton } from "../button/icon-button";
 
 type PaginationProps = {
     page: number;
@@ -18,22 +20,11 @@ export function Pagination({
     onPageChange,
     className,
 }: Readonly<PaginationProps>) {
-    if (totalPages <= 1) return null;
-
-    function getPageNumbers(): (number | "ellipsis")[] {
-        const pages: (number | "ellipsis")[] = [];
-        const delta = 1;
-
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
-                pages.push(i);
-            } else if (pages[pages.length - 1] !== "ellipsis") {
-                pages.push("ellipsis");
-            }
-        }
-
-        return pages;
+    if (totalPages <= 1) {
+        return null;
     }
+
+    const items = getPaginationItems(page, totalPages);
 
     return (
         <nav
@@ -50,28 +41,35 @@ export function Pagination({
                 <ChevronLeft className="size-[1em]" />
             </IconButton>
 
-            {getPageNumbers().map((p, idx) =>
-                p === "ellipsis" ? (
-                    <span
-                        key={`ellipsis-${idx}`}
-                        className="flex h-10 w-10 items-center justify-center text-sm text-muted-foreground"
-                    >
-                        …
-                    </span>
-                ) : (
+            {items.map((item, index) => {
+                if (item === "ellipsis") {
+                    const previousItem = items[index - 1];
+                    const nextItem = items[index + 1];
+
+                    return (
+                        <span
+                            key={`ellipsis-${previousItem}-${nextItem}`}
+                            className="flex h-10 w-10 items-center justify-center text-sm text-muted-foreground"
+                        >
+                            …
+                        </span>
+                    );
+                }
+
+                return (
                     <Button
-                        key={p}
+                        key={item}
                         size="md"
-                        variant={p === page ? "solid" : "ghost"}
-                        tone={p === page ? "primary" : "accent"}
-                        onClick={() => onPageChange(p)}
-                        aria-current={p === page ? "page" : undefined}
+                        variant={item === page ? "solid" : "ghost"}
+                        tone={item === page ? "primary" : "accent"}
+                        onClick={() => onPageChange(item)}
+                        aria-current={item === page ? "page" : undefined}
                         className="h-10 min-w-10 px-0"
                     >
-                        {p}
+                        {item}
                     </Button>
-                ),
-            )}
+                );
+            })}
 
             <IconButton
                 size="md"

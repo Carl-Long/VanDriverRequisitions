@@ -8,7 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination/pagination";
 import { Surface } from "@/components/ui/surface";
 import { TableSkeleton } from "@/components/ui/table/table-skeleton";
 import { Toggle } from "@/components/ui/toggle";
