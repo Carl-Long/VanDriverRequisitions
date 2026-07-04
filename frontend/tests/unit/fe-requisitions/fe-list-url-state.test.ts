@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { PAGE_SIZE } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
+import {
+    PAGE_SIZE,
+    PAGE_SIZE_OPTIONS,
+} from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
 import {
     buildSearchParams,
     filtersFromSearchParams,
     pageFromSearchParams,
+    pageSizeFromSearchParams,
 } from "@/features/fe-requisitions/list/lib/url-state";
 import type { FeRequisitionFilters } from "@/features/fe-requisitions/types/fe-requisiton-filters.types";
 
@@ -98,6 +102,23 @@ describe("FE requisition list URL state", () => {
         expect(pageFromSearchParams(new URLSearchParams({ page: "2.5" }))).toBe(1);
     });
 
+    it("parses allowed page sizes and defaults unsafe page sizes", () => {
+        expect(
+            pageSizeFromSearchParams(
+                new URLSearchParams({ pageSize: String(PAGE_SIZE_OPTIONS[0]) }),
+            ),
+        ).toBe(PAGE_SIZE_OPTIONS[0]);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "25" }))).toBe(25);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "50" }))).toBe(50);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "100" }))).toBe(100);
+
+        expect(pageSizeFromSearchParams(new URLSearchParams())).toBe(PAGE_SIZE);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "abc" }))).toBe(PAGE_SIZE);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "0" }))).toBe(PAGE_SIZE);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "15" }))).toBe(PAGE_SIZE);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "25.5" }))).toBe(PAGE_SIZE);
+    });
+
     it("serialises only non-default filters and omits page one", () => {
         const params = buildSearchParams(
             createFilters({
@@ -149,19 +170,34 @@ describe("FE requisition list URL state", () => {
             page: "4",
         });
     });
+
+    it("serialises non-default page size", () => {
+        const params = buildSearchParams(createFilters(), 1, 25);
+
+        expect(toObject(params)).toEqual({
+            pageSize: "25",
+        });
+    });
+
+    it("omits default page size", () => {
+        const params = buildSearchParams(createFilters(), 1, PAGE_SIZE);
+
+        expect(toObject(params)).toEqual({});
+    });
 });
 
 describe("buildFeRequisitionQuery", () => {
     it("builds a query using the current user for the default created-by filter", () => {
         const result = buildFeRequisitionQuery(
             2,
+            25,
             createFilters(),
             "current-user-id",
         );
 
         expect(result).toEqual({
             page: 2,
-            pageSize: PAGE_SIZE,
+            pageSize: 25,
             createdByUserId: "current-user-id",
         });
     });
@@ -169,6 +205,7 @@ describe("buildFeRequisitionQuery", () => {
     it("builds a query with explicit filters and no created-by user when filtering by anyone", () => {
         const result = buildFeRequisitionQuery(
             3,
+            50,
             createFilters({
                 requisitionNumber: "FE-10001",
                 status: "Rejected",
@@ -181,7 +218,7 @@ describe("buildFeRequisitionQuery", () => {
 
         expect(result).toEqual({
             page: 3,
-            pageSize: PAGE_SIZE,
+            pageSize: 50,
             requisitionNumber: "FE-10001",
             status: "Rejected",
             shopId: "shop-id",
@@ -192,6 +229,7 @@ describe("buildFeRequisitionQuery", () => {
     it("builds a query using the selected user for a specific created-by filter", () => {
         const result = buildFeRequisitionQuery(
             1,
+            PAGE_SIZE_OPTIONS[0],
             createFilters({
                 createdBy: {
                     type: "user",
@@ -202,6 +240,10 @@ describe("buildFeRequisitionQuery", () => {
             "current-user-id",
         );
 
-        expect(result.createdByUserId).toBe("selected-user-id");
+        expect(result).toEqual({
+            page: 1,
+            pageSize: PAGE_SIZE_OPTIONS[0],
+            createdByUserId: "selected-user-id",
+        });
     });
 });

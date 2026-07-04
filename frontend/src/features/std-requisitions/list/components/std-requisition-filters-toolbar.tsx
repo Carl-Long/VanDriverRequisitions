@@ -3,24 +3,31 @@
 import { RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button/button";
-import { Surface } from "@/components/ui/surface";
-import { cn } from "@/lib/utils";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
-import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
-import { StdStatusFilterField } from "../filter-fields/std-status-filter-field";
+import { PageSizeSelect } from "@/components/ui/page-size-select";
+import { Surface } from "@/components/ui/surface";
 import { CreatedByUserFilterField } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
 import { ShopFilterField } from "@/features/requisitions-shared/components/filter-fields/shop-filter-field";
+import { cn } from "@/lib/utils";
+
+import { STD_REQUISITION_PAGE_SIZE_OPTIONS } from "../../constants/std-requisition-status.constants";
+import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
+import { StdStatusFilterField } from "../filter-fields/std-status-filter-field";
 
 type Props = {
     filters: StdRequisitionFilters;
+    pageSize: number;
     onFiltersChange: (filters: StdRequisitionFilters) => void;
+    onPageSizeChange: (pageSize: number) => void;
     onReset: () => void;
 };
 
 export function StdRequisitionFiltersToolbar({
     filters,
+    pageSize,
     onFiltersChange,
+    onPageSizeChange,
     onReset,
 }: Readonly<Props>) {
     return (
@@ -30,7 +37,9 @@ export function StdRequisitionFiltersToolbar({
                     <div className="flex items-center gap-2">
                         <SlidersHorizontal className="size-[1em] text-muted-foreground" />
 
-                        <h2 className="text-sm font-semibold text-foreground">Find Requisitions</h2>
+                        <h2 className="text-sm font-semibold text-foreground">
+                            Find Requisitions
+                        </h2>
                     </div>
 
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -38,11 +47,9 @@ export function StdRequisitionFiltersToolbar({
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="relative w-full max-w-md">
-                        <Search
-                            className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                        />
+                <div className="grid gap-3 md:grid-cols-[minmax(260px,420px)_auto_minmax(0,1fr)_180px] md:items-center">
+                    <div className="relative min-w-0">
+                        <Search className="size-[0.95em] absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 
                         <Input
                             value={filters.requisitionNumber}
@@ -57,56 +64,58 @@ export function StdRequisitionFiltersToolbar({
                         />
                     </div>
 
-                    <Button tone="accent" variant="solid" size="sm" onClick={onReset}>
+                    <Button tone="accent" variant="solid" onClick={onReset}>
                         <RotateCcw className="size-[1em]" />
                         <span>Reset Filters</span>
                     </Button>
+
+                    <div className="hidden md:block" />
+
+                    <PageSizeSelect
+                        pageSize={pageSize}
+                        options={STD_REQUISITION_PAGE_SIZE_OPTIONS}
+                        onPageSizeChange={onPageSizeChange}
+                    />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="min-w-[260px] flex-1">
-                        <CreatedByUserFilterField
-                            hideLabel
-                            fascia="Std"
-                            value={filters.createdBy}
-                            onChange={(value) => {
-                                onFiltersChange({
-                                    ...filters,
-                                    createdBy: value,
-                                });
-                            }}
-                        />
-                    </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_220px_minmax(260px,1fr)]">
+                    <CreatedByUserFilterField
+                        hideLabel
+                        fascia="Std"
+                        value={filters.createdBy}
+                        onChange={(value) => {
+                            onFiltersChange({
+                                ...filters,
+                                createdBy: value,
+                            });
+                        }}
+                    />
 
-                    <div className="min-w-[220px]">
-                        <StdStatusFilterField
-                            hideLabel
-                            value={filters.status}
-                            onChange={(value) => {
-                                onFiltersChange({
-                                    ...filters,
-                                    status: value,
-                                });
-                            }}
-                        />
-                    </div>
+                    <StdStatusFilterField
+                        hideLabel
+                        value={filters.status}
+                        onChange={(value) => {
+                            onFiltersChange({
+                                ...filters,
+                                status: value,
+                            });
+                        }}
+                    />
 
-                    <div className="min-w-[260px] flex-1">
-                        <ShopFilterField
-                            hideLabel
-                            value={filters.shopId}
-                            label={filters.shopLabel}
-                            includeAllOption={true}
-                            prefixLabel={true}
-                            onChange={(value, label) => {
-                                onFiltersChange({
-                                    ...filters,
-                                    shopId: value,
-                                    shopLabel: label,
-                                });
-                            }}
-                        />
-                    </div>
+                    <ShopFilterField
+                        hideLabel
+                        value={filters.shopId}
+                        label={filters.shopLabel}
+                        includeAllOption={true}
+                        prefixLabel={true}
+                        onChange={(value, label) => {
+                            onFiltersChange({
+                                ...filters,
+                                shopId: value,
+                                shopLabel: label,
+                            });
+                        }}
+                    />
                 </div>
             </div>
         </Surface>

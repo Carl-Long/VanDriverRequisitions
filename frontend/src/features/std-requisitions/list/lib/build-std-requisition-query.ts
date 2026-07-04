@@ -1,15 +1,25 @@
-import { STD_REQUISITION_PAGE_SIZE } from "../../constants/std-requisition-status.constants";
 import type { StdRequisitionQuery } from "../../types/std-requisition.types";
 import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
 
 export function buildStdRequisitionQuery(
     page: number,
+    pageSize: number,
     filters: StdRequisitionFilters,
     currentUserId: string,
 ): StdRequisitionQuery {
+    let createdByUserId: string | undefined;
+
+    if (filters.createdBy.type === "me") {
+        createdByUserId = currentUserId;
+    }
+
+    if (filters.createdBy.type === "user") {
+        createdByUserId = filters.createdBy.userId;
+    }
+
     return {
         page,
-        pageSize: STD_REQUISITION_PAGE_SIZE,
+        pageSize,
 
         ...(filters.requisitionNumber && {
             requisitionNumber: filters.requisitionNumber,
@@ -23,11 +33,6 @@ export function buildStdRequisitionQuery(
             shopId: filters.shopId,
         }),
 
-        createdByUserId:
-            filters.createdBy.type === "me"
-                ? currentUserId
-                : filters.createdBy.type === "user"
-                  ? filters.createdBy.userId
-                  : undefined,
+        createdByUserId,
     };
 }

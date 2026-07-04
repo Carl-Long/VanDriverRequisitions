@@ -21,8 +21,9 @@ import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/list/com
 import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
 import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
-import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams, } from "@/features/fe-requisitions/list/lib/url-state";
+import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams, pageSizeFromSearchParams, } from "@/features/fe-requisitions/list/lib/url-state";
 import { getApiErrorMessage } from "@/lib/api/client";
+import { INITIAL_FILTERS } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 
 export default function HomeVanDriversPage() {
     const { user, loading: authLoading } = useAuth();
@@ -32,6 +33,7 @@ export default function HomeVanDriversPage() {
     const searchParams = useSearchParams();
     const filters = filtersFromSearchParams(searchParams);
     const page = pageFromSearchParams(searchParams);
+    const pageSize = pageSizeFromSearchParams(searchParams);
     const debouncedReqNumber = useDebounce(filters.requisitionNumber, 400);
     const [data, setData] = useState<PagedResult<FeRequisitionSummary> | null>(null);
     const [loading, setLoading] = useState(true);
@@ -74,6 +76,7 @@ export default function HomeVanDriversPage() {
                 const result = await feRequisitionsApi.getAll(
                     buildFeRequisitionQuery(
                         page,
+                        pageSize,
                         {
                             requisitionNumber: debouncedReqNumber,
                             status,
@@ -109,6 +112,7 @@ export default function HomeVanDriversPage() {
         canCreate,
         currentUserId,
         page,
+        pageSize,
         debouncedReqNumber,
         status,
         shopId,
@@ -121,7 +125,12 @@ export default function HomeVanDriversPage() {
     const items = data?.items ?? [];
 
     function handleFiltersChange(next: FeRequisitionFilters) {
-        const params = buildSearchParams(next, 1);
+        const params = buildSearchParams(next, 1, pageSize);
+        router.replace(`${pathname}?${params.toString()}`);
+    }
+
+    function handlePageSizeChange(nextPageSize: number) {
+        const params = buildSearchParams(filters, 1, nextPageSize);
         router.replace(`${pathname}?${params.toString()}`);
     }
 
@@ -135,7 +144,9 @@ export default function HomeVanDriversPage() {
     const newRequisitionHref = `/home-van-drivers/new?returnTo=${encodeURIComponent(currentListUrl)}`;
 
     function resetFilters() {
-        router.replace(pathname);
+        const params = buildSearchParams(INITIAL_FILTERS, 1, pageSize);
+        const queryString = params.toString();
+        router.replace(queryString ? `${pathname}?${queryString}` : pathname);
     }
 
     if (authLoading) {
@@ -159,23 +170,17 @@ export default function HomeVanDriversPage() {
                 </Button>
             </PageHeader>
 
-            {/* Filters */}
-
             <FeRequisitionFiltersToolbar
                 filters={filters}
+                pageSize={pageSize}
                 onFiltersChange={handleFiltersChange}
+                onPageSizeChange={handlePageSizeChange}
                 onReset={resetFilters}
             />
 
-            {/* Error */}
-
             {error && <Alert>{error}</Alert>}
 
-            {/* Loading */}
-
             {loading && <FeRequisitionTableSkeleton />}
-
-            {/* Empty */}
 
             {!loading && items.length === 0 && (
                 <EmptyState
@@ -185,8 +190,6 @@ export default function HomeVanDriversPage() {
                 />
             )}
 
-            {/* Table */}
-
             {!loading && items.length > 0 && (
                 <FeRequisitionTable
                     items={items}
@@ -195,13 +198,12 @@ export default function HomeVanDriversPage() {
                 />
             )}
 
-            {/* Pagination */}
             {data && data.totalPages > 1 && (
                 <Pagination
                     page={data.page}
                     totalPages={data.totalPages}
                     onPageChange={(nextPage) => {
-                        const params = buildSearchParams(filters, nextPage);
+                        const params = buildSearchParams(filters, nextPage, pageSize);
                         router.push(`${pathname}?${params.toString()}`);
                     }}
                     className="mt-6"
