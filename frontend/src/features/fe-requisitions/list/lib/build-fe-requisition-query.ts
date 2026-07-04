@@ -1,3 +1,6 @@
+import { createdByUserIdFromFilter } from "@/features/requisitions-shared/list/created-by-url-state";
+
+import { PAGE_SIZE } from "../../constants/fe-requisition-status.constants";
 import type { FeRequisitionQuery } from "../../types/fe-requisition.types";
 import type { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 
@@ -7,16 +10,6 @@ export function buildFeRequisitionQuery(
     filters: FeRequisitionFilters,
     currentUserId: string,
 ): FeRequisitionQuery {
-    let createdByUserId: string | undefined;
-
-    if (filters.createdBy.type === "me") {
-        createdByUserId = currentUserId;
-    }
-
-    if (filters.createdBy.type === "user") {
-        createdByUserId = filters.createdBy.userId;
-    }
-
     return {
         page,
         pageSize,
@@ -33,6 +26,16 @@ export function buildFeRequisitionQuery(
             shopId: filters.shopId,
         }),
 
-        createdByUserId,
+        createdByUserId: createdByUserIdFromFilter(
+            filters.createdBy,
+            currentUserId,
+        ),
     };
+}
+
+export function buildDefaultFeRequisitionQuery(
+    filters: FeRequisitionFilters,
+    currentUserId: string,
+): FeRequisitionQuery {
+    return buildFeRequisitionQuery(1, PAGE_SIZE, filters, currentUserId);
 }

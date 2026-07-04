@@ -1,6 +1,6 @@
-import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
+import { appendCreatedBySearchParams, createdByFromSearchParams } from "@/features/requisitions-shared/list/created-by-url-state";
 import { INITIAL_FILTERS, PAGE_SIZE, PAGE_SIZE_OPTIONS, REQUISITION_STATUSES, type RequisitionStatus } from "../../constants/fe-requisition-status.constants";
-import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
+import type { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 
 function isValidStatus(value: string | null): value is RequisitionStatus {
     return (
@@ -9,28 +9,14 @@ function isValidStatus(value: string | null): value is RequisitionStatus {
     );
 }
 
-export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequisitionFilters {
-    const createdBy = searchParams.get("createdBy");
+function isValidPageSize(pageSize: number) {
+    return (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize);
+}
+
+export function filtersFromSearchParams(
+    searchParams: URLSearchParams,
+): FeRequisitionFilters {
     const status = searchParams.get("status");
-
-    let createdByFilter: CreatedByFilter = {
-        type: "me",
-    };
-
-    if (createdBy === "any") {
-        createdByFilter = {
-            type: "any",
-        };
-    }
-
-    if (createdBy === "user") {
-        const userId = searchParams.get("createdByUserId");
-        const label = searchParams.get("createdByLabel") ?? "";
-
-        if (userId) {
-            createdByFilter = { type: "user", userId, label };
-        }
-    }
 
     return {
         ...INITIAL_FILTERS,
@@ -41,7 +27,7 @@ export function filtersFromSearchParams(searchParams: URLSearchParams): FeRequis
 
         shopId: searchParams.get("shopId"),
         shopLabel: searchParams.get("shopLabel"),
-        createdBy: createdByFilter,
+        createdBy: createdByFromSearchParams(searchParams),
     };
 }
 
@@ -58,16 +44,18 @@ export function pageFromSearchParams(searchParams: URLSearchParams): number {
 export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
     const pageSize = Number(searchParams.get("pageSize"));
 
-    if (!Number.isInteger(pageSize)) {
+    if (!Number.isInteger(pageSize) || !isValidPageSize(pageSize)) {
         return PAGE_SIZE;
     }
 
-    return (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
-        ? pageSize
-        : PAGE_SIZE;
+    return pageSize;
 }
 
-export function buildSearchParams(filters: FeRequisitionFilters, page: number, pageSize = PAGE_SIZE) {
+export function buildSearchParams(
+    filters: FeRequisitionFilters,
+    page: number,
+    pageSize: number = PAGE_SIZE,
+) {
     const params = new URLSearchParams();
 
     if (filters.requisitionNumber) {
@@ -86,21 +74,7 @@ export function buildSearchParams(filters: FeRequisitionFilters, page: number, p
         params.set("shopLabel", filters.shopLabel);
     }
 
-    switch (filters.createdBy.type) {
-        case "any":
-            params.set("createdBy", "any");
-            break;
-
-        case "user":
-            params.set("createdBy", "user");
-            params.set("createdByUserId", filters.createdBy.userId);
-            params.set("createdByLabel", filters.createdBy.label);
-            break;
-
-        case "me":
-        default:
-            break;
-    }
+    appendCreatedBySearchParams(params, filters.createdBy);
 
     if (page > 1) {
         params.set("page", String(page));

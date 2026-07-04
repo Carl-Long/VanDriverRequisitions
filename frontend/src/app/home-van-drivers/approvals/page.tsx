@@ -16,11 +16,11 @@ import { useAuth } from "@/providers/auth-provider";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
-import { FeRequisitionTableSkeleton } from "@/features/fe-requisitions/list/components/fe-requisition-table-skeleton";
 import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
 import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
@@ -111,7 +111,7 @@ export default function FeRequisitionApprovalsPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <FeRequisitionTableSkeleton />
+                <RequisitionTableSkeleton />
             </PageContainer>
         );
     }
@@ -135,7 +135,7 @@ export default function FeRequisitionApprovalsPage() {
 
             {error && <Alert>{error}</Alert>}
 
-            {loading && <FeRequisitionTableSkeleton />}
+            {loading && <RequisitionTableSkeleton />}
 
             {!loading && items.length === 0 && (
                 <EmptyState
