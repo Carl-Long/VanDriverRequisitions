@@ -1,5 +1,21 @@
-import { appendCreatedBySearchParams, createdByFromSearchParams } from "@/features/requisitions-shared/list/created-by-url-state";
-import { INITIAL_FILTERS, PAGE_SIZE, PAGE_SIZE_OPTIONS, REQUISITION_STATUSES, type RequisitionStatus } from "../../constants/fe-requisition-status.constants";
+import {
+    appendCreatedBySearchParams,
+    createdByFromSearchParams,
+} from "@/features/requisitions-shared/list/created-by-url-state";
+import {
+    appendPageSearchParam,
+    appendPageSizeSearchParam,
+    pageFromSearchParams as sharedPageFromSearchParams,
+    pageSizeFromSearchParams as sharedPageSizeFromSearchParams,
+} from "@/features/requisitions-shared/list/page-url-state";
+
+import {
+    INITIAL_FILTERS,
+    PAGE_SIZE,
+    PAGE_SIZE_OPTIONS,
+    REQUISITION_STATUSES,
+    type RequisitionStatus,
+} from "../../constants/fe-requisition-status.constants";
 import type { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 
 function isValidStatus(value: string | null): value is RequisitionStatus {
@@ -7,10 +23,6 @@ function isValidStatus(value: string | null): value is RequisitionStatus {
         value !== null &&
         (REQUISITION_STATUSES as readonly string[]).includes(value)
     );
-}
-
-function isValidPageSize(pageSize: number) {
-    return (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize);
 }
 
 export function filtersFromSearchParams(
@@ -32,23 +44,15 @@ export function filtersFromSearchParams(
 }
 
 export function pageFromSearchParams(searchParams: URLSearchParams): number {
-    const page = Number(searchParams.get("page"));
-
-    if (!Number.isInteger(page) || page < 1) {
-        return 1;
-    }
-
-    return page;
+    return sharedPageFromSearchParams(searchParams);
 }
 
 export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
-    const pageSize = Number(searchParams.get("pageSize"));
-
-    if (!Number.isInteger(pageSize) || !isValidPageSize(pageSize)) {
-        return PAGE_SIZE;
-    }
-
-    return pageSize;
+    return sharedPageSizeFromSearchParams(
+        searchParams,
+        PAGE_SIZE,
+        PAGE_SIZE_OPTIONS,
+    );
 }
 
 export function buildSearchParams(
@@ -75,14 +79,8 @@ export function buildSearchParams(
     }
 
     appendCreatedBySearchParams(params, filters.createdBy);
-
-    if (page > 1) {
-        params.set("page", String(page));
-    }
-
-    if (pageSize !== PAGE_SIZE) {
-        params.set("pageSize", String(pageSize));
-    }
+    appendPageSearchParam(params, page);
+    appendPageSizeSearchParam(params, pageSize, PAGE_SIZE);
 
     return params;
 }
