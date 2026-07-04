@@ -46,12 +46,26 @@ export function getCategoryOptionsForFascia(
     return [];
 }
 
-export function isAllowedCategoryForFascia(
+export function isCategoryAllowedForFascia(
     fascia: RequisitionLimitRuleFascia,
     category: RequisitionLimitRuleCategory,
 ) {
     return getCategoryOptionsForFascia(fascia).some(
         (option) => option.value === category,
     );
+}
+
+export function isAllowedCategoryForFascia(
+    fascia: RequisitionLimitRuleFascia,
+    category: RequisitionLimitRuleCategory,
+) {
+    return isCategoryAllowedForFascia(fascia, category);
+}
+
+export function isFeGeneralTaskLimitRule(
+    fascia: RequisitionLimitRuleFascia,
+    category: RequisitionLimitRuleCategory,
+) {
+    return fascia === "Fe" && category === "GeneralTask";
 }
 export { REQUISITION_FASCIAS as requisitionLimitRuleFascias, FASCIA_OPTIONS as fasciaOptions } from "@/lib/constants/fascias";
