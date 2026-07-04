@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.StdCollectionTypes.Dtos;
@@ -52,7 +53,7 @@ public class StdCollectionTypesController(IStdCollectionTypeService stdCollectio
     public async Task<ActionResult<StdCollectionTypeSummaryDto>> Create([FromBody] CreateStdCollectionTypeDto createStdCollectionTypeDto, CancellationToken cancellationToken)
     {
         var created = await stdCollectionTypeService.CreateAsync(createStdCollectionTypeDto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]

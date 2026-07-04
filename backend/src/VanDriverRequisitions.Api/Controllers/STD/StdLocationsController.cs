@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Models;
 using VanDriverRequisitions.Application.Common.Security;
@@ -56,7 +57,7 @@ public class StdLocationsController(IStdLocationService stdLocationService) : Co
         CancellationToken cancellationToken)
     {
         var created = await stdLocationService.CreateAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]

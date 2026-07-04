@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.StdRequisitions.Dtos;
@@ -51,8 +52,8 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
     {
-        var result = await stdRequisitionService.CreateAsync(saveStdRequisitionDto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id, version = "1.0" }, result);
+        var created = await stdRequisitionService.CreateAsync(saveStdRequisitionDto, cancellationToken);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -64,8 +65,8 @@ public class StdRequisitionsController(IStdRequisitionService stdRequisitionServ
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] SaveStdRequisitionDto saveStdRequisitionDto, CancellationToken cancellationToken)
     {
-        var result = await stdRequisitionService.UpdateAsync(id, saveStdRequisitionDto, cancellationToken);
-        return Ok(result);
+        var updated = await stdRequisitionService.UpdateAsync(id, saveStdRequisitionDto, cancellationToken);
+        return Ok(updated);
     }
 
     [HttpPost("submit")]

@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.CostReasons.Dtos;
@@ -52,12 +53,8 @@ public class CostReasonsController(ICostReasonService costReasonService) : Contr
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<CostReasonSummaryDto>> Create([FromBody] CreateCostReasonDto createCostReasonDto, CancellationToken cancellationToken)
     {
-        var createdCostReason = await costReasonService.CreateAsync(createCostReasonDto, cancellationToken);
-
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = createdCostReason.Id },
-            createdCostReason);
+        var created = await costReasonService.CreateAsync(createCostReasonDto, cancellationToken);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -69,8 +66,8 @@ public class CostReasonsController(ICostReasonService costReasonService) : Contr
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<CostReasonSummaryDto>> Update([FromRoute] Guid id, [FromBody] UpdateCostReasonDto updateCostReasonDto, CancellationToken cancellationToken)
     {
-        var updatedCostReason = await costReasonService.UpdateAsync(id, updateCostReasonDto, cancellationToken);
-        return Ok(updatedCostReason);
+        var updated = await costReasonService.UpdateAsync(id, updateCostReasonDto, cancellationToken);
+        return Ok(updated);
     }
 
     [HttpPost("{id:guid}/activate")]

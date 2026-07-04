@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.RequisitionLimitRules.Dtos;
@@ -42,13 +43,10 @@ public class RequisitionLimitRulesController(IRequisitionLimitRuleService requis
     [ProducesResponseType(typeof(RequisitionLimitRuleSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<RequisitionLimitRuleSummaryDto>> Create(
-        [FromBody] CreateRequisitionLimitRuleDto createDto,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<RequisitionLimitRuleSummaryDto>> Create([FromBody] CreateRequisitionLimitRuleDto createDto, CancellationToken cancellationToken)
     {
         var created = await requisitionLimitRuleService.CreateAsync(createDto, cancellationToken);
-
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]

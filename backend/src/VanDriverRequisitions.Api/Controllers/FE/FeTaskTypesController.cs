@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeTaskTypes.Dtos;
@@ -42,7 +43,7 @@ public class FeTaskTypesController(IFeTaskTypeService feTaskTypeService) : Contr
     public async Task<ActionResult<FeTaskTypeSummaryDto>> Create([FromBody] CreateFeTaskTypeDto createFeTaskTypeDto, CancellationToken cancellationToken)
     {
         var createdFeTaskType = await feTaskTypeService.CreateAsync(createFeTaskTypeDto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = createdFeTaskType.Id }, createdFeTaskType);
+        return this.CreatedAtVersionedAction(nameof(GetById), createdFeTaskType.Id, createdFeTaskType); 
     }
 
     [HttpPut("{id:guid}")]
