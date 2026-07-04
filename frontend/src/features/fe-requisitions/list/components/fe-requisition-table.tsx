@@ -14,6 +14,7 @@ import { RequisitionStatus } from "../../constants/fe-requisition-status.constan
 import { FeRequisitionSummary } from "../../types/fe-requisition.types";
 import { StatusPill } from "./status-pill";
 import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
+import { VanDriverIdentityCell } from "@/features/requisitions-shared/components/van-driver-identity-cell";
 
 type Props = {
     items: FeRequisitionSummary[];
@@ -28,7 +29,7 @@ export function FeRequisitionTable({ items, getHref, onRowClick }: Readonly<Prop
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Requisition</TableHeaderCell>
-                        <TableHeaderCell>Company</TableHeaderCell>
+                        <TableHeaderCell>Van Driver</TableHeaderCell>
                         <TableHeaderCell align="center" nowrap>
                             Status
                         </TableHeaderCell>
@@ -82,17 +83,13 @@ export function FeRequisitionTable({ items, getHref, onRowClick }: Readonly<Prop
                                 </TableCell>
 
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="font-medium text-foreground">
-                                            {req.vanDriverCode}
-                                        </span>
-
-                                        <span className="max-w-[220px] truncate text-xs text-muted-foreground">
-                                            {req.tradersName}
-                                        </span>
-                                    </div>
+                                    <VanDriverIdentityCell
+                                        vanDriverName={req.vanDriverName}
+                                        vanDriverCode={req.vanDriverCode}
+                                        tradersName={req.tradersName}
+                                    />
                                 </TableCell>
-
+                                
                                 <TableCell align="center" nowrap>
                                     <div className="flex justify-center">
                                         <StatusPill status={req.status as RequisitionStatus} />

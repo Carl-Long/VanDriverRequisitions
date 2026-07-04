@@ -24,8 +24,8 @@ import { StdRequisitionTable } from "@/features/std-requisitions/list/components
 
 import { buildStdRequisitionQuery } from "@/features/std-requisitions/list/lib/build-std-requisition-query";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, pageSizeFromSearchParams, } from "@/features/std-requisitions/list/lib/url-state";
-import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 import { INITIAL_STD_REQUISITION_FILTERS } from "@/features/std-requisitions/constants/std-requisition-status.constants";
+import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
 
 export default function StandardDriversPage() {
     const { user, loading: authLoading } = useAuth();
@@ -157,7 +157,7 @@ export default function StandardDriversPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionTableSkeleton />
+                <RequisitionTableSkeleton />
             </PageContainer>
         );
     }
@@ -188,7 +188,7 @@ export default function StandardDriversPage() {
 
             {error && <Alert>{error}</Alert>}
 
-            {loading && <StdRequisitionTableSkeleton />}
+            {loading && <RequisitionTableSkeleton />}
 
             {!loading && items.length === 0 && (
                 <EmptyState

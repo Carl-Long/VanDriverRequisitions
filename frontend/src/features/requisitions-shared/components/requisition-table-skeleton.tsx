@@ -1,6 +1,5 @@
-import { Surface } from "@/components/ui/surface";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { Surface } from "@/components/ui/surface";
 import {
     Table,
     TableBody,
@@ -15,7 +14,9 @@ type Props = {
     rows?: number;
 };
 
-export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
+export function RequisitionTableSkeleton({ rows = 10 }: Readonly<Props>) {
+    const rowKeys = createSkeletonKeys("requisition-table-row", rows);
+
     return (
         <Surface className="overflow-x-auto">
             <Table>
@@ -23,7 +24,7 @@ export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
                     <TableHeaderRow>
                         <TableHeaderCell>Requisition</TableHeaderCell>
 
-                        <TableHeaderCell>Company</TableHeaderCell>
+                        <TableHeaderCell>Van Driver</TableHeaderCell>
 
                         <TableHeaderCell align="center" nowrap>
                             Status
@@ -40,11 +41,8 @@ export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
                 </TableHeader>
 
                 <TableBody>
-                    {Array.from({
-                        length: rows,
-                    }).map((_, index) => (
-                        <TableRow key={index}>
-                            {/* Requisition */}
+                    {rowKeys.map((rowKey) => (
+                        <TableRow key={rowKey}>
                             <TableCell>
                                 <div className="flex flex-col leading-tight">
                                     <Skeleton className="h-4 w-20" />
@@ -52,40 +50,33 @@ export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
                                 </div>
                             </TableCell>
 
-                            {/* Company */}
                             <TableCell>
                                 <div className="flex flex-col leading-tight">
-                                    <Skeleton className="h-4 w-16" />
-                                    <Skeleton className="mt-2 h-3 w-40" />
+                                    <Skeleton className="h-4 w-40" />
+                                    <Skeleton className="mt-2 h-3 w-48" />
                                 </div>
                             </TableCell>
 
-                            {/* Status */}
                             <TableCell align="center" nowrap>
                                 <div className="flex justify-center">
                                     <Skeleton className="h-6 w-24 rounded-full" />
                                 </div>
                             </TableCell>
 
-                            {/* Amount */}
                             <TableCell align="right" nowrap>
                                 <Skeleton className="ml-auto h-4 w-20" />
                             </TableCell>
 
-                            {/* Shop */}
                             <TableCell>
                                 <div className="flex flex-col leading-tight">
                                     <Skeleton className="h-4 w-14" />
-
                                     <Skeleton className="mt-2 h-3 w-44" />
                                 </div>
                             </TableCell>
 
-                            {/* Last Activity */}
                             <TableCell>
                                 <div className="flex flex-col leading-tight">
                                     <Skeleton className="h-4 w-32" />
-
                                     <Skeleton className="mt-2 h-3 w-24" />
                                 </div>
                             </TableCell>
@@ -94,5 +85,12 @@ export function FeRequisitionTableSkeleton({ rows = 8 }: Readonly<Props>) {
                 </TableBody>
             </Table>
         </Surface>
+    );
+}
+
+function createSkeletonKeys(prefix: string, count: number) {
+    return Array.from(
+        { length: count },
+        (_, itemNumber) => `${prefix}-${itemNumber + 1}`,
     );
 }
