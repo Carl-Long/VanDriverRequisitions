@@ -1,1 +1,0 @@
-export type StdRequisitionPageMode = "create" | "edit" | "readonly" | "approval";

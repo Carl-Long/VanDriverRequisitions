@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { Alert } from "@/components/ui/alert";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
-import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
 import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
 import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
@@ -17,7 +16,6 @@ import { stdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { useToast } from "@/providers/toast-provider";
-import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
@@ -35,9 +33,11 @@ import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
+import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
+import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
 
 type Props = {
-    mode: StdRequisitionPageMode;
+    mode: RequisitionPageMode;
     stdRequisition?: StdRequisitionDetail;
     limitRules: RequisitionLimitRuleSummary[];
     submitWindowStatus: SubmitWindowStatus | null;
@@ -337,7 +337,7 @@ export function StdRequisitionShell({
 
     return (
         <div className="space-y-4">
-            <StdRequisitionHeader
+            <RequisitionFormHeader
                 mode={mode}
                 backHref={backHref}
                 requisitionNumber={draft.requisitionNumber}

@@ -3,11 +3,9 @@
 import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants/requisition-row-categories";
 import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
-import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
-import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { useMemo } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
@@ -33,10 +31,12 @@ import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
+import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
+import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
 
 
 type Props = {
-    mode: FeRequisitionPageMode;
+    mode: RequisitionPageMode;
     limitRules: RequisitionLimitRuleSummary[];
     taskTypes: FeTaskType[];
     submitWindowStatus: SubmitWindowStatus | null;
@@ -334,7 +334,7 @@ export function FeRequisitionShell({
 
     return (
         <div className="space-y-4">
-            <FeRequisitionHeader
+            <RequisitionFormHeader
                 mode={mode}
                 backHref={backHref}
                 requisitionNumber={draft.requisitionNumber}
