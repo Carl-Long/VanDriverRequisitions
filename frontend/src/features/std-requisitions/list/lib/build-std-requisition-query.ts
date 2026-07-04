@@ -1,5 +1,8 @@
-import type { StdRequisitionQuery } from "../../types/std-requisition.types";
+import { createdByUserIdFromFilter } from "@/features/requisitions-shared/list/created-by-url-state";
+
+import { STD_REQUISITION_PAGE_SIZE } from "../../constants/std-requisition-status.constants";
 import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
+import type { StdRequisitionQuery } from "../../types/std-requisition.types";
 
 export function buildStdRequisitionQuery(
     page: number,
@@ -7,16 +10,6 @@ export function buildStdRequisitionQuery(
     filters: StdRequisitionFilters,
     currentUserId: string,
 ): StdRequisitionQuery {
-    let createdByUserId: string | undefined;
-
-    if (filters.createdBy.type === "me") {
-        createdByUserId = currentUserId;
-    }
-
-    if (filters.createdBy.type === "user") {
-        createdByUserId = filters.createdBy.userId;
-    }
-
     return {
         page,
         pageSize,
@@ -33,6 +26,21 @@ export function buildStdRequisitionQuery(
             shopId: filters.shopId,
         }),
 
-        createdByUserId,
+        createdByUserId: createdByUserIdFromFilter(
+            filters.createdBy,
+            currentUserId,
+        ),
     };
+}
+
+export function buildDefaultStdRequisitionQuery(
+    filters: StdRequisitionFilters,
+    currentUserId: string,
+): StdRequisitionQuery {
+    return buildStdRequisitionQuery(
+        1,
+        STD_REQUISITION_PAGE_SIZE,
+        filters,
+        currentUserId,
+    );
 }

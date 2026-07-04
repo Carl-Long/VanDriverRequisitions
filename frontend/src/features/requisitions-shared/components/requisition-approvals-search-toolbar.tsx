@@ -49,7 +49,7 @@ export function RequisitionApprovalsSearchToolbar({
                         />
                     </div>
 
-                    <Button tone="accent" variant="solid" size="sm" onClick={onReset}>
+                    <Button tone="accent" variant="solid" onClick={onReset}>
                         <RotateCcw className="size-[1em]" />
 
                         <span>Clear Search</span>

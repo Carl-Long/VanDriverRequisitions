@@ -15,6 +15,7 @@ import { ActivityMetaCell } from "@/components/ui/activity-meta-cell";
 import type { StdRequisitionSummary } from "../../types/std-requisition.types";
 import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
 import { StdStatusPill } from "./std-status-pill";
+import { VanDriverIdentityCell } from "@/features/requisitions-shared/components/van-driver-identity-cell";
 
 type Props = {
     items: StdRequisitionSummary[];
@@ -29,7 +30,7 @@ export function StdRequisitionTable({ items, getHref, onRowClick }: Readonly<Pro
                 <TableHeader>
                     <TableHeaderRow>
                         <TableHeaderCell>Requisition</TableHeaderCell>
-                        <TableHeaderCell>Company</TableHeaderCell>
+                        <TableHeaderCell>Van Driver</TableHeaderCell>
 
                         <TableHeaderCell align="center" nowrap>
                             Status
@@ -86,15 +87,11 @@ export function StdRequisitionTable({ items, getHref, onRowClick }: Readonly<Pro
                                 </TableCell>
 
                                 <TableCell>
-                                    <div className="flex flex-col leading-tight">
-                                        <span className="font-medium text-foreground">
-                                            {req.vanDriverCode}
-                                        </span>
-
-                                        <span className="max-w-[220px] truncate text-xs text-muted-foreground">
-                                            {req.tradersName}
-                                        </span>
-                                    </div>
+                                    <VanDriverIdentityCell
+                                        vanDriverName={req.vanDriverName}
+                                        vanDriverCode={req.vanDriverCode}
+                                        tradersName={req.tradersName}
+                                    />
                                 </TableCell>
 
                                 <TableCell align="center" nowrap>

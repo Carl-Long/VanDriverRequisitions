@@ -18,10 +18,10 @@ import type { StdRequisitionSummary } from "@/features/std-requisitions/types/st
 import { useAuth } from "@/providers/auth-provider";
 import { getApiErrorMessage } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
-import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
 
 export default function StdRequisitionApprovalsPage() {
     const router = useRouter();
@@ -111,7 +111,7 @@ export default function StdRequisitionApprovalsPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionTableSkeleton />
+                <RequisitionTableSkeleton />
             </PageContainer>
         );
     }
@@ -135,7 +135,7 @@ export default function StdRequisitionApprovalsPage() {
 
             {error && <Alert tone="danger">{error}</Alert>}
 
-            {loading && <StdRequisitionTableSkeleton />}
+            {loading && <RequisitionTableSkeleton />}
 
             {!loading && items.length === 0 && (
                 <EmptyState

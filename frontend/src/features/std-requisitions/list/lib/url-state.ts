@@ -1,6 +1,6 @@
-import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
+import { appendCreatedBySearchParams, createdByFromSearchParams } from "@/features/requisitions-shared/list/created-by-url-state";
+import { appendPageSearchParam, appendPageSizeSearchParam, pageFromSearchParams as sharedPageFromSearchParams, pageSizeFromSearchParams as sharedPageSizeFromSearchParams } from "@/features/requisitions-shared/list/page-url-state";
 import { INITIAL_STD_REQUISITION_FILTERS, STD_REQUISITION_PAGE_SIZE, STD_REQUISITION_PAGE_SIZE_OPTIONS, STD_REQUISITION_STATUSES, type StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
-
 import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
 
 function isValidStatus(value: string | null): value is StdRequisitionStatus {
@@ -10,66 +10,41 @@ function isValidStatus(value: string | null): value is StdRequisitionStatus {
     );
 }
 
-export function filtersFromSearchParams(searchParams: URLSearchParams): StdRequisitionFilters {
-    const createdBy = searchParams.get("createdBy");
-
-    let createdByFilter: CreatedByFilter = {
-        type: "me",
-    };
-
-    if (createdBy === "any") {
-        createdByFilter = {
-            type: "any",
-        };
-    }
-
-    if (createdBy === "user") {
-        const userId = searchParams.get("createdByUserId");
-        const label = searchParams.get("createdByLabel") ?? "";
-
-        if (userId) {
-            createdByFilter = { type: "user", userId, label };
-        }
-    }
+export function filtersFromSearchParams(
+    searchParams: URLSearchParams,
+): StdRequisitionFilters {
+    const status = searchParams.get("status");
 
     return {
         ...INITIAL_STD_REQUISITION_FILTERS,
 
         requisitionNumber: searchParams.get("requisitionNumber") ?? "",
 
-        status: isValidStatus(searchParams.get("status"))
-            ? (searchParams.get("status") as StdRequisitionStatus)
-            : "",
+        status: isValidStatus(status) ? status : "",
 
         shopId: searchParams.get("shopId"),
         shopLabel: searchParams.get("shopLabel"),
-        createdBy: createdByFilter,
+        createdBy: createdByFromSearchParams(searchParams),
     };
 }
 
 export function pageFromSearchParams(searchParams: URLSearchParams): number {
-    const page = Number(searchParams.get("page"));
-
-    if (!Number.isInteger(page) || page < 1) {
-        return 1;
-    }
-
-    return page;
+    return sharedPageFromSearchParams(searchParams);
 }
 
 export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
-    const pageSize = Number(searchParams.get("pageSize"));
-
-    if (!Number.isInteger(pageSize)) {
-        return STD_REQUISITION_PAGE_SIZE;
-    }
-
-    return (STD_REQUISITION_PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
-        ? pageSize
-        : STD_REQUISITION_PAGE_SIZE;
+    return sharedPageSizeFromSearchParams(
+        searchParams,
+        STD_REQUISITION_PAGE_SIZE,
+        STD_REQUISITION_PAGE_SIZE_OPTIONS,
+    );
 }
 
-export function buildSearchParams(filters: StdRequisitionFilters, page: number, pageSize = STD_REQUISITION_PAGE_SIZE) {
+export function buildSearchParams(
+    filters: StdRequisitionFilters,
+    page: number,
+    pageSize: number = STD_REQUISITION_PAGE_SIZE,
+) {
     const params = new URLSearchParams();
 
     if (filters.requisitionNumber) {
@@ -88,29 +63,9 @@ export function buildSearchParams(filters: StdRequisitionFilters, page: number, 
         params.set("shopLabel", filters.shopLabel);
     }
 
-    switch (filters.createdBy.type) {
-        case "any":
-            params.set("createdBy", "any");
-            break;
-
-        case "user":
-            params.set("createdBy", "user");
-            params.set("createdByUserId", filters.createdBy.userId);
-            params.set("createdByLabel", filters.createdBy.label);
-            break;
-
-        case "me":
-        default:
-            break;
-    }
-
-    if (page > 1) {
-        params.set("page", String(page));
-    }
-
-    if (pageSize !== STD_REQUISITION_PAGE_SIZE) {
-        params.set("pageSize", String(pageSize));
-    }
+    appendCreatedBySearchParams(params, filters.createdBy);
+    appendPageSearchParam(params, page);
+    appendPageSizeSearchParam(params, pageSize, STD_REQUISITION_PAGE_SIZE);
 
     return params;
 }

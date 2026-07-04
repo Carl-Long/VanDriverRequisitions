@@ -40,7 +40,7 @@ export function Modal({ open, onClose, title, titleClassName, children }: Readon
         <dialog
             ref={dialogRef}
             className={cn(
-                "m-auto w-full max-w-lg rounded-2xl border border-border bg-surface p-0",
+                "m-auto w-full max-w-lg overflow-visible rounded-2xl border border-border bg-surface p-0",
                 "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
                 "shadow-xl",
             )}
