@@ -21,7 +21,6 @@ import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
-import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
@@ -35,6 +34,7 @@ import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/compon
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
+import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 
 type Props = {
     mode: StdRequisitionPageMode;
@@ -471,8 +471,9 @@ export function StdRequisitionShell({
                     />
                 }
                 submissionHistory={
-                    <StdSubmissionHistoryTab
+                    <SubmissionHistoryTab
                         submissions={draft.submissionHistory}
+                        submissionBasePath="/standard-van-drivers/submissions"
                         returnTo={backHref}
                     />
                 }

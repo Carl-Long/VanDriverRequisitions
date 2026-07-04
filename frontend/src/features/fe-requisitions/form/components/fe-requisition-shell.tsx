@@ -18,7 +18,6 @@ import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
-import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
@@ -33,6 +32,7 @@ import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/compon
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
+import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 
 
 type Props = {
@@ -445,8 +445,9 @@ export function FeRequisitionShell({
                     />
                 }
                 submissionHistory={
-                    <FeSubmissionHistoryTab
+                    <SubmissionHistoryTab
                         submissions={draft.submissionHistory}
+                        submissionBasePath="/home-van-drivers/submissions"
                         returnTo={backHref}
                     />
                 }
