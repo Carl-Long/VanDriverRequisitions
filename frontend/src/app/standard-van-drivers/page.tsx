@@ -130,7 +130,7 @@ export default function StandardDriversPage() {
     const items = data?.items ?? [];
 
     function handleFiltersChange(next: StdRequisitionFilters) {
-        const params = buildSearchParams(next, 1);
+        const params = buildSearchParams(next, 1, pageSize);
         router.replace(`${pathname}?${params.toString()}`);
     }
 
