@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using VanDriverRequisitions.Api.Extensions;
 using VanDriverRequisitions.Api.RateLimiting;
 using VanDriverRequisitions.Application.Common.Security;
 using VanDriverRequisitions.Application.Features.FeRequisitions.Dtos;
@@ -49,8 +50,8 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     [ProducesResponseType(typeof(FeRequisitionDetailDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] SaveFeRequisitionDto saveFeRequisitionDto, CancellationToken cancellationToken)
     {
-        var result = await feRequisitionService.CreateAsync(saveFeRequisitionDto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id, version = "1.0", }, result);
+        var created = await feRequisitionService.CreateAsync(saveFeRequisitionDto, cancellationToken);
+        return this.CreatedAtVersionedAction(nameof(GetById), created.Id, created);
     }
 
     [HttpPut("{id:guid}")]
@@ -64,8 +65,8 @@ public class FeRequisitionsController(IFeRequisitionService feRequisitionService
     [FromBody] SaveFeRequisitionDto saveFeRequisitionDto,
     CancellationToken cancellationToken)
     {
-        var result = await feRequisitionService.UpdateAsync(id, saveFeRequisitionDto, cancellationToken);
-        return Ok(result);
+        var updated = await feRequisitionService.UpdateAsync(id, saveFeRequisitionDto, cancellationToken);
+        return Ok(updated);
     }
 
     [HttpPost("submit")]

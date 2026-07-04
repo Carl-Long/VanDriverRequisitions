@@ -7,10 +7,12 @@ public sealed class StdLocationSummaryDto
     public Guid ShopId { get; init; }
     public string ShopCode { get; init; } = string.Empty;
     public string ShopName { get; init; } = string.Empty;
+    public bool IsShopActive { get; init; }
 
     public Guid CollectionTypeId { get; init; }
     public string CollectionTypeCode { get; init; } = string.Empty;
     public string CollectionTypeName { get; init; } = string.Empty;
+    public bool IsCollectionTypeActive { get; init; }
 
     public string LocationName { get; init; } = string.Empty;
     public string PostCode { get; init; } = string.Empty;

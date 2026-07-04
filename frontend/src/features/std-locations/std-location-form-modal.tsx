@@ -60,14 +60,15 @@ function StdLocationFormModalContent({
     const isEditing = !!initial;
 
     const [serverError, setServerError] = useState<string | null>(null);
-    const [shopLabel, setShopLabel] = useState<string | null>(() =>
-        initial ? `${initial.shopCode} - ${initial.shopName}` : null,
-    );
+    const [shopLabel, setShopLabel] = useState<string | null>(() => initial ? `${initial.shopCode} - ${initial.shopName}` : null);
+    const [isSelectedShopActive, setIsSelectedShopActive] = useState<boolean | null>(() => initial?.isShopActive ?? null);
+
     const [collectionTypeLabel, setCollectionTypeLabel] = useState<string | null>(() =>
         initial
             ? `${initial.collectionTypeCode} - ${initial.collectionTypeName}`
             : null,
     );
+    const [isSelectedCollectionTypeActive, setIsSelectedCollectionTypeActive] = useState<boolean | null>(() => initial?.isCollectionTypeActive ?? null);
 
     const {
         register,
@@ -152,6 +153,7 @@ function StdLocationFormModalContent({
                     required
                     value={shopId || null}
                     label={shopLabel}
+                    isShopActive={isSelectedShopActive}
                     error={errors.shopId?.message}
                     placeholder="Select shop"
                     onChange={(value, label) => {
@@ -160,6 +162,7 @@ function StdLocationFormModalContent({
                             shouldDirty: true,
                         });
                         setShopLabel(label);
+                        setIsSelectedShopActive(value ? true : null);
                     }}
                 />
 
@@ -167,6 +170,7 @@ function StdLocationFormModalContent({
                     required
                     value={collectionTypeId || null}
                     label={collectionTypeLabel}
+                    isCollectionTypeActive={isSelectedCollectionTypeActive}
                     error={errors.collectionTypeId?.message}
                     onChange={(value, label) => {
                         setValue("collectionTypeId", value ?? "", {
@@ -174,6 +178,7 @@ function StdLocationFormModalContent({
                             shouldDirty: true,
                         });
                         setCollectionTypeLabel(label);
+                        setIsSelectedCollectionTypeActive(value ? true : null);
                     }}
                 />
 

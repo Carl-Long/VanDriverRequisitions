@@ -4,20 +4,26 @@ import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { AdminFormServerError } from "@/features/admin-shared/admin-form-server-error";
+import { AdminModalFormActions } from "@/features/admin-shared/admin-modal-form-actions";
 import { Field } from "@/components/ui/field/field";
 import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { Modal } from "@/components/ui/modal";
 import type { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
-import type { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, RequisitionLimitRuleSummary, } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import type { RequisitionLimitRuleCategory, RequisitionLimitRuleFascia, RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { getApiErrorMessage } from "@/lib/api/client";
-
-import { categoryOptions, fasciaOptions, requisitionLimitRuleCategories, requisitionLimitRuleFascias } from "./requisition-limit-rule-options";
-import { InactiveLookupWarning } from "../requisitions-shared/components/inactive-lookup-warning";
 import { hasMaxTwoDecimalPlaces, MIN_MONEY_AMOUNT } from "@/lib/validation/money";
-import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
-import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
+
+import {
+    fasciaOptions,
+    getCategoryOptionsForFascia,
+    isCategoryAllowedForFascia,
+    isFeGeneralTaskLimitRule,
+    requisitionLimitRuleCategories,
+    requisitionLimitRuleFascias,
+} from "./requisition-limit-rule-options";
 
 type FormValues = {
     category: RequisitionLimitRuleCategory | "";
@@ -26,6 +32,9 @@ type FormValues = {
     maxQuantity: number;
     maxRate: number;
 };
+
+const feTaskTypeValidationMessage =
+    "FeTaskTypeId is required only for FE GeneralTask and must be null for other categories.";
 
 const positiveIntegerInputSchema = (label: string) =>
     z
@@ -54,16 +63,16 @@ const positiveMoneyInputSchema = (label: string) =>
 
 const schema = z
     .object({
-        category: z
-            .union([z.literal(""), z.enum(requisitionLimitRuleCategories)])
-            .refine((value) => value !== "", {
-                message: "Category is required and must be valid.",
-            }),
-
         fascia: z
             .union([z.literal(""), z.enum(requisitionLimitRuleFascias)])
             .refine((value) => value !== "", {
                 message: "Fascia is required and must be valid.",
+            }),
+
+        category: z
+            .union([z.literal(""), z.enum(requisitionLimitRuleCategories)])
+            .refine((value) => value !== "", {
+                message: "Category is required and must be valid.",
             }),
 
         feTaskTypeId: z.string().nullable(),
@@ -72,23 +81,36 @@ const schema = z
         maxRate: positiveMoneyInputSchema("Max Rate"),
     })
     .superRefine((data, ctx) => {
-        const isGeneralTask = data.category === "GeneralTask";
-
-        if (isGeneralTask && !data.feTaskTypeId) {
+        if (
+            data.fascia &&
+            data.category &&
+            !isCategoryAllowedForFascia(data.fascia, data.category)
+        ) {
             ctx.addIssue({
                 code: "custom",
-                path: ["feTaskTypeId"],
-                message:
-                    "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+                path: ["category"],
+                message: "Category is not supported for the selected fascia.",
             });
         }
 
-        if (!isGeneralTask && data.feTaskTypeId) {
+        const isFeGeneralTask = isFeGeneralTaskLimitRule(
+            data.fascia,
+            data.category,
+        );
+
+        if (isFeGeneralTask && !data.feTaskTypeId) {
             ctx.addIssue({
                 code: "custom",
                 path: ["feTaskTypeId"],
-                message:
-                    "FeTaskTypeId is required only for GeneralTask and must be null for other categories.",
+                message: feTaskTypeValidationMessage,
+            });
+        }
+
+        if (!isFeGeneralTask && data.feTaskTypeId) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["feTaskTypeId"],
+                message: feTaskTypeValidationMessage,
             });
         }
     });
@@ -139,21 +161,75 @@ function RequisitionLimitRuleFormModalContent({
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
-            category: initial?.category ?? "",
             fascia: initial?.fascia ?? "",
+            category: initial?.category ?? "",
             feTaskTypeId: initial?.feTaskTypeId ?? null,
             maxQuantity: initial?.maxQuantity ?? 0,
             maxRate: initial?.maxRate ?? 0,
         },
     });
 
+    const fascia = useWatch({ control, name: "fascia" });
     const category = useWatch({ control, name: "category" });
-    const isGeneralTask = category === "GeneralTask";
-    const maxRateLabel = category === "VanPack" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
+
+    const availableCategoryOptions = useMemo(
+        () => getCategoryOptionsForFascia(fascia),
+        [fascia],
+    );
+
+    const isFeGeneralTask = isFeGeneralTaskLimitRule(fascia, category);
+    const maxRateLabel =
+        category === "VanPack" ? "Fixed Van Pack Price (£)" : "Max Rate (£)";
+
+    const fasciaRegistration = register("fascia", {
+        onChange: (event) => {
+            const nextFascia = event.target.value as
+                | RequisitionLimitRuleFascia
+                | "";
+
+            if (!nextFascia) {
+                setValue("category", "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+                setValue("feTaskTypeId", null, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+                return;
+            }
+
+            if (
+                category &&
+                !isCategoryAllowedForFascia(nextFascia, category)
+            ) {
+                setValue("category", "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+                setValue("feTaskTypeId", null, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+                return;
+            }
+
+            if (!isFeGeneralTaskLimitRule(nextFascia, category)) {
+                setValue("feTaskTypeId", null, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                });
+            }
+        },
+    });
 
     const categoryRegistration = register("category", {
         onChange: (event) => {
-            if (event.target.value !== "GeneralTask") {
+            const nextCategory = event.target.value as
+                | RequisitionLimitRuleCategory
+                | "";
+
+            if (!isFeGeneralTaskLimitRule(fascia, nextCategory)) {
                 setValue("feTaskTypeId", null, {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -181,11 +257,10 @@ function RequisitionLimitRuleFormModalContent({
     );
 
     const showInactiveTaskTypeWarning =
-        isGeneralTask &&
+        isFeGeneralTask &&
         isEditing &&
         Boolean(initial?.feTaskTypeId) &&
         selectedTaskType?.isActive === false;
-
 
     function handleClose() {
         onClose();
@@ -200,10 +275,12 @@ function RequisitionLimitRuleFormModalContent({
             await onSubmit({
                 category: data.category,
                 fascia: data.fascia,
-                feTaskTypeId:
-                    data.category === "GeneralTask"
-                        ? data.feTaskTypeId || null
-                        : null,
+                feTaskTypeId: isFeGeneralTaskLimitRule(
+                    data.fascia,
+                    data.category,
+                )
+                    ? data.feTaskTypeId || null
+                    : null,
                 maxQuantity: data.maxQuantity,
                 maxRate: data.maxRate,
             });
@@ -224,23 +301,10 @@ function RequisitionLimitRuleFormModalContent({
             title={isEditing ? "Edit Limit Rule" : "Create Limit Rule"}
         >
             <form onSubmit={handleSubmit(onValid)} noValidate className="space-y-5">
-
                 <AdminFormServerError message={serverError} />
 
-                <Field label="Category" required error={errors.category?.message}>
-                    <select className={fieldBase} {...categoryRegistration}>
-                        <option value="">Select category</option>
-
-                        {categoryOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
-                </Field>
-
                 <Field label="Fascia" required error={errors.fascia?.message}>
-                    <select className={fieldBase} {...register("fascia")}>
+                    <select className={fieldBase} {...fasciaRegistration}>
                         <option value="">Select fascia</option>
 
                         {fasciaOptions.map((opt) => (
@@ -251,7 +315,25 @@ function RequisitionLimitRuleFormModalContent({
                     </select>
                 </Field>
 
-                {isGeneralTask && (
+                <Field label="Category" required error={errors.category?.message}>
+                    <select
+                        className={fieldBase}
+                        disabled={!fascia}
+                        {...categoryRegistration}
+                    >
+                        <option value="">
+                            {fascia ? "Select category" : "Select fascia first"}
+                        </option>
+
+                        {availableCategoryOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+                </Field>
+
+                {isFeGeneralTask && (
                     <Field
                         label="Task Type"
                         error={errors.feTaskTypeId?.message}
@@ -264,10 +346,13 @@ function RequisitionLimitRuleFormModalContent({
 
                             {visibleTaskTypes.map((taskType) => (
                                 <option key={taskType.id} value={taskType.id}>
-                                    {taskType.isActive ? taskType.name : `${taskType.name} (Inactive)`}
+                                    {taskType.isActive
+                                        ? taskType.name
+                                        : `${taskType.name} (Inactive)`}
                                 </option>
                             ))}
                         </select>
+
                         {showInactiveTaskTypeWarning && (
                             <InactiveLookupWarning label="task type" variant="field" />
                         )}

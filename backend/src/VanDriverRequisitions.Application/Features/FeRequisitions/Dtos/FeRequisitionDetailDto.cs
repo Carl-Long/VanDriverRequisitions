@@ -11,7 +11,6 @@ public sealed class FeRequisitionDetailDto
     public required VanDriverLookupDto VanDriverSummary { get; init; }
     public Guid VanDriverId { get; init; }
     public string VanDriverName { get; init; } = string.Empty;
-    public bool IsVanDriverActive { get; init; }
     public Guid ShopId { get; init; }
     public required string ShopCode { get; init; }
     public required string ShopName { get; init; }

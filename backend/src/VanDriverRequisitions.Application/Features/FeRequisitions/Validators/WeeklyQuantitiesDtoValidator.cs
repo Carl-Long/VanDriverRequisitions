@@ -42,4 +42,20 @@ public sealed class WeeklyQuantitiesDtoValidator : AbstractValidator<WeeklyQuant
             .When(x => x.Saturday.HasValue)
             .WithMessage("Saturday cannot be negative.");
     }
+
+    public static bool HasAtLeastOnePositiveQuantity(WeeklyQuantitiesDto? week)
+    {
+        return week is not null && GetValues(week).Any(x => x is > 0);
+    }
+
+    private static IEnumerable<int?> GetValues(WeeklyQuantitiesDto week)
+    {
+        yield return week.Sunday;
+        yield return week.Monday;
+        yield return week.Tuesday;
+        yield return week.Wednesday;
+        yield return week.Thursday;
+        yield return week.Friday;
+        yield return week.Saturday;
+    }
 }
