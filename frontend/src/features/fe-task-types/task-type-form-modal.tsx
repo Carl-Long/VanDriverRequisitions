@@ -118,14 +118,6 @@ function TaskTypeFormModalContent({
 
                 <AdminFormServerError message={serverError} />
 
-                <Field label="Name" error={errors.name?.message} required>
-                    <Input
-                        {...register("name")}
-                        state={errors.name ? "error" : "default"}
-                        placeholder="e.g. Collections"
-                    />
-                </Field>
-
                 <Field
                     label="Code"
                     error={errors.code?.message}
@@ -136,6 +128,14 @@ function TaskTypeFormModalContent({
                         {...register("code")}
                         state={errors.code ? "error" : "default"}
                         placeholder="e.g. 23707"
+                    />
+                </Field>
+
+                <Field label="Name" error={errors.name?.message} required>
+                    <Input
+                        {...register("name")}
+                        state={errors.name ? "error" : "default"}
+                        placeholder="e.g. Collections"
                     />
                 </Field>
 
