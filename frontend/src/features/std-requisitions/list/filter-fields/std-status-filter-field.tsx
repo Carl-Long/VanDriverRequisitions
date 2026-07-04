@@ -33,6 +33,7 @@ export function StdStatusFilterField({ value, onChange, hideLabel = false }: Rea
             label={value ? `Status: ${stdRequisitionStatusConfig[value].label}` : "Status: All"}
             pinnedOptions={STATIC_OPTIONS}
             options={statusOptions}
+            searchable={false}
             placeholder="Status: All statuses"
             noMatchesText="No matching status found"
             onChange={(value) => onChange((value as StdRequisitionStatus) ?? "")}

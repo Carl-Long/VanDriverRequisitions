@@ -29,6 +29,7 @@ export function PageSizeSelect({
             value={String(pageSize)}
             label={`Rows per page: ${pageSize}`}
             options={comboboxOptions}
+            searchable={false}
             placeholder="Rows per page"
             emptyStateText="No page sizes available"
             noMatchesText="No matching page size found"

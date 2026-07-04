@@ -36,6 +36,7 @@ export function StatusFilterField({ value, onChange, hideLabel = false }: Readon
             value={value}
             label={value ? `Status: ${requisitionStatusConfig[value].label}` : "Status: All"}
             pinnedOptions={STATIC_OPTIONS}
+            searchable={false}
             options={statusOptions}
             placeholder="Status: All statuses"
             noMatchesText="No matching status found"
