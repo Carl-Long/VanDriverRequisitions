@@ -4,9 +4,7 @@ import {
     createContext,
     useCallback,
     useContext,
-    useEffect,
     useMemo,
-    useRef,
     useSyncExternalStore,
     type ReactNode,
 } from "react";
@@ -63,6 +61,10 @@ const authSessionListeners = new Set<() => void>();
 let authSessionSnapshot: AuthSessionState | null = null;
 
 function clearStoredAuthSession() {
+    if (globalThis.window === undefined) {
+        return;
+    }
+
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USER_KEY);
 }
@@ -102,6 +104,10 @@ function getServerAuthSessionSnapshot(): AuthSessionState {
     return SERVER_AUTH_SESSION;
 }
 
+function getCurrentAuthToken(): string | null {
+    return getAuthSessionSnapshot().token;
+}
+
 function subscribeToAuthSession(listener: () => void) {
     authSessionListeners.add(listener);
 
@@ -135,6 +141,8 @@ function removeAuthSession() {
     emitAuthSessionChanged();
 }
 
+configureAuth(getCurrentAuthToken, removeAuthSession);
+
 function parseJwt(token: string): Record<string, unknown> {
     const payload = token.split(".")[1];
 
@@ -142,7 +150,7 @@ function parseJwt(token: string): Record<string, unknown> {
         return {};
     }
 
-    const base64 = payload.replaceAll('-', "+").replaceAll('_', "/");
+    const base64 = payload.replaceAll("-", "+").replaceAll("_", "/");
     const padded = base64.padEnd(
         base64.length + ((4 - (base64.length % 4)) % 4),
         "=",
@@ -190,14 +198,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
     );
 
     const { token, user, loading } = authSession;
-    const tokenRef = useRef<string | null>(token);
-
-    useEffect(() => {
-        tokenRef.current = token;
-    }, [token]);
 
     const logout = useCallback(() => {
-        tokenRef.current = null;
         removeAuthSession();
     }, []);
 
@@ -220,13 +222,8 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
         const accessToken = data.access_token;
         const authUser = userFromToken(accessToken);
 
-        tokenRef.current = accessToken;
         saveAuthSession(accessToken, authUser);
     }, []);
-
-    useEffect(() => {
-        configureAuth(() => tokenRef.current, logout);
-    }, [logout]);
 
     const value = useMemo(
         () => ({
