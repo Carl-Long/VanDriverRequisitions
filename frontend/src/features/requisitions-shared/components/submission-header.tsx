@@ -2,12 +2,25 @@
 
 import { AuditField } from "@/components/ui/field/audit-field";
 import { SummaryField } from "@/components/ui/field/summary-field";
-import { FeRequisitionSubmissionDetail } from "@/features/fe-requisitions/types/fe-requisition-submission.types";
 import { SubmissionStatusPill } from "@/features/requisitions-shared/components/submission-status-pill";
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
 
-type Props = { submission: FeRequisitionSubmissionDetail };
+type SubmissionHeaderData = {
+    submissionNumber: number;
+    status: SubmissionStatus;
+    submittedByName: string;
+    submittedAtUtc: string;
+    reviewedByName: string | null;
+    reviewedAtUtc: string | null;
+    poNumber: string | null;
+    rejectionNotes: string | null;
+};
 
-export function FeSubmissionHeader({ submission }: Readonly<Props>) {
+type Props = {
+    submission: SubmissionHeaderData;
+};
+
+export function SubmissionHeader({ submission }: Readonly<Props>) {
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card print-submission-header">
             <div className="flex items-start justify-between print-header-row">
@@ -34,13 +47,11 @@ export function FeSubmissionHeader({ submission }: Readonly<Props>) {
                 />
 
                 {submission.reviewedAtUtc && (
-                    <div className="space-y-4">
-                        <AuditField
-                            label="Reviewed By"
-                            name={submission.reviewedByName}
-                            dateTime={submission.reviewedAtUtc}
-                        />
-                    </div>
+                    <AuditField
+                        label="Reviewed By"
+                        name={submission.reviewedByName}
+                        dateTime={submission.reviewedAtUtc}
+                    />
                 )}
             </div>
 
@@ -48,7 +59,11 @@ export function FeSubmissionHeader({ submission }: Readonly<Props>) {
                 <div className="mt-6 border-t border-border pt-4 print-notes-block">
                     <SummaryField
                         label="Purchase Order Number"
-                        value={<div className="whitespace-pre-wrap">{submission.poNumber}</div>}
+                        value={
+                            <div className="whitespace-pre-wrap">
+                                {submission.poNumber}
+                            </div>
+                        }
                     />
                 </div>
             )}

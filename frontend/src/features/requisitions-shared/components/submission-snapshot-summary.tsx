@@ -3,13 +3,24 @@
 import { SummaryField } from "@/components/ui/field/summary-field";
 import { formatCurrencyGB } from "@/lib/format/currency";
 import { formatDateGB } from "@/lib/format/date";
-import type { StdRequisitionSnapshot } from "../types/std-requisition-submission.types";
 
-type Props = {
-    snapshot: StdRequisitionSnapshot;
+type SubmissionSnapshotSummaryData = {
+    requisitionNumber: string;
+    requisitionDate: string;
+    shopCode: string;
+    shopName: string;
+    subtotal: number;
+    vanDriverCode: string;
+    vanDriverName: string;
+    tradersName: string;
+    isVatApplicable: boolean;
 };
 
-export function StdSubmissionSnapshotSummary({ snapshot }: Readonly<Props>) {
+type Props = {
+    snapshot: SubmissionSnapshotSummaryData;
+};
+
+export function SubmissionSnapshotSummary({ snapshot }: Readonly<Props>) {
     return (
         <div className="rounded-2xl border border-border bg-surface p-6 print-card">
             <div className="mb-6 print-section-heading">
@@ -21,23 +32,35 @@ export function StdSubmissionSnapshotSummary({ snapshot }: Readonly<Props>) {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 print-summary-grid">
-                <SummaryField label="Requisition Number" value={snapshot.requisitionNumber} />
+                <SummaryField
+                    label="Requisition Number"
+                    value={snapshot.requisitionNumber}
+                />
 
                 <SummaryField
                     label="Requisition Date"
                     value={formatDateGB(snapshot.requisitionDate) ?? "-"}
                 />
 
-                <SummaryField label="Shop" value={`${snapshot.shopCode} - ${snapshot.shopName}`} />
+                <SummaryField
+                    label="Shop"
+                    value={`${snapshot.shopCode} - ${snapshot.shopName}`}
+                />
 
-                <SummaryField label="Subtotal" value={formatCurrencyGB(snapshot.subtotal)} />
+                <SummaryField
+                    label="Subtotal"
+                    value={formatCurrencyGB(snapshot.subtotal)}
+                />
 
                 <SummaryField
                     label="Van Driver"
                     value={`${snapshot.vanDriverCode} - ${snapshot.tradersName}`}
                 />
 
-                <SummaryField label="Driver Name" value={snapshot.vanDriverName} />
+                <SummaryField
+                    label="Driver Name"
+                    value={snapshot.vanDriverName}
+                />
 
                 <SummaryField
                     label="VAT Applicable"
