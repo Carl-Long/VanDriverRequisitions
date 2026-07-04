@@ -6,7 +6,7 @@ import { CalendarX, Plus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination/pagination";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import type { PagedResult } from "@/lib/types";
 import { cn } from "@/lib/utils";

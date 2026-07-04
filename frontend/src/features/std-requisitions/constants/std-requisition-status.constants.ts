@@ -34,3 +34,5 @@ export const INITIAL_STD_REQUISITION_FILTERS: StdRequisitionFilters = {
 };
 
 export const STD_REQUISITION_PAGE_SIZE = 10;
+
+export const STD_REQUISITION_PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100] as const;

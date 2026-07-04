@@ -9,7 +9,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination/pagination";
 import { canApproveRequisitions } from "@/features/auth/roles";
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
 import { StdRequisitionTable } from "@/features/std-requisitions/list/components/std-requisition-table";

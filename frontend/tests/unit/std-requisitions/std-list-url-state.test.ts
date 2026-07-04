@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { STD_REQUISITION_PAGE_SIZE } from "@/features/std-requisitions/constants/std-requisition-status.constants";
+import {
+    STD_REQUISITION_PAGE_SIZE,
+    STD_REQUISITION_PAGE_SIZE_OPTIONS,
+} from "@/features/std-requisitions/constants/std-requisition-status.constants";
 import { buildStdRequisitionQuery } from "@/features/std-requisitions/list/lib/build-std-requisition-query";
 import {
     buildSearchParams,
     filtersFromSearchParams,
     pageFromSearchParams,
+    pageSizeFromSearchParams,
 } from "@/features/std-requisitions/list/lib/url-state";
 import type { StdRequisitionFilters } from "@/features/std-requisitions/types/std-requisition-filters.types";
 
@@ -98,6 +102,33 @@ describe("STD requisition list URL state", () => {
         expect(pageFromSearchParams(new URLSearchParams({ page: "2.5" }))).toBe(1);
     });
 
+    it("parses allowed page sizes and defaults unsafe page sizes", () => {
+        expect(
+            pageSizeFromSearchParams(
+                new URLSearchParams({
+                    pageSize: String(STD_REQUISITION_PAGE_SIZE_OPTIONS[0]),
+                }),
+            ),
+        ).toBe(STD_REQUISITION_PAGE_SIZE_OPTIONS[0]);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "25" }))).toBe(25);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "50" }))).toBe(50);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "100" }))).toBe(100);
+
+        expect(pageSizeFromSearchParams(new URLSearchParams())).toBe(STD_REQUISITION_PAGE_SIZE);
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "abc" }))).toBe(
+            STD_REQUISITION_PAGE_SIZE,
+        );
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "0" }))).toBe(
+            STD_REQUISITION_PAGE_SIZE,
+        );
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "15" }))).toBe(
+            STD_REQUISITION_PAGE_SIZE,
+        );
+        expect(pageSizeFromSearchParams(new URLSearchParams({ pageSize: "25.5" }))).toBe(
+            STD_REQUISITION_PAGE_SIZE,
+        );
+    });
+
     it("serialises only non-default filters and omits page one", () => {
         const params = buildSearchParams(
             createFilters({
@@ -149,19 +180,38 @@ describe("STD requisition list URL state", () => {
             page: "4",
         });
     });
+
+    it("serialises non-default page size", () => {
+        const params = buildSearchParams(createFilters(), 1, 25);
+
+        expect(toObject(params)).toEqual({
+            pageSize: "25",
+        });
+    });
+
+    it("omits default page size", () => {
+        const params = buildSearchParams(
+            createFilters(),
+            1,
+            STD_REQUISITION_PAGE_SIZE,
+        );
+
+        expect(toObject(params)).toEqual({});
+    });
 });
 
 describe("buildStdRequisitionQuery", () => {
     it("builds a query using the current user for the default created-by filter", () => {
         const result = buildStdRequisitionQuery(
             2,
+            25,
             createFilters(),
             "current-user-id",
         );
 
         expect(result).toEqual({
             page: 2,
-            pageSize: STD_REQUISITION_PAGE_SIZE,
+            pageSize: 25,
             createdByUserId: "current-user-id",
         });
     });
@@ -169,6 +219,7 @@ describe("buildStdRequisitionQuery", () => {
     it("builds a query with explicit filters and no created-by user when filtering by anyone", () => {
         const result = buildStdRequisitionQuery(
             3,
+            50,
             createFilters({
                 requisitionNumber: "STD-10001",
                 status: "Rejected",
@@ -181,7 +232,7 @@ describe("buildStdRequisitionQuery", () => {
 
         expect(result).toEqual({
             page: 3,
-            pageSize: STD_REQUISITION_PAGE_SIZE,
+            pageSize: 50,
             requisitionNumber: "STD-10001",
             status: "Rejected",
             shopId: "shop-id",
@@ -192,6 +243,7 @@ describe("buildStdRequisitionQuery", () => {
     it("builds a query using the selected user for a specific created-by filter", () => {
         const result = buildStdRequisitionQuery(
             1,
+            STD_REQUISITION_PAGE_SIZE_OPTIONS[0],
             createFilters({
                 createdBy: {
                     type: "user",
@@ -202,6 +254,10 @@ describe("buildStdRequisitionQuery", () => {
             "current-user-id",
         );
 
-        expect(result.createdByUserId).toBe("selected-user-id");
+        expect(result).toEqual({
+            page: 1,
+            pageSize: STD_REQUISITION_PAGE_SIZE_OPTIONS[0],
+            createdByUserId: "selected-user-id",
+        });
     });
 });

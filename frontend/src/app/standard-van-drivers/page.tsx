@@ -7,7 +7,7 @@ import { Inbox, Plus } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button/button";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -23,8 +23,9 @@ import { StdRequisitionFiltersToolbar } from "@/features/std-requisitions/list/c
 import { StdRequisitionTable } from "@/features/std-requisitions/list/components/std-requisition-table";
 
 import { buildStdRequisitionQuery } from "@/features/std-requisitions/list/lib/build-std-requisition-query";
-import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, } from "@/features/std-requisitions/list/lib/url-state";
+import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, pageSizeFromSearchParams, } from "@/features/std-requisitions/list/lib/url-state";
 import { StdRequisitionTableSkeleton } from "@/features/std-requisitions/list/components/std-requisition-table-skeleton";
+import { INITIAL_STD_REQUISITION_FILTERS } from "@/features/std-requisitions/constants/std-requisition-status.constants";
 
 export default function StandardDriversPage() {
     const { user, loading: authLoading } = useAuth();
@@ -35,6 +36,7 @@ export default function StandardDriversPage() {
 
     const filters = filtersFromSearchParams(searchParams);
     const page = pageFromSearchParams(searchParams);
+    const pageSize = pageSizeFromSearchParams(searchParams);
     const debouncedReqNumber = useDebounce(filters.requisitionNumber, 400);
 
     const [data, setData] = useState<PagedResult<StdRequisitionSummary> | null>(null);
@@ -42,16 +44,14 @@ export default function StandardDriversPage() {
     const [error, setError] = useState<string | null>(null);
 
     const canCreate = canCreateRequisitions(user);
-    const currentUserId = user?.id;
 
+    const currentUserId = user?.id;
     const status = filters.status;
     const shopId = filters.shopId;
     const shopLabel = filters.shopLabel;
     const createdByType = filters.createdBy.type;
-    const createdByUserId =
-        filters.createdBy.type === "user" ? filters.createdBy.userId : "";
-    const createdByLabel =
-        filters.createdBy.type === "user" ? filters.createdBy.label : "";
+    const createdByUserId = filters.createdBy.type === "user" ? filters.createdBy.userId : "";
+    const createdByLabel = filters.createdBy.type === "user" ? filters.createdBy.label : "";
 
     useEffect(() => {
         if (authLoading || !canCreate || !currentUserId) {
@@ -81,6 +81,7 @@ export default function StandardDriversPage() {
                 const result = await stdRequisitionsApi.getAll(
                     buildStdRequisitionQuery(
                         page,
+                        pageSize,
                         {
                             requisitionNumber: debouncedReqNumber,
                             status,
@@ -116,6 +117,7 @@ export default function StandardDriversPage() {
         canCreate,
         currentUserId,
         page,
+        pageSize,
         debouncedReqNumber,
         status,
         shopId,
@@ -132,6 +134,11 @@ export default function StandardDriversPage() {
         router.replace(`${pathname}?${params.toString()}`);
     }
 
+    function handlePageSizeChange(nextPageSize: number) {
+        const params = buildSearchParams(filters, 1, nextPageSize);
+        router.replace(`${pathname}?${params.toString()}`);
+    }
+
     const queryString = searchParams.toString();
     const currentListUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
@@ -142,7 +149,9 @@ export default function StandardDriversPage() {
     const newRequisitionHref = `/standard-van-drivers/new?returnTo=${encodeURIComponent(currentListUrl)}`;
 
     function resetFilters() {
-        router.replace(pathname);
+        const params = buildSearchParams(INITIAL_STD_REQUISITION_FILTERS, 1, pageSize,);
+        const queryString = params.toString();
+        router.replace(queryString ? `${pathname}?${queryString}` : pathname);
     }
 
     if (authLoading) {
@@ -171,7 +180,9 @@ export default function StandardDriversPage() {
 
             <StdRequisitionFiltersToolbar
                 filters={filters}
+                pageSize={pageSize}
                 onFiltersChange={handleFiltersChange}
+                onPageSizeChange={handlePageSizeChange}
                 onReset={resetFilters}
             />
 
@@ -200,7 +211,7 @@ export default function StandardDriversPage() {
                     page={data.page}
                     totalPages={data.totalPages}
                     onPageChange={(nextPage) => {
-                        const params = buildSearchParams(filters, nextPage);
+                        const params = buildSearchParams(filters, nextPage, pageSize);
                         router.push(`${pathname}?${params.toString()}`);
                     }}
                     className="mt-6"

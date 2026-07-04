@@ -1,15 +1,11 @@
 import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
-import {
-    REQUISITION_STATUSES,
-    INITIAL_FILTERS,
-    RequisitionStatus,
-} from "../../constants/fe-requisition-status.constants";
+import { INITIAL_FILTERS, PAGE_SIZE, PAGE_SIZE_OPTIONS, REQUISITION_STATUSES, type RequisitionStatus } from "../../constants/fe-requisition-status.constants";
 import { FeRequisitionFilters } from "../../types/fe-requisiton-filters.types";
 
 function isValidStatus(value: string | null): value is RequisitionStatus {
     return (
         value !== null &&
-        REQUISITION_STATUSES.some((status) => status === value)
+        (REQUISITION_STATUSES as readonly string[]).includes(value)
     );
 }
 
@@ -59,7 +55,19 @@ export function pageFromSearchParams(searchParams: URLSearchParams): number {
     return page;
 }
 
-export function buildSearchParams(filters: FeRequisitionFilters, page: number) {
+export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
+    const pageSize = Number(searchParams.get("pageSize"));
+
+    if (!Number.isInteger(pageSize)) {
+        return PAGE_SIZE;
+    }
+
+    return (PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
+        ? pageSize
+        : PAGE_SIZE;
+}
+
+export function buildSearchParams(filters: FeRequisitionFilters, page: number, pageSize = PAGE_SIZE) {
     const params = new URLSearchParams();
 
     if (filters.requisitionNumber) {
@@ -96,6 +104,10 @@ export function buildSearchParams(filters: FeRequisitionFilters, page: number) {
 
     if (page > 1) {
         params.set("page", String(page));
+    }
+
+    if (pageSize !== PAGE_SIZE) {
+        params.set("pageSize", String(pageSize));
     }
 
     return params;

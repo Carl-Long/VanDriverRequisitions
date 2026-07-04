@@ -1,14 +1,13 @@
 import { CreatedByFilter } from "@/features/requisitions-shared/components/filter-fields/created-by-user-filter-field";
-import {
-    INITIAL_STD_REQUISITION_FILTERS,
-    STD_REQUISITION_STATUSES,
-    type StdRequisitionStatus,
-} from "../../constants/std-requisition-status.constants";
+import { INITIAL_STD_REQUISITION_FILTERS, STD_REQUISITION_PAGE_SIZE, STD_REQUISITION_PAGE_SIZE_OPTIONS, STD_REQUISITION_STATUSES, type StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
 
 import type { StdRequisitionFilters } from "../../types/std-requisition-filters.types";
 
-function isValidStatus(value: string | null) {
-    return value !== null && STD_REQUISITION_STATUSES.includes(value as StdRequisitionStatus);
+function isValidStatus(value: string | null): value is StdRequisitionStatus {
+    return (
+        value !== null &&
+        (STD_REQUISITION_STATUSES as readonly string[]).includes(value)
+    );
 }
 
 export function filtersFromSearchParams(searchParams: URLSearchParams): StdRequisitionFilters {
@@ -58,7 +57,19 @@ export function pageFromSearchParams(searchParams: URLSearchParams): number {
     return page;
 }
 
-export function buildSearchParams(filters: StdRequisitionFilters, page: number) {
+export function pageSizeFromSearchParams(searchParams: URLSearchParams): number {
+    const pageSize = Number(searchParams.get("pageSize"));
+
+    if (!Number.isInteger(pageSize)) {
+        return STD_REQUISITION_PAGE_SIZE;
+    }
+
+    return (STD_REQUISITION_PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
+        ? pageSize
+        : STD_REQUISITION_PAGE_SIZE;
+}
+
+export function buildSearchParams(filters: StdRequisitionFilters, page: number, pageSize = STD_REQUISITION_PAGE_SIZE) {
     const params = new URLSearchParams();
 
     if (filters.requisitionNumber) {
@@ -95,6 +106,10 @@ export function buildSearchParams(filters: StdRequisitionFilters, page: number) 
 
     if (page > 1) {
         params.set("page", String(page));
+    }
+
+    if (pageSize !== STD_REQUISITION_PAGE_SIZE) {
+        params.set("pageSize", String(pageSize));
     }
 
     return params;
