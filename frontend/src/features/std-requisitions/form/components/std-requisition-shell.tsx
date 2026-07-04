@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { Alert } from "@/components/ui/alert";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
 import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
-import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
 import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
@@ -35,6 +34,7 @@ import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-s
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
 import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
+import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -374,7 +374,7 @@ export function StdRequisitionShell({
                 transfersHasWarning={tabWarnings.transfersHasWarning}
                 additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
-                    <StdRequisitionDetailsTab
+                    <RequisitionDetailsTab
                         readonly={isReadonly}
                         draft={draft}
                         errors={errors}

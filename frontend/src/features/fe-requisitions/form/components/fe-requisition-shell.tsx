@@ -1,7 +1,6 @@
 "use client";
 
 import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants/requisition-row-categories";
-import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
 import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
@@ -33,6 +32,7 @@ import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-s
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
 import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
+import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 
 
 type Props = {
@@ -366,7 +366,7 @@ export function FeRequisitionShell({
                 transfersHasWarning={tabWarnings.transfersHasWarning}
                 additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
-                    <FeRequisitionDetailsTab
+                    <RequisitionDetailsTab
                         readonly={isReadonly}
                         draft={draft}
                         onRequisitionDateChange={setRequisitionDate}
