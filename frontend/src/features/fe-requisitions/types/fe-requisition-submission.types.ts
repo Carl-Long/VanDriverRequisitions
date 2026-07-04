@@ -16,15 +16,6 @@ export type FeRequisitionSubmissionDetail = {
     snapshot: FeRequisitionSnapshot;
 };
 
-export type ApproveFeRequisitionRequest = {
-    rowVersion: string | null;
-};
-
-export type RejectFeRequisitionRequest = {
-    rowVersion: string | null;
-    rejectionNotes: string;
-};
-
 export type FeRequisitionSubmissionHistory = {
     id: string;
     submissionNumber: number;

@@ -23,15 +23,6 @@ export type StdRequisitionSubmissionDetail = {
     snapshot: StdRequisitionSnapshot;
 };
 
-export type ApproveStdRequisitionRequest = {
-    rowVersion: string | null;
-};
-
-export type RejectStdRequisitionRequest = {
-    rowVersion: string | null;
-    rejectionNotes: string;
-};
-
 export type StdRequisitionSubmissionHistory = {
     id: string;
     submissionNumber: number;

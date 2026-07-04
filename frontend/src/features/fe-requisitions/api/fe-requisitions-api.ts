@@ -1,11 +1,12 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
 import { SaveFeRequisition } from "../types/fe-requisition-save.types";
-import {
-    FeRequisitionSubmissionDetail,
-    ApproveFeRequisitionRequest,
-    RejectFeRequisitionRequest,
-} from "../types/fe-requisition-submission.types";
+import type {
+    ApproveRequisitionRequest,
+    RejectRequisitionRequest,
+} from "@/features/requisitions-shared/types/requisition-approval.types";
+
+import { FeRequisitionSubmissionDetail } from "../types/fe-requisition-submission.types";
 import {
     FeRequisitionQuery,
     FeRequisitionSummary,
@@ -56,13 +57,13 @@ export const feRequisitionsApi = {
     getSubmission: (submissionId: string) =>
         apiFetch<FeRequisitionSubmissionDetail>(`${BASE}/submissions/${submissionId}`),
 
-    approve: (id: string, data: ApproveFeRequisitionRequest) =>
+    approve: (id: string, data: ApproveRequisitionRequest) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}/approve`, {
             method: "POST",
             body: data,
         }),
 
-    reject: (id: string, data: RejectFeRequisitionRequest) =>
+    reject: (id: string, data: RejectRequisitionRequest) =>
         apiFetch<FeRequisitionDetail>(`${BASE}/${id}/reject`, {
             method: "POST",
             body: data,
