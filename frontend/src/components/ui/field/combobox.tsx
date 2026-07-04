@@ -14,6 +14,7 @@ export type ComboboxOption<TData = unknown> = {
 
 type Props<TData = unknown> = {
     disabled?: boolean;
+    searchable?: boolean;
     state?: "default" | "error";
     value: string | null;
     label?: string | null;
@@ -29,6 +30,7 @@ type Props<TData = unknown> = {
 
 export function Combobox<TData = unknown>({
     disabled = false,
+    searchable = true,
     state = "default",
     value,
     label,
@@ -50,7 +52,8 @@ export function Combobox<TData = unknown>({
     const triggerRef = useRef<HTMLButtonElement>(null);
 
     const maxVisibleOptions = 50;
-    const hasSearch = search.trim().length > 0;
+    const isSearchEnabled = searchable || Boolean(onSearch);
+    const hasSearch = isSearchEnabled && search.trim().length > 0;
 
     const emptyResultsMessage = hasSearch ? noMatchesText : emptyStateText;
 
@@ -164,6 +167,7 @@ export function Combobox<TData = unknown>({
                 },
             );
         }, delay);
+
         return () => {
             cancelled = true;
             globalThis.clearTimeout(timeoutId);
@@ -198,16 +202,18 @@ export function Combobox<TData = unknown>({
 
             {open && (
                 <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-background shadow-lg">
-                    <div className="relative overflow-hidden rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset">
-                        <Search className="absolute left-3 top-1/2 size-[0.95em] -translate-y-1/2 text-muted-foreground" />
+                    {isSearchEnabled && (
+                        <div className="relative overflow-hidden rounded-t-lg border-b border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-inset">
+                            <Search className="absolute left-3 top-1/2 size-[0.95em] -translate-y-1/2 text-muted-foreground" />
 
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search..."
-                            className="h-10 w-full bg-transparent pl-9 pr-3 text-sm outline-none"
-                        />
-                    </div>
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search..."
+                                className="h-10 w-full bg-transparent pl-9 pr-3 text-sm outline-none"
+                            />
+                        </div>
+                    )}
 
                     <div className="max-h-64 overflow-y-auto py-1">
                         {pinnedOptions.map((option) => {

@@ -1,24 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
+import {
+    Combobox,
+    type ComboboxOption,
+} from "@/components/ui/field/combobox";
 import { Field } from "@/components/ui/field/field";
-import { fieldBase } from "@/components/ui/field/fieldstyles";
 import { Input } from "@/components/ui/field/input";
 import { Modal } from "@/components/ui/modal";
 import { ApiError } from "@/lib/api/client";
-import { CostReason } from "./cost-reason.types";
+
 import { AdminFormServerError } from "../admin-shared/admin-form-server-error";
 import { AdminModalFormActions } from "../admin-shared/admin-modal-form-actions";
-
+import { CostReason } from "./cost-reason.types";
 
 const scopeOptions = [
     { value: "Fe", label: "FE" },
     { value: "Std", label: "STD" },
     { value: "Shared", label: "Shared" },
-] as const;
+] as const satisfies readonly ComboboxOption[];
 
 const costReasonSchema = z.object({
     code: z
@@ -73,7 +77,9 @@ function CostReasonFormModalContent({
     const {
         register,
         handleSubmit,
+        control,
         setError,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<CostReasonFormData>({
         resolver: zodResolver(costReasonSchema),
@@ -84,6 +90,10 @@ function CostReasonFormModalContent({
         },
     });
 
+    const scope = useWatch({ control, name: "scope" });
+
+    const selectedScopeLabel =
+        scopeOptions.find((option) => option.value === scope)?.label ?? null;
 
     function handleClose() {
         onClose();
@@ -156,13 +166,30 @@ function CostReasonFormModalContent({
                 </Field>
 
                 <Field label="Scope" error={errors.scope?.message} required>
-                    <select className={fieldBase} {...register("scope")}>
-                        {scopeOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                    <Combobox
+                        value={scope}
+                        label={selectedScopeLabel}
+                        options={[...scopeOptions]}
+                        searchable={false}
+                        placeholder="Select scope"
+                        emptyStateText="No scopes available"
+                        noMatchesText="No matching scope found"
+                        state={errors.scope ? "error" : "default"}
+                        onChange={(value) => {
+                            if (!value) {
+                                return;
+                            }
+
+                            setValue(
+                                "scope",
+                                value as CostReasonFormData["scope"],
+                                {
+                                    shouldDirty: true,
+                                    shouldValidate: true,
+                                },
+                            );
+                        }}
+                    />
                 </Field>
 
                 <AdminModalFormActions
