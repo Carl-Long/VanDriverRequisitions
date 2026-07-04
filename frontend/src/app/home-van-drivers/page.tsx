@@ -18,12 +18,12 @@ import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisition
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { Alert } from "@/components/ui/alert";
 import { FeRequisitionFiltersToolbar } from "@/features/fe-requisitions/list/components/fe-requisition-filters-toolbar";
-import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { buildFeRequisitionQuery } from "@/features/fe-requisitions/list/lib/build-fe-requisition-query";
 import { filtersFromSearchParams, pageFromSearchParams, buildSearchParams, pageSizeFromSearchParams, } from "@/features/fe-requisitions/list/lib/url-state";
 import { getApiErrorMessage } from "@/lib/api/client";
 import { INITIAL_FILTERS } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
+import { RequisitionListTable } from "@/features/requisitions-shared/components/requisition-list-table";
 
 export default function HomeVanDriversPage() {
     const { user, loading: authLoading } = useAuth();
@@ -191,7 +191,7 @@ export default function HomeVanDriversPage() {
             )}
 
             {!loading && items.length > 0 && (
-                <FeRequisitionTable
+                <RequisitionListTable
                     items={items}
                     getHref={getRequisitionHref}
                     onRowClick={(req) => router.push(getRequisitionHref(req))}

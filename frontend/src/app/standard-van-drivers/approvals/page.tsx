@@ -12,7 +12,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Pagination } from "@/components/ui/pagination/pagination";
 import { canApproveRequisitions } from "@/features/auth/roles";
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
-import { StdRequisitionTable } from "@/features/std-requisitions/list/components/std-requisition-table";
 import { pageFromSearchParams } from "@/features/std-requisitions/list/lib/url-state";
 import type { StdRequisitionSummary } from "@/features/std-requisitions/types/std-requisition.types";
 import { useAuth } from "@/providers/auth-provider";
@@ -22,6 +21,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
+import { RequisitionListTable } from "@/features/requisitions-shared/components/requisition-list-table";
 
 export default function StdRequisitionApprovalsPage() {
     const router = useRouter();
@@ -150,7 +150,7 @@ export default function StdRequisitionApprovalsPage() {
             )}
 
             {!loading && items.length > 0 && (
-                <StdRequisitionTable
+                <RequisitionListTable
                     items={items}
                     getHref={(req) => withReturnTo(`/standard-van-drivers/approvals/${req.id}`, currentListHref)}
                     onRowClick={(req) => router.push(withReturnTo(`/standard-van-drivers/approvals/${req.id}`, currentListHref))}

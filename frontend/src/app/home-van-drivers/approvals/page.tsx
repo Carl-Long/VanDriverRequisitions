@@ -15,12 +15,12 @@ import { canApproveRequisitions } from "@/features/auth/roles";
 import { useAuth } from "@/providers/auth-provider";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionSummary } from "@/features/fe-requisitions/types/fe-requisition.types";
-import { FeRequisitionTable } from "@/features/fe-requisitions/list/components/fe-requisition-table";
 import { pageFromSearchParams } from "@/features/fe-requisitions/list/lib/url-state";
 import { useDebounce } from "@/hooks/use-debounce";
 import { RequisitionApprovalsSearchToolbar } from "@/features/requisitions-shared/components/requisition-approvals-search-toolbar";
 import { getCurrentPathWithSearch, withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
+import { RequisitionListTable } from "@/features/requisitions-shared/components/requisition-list-table";
 
 export default function FeRequisitionApprovalsPage() {
     const router = useRouter();
@@ -150,7 +150,7 @@ export default function FeRequisitionApprovalsPage() {
             )}
 
             {!loading && items.length > 0 && (
-                <FeRequisitionTable
+                <RequisitionListTable
                     items={items}
                     getHref={(req) => withReturnTo(`/home-van-drivers/approvals/${req.id}`, currentListHref)}
                     onRowClick={(req) => router.push(withReturnTo(`/home-van-drivers/approvals/${req.id}`, currentListHref))}

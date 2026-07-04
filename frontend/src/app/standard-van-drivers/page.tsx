@@ -20,12 +20,12 @@ import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisit
 import type { StdRequisitionSummary } from "@/features/std-requisitions/types/std-requisition.types";
 import type { StdRequisitionFilters } from "@/features/std-requisitions/types/std-requisition-filters.types";
 import { StdRequisitionFiltersToolbar } from "@/features/std-requisitions/list/components/std-requisition-filters-toolbar";
-import { StdRequisitionTable } from "@/features/std-requisitions/list/components/std-requisition-table";
 
 import { buildStdRequisitionQuery } from "@/features/std-requisitions/list/lib/build-std-requisition-query";
 import { buildSearchParams, filtersFromSearchParams, pageFromSearchParams, pageSizeFromSearchParams, } from "@/features/std-requisitions/list/lib/url-state";
 import { INITIAL_STD_REQUISITION_FILTERS } from "@/features/std-requisitions/constants/std-requisition-status.constants";
 import { RequisitionTableSkeleton } from "@/features/requisitions-shared/components/requisition-table-skeleton";
+import { RequisitionListTable } from "@/features/requisitions-shared/components/requisition-list-table";
 
 export default function StandardDriversPage() {
     const { user, loading: authLoading } = useAuth();
@@ -199,7 +199,7 @@ export default function StandardDriversPage() {
             )}
 
             {!loading && items.length > 0 && (
-                <StdRequisitionTable
+                <RequisitionListTable
                     items={items}
                     getHref={getRequisitionHref}
                     onRowClick={(req) => router.push(getRequisitionHref(req))}
