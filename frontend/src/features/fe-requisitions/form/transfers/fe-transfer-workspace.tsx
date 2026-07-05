@@ -15,9 +15,10 @@ import { EditableCellButton } from "../../../requisitions-shared/components/edit
 import { DeleteRowButton } from "../../../requisitions-shared/components/delete-row-button";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
-import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { getFeTransferLimitStatus } from "../lib/get-fe-transfer-limit-status";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { RequisitionLimitIssueBlock } from "@/features/requisitions-shared/components/requisition-limit-issue-block";
 
 type Props = {
     readonly: boolean;
@@ -190,7 +191,11 @@ function TransfersTable({
                                 transfer.isShopFromActive === false ||
                                 transfer.isShopToActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -198,7 +203,7 @@ function TransfersTable({
                                     onClick={readonly ? undefined : () => onEdit(transfer)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>
@@ -212,7 +217,7 @@ function TransfersTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <RequisitionLimitWarningBlock
+                                                <RequisitionLimitIssueBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />

@@ -19,7 +19,6 @@ import { useStdSubmission } from "@/features/std-requisitions/std-submissions-vi
 import { useAuth } from "@/providers/auth-provider";
 import { SubmissionSnapshotSummary } from "@/features/requisitions-shared/components/submission-snapshot-summary";
 import { SubmissionHeader } from "@/features/requisitions-shared/components/submission-header";
-import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 import { SubmissionPageSkeleton } from "@/features/requisitions-shared/components/submission-page-skeleton";
 
 export default function StdSubmissionPage() {

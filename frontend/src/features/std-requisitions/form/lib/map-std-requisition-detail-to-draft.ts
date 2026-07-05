@@ -44,6 +44,8 @@ export function mapStdRequisitionDetailToDraft(
             collectionTypeLabel: row.collectionTypeName,
             collectionTypeCode: row.collectionTypeCode,
             isCollectionTypeActive: row.isCollectionTypeActive,
+            isLocationLinkedToRequisitionShop: row.isLocationLinkedToRequisitionShop,
+            isLocationLinkedToCollectionType: row.isLocationLinkedToCollectionType,
 
             locationId: row.locationId,
             locationLabel: row.locationName,

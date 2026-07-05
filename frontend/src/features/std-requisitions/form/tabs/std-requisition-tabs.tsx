@@ -3,23 +3,27 @@
 import { buildStdRequisitionTabs } from "../lib/build-std-requisition-tabs";
 import { useMemo } from "react";
 import { RequisitionTabsFrame } from "@/features/requisitions-shared/components/requisitions-tab-frame";
+import {
+    REQUISITION_TAB_ISSUE_SEVERITY,
+    type RequisitionTabIssueSeverity,
+} from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     activeKey: string;
     onActiveKeyChange: (key: string) => void;
     details: React.ReactNode;
     collectionChargesBanksAndBins: React.ReactNode;
-    collectionChargesBanksAndBinsHasWarning?: boolean;
     collectionVanPacks: React.ReactNode;
-    collectionVanPacksHasWarning?: boolean;
     pickups: React.ReactNode;
-    pickupsHasWarning?: boolean;
     transfers: React.ReactNode;
-    transfersHasWarning?: boolean;
     additionalCosts: React.ReactNode;
-    additionalCostsHasWarning?: boolean;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
+    collectionChargesBanksAndBinsIssueSeverity?: RequisitionTabIssueSeverity;
+    collectionVanPacksIssueSeverity?: RequisitionTabIssueSeverity;
+    pickupsIssueSeverity?: RequisitionTabIssueSeverity;
+    transfersIssueSeverity?: RequisitionTabIssueSeverity;
+    additionalCostsIssueSeverity?: RequisitionTabIssueSeverity;
 };
 
 export function StdRequisitionTabs({
@@ -27,18 +31,17 @@ export function StdRequisitionTabs({
     onActiveKeyChange,
     details,
     collectionChargesBanksAndBins,
-    collectionChargesBanksAndBinsHasWarning,
     collectionVanPacks,
-    collectionVanPacksHasWarning,
     pickups,
-    pickupsHasWarning,
     transfers,
-    transfersHasWarning,
     additionalCosts,
-    additionalCostsHasWarning,
     submissionHistory,
     submissionHistoryCount,
-
+    collectionChargesBanksAndBinsIssueSeverity,
+    collectionVanPacksIssueSeverity,
+    pickupsIssueSeverity,
+    transfersIssueSeverity,
+    additionalCostsIssueSeverity,
 }: Readonly<Props>) {
 
     const tabs = useMemo(
@@ -48,28 +51,31 @@ export function StdRequisitionTabs({
 
     const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
 
-    function tabHasWarning(tab: (typeof tabs)[number]) {
+    function getTabIssueSeverity(tab: (typeof tabs)[number]): RequisitionTabIssueSeverity {
         if (tab.type === "banks-and-bins") {
-            return collectionChargesBanksAndBinsHasWarning ?? false;
+            return collectionChargesBanksAndBinsIssueSeverity ??
+                REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "van-packs") {
-            return collectionVanPacksHasWarning ?? false;
+            return collectionVanPacksIssueSeverity ??
+                REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "pickups") {
-            return pickupsHasWarning ?? false;
+            return pickupsIssueSeverity ?? REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "transfers") {
-            return transfersHasWarning ?? false;
+            return transfersIssueSeverity ?? REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "additional-costs") {
-            return additionalCostsHasWarning ?? false;
+            return additionalCostsIssueSeverity ??
+                REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
-        return false;
+        return REQUISITION_TAB_ISSUE_SEVERITY.None;
     }
 
     return (
@@ -78,7 +84,7 @@ export function StdRequisitionTabs({
             activeKey={activeTab.key}
             ariaLabel="STD requisition sections"
             onActiveKeyChange={onActiveKeyChange}
-            getTabHasWarning={tabHasWarning}
+            getTabIssueSeverity={getTabIssueSeverity}
         >
             {activeTab.key === "details" && details}
             {activeTab.key === "collection-charges-banks-and-bins" && collectionChargesBanksAndBins}

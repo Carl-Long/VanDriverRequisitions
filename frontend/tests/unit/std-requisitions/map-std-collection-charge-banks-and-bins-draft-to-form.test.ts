@@ -19,6 +19,8 @@ describe("mapStdCollectionChargeBanksAndBinsDraftToForm", () => {
             locationLabel: "Location A",
             locationPostCode: "AB1 2CD",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 4,
 
@@ -44,6 +46,8 @@ describe("mapStdCollectionChargeBanksAndBinsDraftToForm", () => {
             locationLabel: "Location A",
             locationPostCode: "AB1 2CD",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 4,
 

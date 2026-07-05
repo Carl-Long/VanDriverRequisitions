@@ -35,6 +35,8 @@ export function createStdCollectionChargeBanksAndBinsFormSchema({
             locationLabel: z.string().nullable(),
             locationPostCode: z.string().nullable(),
             isLocationActive: z.boolean(),
+            isLocationLinkedToRequisitionShop: z.boolean(),
+            isLocationLinkedToCollectionType: z.boolean(),
 
             numberOfBags: z
                 .number()

@@ -16,8 +16,9 @@ import { DeleteRowButton } from "../../../requisitions-shared/components/delete-
 import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
-import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { getFeAdditionalCostLimitStatus } from "../lib/get-fe-additional-cost-limit-status";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { RequisitionLimitIssueBlock } from "@/features/requisitions-shared/components/requisition-limit-issue-block";
 
 type Props = {
     readonly: boolean;
@@ -175,7 +176,11 @@ function AdditionalCostsTable({
 
                             const hasInactiveLookup = row.isReasonActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -183,7 +188,7 @@ function AdditionalCostsTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>
@@ -197,7 +202,7 @@ function AdditionalCostsTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <RequisitionLimitWarningBlock
+                                                <RequisitionLimitIssueBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />

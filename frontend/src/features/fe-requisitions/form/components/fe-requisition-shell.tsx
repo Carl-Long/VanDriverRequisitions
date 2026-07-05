@@ -21,7 +21,6 @@ import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisi
 import { FeMileageWorkspace } from "../mileage/fe-mileage-workspace";
 import { FeTransferWorkspace } from "../transfers/fe-transfer-workspace";
 import { FeAdditionalCostWorkspace } from "../additional-costs/fe-additional-cost-workspace";
-import { useFeRequisitionTabWarnings } from "../hooks/use-fe-requisition-tab-warnings";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
@@ -34,6 +33,8 @@ import { RequisitionPageMode } from "@/features/requisitions-shared/types/requis
 import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
 import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
+import { useFeRequisitionTabIssues } from "../hooks/use-fe-requisition-tab-issues";
+import { hasBlockingRequisitionTabIssue } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -106,7 +107,25 @@ export function FeRequisitionShell({
         [draft.feGeneralTasks],
     );
 
-    const tabWarnings = useFeRequisitionTabWarnings({ draft, isReadonly, limitRules, });
+    const tabIssues = useFeRequisitionTabIssues({ draft, isReadonly, limitRules });
+
+    const hasKnownSaveBlockers = hasBlockingRequisitionTabIssue([
+        tabIssues.mileage,
+        tabIssues.transfers,
+        tabIssues.additionalCosts,
+        ...taskTypes.map((taskType) =>
+            tabIssues.getTaskTypeTabIssueSeverity(taskType.id),
+        ),
+    ]);
+
+    const knownSaveBlockerMessage = hasKnownSaveBlockers
+        ? "Please resolve the tab issues before saving or submitting this requisition."
+        : null;
+
+    const formErrorMessage = [errors.form, knownSaveBlockerMessage]
+        .filter(Boolean)
+        .join("\n");
+
 
     const router = useRouter();
     const toast = useToast();
@@ -126,6 +145,7 @@ export function FeRequisitionShell({
             });
         },
     });
+
 
     const canSubmitStatus =
         draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
@@ -270,6 +290,7 @@ export function FeRequisitionShell({
                 submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction ?? approvalActions.activeAction}
                 canSubmit={canSubmit}
+                hasKnownSaveBlockers={hasKnownSaveBlockers}
                 submittedAtUtc={draft.submittedAtUtc}
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
@@ -279,7 +300,7 @@ export function FeRequisitionShell({
                 onReject={approvalActions.openRejectModal}
             />
 
-            <RequisitionFormErrorAlert message={errors.form} />
+            <RequisitionFormErrorAlert message={formErrorMessage} />
 
             <FeRequisitionTabs
                 activeKey={activeKey}
@@ -287,10 +308,10 @@ export function FeRequisitionShell({
                 taskTypes={taskTypes}
                 usedTaskTypeIds={usedTaskTypeIds}
                 submissionHistoryCount={draft.submissionHistory.length}
-                getTaskTypeTabHasWarning={tabWarnings.getTaskTypeTabHasWarning}
-                mileageHasWarning={tabWarnings.mileageHasWarning}
-                transfersHasWarning={tabWarnings.transfersHasWarning}
-                additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
+                getTaskTypeTabIssueSeverity={tabIssues.getTaskTypeTabIssueSeverity}
+                mileageIssueSeverity={tabIssues.mileage}
+                transfersIssueSeverity={tabIssues.transfers}
+                additionalCostsIssueSeverity={tabIssues.additionalCosts}
                 details={
                     <RequisitionDetailsTab
                         readonly={isReadonly}

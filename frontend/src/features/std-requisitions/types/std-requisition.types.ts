@@ -81,6 +81,8 @@ export type StdCollectionChargeBanksAndBins = {
     locationName: string;
     locationPostCode: string;
     isLocationActive: boolean;
+    isLocationLinkedToRequisitionShop: boolean;
+    isLocationLinkedToCollectionType: boolean;
 
     numberOfBags: number | null;
 
@@ -151,7 +153,7 @@ export type StdAdditionalCost = {
     reasonCode: string;
     reasonText: string;
     isReasonActive: boolean;
-    
+
     numberOfBags: number;
 
     chargeType: StdChargeType;

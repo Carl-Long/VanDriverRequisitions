@@ -20,7 +20,8 @@ import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../component
 import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
-import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { RequisitionLimitIssueBlock } from "@/features/requisitions-shared/components/requisition-limit-issue-block";
 
 type Props = {
     readonly: boolean;
@@ -230,7 +231,12 @@ function BanksAndBinsTable({
 
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
                             const hasInactiveLookup = row.isCollectionTypeActive === false || row.isLocationActive === false;
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+                            const hasLocationRelationshipBlocker = row.isLocationLinkedToRequisitionShop === false || row.isLocationLinkedToCollectionType === false;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue || hasLocationRelationshipBlocker,
+                            });
 
                             return (
                                 <TableRow
@@ -238,7 +244,7 @@ function BanksAndBinsTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>
@@ -252,7 +258,7 @@ function BanksAndBinsTable({
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <RequisitionLimitWarningBlock
+                                                <RequisitionLimitIssueBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />
@@ -293,9 +299,21 @@ function BanksAndBinsTable({
                                             {row.isLocationActive === false && (
                                                 <InactiveLookupWarning label="location" />
                                             )}
+
+                                            {row.isLocationLinkedToRequisitionShop === false && (
+                                                <p className="mt-1 text-xs font-medium text-danger">
+                                                    This location no longer belongs to the requisition shop.
+                                                </p>
+                                            )}
+
+                                            {row.isLocationLinkedToCollectionType === false && (
+                                                <p className="mt-1 text-xs font-medium text-danger">
+                                                    This location no longer belongs to the selected collection type.
+                                                </p>
+                                            )}
                                         </div>
                                     </TableCell>
-
+                                    
                                     <TableCell align="right" className="tabular-nums">
                                         {row.numberOfBags ?? "-"}
                                     </TableCell>

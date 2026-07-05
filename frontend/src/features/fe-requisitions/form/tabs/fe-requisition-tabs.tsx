@@ -4,6 +4,10 @@ import { useMemo } from "react";
 import { buildFeRequisitionTabs } from "../lib/build-fe-requisition-tabs";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { RequisitionTabsFrame } from "@/features/requisitions-shared/components/requisitions-tab-frame";
+import {
+    REQUISITION_TAB_ISSUE_SEVERITY,
+    type RequisitionTabIssueSeverity,
+} from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     taskTypes: FeTaskType[];
@@ -13,14 +17,15 @@ type Props = {
     details: React.ReactNode;
     renderTaskTypeTab: (taskTypeId: string) => React.ReactNode;
     mileage: React.ReactNode;
-    mileageHasWarning?: boolean;
     transfers: React.ReactNode;
-    transfersHasWarning?: boolean;
     additionalCosts: React.ReactNode;
-    additionalCostsHasWarning?: boolean;
     submissionHistory: React.ReactNode;
     submissionHistoryCount: number;
-    getTaskTypeTabHasWarning?: (taskTypeId: string) => boolean;
+    mileageIssueSeverity?: RequisitionTabIssueSeverity;
+    transfersIssueSeverity?: RequisitionTabIssueSeverity;
+    additionalCostsIssueSeverity?: RequisitionTabIssueSeverity;
+    getTaskTypeTabIssueSeverity?: (taskTypeId: string) => RequisitionTabIssueSeverity;
+
 };
 
 export function FeRequisitionTabs({
@@ -34,11 +39,11 @@ export function FeRequisitionTabs({
     additionalCosts,
     submissionHistory,
     submissionHistoryCount,
-    getTaskTypeTabHasWarning,
     usedTaskTypeIds,
-    mileageHasWarning,
-    transfersHasWarning,
-    additionalCostsHasWarning,
+    getTaskTypeTabIssueSeverity,
+    mileageIssueSeverity,
+    transfersIssueSeverity,
+    additionalCostsIssueSeverity
 }: Readonly<Props>) {
     const tabs = useMemo(
         () => buildFeRequisitionTabs(taskTypes, usedTaskTypeIds, submissionHistoryCount),
@@ -47,24 +52,28 @@ export function FeRequisitionTabs({
 
     const activeTab = tabs.find((x) => x.key === activeKey) ?? tabs[0];
 
-    function tabHasWarning(tab: (typeof tabs)[number]) {
+    function getTabIssueSeverity(tab: (typeof tabs)[number]): RequisitionTabIssueSeverity {
         if (tab.type === "general-task") {
-            return tab.isInactive || (getTaskTypeTabHasWarning?.(tab.taskTypeId) ?? false);
+            return combineTaskTypeIssueSeverity(
+                tab.isInactive,
+                getTaskTypeTabIssueSeverity?.(tab.taskTypeId) ??
+                REQUISITION_TAB_ISSUE_SEVERITY.None,
+            );
         }
 
         if (tab.type === "mileage") {
-            return mileageHasWarning ?? false;
+            return mileageIssueSeverity ?? REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "transfers") {
-            return transfersHasWarning ?? false;
+            return transfersIssueSeverity ?? REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
         if (tab.type === "additional-costs") {
-            return additionalCostsHasWarning ?? false;
+            return additionalCostsIssueSeverity ?? REQUISITION_TAB_ISSUE_SEVERITY.None;
         }
 
-        return false;
+        return REQUISITION_TAB_ISSUE_SEVERITY.None;
     }
 
     return (
@@ -73,7 +82,7 @@ export function FeRequisitionTabs({
             activeKey={activeTab.key}
             ariaLabel="Requisition sections"
             onActiveKeyChange={onActiveKeyChange}
-            getTabHasWarning={tabHasWarning}
+            getTabIssueSeverity={getTabIssueSeverity}
         >
             {activeTab.type === "details" && details}
             {activeTab.type === "general-task" && renderTaskTypeTab(activeTab.taskTypeId)}
@@ -84,3 +93,17 @@ export function FeRequisitionTabs({
         </RequisitionTabsFrame>
     );
 }
+
+function combineTaskTypeIssueSeverity(
+    isInactive: boolean,
+    issueSeverity: RequisitionTabIssueSeverity,
+): RequisitionTabIssueSeverity {
+    if (issueSeverity === REQUISITION_TAB_ISSUE_SEVERITY.Blocker) {
+        return issueSeverity;
+    }
+
+    return isInactive
+        ? REQUISITION_TAB_ISSUE_SEVERITY.Warning
+        : issueSeverity;
+}
+

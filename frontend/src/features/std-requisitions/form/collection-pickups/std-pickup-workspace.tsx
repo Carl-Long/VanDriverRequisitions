@@ -25,7 +25,8 @@ import { getStdChargeLimitStatus } from "../lib/get-std-charge-limit-status";
 import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../components/std-charge-table-cells";
 import { formatDateGB } from "@/lib/format/date";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
-import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { RequisitionLimitIssueBlock } from "@/features/requisitions-shared/components/requisition-limit-issue-block";
 
 type Props = {
     readonly: boolean;
@@ -244,8 +245,11 @@ function PickupTable({
                                 flatChargeLimitRule,
                             );
 
-                            const hasLimitIssue =
-                                !readonly && limitStatus.state !== "ok";
+                            const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -253,7 +257,7 @@ function PickupTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue: hasLimitIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>
@@ -265,9 +269,9 @@ function PickupTable({
                                             >
                                                 {formatDateGB(row.date) ?? "-"}
                                             </EditableCellButton>
-                                            
+
                                             {hasLimitIssue && (
-                                                <RequisitionLimitWarningBlock
+                                                <RequisitionLimitIssueBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />

@@ -1,9 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import {
+    REQUISITION_TAB_ISSUE_SEVERITY,
+    type RequisitionTabIssueSeverity,
+} from "../types/requisition-tab-issue-severity";
 
 export type RequisitionTabFrameItem = {
     key: string;
@@ -15,7 +19,7 @@ type Props<TTab extends RequisitionTabFrameItem> = {
     activeKey: string;
     ariaLabel: string;
     onActiveKeyChange: (key: string) => void;
-    getTabHasWarning?: (tab: TTab) => boolean;
+    getTabIssueSeverity?: (tab: TTab) => RequisitionTabIssueSeverity;
     children: ReactNode;
 };
 
@@ -24,7 +28,7 @@ export function RequisitionTabsFrame<TTab extends RequisitionTabFrameItem>({
     activeKey,
     ariaLabel,
     onActiveKeyChange,
-    getTabHasWarning,
+    getTabIssueSeverity,
     children,
 }: Readonly<Props<TTab>>) {
     return (
@@ -35,7 +39,10 @@ export function RequisitionTabsFrame<TTab extends RequisitionTabFrameItem>({
                         <RequisitionTabButton
                             key={tab.key}
                             active={tab.key === activeKey}
-                            hasWarning={getTabHasWarning?.(tab) ?? false}
+                            issueSeverity={
+                                getTabIssueSeverity?.(tab) ??
+                                REQUISITION_TAB_ISSUE_SEVERITY.None
+                            }
                             onClick={() => onActiveKeyChange(tab.key)}
                         >
                             {tab.label}
@@ -51,17 +58,36 @@ export function RequisitionTabsFrame<TTab extends RequisitionTabFrameItem>({
 
 type RequisitionTabButtonProps = {
     active: boolean;
-    hasWarning?: boolean;
+    issueSeverity: RequisitionTabIssueSeverity;
     onClick: () => void;
     children: ReactNode;
 };
 
 function RequisitionTabButton({
     active,
-    hasWarning,
+    issueSeverity,
     onClick,
     children,
 }: Readonly<RequisitionTabButtonProps>) {
+    const hasIssue = issueSeverity !== REQUISITION_TAB_ISSUE_SEVERITY.None;
+    const isBlocker = issueSeverity === REQUISITION_TAB_ISSUE_SEVERITY.Blocker;
+
+    const Icon = isBlocker ? AlertCircle : AlertTriangle;
+
+    const label = isBlocker
+        ? "This tab has blocking issues"
+        : "This tab has warnings";
+
+    const warningClassName = active
+        ? "bg-warning/15 text-warning"
+        : "bg-warning/10 text-warning";
+
+    const blockerClassName = active
+        ? "bg-danger/15 text-danger"
+        : "bg-danger/10 text-danger";
+
+    const issueClassName = isBlocker ? blockerClassName : warningClassName;
+
     return (
         <button
             type="button"
@@ -78,16 +104,16 @@ function RequisitionTabButton({
         >
             <span>{children}</span>
 
-            {hasWarning && (
+            {hasIssue && (
                 <span
-                    title="This tab has warnings"
+                    title={label}
                     className={cn(
                         "inline-flex h-5 w-5 items-center justify-center rounded-full",
-                        active ? "bg-warning/15 text-warning" : "bg-warning/10 text-warning",
+                        issueClassName,
                     )}
                 >
-                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span className="sr-only">This tab has warnings</span>
+                    <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="sr-only">{label}</span>
                 </span>
             )}
         </button>

@@ -129,6 +129,8 @@ function createBanksAndBinsForm(overrides: Record<string, unknown> = {}) {
         locationLabel: "Location",
         locationPostCode: "AB1 2CD",
         isLocationActive: true,
+        isLocationLinkedToRequisitionShop: true,
+        isLocationLinkedToCollectionType: true,
 
         numberOfBags: 1,
 
@@ -400,6 +402,27 @@ describe("createStdCollectionChargeBanksAndBinsFormSchema", () => {
                 collectionTypeId: ["Collection type is required"],
                 locationId: ["Location is required"],
             });
+        }
+    });
+
+    it("preserves banks and bins location relationship flags when parsing a valid row", () => {
+        const schema = createStdCollectionChargeBanksAndBinsFormSchema({
+            mileageLimitRule,
+            flatChargeLimitRule,
+        });
+
+        const row = createBanksAndBinsForm({
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: false,
+        });
+
+        const result = schema.safeParse(row);
+
+        expect(result.success).toBe(true);
+
+        if (result.success) {
+            expect(result.data.isLocationLinkedToRequisitionShop).toBe(false);
+            expect(result.data.isLocationLinkedToCollectionType).toBe(false);
         }
     });
 });

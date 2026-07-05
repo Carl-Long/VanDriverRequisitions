@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants/requisition-row-categories";
-import { getFeRequisitionTabWarnings } from "@/features/fe-requisitions/form/lib/get-fe-requisition-tab-warnings";
+import { getFeRequisitionTabIssues } from "@/features/fe-requisitions/form/lib/get-fe-requisition-tab-issues";
 import type { FeAdditionalCostDraft } from "@/features/fe-requisitions/form/types/fe-additional-cost-draft";
 import type {
     FeGeneralTaskDraft,
@@ -11,6 +11,7 @@ import type { FeMileageDraft } from "@/features/fe-requisitions/form/types/fe-mi
 import type { FeRequisitionDraft } from "@/features/fe-requisitions/form/types/fe-requisition-draft";
 import type { FeTransferDraft } from "@/features/fe-requisitions/form/types/fe-transfer-draft";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { REQUISITION_TAB_ISSUE_SEVERITY } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 import { FASCIAS } from "@/lib/constants/fascias";
 
 function createQuantities(
@@ -212,9 +213,9 @@ function createCleanLimitRules(): RequisitionLimitRuleSummary[] {
     ];
 }
 
-describe("getFeRequisitionTabWarnings", () => {
-    it("returns no warnings when the requisition is readonly", () => {
-        const result = getFeRequisitionTabWarnings({
+describe("getFeRequisitionTabIssues", () => {
+    it("returns no issues when the requisition is readonly", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feGeneralTasks: [
                     createGeneralTask({
@@ -241,14 +242,16 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: [],
         });
 
-        expect(result.getTaskTypeTabHasWarning("task-type-id")).toBe(false);
-        expect(result.mileageHasWarning).toBe(false);
-        expect(result.transfersHasWarning).toBe(false);
-        expect(result.additionalCostsHasWarning).toBe(false);
+        expect(result.getTaskTypeTabIssueSeverity("task-type-id")).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.None,
+        );
+        expect(result.mileage).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
+        expect(result.additionalCosts).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
     });
 
-    it("warns for a general task tab when matching rows have missing or invalid limits", () => {
-        const result = getFeRequisitionTabWarnings({
+    it("returns blocker for a general task tab when matching rows have missing or invalid limits", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feGeneralTasks: [
                     createGeneralTask({
@@ -260,12 +263,16 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: [],
         });
 
-        expect(result.getTaskTypeTabHasWarning("task-type-id")).toBe(true);
-        expect(result.getTaskTypeTabHasWarning("other-task-type-id")).toBe(false);
+        expect(result.getTaskTypeTabIssueSeverity("task-type-id")).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+        expect(result.getTaskTypeTabIssueSeverity("other-task-type-id")).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.None,
+        );
     });
 
-    it("warns for mileage rows with missing or invalid limits", () => {
-        const result = getFeRequisitionTabWarnings({
+    it("returns blocker for mileage rows with missing or invalid limits", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feMileages: [
                     createMileage(),
@@ -275,11 +282,11 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: [],
         });
 
-        expect(result.mileageHasWarning).toBe(true);
+        expect(result.mileage).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Blocker);
     });
 
-    it("warns for inactive transfer shops", () => {
-        const result = getFeRequisitionTabWarnings({
+    it("returns warning for inactive transfer shops", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feTransfers: [
                     createTransfer({
@@ -291,11 +298,48 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: createCleanLimitRules(),
         });
 
-        expect(result.transfersHasWarning).toBe(true);
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Warning);
     });
 
-    it("warns for inactive additional-cost reasons", () => {
-        const result = getFeRequisitionTabWarnings({
+    it("returns blocker for transfer rows with missing or invalid limits", () => {
+        const result = getFeRequisitionTabIssues({
+            draft: createDraft({
+                feTransfers: [
+                    createTransfer({
+                        quantities: createQuantities({
+                            sunday: 11,
+                        }),
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            limitRules: createCleanLimitRules(),
+        });
+
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Blocker);
+    });
+
+    it("returns blocker when a transfer tab has both historical warnings and limit blockers", () => {
+        const result = getFeRequisitionTabIssues({
+            draft: createDraft({
+                feTransfers: [
+                    createTransfer({
+                        isShopToActive: false,
+                        quantities: createQuantities({
+                            sunday: 11,
+                        }),
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            limitRules: createCleanLimitRules(),
+        });
+
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Blocker);
+    });
+
+    it("returns warning for inactive additional-cost reasons", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feAdditionalCosts: [
                     createAdditionalCost({
@@ -307,11 +351,33 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: createCleanLimitRules(),
         });
 
-        expect(result.additionalCostsHasWarning).toBe(true);
+        expect(result.additionalCosts).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
     });
 
-    it("returns no warnings when all rows are clean and matching limit rules exist", () => {
-        const result = getFeRequisitionTabWarnings({
+    it("returns blocker for additional-cost rows with missing or invalid limits", () => {
+        const result = getFeRequisitionTabIssues({
+            draft: createDraft({
+                feAdditionalCosts: [
+                    createAdditionalCost({
+                        chargingOption: "Job",
+                        totalNumber: 6,
+                        ratePerJob: 10,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            limitRules: createCleanLimitRules(),
+        });
+
+        expect(result.additionalCosts).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+    });
+
+    it("returns no issues when all rows are clean and matching limit rules exist", () => {
+        const result = getFeRequisitionTabIssues({
             draft: createDraft({
                 feGeneralTasks: [
                     createGeneralTask({
@@ -354,10 +420,14 @@ describe("getFeRequisitionTabWarnings", () => {
             limitRules: createCleanLimitRules(),
         });
 
-        expect(result.getTaskTypeTabHasWarning("task-type-id")).toBe(false);
-        expect(result.getTaskTypeTabHasWarning("other-task-type-id")).toBe(false);
-        expect(result.mileageHasWarning).toBe(false);
-        expect(result.transfersHasWarning).toBe(false);
-        expect(result.additionalCostsHasWarning).toBe(false);
+        expect(result.getTaskTypeTabIssueSeverity("task-type-id")).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.None,
+        );
+        expect(result.getTaskTypeTabIssueSeverity("other-task-type-id")).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.None,
+        );
+        expect(result.mileage).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
+        expect(result.additionalCosts).toBe(REQUISITION_TAB_ISSUE_SEVERITY.None);
     });
 });

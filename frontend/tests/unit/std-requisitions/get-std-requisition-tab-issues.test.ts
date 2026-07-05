@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
+import { REQUISITION_TAB_ISSUE_SEVERITY } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 import { STD_CHARGE_TYPE } from "@/features/std-requisitions/constants/std-charge-type.constants";
 import { STD_REQUISITION_ROW_CATEGORIES } from "@/features/std-requisitions/constants/std-requisition-row-categories";
-import { getStdRequisitionTabWarnings } from "@/features/std-requisitions/form/lib/get-std-requisition-tab-warnings";
+import { getStdRequisitionTabIssues } from "@/features/std-requisitions/form/lib/get-std-requisition-tab-issues";
 import type { StdAdditionalCostDraft } from "@/features/std-requisitions/form/types/std-additional-cost-draft";
 import type { StdCollectionChargeBanksAndBinsDraft } from "@/features/std-requisitions/form/types/std-collection-charge-banks-and-bins-draft";
 import type { StdCollectionVanPackDraft } from "@/features/std-requisitions/form/types/std-collection-van-pack-draft";
@@ -81,7 +82,8 @@ function createBanksAndBins(
         locationLabel: "Location",
         locationPostCode: "AB1 2CD",
         isLocationActive: true,
-
+        isLocationLinkedToRequisitionShop: true,
+        isLocationLinkedToCollectionType: true,
         numberOfBags: 1,
 
         chargeType: STD_CHARGE_TYPE.Mileage,
@@ -224,9 +226,9 @@ const vanPackRule = createRule({
     maxRate: 7,
 });
 
-describe("getStdRequisitionTabWarnings", () => {
-    it("returns no warnings when the requisition is readonly", () => {
-        const result = getStdRequisitionTabWarnings({
+describe("getStdRequisitionTabIssues", () => {
+    it("returns no issues when the requisition is readonly", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins({
@@ -266,16 +268,16 @@ describe("getStdRequisitionTabWarnings", () => {
         });
 
         expect(result).toEqual({
-            collectionChargesBanksAndBinsHasWarning: false,
-            collectionVanPacksHasWarning: false,
-            pickupsHasWarning: false,
-            transfersHasWarning: false,
-            additionalCostsHasWarning: false,
+            collectionChargesBanksAndBins: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            collectionVanPacks: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            pickups: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            transfers: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            additionalCosts: REQUISITION_TAB_ISSUE_SEVERITY.None,
         });
     });
 
-    it("returns no warnings when there are no child rows", () => {
-        const result = getStdRequisitionTabWarnings({
+    it("returns no issues when there are no child rows", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft(),
             isReadonly: false,
             stdMileageLimitRule: undefined,
@@ -284,16 +286,16 @@ describe("getStdRequisitionTabWarnings", () => {
         });
 
         expect(result).toEqual({
-            collectionChargesBanksAndBinsHasWarning: false,
-            collectionVanPacksHasWarning: false,
-            pickupsHasWarning: false,
-            transfersHasWarning: false,
-            additionalCostsHasWarning: false,
+            collectionChargesBanksAndBins: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            collectionVanPacks: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            pickups: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            transfers: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            additionalCosts: REQUISITION_TAB_ISSUE_SEVERITY.None,
         });
     });
 
-    it("warns for banks and bins inactive collection type and location rows", () => {
-        const collectionTypeResult = getStdRequisitionTabWarnings({
+    it("returns warnings for banks and bins inactive collection type and location rows", () => {
+        const collectionTypeResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins({
@@ -307,7 +309,7 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        const locationResult = getStdRequisitionTabWarnings({
+        const locationResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins({
@@ -321,12 +323,16 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(collectionTypeResult.collectionChargesBanksAndBinsHasWarning).toBe(true);
-        expect(locationResult.collectionChargesBanksAndBinsHasWarning).toBe(true);
+        expect(collectionTypeResult.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
+        expect(locationResult.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
     });
 
-    it("warns for banks and bins rows with missing or invalid limits", () => {
-        const missingLimitResult = getStdRequisitionTabWarnings({
+    it("returns blockers for banks and bins rows with missing or invalid limits", () => {
+        const missingLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins(),
@@ -338,7 +344,7 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        const overLimitResult = getStdRequisitionTabWarnings({
+        const overLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins({
@@ -352,12 +358,16 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(missingLimitResult.collectionChargesBanksAndBinsHasWarning).toBe(true);
-        expect(overLimitResult.collectionChargesBanksAndBinsHasWarning).toBe(true);
+        expect(missingLimitResult.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+        expect(overLimitResult.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 
-    it("warns for van pack rows with missing or invalid limits", () => {
-        const missingLimitResult = getStdRequisitionTabWarnings({
+    it("returns blockers for van pack rows with missing or invalid limits", () => {
+        const missingLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionVanPacks: [
                     createVanPack(),
@@ -369,7 +379,7 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: undefined,
         });
 
-        const overLimitResult = getStdRequisitionTabWarnings({
+        const overLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionVanPacks: [
                     createVanPack({
@@ -383,12 +393,16 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(missingLimitResult.collectionVanPacksHasWarning).toBe(true);
-        expect(overLimitResult.collectionVanPacksHasWarning).toBe(true);
+        expect(missingLimitResult.collectionVanPacks).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+        expect(overLimitResult.collectionVanPacks).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 
-    it("warns for pickup rows with missing or invalid limits", () => {
-        const missingLimitResult = getStdRequisitionTabWarnings({
+    it("returns blockers for pickup rows with missing or invalid limits", () => {
+        const missingLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 pickups: [
                     createPickup(),
@@ -400,7 +414,7 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        const overLimitResult = getStdRequisitionTabWarnings({
+        const overLimitResult = getStdRequisitionTabIssues({
             draft: createDraft({
                 pickups: [
                     createPickup({
@@ -414,12 +428,16 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(missingLimitResult.pickupsHasWarning).toBe(true);
-        expect(overLimitResult.pickupsHasWarning).toBe(true);
+        expect(missingLimitResult.pickups).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+        expect(overLimitResult.pickups).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 
-    it("warns for transfer inactive shops and invalid limits", () => {
-        const inactiveShopResult = getStdRequisitionTabWarnings({
+    it("returns warnings for inactive transfer shops", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 transfers: [
                     createTransfer({
@@ -433,7 +451,11 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        const overLimitResult = getStdRequisitionTabWarnings({
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Warning);
+    });
+
+    it("returns blockers for transfer rows with missing or invalid limits", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 transfers: [
                     createTransfer({
@@ -447,12 +469,30 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(inactiveShopResult.transfersHasWarning).toBe(true);
-        expect(overLimitResult.transfersHasWarning).toBe(true);
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Blocker);
     });
 
-    it("warns for additional-cost inactive reasons and invalid limits", () => {
-        const inactiveReasonResult = getStdRequisitionTabWarnings({
+    it("returns blocker when a tab has both historical warnings and limit blockers", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                transfers: [
+                    createTransfer({
+                        isShopFromActive: false,
+                        miles: 21,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.transfers).toBe(REQUISITION_TAB_ISSUE_SEVERITY.Blocker);
+    });
+
+    it("returns warnings for inactive additional-cost reasons", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 additionalCosts: [
                     createAdditionalCost({
@@ -466,7 +506,13 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        const overLimitResult = getStdRequisitionTabWarnings({
+        expect(result.additionalCosts).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
+    });
+
+    it("returns blockers for additional-cost rows with missing or invalid limits", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 additionalCosts: [
                     createAdditionalCost({
@@ -483,12 +529,13 @@ describe("getStdRequisitionTabWarnings", () => {
             stdVanPackLimitRule: vanPackRule,
         });
 
-        expect(inactiveReasonResult.additionalCostsHasWarning).toBe(true);
-        expect(overLimitResult.additionalCostsHasWarning).toBe(true);
+        expect(result.additionalCosts).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 
-    it("returns no warnings when all rows are clean and matching limit rules exist", () => {
-        const result = getStdRequisitionTabWarnings({
+    it("returns no issues when all rows are clean and matching limit rules exist", () => {
+        const result = getStdRequisitionTabIssues({
             draft: createDraft({
                 collectionChargesBanksAndBins: [
                     createBanksAndBins({
@@ -529,11 +576,95 @@ describe("getStdRequisitionTabWarnings", () => {
         });
 
         expect(result).toEqual({
-            collectionChargesBanksAndBinsHasWarning: false,
-            collectionVanPacksHasWarning: false,
-            pickupsHasWarning: false,
-            transfersHasWarning: false,
-            additionalCostsHasWarning: false,
+            collectionChargesBanksAndBins: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            collectionVanPacks: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            pickups: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            transfers: REQUISITION_TAB_ISSUE_SEVERITY.None,
+            additionalCosts: REQUISITION_TAB_ISSUE_SEVERITY.None,
         });
+    });
+
+    it("returns blocker for banks and bins rows when the location is no longer linked to the requisition shop", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationLinkedToRequisitionShop: false,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+    });
+
+    it("returns blocker for banks and bins rows when the location is no longer linked to the selected collection type", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationLinkedToCollectionType: false,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+    });
+
+    it("returns warning for inactive banks and bins location when the relationship is still valid", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationActive: false,
+                        isLocationLinkedToRequisitionShop: true,
+                        isLocationLinkedToCollectionType: true,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
+    });
+
+    it("returns blocker when banks and bins has both inactive lookup warning and location relationship blocker", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationActive: false,
+                        isLocationLinkedToRequisitionShop: false,
+                        isLocationLinkedToCollectionType: true,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 });

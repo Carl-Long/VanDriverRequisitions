@@ -195,9 +195,9 @@ function StdCollectionChargeBanksAndBinsDrawerContent({
                                 locationId: collectionTypeChanged ? null : prev.locationId,
                                 locationLabel: collectionTypeChanged ? null : prev.locationLabel,
                                 locationPostCode: collectionTypeChanged ? null : prev.locationPostCode,
-                                isLocationActive: collectionTypeChanged
-                                    ? true
-                                    : prev.isLocationActive,
+                                isLocationActive: collectionTypeChanged ? true : prev.isLocationActive,
+                                isLocationLinkedToRequisitionShop: collectionTypeChanged ? true : prev.isLocationLinkedToRequisitionShop,
+                                isLocationLinkedToCollectionType: collectionTypeChanged ? true : prev.isLocationLinkedToCollectionType,
                             };
                         });
 
@@ -227,8 +227,9 @@ function StdCollectionChargeBanksAndBinsDrawerContent({
                                 previousIsActive: prev.isLocationActive,
                                 nextId: value,
                             }),
+                            isLocationLinkedToRequisitionShop: true,
+                            isLocationLinkedToCollectionType: true,
                         }));
-
                         clearError("locationId");
                         clearError("form");
                     }}

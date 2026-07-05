@@ -16,6 +16,8 @@ export function mapStdCollectionChargeBanksAndBinsDraftToForm(
         locationLabel: row.locationLabel,
         locationPostCode: row.locationPostCode,
         isLocationActive: row.isLocationActive,
+        isLocationLinkedToRequisitionShop: row.isLocationLinkedToRequisitionShop,
+        isLocationLinkedToCollectionType: row.isLocationLinkedToCollectionType,
 
         numberOfBags: row.numberOfBags,
 

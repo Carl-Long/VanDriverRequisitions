@@ -194,7 +194,7 @@ public sealed class StdRequisitionService(
 
         var additionalCostReasonActiveMap = await LoadAdditionalCostReasonActiveMapAsync(requisition, cancellationToken);
         var collectionTypeActiveMap = await LoadCollectionTypeActiveMapAsync(requisition, cancellationToken);
-        var locationActiveMap = await LoadLocationActiveMapAsync(requisition, cancellationToken);
+        var locationMap = await LoadLocationMapAsync(requisition, cancellationToken);
         var transferShopActiveMap = await LoadTransferShopActiveMapAsync(requisition, cancellationToken);
         
         return StdRequisitionMapper.MapRequisitionToDetailDto(
@@ -203,7 +203,7 @@ public sealed class StdRequisitionService(
             shopActive,
             additionalCostReasonActiveMap,
             collectionTypeActiveMap,
-            locationActiveMap,
+            locationMap,
             transferShopActiveMap);
     }
     
@@ -221,13 +221,14 @@ public sealed class StdRequisitionService(
             cancellationToken);
     }
 
-    private async Task<Dictionary<Guid, bool>> LoadLocationActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
+    private async Task<Dictionary<Guid, StdLocation>> LoadLocationMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
-        return await lookupLoader.LoadStdLocationActiveMapAsync(
+        return await lookupLoader.LoadStdLocationMapAsync(
             requisition.CollectionChargesBanksAndBins.Select(x => x.LocationId),
-            cancellationToken);
+            cancellationToken,
+            includeInactive: true);
     }
-
+    
     private async Task<Dictionary<Guid, bool>> LoadTransferShopActiveMapAsync(StdRequisition requisition, CancellationToken cancellationToken)
     {
         return await lookupLoader.LoadShopActiveMapAsync(
