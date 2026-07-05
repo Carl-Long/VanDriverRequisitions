@@ -2,9 +2,12 @@
 
 import { useMemo } from "react";
 
-import { Field } from "@/components/ui/field/field";
 import { Combobox, type ComboboxOption } from "@/components/ui/field/combobox";
-import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
+import { Field } from "@/components/ui/field/field";
+import {
+    InactiveLookupWarning,
+    type InactiveLookupWarningContext,
+} from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { vanDriversApi, type VanDriverLookup } from "@/lib/api/van-drivers";
 
 type Props = {
@@ -13,24 +16,30 @@ type Props = {
     label: string | null;
     error?: string;
     selectedVanDriver?: VanDriverLookup | null;
-    onChange: (params: {
-        id: string | null;
-        label: string | null;
-        summary: VanDriverLookup | null;
-    }) => void;
+    inactiveWarningContext?: InactiveLookupWarningContext;
+    onChange: (params: VanDriverSelection) => void;
+};
+
+type VanDriverSelection = {
+    id: string | null;
+    label: string | null;
+    summary: VanDriverLookup | null;
 };
 
 type VanDriverOption = ComboboxOption<VanDriverLookup>;
 
 export function VanDriverField({
-    disabled,
+    disabled = false,
     value,
     label,
     selectedVanDriver,
+    inactiveWarningContext = "editable",
     error,
     onChange,
 }: Readonly<Props>) {
-    const showInactiveWarning = Boolean(value && selectedVanDriver?.isActive === false);
+    const showInactiveWarning = Boolean(
+        value && selectedVanDriver?.isActive === false,
+    );
 
     const pinnedOptions = useMemo<VanDriverOption[]>(() => {
         if (!value || !label || selectedVanDriver?.isActive !== false) {
@@ -44,7 +53,7 @@ export function VanDriverField({
                 data: selectedVanDriver,
             },
         ];
-    }, [value, label, selectedVanDriver]);
+    }, [label, selectedVanDriver, value]);
 
     async function searchVanDrivers(search: string): Promise<VanDriverOption[]> {
         const response = await vanDriversApi.search({
@@ -55,19 +64,17 @@ export function VanDriverField({
         return response.items.map(mapVanDriverToOption);
     }
 
-    function handleChange(value: string | null, option: VanDriverOption | null) {
-        if (!value || !option) {
-            onChange({
-                id: null,
-                label: null,
-                summary: null,
-            });
-
+    function handleChange(
+        selectedValue: string | null,
+        option: VanDriverOption | null,
+    ) {
+        if (!selectedValue || !option) {
+            onChange(createEmptyVanDriverSelection());
             return;
         }
 
         onChange({
-            id: value,
+            id: selectedValue,
             label: option.label,
             summary: option.data ?? null,
         });
@@ -91,7 +98,11 @@ export function VanDriverField({
                 />
 
                 {showInactiveWarning && (
-                    <InactiveLookupWarning label="van driver" variant="field" />
+                    <InactiveLookupWarning
+                        label="van driver"
+                        variant="field"
+                        context={inactiveWarningContext}
+                    />
                 )}
             </div>
         </Field>
@@ -103,5 +114,13 @@ function mapVanDriverToOption(vanDriver: VanDriverLookup): VanDriverOption {
         value: vanDriver.id,
         label: `${vanDriver.code} - ${vanDriver.tradersName}`,
         data: vanDriver,
+    };
+}
+
+function createEmptyVanDriverSelection(): VanDriverSelection {
+    return {
+        id: null,
+        label: null,
+        summary: null,
     };
 }

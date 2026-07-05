@@ -66,7 +66,7 @@ export function RequisitionDetailsFields({
                 value={shopId}
                 label={shopLabel}
                 isShopActive={isShopActive}
-                onChange={(value, label) => {
+                inactiveWarningContext={readonly ? "readonly" : "editable"} onChange={(value, label) => {
                     onShopChange({ id: value, label });
                     clearError("shopId");
                 }}
@@ -78,6 +78,7 @@ export function RequisitionDetailsFields({
                 value={vanDriverId}
                 label={vanDriverLabel}
                 selectedVanDriver={vanDriverSummary}
+                inactiveWarningContext={readonly ? "readonly" : "editable"}
                 onChange={(params) => {
                     onVanDriverChange(params);
                     clearError("vanDriverId");
