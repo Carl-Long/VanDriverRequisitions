@@ -11,14 +11,14 @@ import { Alert } from "@/components/ui/alert";
 import { canViewRequisitionSubmissions } from "@/features/auth/roles";
 import { FeSubmissionAdditionalCostsTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-additional-costs-table";
 import { FeSubmissionGeneralTasksTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-general-tasks-table";
-import { FeSubmissionHeader } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-header";
 import { FeSubmissionMileageTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-mileage-table";
-import { FeSubmissionPageSkeleton } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-page-skeleton";
-import { FeSubmissionSnapshotSummary } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-snapshot-summary";
 import { FeSubmissionTransfersTable } from "@/features/fe-requisitions/fe-submissions-view/fe-submission-transfers-table";
 import { useSubmission } from "@/features/fe-requisitions/fe-submissions-view/use-submission";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { useAuth } from "@/providers/auth-provider";
+import { SubmissionHeader } from "@/features/requisitions-shared/components/submission-header";
+import { SubmissionSnapshotSummary } from "@/features/requisitions-shared/components/submission-snapshot-summary";
+import { SubmissionPageSkeleton } from "@/features/requisitions-shared/components/submission-page-skeleton";
 
 export default function FeSubmissionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -26,7 +26,7 @@ export default function FeSubmissionPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <FeSubmissionPageSkeleton />
+                <SubmissionPageSkeleton />
             </PageContainer>
         );
     }
@@ -71,7 +71,7 @@ function FeSubmissionContent() {
     if (loading) {
         return (
             <PageContainer>
-                <FeSubmissionPageSkeleton />
+                <SubmissionPageSkeleton />
             </PageContainer>
         );
     }
@@ -113,8 +113,8 @@ function FeSubmissionContent() {
 
                 <div className="print-page">
                     <div className="space-y-6 submission-print">
-                        <FeSubmissionHeader submission={submission} />
-                        <FeSubmissionSnapshotSummary snapshot={submission.snapshot} />
+                        <SubmissionHeader submission={submission} />
+                        <SubmissionSnapshotSummary snapshot={submission.snapshot} />
                         <FeSubmissionGeneralTasksTable tasks={submission.snapshot.generalTasks} />
                         <FeSubmissionMileageTable rows={submission.snapshot.mileages} />
                         <FeSubmissionTransfersTable transfers={submission.snapshot.transfers} />

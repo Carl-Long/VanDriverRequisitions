@@ -1,4 +1,5 @@
-import { SubmissionStatus } from "../fe-submissions-view/submission-status";
+import type { SubmissionStatus } from "@/features/requisitions-shared/constants/submission-status.constants";
+
 import { ChargingOption, WeeklyQuantities } from "./fe-requisition.types";
 
 export type FeRequisitionSubmissionDetail = {
@@ -13,15 +14,6 @@ export type FeRequisitionSubmissionDetail = {
     rejectionNotes: string | null;
     poNumber: string | null;
     snapshot: FeRequisitionSnapshot;
-};
-
-export type ApproveFeRequisitionRequest = {
-    rowVersion: string | null;
-};
-
-export type RejectFeRequisitionRequest = {
-    rowVersion: string | null;
-    rejectionNotes: string;
 };
 
 export type FeRequisitionSubmissionHistory = {

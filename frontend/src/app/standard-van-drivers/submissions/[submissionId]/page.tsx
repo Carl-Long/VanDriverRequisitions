@@ -10,16 +10,17 @@ import { Button } from "@/components/ui/button/button";
 import { BackLink } from "@/components/ui/navigation-back-link";
 import { canViewRequisitionSubmissions } from "@/features/auth/roles";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
-import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import { StdSubmissionAdditionalCostsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-additional-costs-table";
 import { StdSubmissionBanksAndBinsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-banks-and-bins-table";
-import { StdSubmissionHeader } from "@/features/std-requisitions/std-submissions-view/std-submission-header";
 import { StdSubmissionPickupsTable } from "@/features/std-requisitions/std-submissions-view/std-submission-pickups-table";
-import { StdSubmissionSnapshotSummary } from "@/features/std-requisitions/std-submissions-view/std-submission-snapshot-summary";
 import { StdSubmissionTransfersTable } from "@/features/std-requisitions/std-submissions-view/std-submission-transfers-table";
 import { StdSubmissionVanPacksTable } from "@/features/std-requisitions/std-submissions-view/std-submission-van-packs-table";
 import { useStdSubmission } from "@/features/std-requisitions/std-submissions-view/use-std-submission";
 import { useAuth } from "@/providers/auth-provider";
+import { SubmissionSnapshotSummary } from "@/features/requisitions-shared/components/submission-snapshot-summary";
+import { SubmissionHeader } from "@/features/requisitions-shared/components/submission-header";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
+import { SubmissionPageSkeleton } from "@/features/requisitions-shared/components/submission-page-skeleton";
 
 export default function StdSubmissionPage() {
     const { user, loading: authLoading } = useAuth();
@@ -27,7 +28,7 @@ export default function StdSubmissionPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <SubmissionPageSkeleton />
             </PageContainer>
         );
     }
@@ -72,7 +73,7 @@ function StdSubmissionContent() {
     if (loading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <SubmissionPageSkeleton />
             </PageContainer>
         );
     }
@@ -114,9 +115,9 @@ function StdSubmissionContent() {
 
                 <div className="print-page">
                     <div className="space-y-6 submission-print">
-                        <StdSubmissionHeader submission={submission} />
+                        <SubmissionHeader submission={submission} />
 
-                        <StdSubmissionSnapshotSummary snapshot={submission.snapshot} />
+                        <SubmissionSnapshotSummary snapshot={submission.snapshot} />
 
                         <StdSubmissionBanksAndBinsTable
                             rows={submission.snapshot.collectionChargesBanksAndBins}

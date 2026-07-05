@@ -1,0 +1,1 @@
+export type RequisitionPageMode = "create" | "edit" | "readonly" | "approval";

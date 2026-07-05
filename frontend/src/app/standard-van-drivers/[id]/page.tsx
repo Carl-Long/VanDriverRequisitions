@@ -9,13 +9,13 @@ import { Alert } from "@/components/ui/alert";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { canCreateRequisitions } from "@/features/auth/roles";
 import { StdRequisitionShell } from "@/features/std-requisitions/form/components/std-requisition-shell";
-import { StdRequisitionShellSkeleton } from "@/features/std-requisitions/form/components/std-requisition-shell-skeleton";
 import type { StdRequisitionDetail } from "@/features/std-requisitions/types/std-requisition.types";
 import { stdRequisitionsApi } from "@/features/std-requisitions/api/std-requisitions-api";
 import { useAuth } from "@/providers/auth-provider";
 import { useSubmitWindowStatus } from "@/features/submit-windows/hooks/use-submit-window-status";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 
 export default function StdRequisitionDetailPage() {
     const params = useParams<{ id: string }>();
@@ -81,7 +81,7 @@ export default function StdRequisitionDetailPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
@@ -99,7 +99,7 @@ export default function StdRequisitionDetailPage() {
     if (pageLoading) {
         return (
             <PageContainer>
-                <StdRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }

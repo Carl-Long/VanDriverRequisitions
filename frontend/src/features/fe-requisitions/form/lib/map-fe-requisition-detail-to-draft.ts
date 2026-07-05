@@ -1,7 +1,7 @@
 import { parseDateOnly } from "@/lib/format/date";
-import { RequisitionStatus } from "@/features/fe-requisitions/constants/fe-requisition-status.constants";
 import { FeRequisitionDraft } from "../types/fe-requisition-draft";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
+import { RequisitionStatus } from "@/features/requisitions-shared/constants/requisition-status.constants";
 
 export function mapFeRequisitionDetailToDraft(detail: FeRequisitionDetail): FeRequisitionDraft {
     return {

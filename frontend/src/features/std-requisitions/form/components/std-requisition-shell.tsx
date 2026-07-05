@@ -3,9 +3,7 @@
 import { useMemo } from "react";
 import { Alert } from "@/components/ui/alert";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
-import type { StdRequisitionPageMode } from "../types/std-requisition-page-mode";
 import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
-import { StdRequisitionDetailsTab } from "../details/std-requisition-details-tab";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
 import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
@@ -17,11 +15,9 @@ import { stdRequisitionSchema } from "../schemas/std-requisition-schema";
 import { useRouter } from "next/navigation";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { useToast } from "@/providers/toast-provider";
-import { StdRequisitionHeader } from "../header/std-requisition-header";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
-import { StdSubmissionHistoryTab } from "../../std-submissions-view/std-submission-history-tab";
 import { STD_REQUISITION_ROW_CATEGORIES } from "../../constants/std-requisition-row-categories";
 import { resolveStdRequisitionLimitRule } from "../lib/resolve-std-requisition-limit-rule";
 import { StdCollectionVanPackWorkspace } from "../collection-van-packs/std-collection-van-pack-workspace";
@@ -35,9 +31,14 @@ import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/compon
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
+import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
+import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
+import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
+import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
+import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 
 type Props = {
-    mode: StdRequisitionPageMode;
+    mode: RequisitionPageMode;
     stdRequisition?: StdRequisitionDetail;
     limitRules: RequisitionLimitRuleSummary[];
     submitWindowStatus: SubmitWindowStatus | null;
@@ -98,14 +99,26 @@ export function StdRequisitionShell({
         setActiveKey,
         isSubmitModalOpen,
         setIsSubmitModalOpen,
-        isApproveModalOpen,
-        setIsApproveModalOpen,
-        isRejectModalOpen,
-        setIsRejectModalOpen,
     } = useRequisitionShellUiState({ initialActiveTabKey });
 
 
     const toast = useToast();
+
+    const approvalActions = useRequisitionApprovalActions({
+        mode,
+        requisitionId: draft.requisitionId,
+        rowVersion: draft.rowVersion,
+        backHref,
+        fallbackApprovalsHref: "/standard-van-drivers/approvals",
+        approve: stdRequisitionsApi.approve,
+        reject: stdRequisitionsApi.reject,
+        clearAllErrors,
+        setFormError: (message) => {
+            setErrors({
+                form: message,
+            });
+        },
+    });
 
     const isReadonly = mode === "readonly" || mode === "approval";
 
@@ -250,94 +263,9 @@ export function StdRequisitionShell({
         }
     }
 
-    function handleApproveRequest() {
-        if (mode !== "approval") {
-            return;
-        }
-
-        setIsApproveModalOpen(true);
-    }
-
-    function handleRejectRequest() {
-        if (mode !== "approval") {
-            return;
-        }
-
-        setIsRejectModalOpen(true);
-    }
-
-    async function handleApproveConfirm() {
-        if (!draft.requisitionId) {
-            return;
-        }
-
-        setIsApproveModalOpen(false);
-        setActiveAction("approve");
-
-        try {
-            clearAllErrors();
-
-            const approved = await stdRequisitionsApi.approve(draft.requisitionId, {
-                rowVersion: draft.rowVersion,
-            });
-
-            toast.success(`Requisition #${approved.requisitionNumber} approved`);
-            router.push(backHref ?? "/standard-van-drivers/approvals");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to approve requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to approve requisition",
-            });
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    async function handleRejectConfirm(rejectionNotes: string) {
-        if (!draft.requisitionId) {
-            return;
-        }
-
-        setIsRejectModalOpen(false);
-        setActiveAction("reject");
-
-        try {
-            clearAllErrors();
-
-            const rejected = await stdRequisitionsApi.reject(draft.requisitionId, {
-                rowVersion: draft.rowVersion,
-                rejectionNotes,
-            });
-
-            toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
-            router.push(backHref ?? "/standard-van-drivers/approvals");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to reject requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to reject requisition",
-            });
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
     return (
         <div className="space-y-4">
-            <StdRequisitionHeader
+            <RequisitionFormHeader
                 mode={mode}
                 backHref={backHref}
                 requisitionNumber={draft.requisitionNumber}
@@ -345,15 +273,15 @@ export function StdRequisitionShell({
                 subtotal={subtotal}
                 submitWindowStatus={submitWindowStatus}
                 submitStatusLoading={submitWindowStatusLoading}
-                activeAction={activeAction}
+                activeAction={activeAction ?? approvalActions.activeAction}
                 canSubmit={canSubmit}
                 submittedAtUtc={draft.submittedAtUtc}
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmitRequest}
-                onApprove={handleApproveRequest}
-                onReject={handleRejectRequest}
+                onApprove={approvalActions.openApproveModal}
+                onReject={approvalActions.openRejectModal}
             />
 
             <RequisitionFormErrorAlert message={errors.form} />
@@ -374,7 +302,7 @@ export function StdRequisitionShell({
                 transfersHasWarning={tabWarnings.transfersHasWarning}
                 additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
-                    <StdRequisitionDetailsTab
+                    <RequisitionDetailsTab
                         readonly={isReadonly}
                         draft={draft}
                         errors={errors}
@@ -471,8 +399,9 @@ export function StdRequisitionShell({
                     />
                 }
                 submissionHistory={
-                    <StdSubmissionHistoryTab
+                    <SubmissionHistoryTab
                         submissions={draft.submissionHistory}
+                        submissionBasePath="/standard-van-drivers/submissions"
                         returnTo={backHref}
                     />
                 }
@@ -491,17 +420,17 @@ export function StdRequisitionShell({
             {mode === "approval" && (
                 <>
                     <RequisitionApproveModal
-                        open={isApproveModalOpen}
-                        loading={activeAction === "approve"}
-                        onClose={() => setIsApproveModalOpen(false)}
-                        onConfirm={handleApproveConfirm}
+                        open={approvalActions.isApproveModalOpen}
+                        loading={approvalActions.activeAction === "approve"}
+                        onClose={approvalActions.closeApproveModal}
+                        onConfirm={approvalActions.confirmApprove}
                     />
 
                     <RequisitionRejectModal
-                        open={isRejectModalOpen}
-                        loading={activeAction === "reject"}
-                        onClose={() => setIsRejectModalOpen(false)}
-                        onConfirm={handleRejectConfirm}
+                        open={approvalActions.isRejectModalOpen}
+                        loading={approvalActions.activeAction === "reject"}
+                        onClose={approvalActions.closeRejectModal}
+                        onConfirm={approvalActions.confirmReject}
                     />
                 </>
             )}

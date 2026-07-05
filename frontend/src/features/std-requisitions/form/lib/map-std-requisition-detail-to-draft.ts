@@ -1,5 +1,5 @@
+import { RequisitionStatus } from "@/features/requisitions-shared/constants/requisition-status.constants";
 import type { StdRequisitionDetail } from "../../types/std-requisition.types";
-import type { StdRequisitionStatus } from "../../constants/std-requisition-status.constants";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 import { parseDateOnly } from "@/lib/format/date";
 
@@ -10,7 +10,7 @@ export function mapStdRequisitionDetailToDraft(
         requisitionId: requisition.id,
         rowVersion: requisition.rowVersion,
         requisitionNumber: requisition.requisitionNumber,
-        status: requisition.status as StdRequisitionStatus,
+        status: requisition.status as RequisitionStatus,
 
         requisitionDate: parseDateOnly(requisition.requisitionDate),
 

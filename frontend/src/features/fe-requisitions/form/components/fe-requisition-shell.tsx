@@ -1,13 +1,10 @@
 "use client";
 
 import { REQUISITION_ROW_CATEGORIES } from "@/features/fe-requisitions/constants/requisition-row-categories";
-import { FeRequisitionDetailsTab } from "../details/fe-requisition-details-tab";
 import { FeGeneralTaskWorkspace } from "../general-tasks/fe-general-task-workspace";
-import { FeRequisitionHeader } from "../header/fe-requisition-header";
 import { useFeRequisitionDraft } from "../hooks/use-fe-requisition-draft";
 import { resolveFeRequisitionLimitRule } from "../lib/resolve-fe-requisition-limit-rule";
 import { FeRequisitionTabs } from "../tabs/fe-requisition-tabs";
-import { FeRequisitionPageMode } from "../types/fe-requisition-page-mode";
 import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 import { useMemo } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
@@ -18,7 +15,6 @@ import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
 import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
-import { FeSubmissionHistoryTab } from "../../fe-submissions-view/fe-submission-history-tab";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
@@ -33,10 +29,14 @@ import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/compon
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
 import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
-
+import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
+import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
+import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
+import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
+import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 
 type Props = {
-    mode: FeRequisitionPageMode;
+    mode: RequisitionPageMode;
     limitRules: RequisitionLimitRuleSummary[];
     taskTypes: FeTaskType[];
     submitWindowStatus: SubmitWindowStatus | null;
@@ -92,12 +92,7 @@ export function FeRequisitionShell({
         setActiveKey,
         isSubmitModalOpen,
         setIsSubmitModalOpen,
-        isApproveModalOpen,
-        setIsApproveModalOpen,
-        isRejectModalOpen,
-        setIsRejectModalOpen,
     } = useRequisitionShellUiState({ initialActiveTabKey });
-
 
     const isReadonly = mode === "readonly" || mode === "approval";
 
@@ -115,6 +110,22 @@ export function FeRequisitionShell({
 
     const router = useRouter();
     const toast = useToast();
+
+    const approvalActions = useRequisitionApprovalActions({
+        mode,
+        requisitionId: draft.requisitionId,
+        rowVersion: draft.rowVersion,
+        backHref,
+        fallbackApprovalsHref: "/home-van-drivers/approvals",
+        approve: feRequisitionsApi.approve,
+        reject: feRequisitionsApi.reject,
+        clearAllErrors,
+        setFormError: (message) => {
+            setErrors({
+                form: message,
+            });
+        },
+    });
 
     const canSubmitStatus =
         draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
@@ -247,94 +258,9 @@ export function FeRequisitionShell({
         }
     }
 
-    function handleApproveRequest() {
-        if (mode !== "approval") {
-            return;
-        }
-
-        setIsApproveModalOpen(true);
-    }
-
-    function handleRejectRequest() {
-        if (mode !== "approval") {
-            return;
-        }
-
-        setIsRejectModalOpen(true);
-    }
-
-    async function handleApproveConfirm() {
-        if (!draft.requisitionId) {
-            return;
-        }
-
-        setIsApproveModalOpen(false);
-        setActiveAction("approve");
-
-        try {
-            clearAllErrors();
-
-            const approved = await feRequisitionsApi.approve(draft.requisitionId, {
-                rowVersion: draft.rowVersion,
-            });
-
-            toast.success(`Requisition #${approved.requisitionNumber} approved`);
-            router.push(backHref ?? "/home-van-drivers/approvals");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to approve requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to approve requisition",
-            });
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    async function handleRejectConfirm(rejectionNotes: string) {
-        if (!draft.requisitionId) {
-            return;
-        }
-
-        setIsRejectModalOpen(false);
-        setActiveAction("reject");
-
-        try {
-            clearAllErrors();
-
-            const rejected = await feRequisitionsApi.reject(draft.requisitionId, {
-                rowVersion: draft.rowVersion,
-                rejectionNotes,
-            });
-
-            toast.success(`Requisition #${rejected.requisitionNumber} rejected`);
-            router.push(backHref ?? "/home-van-drivers/approvals");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to reject requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to reject requisition",
-            });
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
     return (
         <div className="space-y-4">
-            <FeRequisitionHeader
+            <RequisitionFormHeader
                 mode={mode}
                 backHref={backHref}
                 requisitionNumber={draft.requisitionNumber}
@@ -342,15 +268,15 @@ export function FeRequisitionShell({
                 subtotal={subtotal}
                 submitWindowStatus={submitWindowStatus}
                 submitStatusLoading={submitWindowStatusLoading}
-                activeAction={activeAction}
+                activeAction={activeAction ?? approvalActions.activeAction}
                 canSubmit={canSubmit}
                 submittedAtUtc={draft.submittedAtUtc}
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
                 onSaveAndContinue={handleSaveAndContinue}
                 onSubmit={handleSubmitRequest}
-                onApprove={handleApproveRequest}
-                onReject={handleRejectRequest}
+                onApprove={approvalActions.openApproveModal}
+                onReject={approvalActions.openRejectModal}
             />
 
             <RequisitionFormErrorAlert message={errors.form} />
@@ -366,7 +292,7 @@ export function FeRequisitionShell({
                 transfersHasWarning={tabWarnings.transfersHasWarning}
                 additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
                 details={
-                    <FeRequisitionDetailsTab
+                    <RequisitionDetailsTab
                         readonly={isReadonly}
                         draft={draft}
                         onRequisitionDateChange={setRequisitionDate}
@@ -445,8 +371,9 @@ export function FeRequisitionShell({
                     />
                 }
                 submissionHistory={
-                    <FeSubmissionHistoryTab
+                    <SubmissionHistoryTab
                         submissions={draft.submissionHistory}
+                        submissionBasePath="/home-van-drivers/submissions"
                         returnTo={backHref}
                     />
                 }
@@ -500,17 +427,17 @@ export function FeRequisitionShell({
             {mode === "approval" && (
                 <>
                     <RequisitionApproveModal
-                        open={isApproveModalOpen}
-                        loading={activeAction === "approve"}
-                        onClose={() => setIsApproveModalOpen(false)}
-                        onConfirm={handleApproveConfirm}
+                        open={approvalActions.isApproveModalOpen}
+                        loading={approvalActions.activeAction === "approve"}
+                        onClose={approvalActions.closeApproveModal}
+                        onConfirm={approvalActions.confirmApprove}
                     />
 
                     <RequisitionRejectModal
-                        open={isRejectModalOpen}
-                        loading={activeAction === "reject"}
-                        onClose={() => setIsRejectModalOpen(false)}
-                        onConfirm={handleRejectConfirm}
+                        open={approvalActions.isRejectModalOpen}
+                        loading={approvalActions.activeAction === "reject"}
+                        onClose={approvalActions.closeRejectModal}
+                        onConfirm={approvalActions.confirmReject}
                     />
                 </>
             )}

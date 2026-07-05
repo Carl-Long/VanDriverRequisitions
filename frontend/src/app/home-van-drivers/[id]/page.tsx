@@ -13,10 +13,10 @@ import { canCreateRequisitions } from "@/features/auth/roles";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
 import type { FeRequisitionDetail } from "@/features/fe-requisitions/types/fe-requisition.types";
 import { FeRequisitionShell } from "@/features/fe-requisitions/form/components/fe-requisition-shell";
-import { FeRequisitionShellSkeleton } from "@/features/fe-requisitions/form/components/fe-requisition-shell-skeleton";
 import { useFeTaskTypes } from "@/features/fe-requisitions/form/hooks/use-fe-task-types";
 import { useRequisitionLimitRules } from "@/features/requisition-limit-rules/use-requisition-limit-rules";
 import { getSafeReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
+import { RequisitionShellSkeleton } from "@/features/requisitions-shared/components/requisition-shell-skeleton";
 
 export default function FeRequisitionDetailPage() {
     const params = useParams<{ id: string }>();
@@ -82,7 +82,7 @@ export default function FeRequisitionDetailPage() {
     if (authLoading) {
         return (
             <PageContainer>
-                <FeRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }
@@ -101,7 +101,7 @@ export default function FeRequisitionDetailPage() {
     if (pageLoading) {
         return (
             <PageContainer>
-                <FeRequisitionShellSkeleton />
+                <RequisitionShellSkeleton />
             </PageContainer>
         );
     }

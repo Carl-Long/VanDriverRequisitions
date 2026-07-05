@@ -1,7 +1,12 @@
 import { apiFetch } from "@/lib/api/client";
 import type { PagedResult } from "@/lib/types";
 import { SaveStdRequisition } from "../types/std-requisition-save.types";
-import { ApproveStdRequisitionRequest, RejectStdRequisitionRequest, StdRequisitionSubmissionDetail, } from "../types/std-requisition-submission.types";
+import type {
+    ApproveRequisitionRequest,
+    RejectRequisitionRequest,
+} from "@/features/requisitions-shared/types/requisition-approval.types";
+
+import { StdRequisitionSubmissionDetail } from "../types/std-requisition-submission.types"; 
 import { StdRequisitionDetail, StdRequisitionQuery, StdRequisitionSummary, } from "../types/std-requisition.types";
 
 const BASE = "/api/v1/std-requisitions";
@@ -61,13 +66,13 @@ export const stdRequisitionsApi = {
     getSubmission: (submissionId: string) =>
         apiFetch<StdRequisitionSubmissionDetail>(`${BASE}/submissions/${submissionId}`),
 
-    approve: (id: string, data: ApproveStdRequisitionRequest) =>
+    approve: (id: string, data: ApproveRequisitionRequest) =>
         apiFetch<StdRequisitionDetail>(`${BASE}/${id}/approve`, {
             method: "POST",
             body: data,
         }),
 
-    reject: (id: string, data: RejectStdRequisitionRequest) =>
+    reject: (id: string, data: RejectRequisitionRequest) =>
         apiFetch<StdRequisitionDetail>(`${BASE}/${id}/reject`, {
             method: "POST",
             body: data,
