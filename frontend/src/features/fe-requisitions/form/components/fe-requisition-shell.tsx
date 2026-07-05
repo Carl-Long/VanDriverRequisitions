@@ -9,11 +9,7 @@ import { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/
 import { useMemo } from "react";
 import { feRequisitionSchema } from "../schemas/fe-requisition-schema";
 import { mapFeRequisitionDraftToSaveRequest } from "../lib/map-fe-requisition-draft-to-save-request";
-import { mapZodErrors } from "../../../requisitions-shared/lib/map-zod-errors";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/providers/toast-provider";
 import { mapFeRequisitionDetailToDraft } from "../lib/map-fe-requisition-detail-to-draft";
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { FeTaskType } from "@/features/fe-task-types/fe-task-types-api";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
 import { feRequisitionsApi } from "@/features/fe-requisitions/api/fe-requisitions-api";
@@ -26,8 +22,6 @@ import { RequisitionApproveModal } from "@/features/requisitions-shared/componen
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
-import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
-import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
 import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
@@ -35,6 +29,7 @@ import { RequisitionDetailsTab } from "@/features/requisitions-shared/components
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 import { useFeRequisitionTabIssues } from "../hooks/use-fe-requisition-tab-issues";
 import { hasBlockingRequisitionTabIssue } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { useRequisitionPersistenceActions } from "@/features/requisitions-shared/hooks/use-requisition-persistence-actions";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -109,6 +104,21 @@ export function FeRequisitionShell({
 
     const tabIssues = useFeRequisitionTabIssues({ draft, isReadonly, limitRules });
 
+    const mileageLimitRule = resolveFeRequisitionLimitRule({
+        rules: limitRules,
+        category: REQUISITION_ROW_CATEGORIES.MILEAGE,
+    });
+
+    const transferLimitRule = resolveFeRequisitionLimitRule({
+        rules: limitRules,
+        category: REQUISITION_ROW_CATEGORIES.TRANSFER,
+    });
+
+    const additionalCostLimitRule = resolveFeRequisitionLimitRule({
+        rules: limitRules,
+        category: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
+    });
+
     const hasKnownSaveBlockers = hasBlockingRequisitionTabIssue([
         tabIssues.mileage,
         tabIssues.transfers,
@@ -126,10 +136,6 @@ export function FeRequisitionShell({
         .filter(Boolean)
         .join("\n");
 
-
-    const router = useRouter();
-    const toast = useToast();
-
     const approvalActions = useRequisitionApprovalActions({
         mode,
         requisitionId: draft.requisitionId,
@@ -146,137 +152,46 @@ export function FeRequisitionShell({
         },
     });
 
+    const {
+        handleSaveDraft,
+        handleSaveAndContinue,
+        handleSubmitRequest,
+        handleSubmitConfirm,
+    } = useRequisitionPersistenceActions({
+        draft,
+        subtotal,
+        schema: feRequisitionSchema,
+
+        requisitionId: draft.requisitionId,
+
+        backHref,
+        listHref: "/home-van-drivers",
+        detailHref: (id) => `/home-van-drivers/${id}`,
+
+        create: feRequisitionsApi.create,
+        update: feRequisitionsApi.update,
+        submitNew: feRequisitionsApi.submitNew,
+        submitExisting: feRequisitionsApi.submitExisting,
+
+        mapDraftToSaveRequest: mapFeRequisitionDraftToSaveRequest,
+        mapDetailToDraft: mapFeRequisitionDetailToDraft,
+        replaceDraft,
+
+        setActiveAction,
+        setErrors,
+        clearAllErrors,
+        setActiveKey,
+        setIsSubmitModalOpen,
+
+        saveFailureMessage: "Failed to save requisition",
+        submitFailureMessage: "Failed to submit requisition",
+    });
+
 
     const canSubmitStatus =
         draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
 
     const canSubmit = canSubmitStatus && !!submitWindowStatus?.currentWindow;
-
-    async function saveRequisition(
-        continueEditing: boolean = false,
-    ): Promise<FeRequisitionDetail | undefined> {
-        const result = feRequisitionSchema.safeParse(draft);
-
-        if (!result.success) {
-            setErrors(mapZodErrors(result.error));
-            setActiveKey("details");
-            return;
-        }
-
-        try {
-            clearAllErrors();
-
-            const request = mapFeRequisitionDraftToSaveRequest(draft);
-
-            const saved = draft.requisitionId
-                ? await feRequisitionsApi.update(draft.requisitionId, request)
-                : await feRequisitionsApi.create(request);
-
-            replaceDraft(mapFeRequisitionDetailToDraft(saved));
-
-            toast.success(`Requisition #${saved.requisitionNumber} saved`);
-
-            if (continueEditing) {
-                router.push(withReturnTo(`/home-van-drivers/${saved.id}`, backHref));
-            } else {
-                router.push(backHref ?? "/home-van-drivers");
-            }
-
-            return saved;
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to save requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to save requisition",
-            });
-        }
-    }
-
-    async function submitRequisition() {
-        const result = feRequisitionSchema.safeParse(draft);
-
-        if (!result.success) {
-            setErrors(mapZodErrors(result.error));
-            setActiveKey("details");
-            return;
-        }
-
-        const subtotalError = getSubmitSubtotalError(subtotal);
-
-        if (subtotalError) {
-            setErrors({
-                form: subtotalError,
-            });
-
-            return;
-        }
-
-        try {
-            clearAllErrors();
-
-            const request = mapFeRequisitionDraftToSaveRequest(draft);
-
-            const submitted = draft.requisitionId
-                ? await feRequisitionsApi.submitExisting(draft.requisitionId, request)
-                : await feRequisitionsApi.submitNew(request);
-
-            toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
-            router.push(backHref ?? "/home-van-drivers");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to submit requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to submit requisition",
-            });
-        }
-    }
-
-    async function handleSaveDraft() {
-        setActiveAction("saveAndClose");
-
-        try {
-            await saveRequisition();
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    async function handleSaveAndContinue() {
-        setActiveAction("saveAndContinue");
-
-        try {
-            await saveRequisition(true);
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    function handleSubmitRequest() {
-        setIsSubmitModalOpen(true);
-    }
-
-    async function handleSubmitConfirm() {
-        setIsSubmitModalOpen(false);
-        setActiveAction("submit");
-
-        try {
-            await submitRequisition();
-        } finally {
-            setActiveAction(null);
-        }
-    }
 
     return (
         <div className="space-y-4">
@@ -326,10 +241,7 @@ export function FeRequisitionShell({
                 }
                 mileage={
                     <FeMileageWorkspace
-                        limitRule={resolveFeRequisitionLimitRule({
-                            rules: limitRules,
-                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
-                        })}
+                        limitRule={mileageLimitRule}
                         readonly={isReadonly}
                         rows={draft.feMileages}
                         onAdd={(form) => {
@@ -347,10 +259,7 @@ export function FeRequisitionShell({
                 }
                 transfers={
                     <FeTransferWorkspace
-                        limitRule={resolveFeRequisitionLimitRule({
-                            rules: limitRules,
-                            category: REQUISITION_ROW_CATEGORIES.TRANSFER,
-                        })}
+                        limitRule={transferLimitRule}
                         readonly={isReadonly}
                         transfers={draft.feTransfers}
                         onAdd={(form) => {
@@ -370,14 +279,8 @@ export function FeRequisitionShell({
                     <FeAdditionalCostWorkspace
                         readonly={isReadonly}
                         rows={draft.feAdditionalCosts}
-                        additionalCostLimitRule={resolveFeRequisitionLimitRule({
-                            rules: limitRules,
-                            category: REQUISITION_ROW_CATEGORIES.ADDITIONAL_COST,
-                        })}
-                        mileageLimitRule={resolveFeRequisitionLimitRule({
-                            rules: limitRules,
-                            category: REQUISITION_ROW_CATEGORIES.MILEAGE,
-                        })}
+                        additionalCostLimitRule={additionalCostLimitRule}
+                        mileageLimitRule={mileageLimitRule}
                         onAdd={(form) => {
                             addAdditionalCost(form);
                             clearError("feAdditionalCosts");
