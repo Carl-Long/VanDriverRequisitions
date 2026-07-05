@@ -20,6 +20,8 @@ describe("updateStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Old Location",
             locationPostCode: "OLD 123",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: true,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 1,
 
@@ -43,6 +45,8 @@ describe("updateStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "New Location",
             locationPostCode: "AB1 2CD",
             isLocationActive: false,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: false,
 
             numberOfBags: 4,
 
@@ -71,6 +75,8 @@ describe("updateStdCollectionChargeBanksAndBinsDraftFromForm", () => {
         expect(result.locationLabel).toBe("New Location");
         expect(result.locationPostCode).toBe("AB1 2CD");
         expect(result.isLocationActive).toBe(false);
+        expect(result.isLocationLinkedToRequisitionShop).toBe(false);
+        expect(result.isLocationLinkedToCollectionType).toBe(false);
 
         expect(result.numberOfBags).toBe(4);
 
@@ -97,6 +103,9 @@ describe("updateStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: null,
             locationPostCode: null,
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: true,
+            isLocationLinkedToCollectionType: true,
+
 
             numberOfBags: null,
 
@@ -120,6 +129,8 @@ describe("updateStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Location",
             locationPostCode: "AB1 2CD",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: true,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 3,
 

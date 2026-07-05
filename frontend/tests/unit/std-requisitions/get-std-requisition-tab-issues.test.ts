@@ -82,7 +82,8 @@ function createBanksAndBins(
         locationLabel: "Location",
         locationPostCode: "AB1 2CD",
         isLocationActive: true,
-
+        isLocationLinkedToRequisitionShop: true,
+        isLocationLinkedToCollectionType: true,
         numberOfBags: 1,
 
         chargeType: STD_CHARGE_TYPE.Mileage,
@@ -581,5 +582,89 @@ describe("getStdRequisitionTabIssues", () => {
             transfers: REQUISITION_TAB_ISSUE_SEVERITY.None,
             additionalCosts: REQUISITION_TAB_ISSUE_SEVERITY.None,
         });
+    });
+
+    it("returns blocker for banks and bins rows when the location is no longer linked to the requisition shop", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationLinkedToRequisitionShop: false,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+    });
+
+    it("returns blocker for banks and bins rows when the location is no longer linked to the selected collection type", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationLinkedToCollectionType: false,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
+    });
+
+    it("returns warning for inactive banks and bins location when the relationship is still valid", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationActive: false,
+                        isLocationLinkedToRequisitionShop: true,
+                        isLocationLinkedToCollectionType: true,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Warning,
+        );
+    });
+
+    it("returns blocker when banks and bins has both inactive lookup warning and location relationship blocker", () => {
+        const result = getStdRequisitionTabIssues({
+            draft: createDraft({
+                collectionChargesBanksAndBins: [
+                    createBanksAndBins({
+                        isLocationActive: false,
+                        isLocationLinkedToRequisitionShop: false,
+                        isLocationLinkedToCollectionType: true,
+                    }),
+                ],
+            }),
+            isReadonly: false,
+            stdMileageLimitRule: mileageRule,
+            stdFlatChargeLimitRule: flatChargeRule,
+            stdVanPackLimitRule: vanPackRule,
+        });
+
+        expect(result.collectionChargesBanksAndBins).toBe(
+            REQUISITION_TAB_ISSUE_SEVERITY.Blocker,
+        );
     });
 });

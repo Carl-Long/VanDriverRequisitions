@@ -25,6 +25,8 @@ describe("createStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Location A",
             locationPostCode: "AB1 2CD",
             isLocationActive: false,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 4,
 
@@ -53,6 +55,8 @@ describe("createStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Location A",
             locationPostCode: "AB1 2CD",
             isLocationActive: false,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 4,
 
@@ -82,6 +86,8 @@ describe("createStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Location B",
             locationPostCode: "SW1A 1AA",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 3,
 
@@ -110,6 +116,8 @@ describe("createStdCollectionChargeBanksAndBinsDraftFromForm", () => {
             locationLabel: "Location B",
             locationPostCode: "SW1A 1AA",
             isLocationActive: true,
+            isLocationLinkedToRequisitionShop: false,
+            isLocationLinkedToCollectionType: true,
 
             numberOfBags: 3,
 
