@@ -19,6 +19,7 @@ import { StdChargeTypeCell, StdMilesCell, StdRateChargeCell } from "../component
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 
 type Props = {
@@ -232,7 +233,11 @@ function AdditionalCostsTable({
 
                             const hasInactiveLookup = row.isReasonActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -240,7 +245,7 @@ function AdditionalCostsTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>
@@ -266,7 +271,7 @@ function AdditionalCostsTable({
                                         {row.reasonCode && row.reasonText
                                             ? `${row.reasonCode} - ${row.reasonText}`
                                             : row.reasonText ?? "-"}
-                                            
+
                                         {row.isReasonActive === false && (
                                             <InactiveLookupWarning label="reason" />
                                         )}

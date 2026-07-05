@@ -18,6 +18,7 @@ import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/compo
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { getFeTransferLimitStatus } from "../lib/get-fe-transfer-limit-status";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     readonly: boolean;
@@ -190,7 +191,11 @@ function TransfersTable({
                                 transfer.isShopFromActive === false ||
                                 transfer.isShopToActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -198,7 +203,7 @@ function TransfersTable({
                                     onClick={readonly ? undefined : () => onEdit(transfer)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>

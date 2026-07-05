@@ -22,6 +22,7 @@ type Props = {
     canSubmit: boolean;
     submittedAtUtc: string | null;
     submittedByNameSnapshot: string | null;
+    hasKnownSaveBlockers?: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -56,6 +57,7 @@ export function RequisitionFormHeader({
     canSubmit,
     submittedAtUtc,
     submittedByNameSnapshot,
+    hasKnownSaveBlockers = false,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
@@ -74,6 +76,7 @@ export function RequisitionFormHeader({
         mode,
         activeAction,
         canSubmit,
+        hasKnownSaveBlockers,
         canApproveOrReject,
         onSaveDraft,
         onSaveAndContinue,
@@ -86,6 +89,7 @@ export function RequisitionFormHeader({
         mode: RequisitionPageMode;
         activeAction: RequisitionSaveAction;
         canSubmit: boolean;
+        hasKnownSaveBlockers: boolean;
         canApproveOrReject: boolean;
         onSaveDraft: () => void;
         onSaveAndContinue: () => void;
@@ -98,6 +102,7 @@ export function RequisitionFormHeader({
         mode,
         activeAction,
         canSubmit,
+        hasKnownSaveBlockers,
         canApproveOrReject,
         onSaveDraft,
         onSaveAndContinue,
@@ -110,6 +115,7 @@ export function RequisitionFormHeader({
                 <RequisitionActions
                     activeAction={activeAction}
                     canSubmit={canSubmit}
+                    hasKnownSaveBlockers={hasKnownSaveBlockers}
                     onSaveDraft={onSaveDraft}
                     onSaveAndContinue={onSaveAndContinue}
                     onSubmit={onSubmit}

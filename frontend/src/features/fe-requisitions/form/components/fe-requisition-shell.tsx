@@ -34,6 +34,7 @@ import { RequisitionFormHeader } from "@/features/requisitions-shared/components
 import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 import { useFeRequisitionTabIssues } from "../hooks/use-fe-requisition-tab-issues";
+import { hasBlockingRequisitionTabIssue } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -108,6 +109,24 @@ export function FeRequisitionShell({
 
     const tabIssues = useFeRequisitionTabIssues({ draft, isReadonly, limitRules });
 
+    const hasKnownSaveBlockers = hasBlockingRequisitionTabIssue([
+        tabIssues.mileage,
+        tabIssues.transfers,
+        tabIssues.additionalCosts,
+        ...taskTypes.map((taskType) =>
+            tabIssues.getTaskTypeTabIssueSeverity(taskType.id),
+        ),
+    ]);
+
+    const knownSaveBlockerMessage = hasKnownSaveBlockers
+        ? "Please resolve the tab issues before saving or submitting this requisition."
+        : null;
+
+    const formErrorMessage = [errors.form, knownSaveBlockerMessage]
+        .filter(Boolean)
+        .join("\n");
+
+
     const router = useRouter();
     const toast = useToast();
 
@@ -126,6 +145,7 @@ export function FeRequisitionShell({
             });
         },
     });
+
 
     const canSubmitStatus =
         draft.status === null || draft.status === "Draft" || draft.status === "Rejected";
@@ -270,6 +290,7 @@ export function FeRequisitionShell({
                 submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction ?? approvalActions.activeAction}
                 canSubmit={canSubmit}
+                hasKnownSaveBlockers={hasKnownSaveBlockers}
                 submittedAtUtc={draft.submittedAtUtc}
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
@@ -279,7 +300,7 @@ export function FeRequisitionShell({
                 onReject={approvalActions.openRejectModal}
             />
 
-            <RequisitionFormErrorAlert message={errors.form} />
+            <RequisitionFormErrorAlert message={formErrorMessage} />
 
             <FeRequisitionTabs
                 activeKey={activeKey}

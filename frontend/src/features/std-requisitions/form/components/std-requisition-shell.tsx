@@ -36,6 +36,7 @@ import { RequisitionPageMode } from "@/features/requisitions-shared/types/requis
 import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 import { useStdRequisitionTabIssues } from "../hooks/use-std-requisition-tab-issues";
+import { hasBlockingRequisitionTabIssue } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -136,6 +137,23 @@ export function StdRequisitionShell({
         stdFlatChargeLimitRule,
         stdVanPackLimitRule,
     });
+
+    const hasKnownSaveBlockers = hasBlockingRequisitionTabIssue([
+        tabIssues.collectionChargesBanksAndBins,
+        tabIssues.collectionVanPacks,
+        tabIssues.pickups,
+        tabIssues.transfers,
+        tabIssues.additionalCosts,
+    ]);
+
+    const knownSaveBlockerMessage = hasKnownSaveBlockers
+        ? "Please resolve the tab issues before saving or submitting this requisition."
+        : null;
+
+    const formErrorMessage = [errors.form, knownSaveBlockerMessage]
+        .filter(Boolean)
+        .join("\n");
+
 
     async function saveRequisition(
         continueEditing: boolean = false,
@@ -275,6 +293,7 @@ export function StdRequisitionShell({
                 submitStatusLoading={submitWindowStatusLoading}
                 activeAction={activeAction ?? approvalActions.activeAction}
                 canSubmit={canSubmit}
+                hasKnownSaveBlockers={hasKnownSaveBlockers}
                 submittedAtUtc={draft.submittedAtUtc}
                 submittedByNameSnapshot={draft.submittedByNameSnapshot}
                 onSaveDraft={handleSaveDraft}
@@ -284,7 +303,7 @@ export function StdRequisitionShell({
                 onReject={approvalActions.openRejectModal}
             />
 
-            <RequisitionFormErrorAlert message={errors.form} />
+            <RequisitionFormErrorAlert message={formErrorMessage} />
 
             {!isReadonly && vanPackRateChangeMessage && (
                 <Alert tone="warning">

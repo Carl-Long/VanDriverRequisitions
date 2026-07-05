@@ -21,6 +21,7 @@ import { formatDateGB } from "@/lib/format/date";
 import { InactiveLookupWarning } from "@/features/requisitions-shared/components/inactive-lookup-warning";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     readonly: boolean;
@@ -229,8 +230,13 @@ function BanksAndBinsTable({
                             );
 
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasInactiveLookup = row.isCollectionTypeActive === false || row.isLocationActive === false;
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+                            const hasInactiveLookup =
+                                row.isCollectionTypeActive === false || row.isLocationActive === false;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -238,7 +244,7 @@ function BanksAndBinsTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>

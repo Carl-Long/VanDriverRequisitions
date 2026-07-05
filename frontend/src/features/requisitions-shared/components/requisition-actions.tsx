@@ -6,6 +6,7 @@ import type { RequisitionSaveAction } from "../types/requisition-save-action";
 type Props = {
     activeAction: RequisitionSaveAction;
     canSubmit: boolean;
+    hasKnownSaveBlockers?: boolean;
     onSaveDraft: () => void;
     onSaveAndContinue: () => void;
     onSubmit: () => void;
@@ -14,17 +15,20 @@ type Props = {
 export function RequisitionActions({
     activeAction,
     canSubmit,
+    hasKnownSaveBlockers,
     onSaveDraft,
     onSaveAndContinue,
     onSubmit,
 }: Readonly<Props>) {
     const isBusy = activeAction !== null;
+    const saveDisabled = isBusy || hasKnownSaveBlockers;
+    const submitDisabled = isBusy || hasKnownSaveBlockers || !canSubmit;
 
     return (
         <div className="flex flex-wrap items-center gap-3">
             <Button
                 loading={activeAction === "saveAndContinue"}
-                disabled={isBusy}
+                disabled={saveDisabled}
                 onClick={onSaveAndContinue}
             >
                 <Save className="size-[1em]" />
@@ -35,7 +39,7 @@ export function RequisitionActions({
             <Button
                 variant="outline"
                 loading={activeAction === "saveAndClose"}
-                disabled={isBusy}
+                disabled={saveDisabled}
                 onClick={onSaveDraft}
             >
                 <Save className="size-[1em]" />
@@ -47,7 +51,7 @@ export function RequisitionActions({
                 <Button
                     tone="danger"
                     loading={activeAction === "submit"}
-                    disabled={isBusy}
+                    disabled={submitDisabled}
                     onClick={onSubmit}
                 >
                     <Send className="size-[1em]" />

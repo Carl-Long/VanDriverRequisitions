@@ -25,6 +25,7 @@ import { formatDateGB } from "@/lib/format/date";
 import { Alert } from "@/components/ui/alert";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     readonly: boolean;
@@ -215,6 +216,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                         {tasks.map((task) => {
                             const limitStatus = getGeneralTaskLimitStatus(task, limitRule);
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
+                            const issueSeverity = getRequisitionRowIssueSeverity({ hasBlocker: hasLimitIssue });
 
                             return (
                                 <TableRow
@@ -222,7 +224,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                     onClick={readonly ? undefined : () => onEdit(task)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue: hasLimitIssue,
+                                        issueSeverity
                                     })}
                                 >
                                     <TableCell>

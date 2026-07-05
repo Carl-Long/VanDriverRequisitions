@@ -18,6 +18,7 @@ import { InactiveLookupWarning } from "@/features/requisitions-shared/components
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
 import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { getFeAdditionalCostLimitStatus } from "../lib/get-fe-additional-cost-limit-status";
+import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
 
 type Props = {
     readonly: boolean;
@@ -175,7 +176,11 @@ function AdditionalCostsTable({
 
                             const hasInactiveLookup = row.isReasonActive === false;
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasIssue = hasLimitIssue || hasInactiveLookup;
+
+                            const issueSeverity = getRequisitionRowIssueSeverity({
+                                hasWarning: hasInactiveLookup,
+                                hasBlocker: hasLimitIssue,
+                            });
 
                             return (
                                 <TableRow
@@ -183,7 +188,7 @@ function AdditionalCostsTable({
                                     onClick={readonly ? undefined : () => onEdit(row)}
                                     className={getEditableTableRowClassName({
                                         readonly,
-                                        hasIssue,
+                                        issueSeverity,
                                     })}
                                 >
                                     <TableCell>

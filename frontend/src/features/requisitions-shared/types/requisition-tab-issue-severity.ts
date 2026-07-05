@@ -40,3 +40,33 @@ export function getLimitStatusTabIssueSeverity(
         ? REQUISITION_TAB_ISSUE_SEVERITY.None
         : REQUISITION_TAB_ISSUE_SEVERITY.Blocker;
 }
+
+export function isBlockingRequisitionTabIssue(
+    severity: RequisitionTabIssueSeverity,
+): boolean {
+    return severity === REQUISITION_TAB_ISSUE_SEVERITY.Blocker;
+}
+
+export function hasBlockingRequisitionTabIssue(
+    severities: RequisitionTabIssueSeverity[],
+): boolean {
+    return severities.some(isBlockingRequisitionTabIssue);
+}
+
+export function getRequisitionRowIssueSeverity({
+    hasWarning,
+    hasBlocker,
+}: {
+    hasWarning?: boolean;
+    hasBlocker?: boolean;
+}): RequisitionTabIssueSeverity {
+    if (hasBlocker) {
+        return REQUISITION_TAB_ISSUE_SEVERITY.Blocker;
+    }
+
+    if (hasWarning) {
+        return REQUISITION_TAB_ISSUE_SEVERITY.Warning;
+    }
+
+    return REQUISITION_TAB_ISSUE_SEVERITY.None;
+}
