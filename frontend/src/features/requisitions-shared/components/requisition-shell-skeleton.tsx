@@ -26,7 +26,7 @@ export function RequisitionShellSkeleton() {
                             </div>
                         </div>
 
-                        <Skeleton className="h-10 w-full max-w-80" />
+                        <Skeleton className="h-10 w-full max-w-80 rounded-full" />
                     </div>
 
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -44,8 +44,8 @@ export function RequisitionShellSkeleton() {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                            <Skeleton className="h-10 w-40" />
-                            <Skeleton className="h-10 w-36" />
+                            <Skeleton className="h-10 w-40 rounded-full" />
+                            <Skeleton className="h-10 w-36 rounded-full" />
                         </div>
                     </div>
                 </div>
