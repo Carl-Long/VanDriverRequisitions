@@ -7,14 +7,10 @@ import { useStdRequisitionDraft } from "../hooks/use-std-requisition-draft";
 import { StdRequisitionTabs } from "../tabs/std-requisition-tabs";
 import { StdCollectionChargeBanksAndBinsWorkspace } from "../collection-charges-banks-and-bins/std-collection-charge-banks-and-bins-workspace";
 import { mapStdRequisitionDetailToDraft } from "../lib/map-std-requisition-detail-to-draft";
-import { mapZodErrors } from "@/features/requisitions-shared/lib/map-zod-errors";
-import { ApiError, getApiErrorMessage } from "@/lib/api/client";
 import { stdRequisitionsApi } from "../../api/std-requisitions-api";
 import { mapStdRequisitionDraftToSaveRequest } from "../lib/map-std-requisition-draft-to-save-request";
 import { stdRequisitionSchema } from "../schemas/std-requisition-schema";
-import { useRouter } from "next/navigation";
 import { SubmitWindowStatus } from "@/features/submit-windows/types/submit-window.types";
-import { useToast } from "@/providers/toast-provider";
 import { RequisitionSubmitModal } from "@/features/requisitions-shared/components/requisition-submit-modal";
 import { RequisitionApproveModal } from "@/features/requisitions-shared/components/requisition-approve-modal";
 import { RequisitionRejectModal } from "@/features/requisitions-shared/components/requisition-reject-modal";
@@ -28,8 +24,6 @@ import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
-import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
-import { getSubmitSubtotalError } from "@/features/requisitions-shared/lib/get-submit-total-error";
 import { SubmissionHistoryTab } from "@/features/requisitions-shared/components/submission-history-tab";
 import { RequisitionFormHeader } from "@/features/requisitions-shared/components/requisition-form-header";
 import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
@@ -37,6 +31,7 @@ import { RequisitionDetailsTab } from "@/features/requisitions-shared/components
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
 import { useStdRequisitionTabIssues } from "../hooks/use-std-requisition-tab-issues";
 import { hasBlockingRequisitionTabIssue } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { useRequisitionPersistenceActions } from "@/features/requisitions-shared/hooks/use-requisition-persistence-actions";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -57,8 +52,6 @@ export function StdRequisitionShell({
     initialActiveTabKey,
     backHref,
 }: Readonly<Props>) {
-
-    const router = useRouter();
     const initialDraft = useMemo(() => (stdRequisition ? mapStdRequisitionDetailToDraft(stdRequisition) : undefined), [stdRequisition]);
     const stdMileageLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, category: STD_REQUISITION_ROW_CATEGORIES.MILEAGE, });
     const stdFlatChargeLimitRule = resolveStdRequisitionLimitRule({ rules: limitRules, category: STD_REQUISITION_ROW_CATEGORIES.FLAT_CHARGE });
@@ -103,7 +96,6 @@ export function StdRequisitionShell({
     } = useRequisitionShellUiState({ initialActiveTabKey });
 
 
-    const toast = useToast();
 
     const approvalActions = useRequisitionApprovalActions({
         mode,
@@ -119,6 +111,41 @@ export function StdRequisitionShell({
                 form: message,
             });
         },
+    });
+
+    const {
+        handleSaveDraft,
+        handleSaveAndContinue,
+        handleSubmitRequest,
+        handleSubmitConfirm,
+    } = useRequisitionPersistenceActions({
+        draft,
+        subtotal,
+        schema: stdRequisitionSchema,
+
+        requisitionId: draft.requisitionId,
+
+        backHref,
+        listHref: "/standard-van-drivers",
+        detailHref: (id) => `/standard-van-drivers/${id}`,
+
+        create: stdRequisitionsApi.create,
+        update: stdRequisitionsApi.update,
+        submitNew: stdRequisitionsApi.submitNew,
+        submitExisting: stdRequisitionsApi.submitExisting,
+
+        mapDraftToSaveRequest: mapStdRequisitionDraftToSaveRequest,
+        mapDetailToDraft: mapStdRequisitionDetailToDraft,
+        replaceDraft,
+
+        setActiveAction,
+        setErrors,
+        clearAllErrors,
+        setActiveKey,
+        setIsSubmitModalOpen,
+
+        saveFailureMessage: "Failed to save requisition",
+        submitFailureMessage: "Failed to submit requisition",
     });
 
     const isReadonly = mode === "readonly" || mode === "approval";
@@ -153,133 +180,6 @@ export function StdRequisitionShell({
     const formErrorMessage = [errors.form, knownSaveBlockerMessage]
         .filter(Boolean)
         .join("\n");
-
-
-    async function saveRequisition(
-        continueEditing: boolean = false,
-    ): Promise<StdRequisitionDetail | undefined> {
-        const result = stdRequisitionSchema.safeParse(draft);
-
-        if (!result.success) {
-            setErrors(mapZodErrors(result.error));
-            setActiveKey("details");
-            return;
-        }
-
-        try {
-            clearAllErrors();
-
-            const request = mapStdRequisitionDraftToSaveRequest(draft);
-
-            const saved = draft.requisitionId
-                ? await stdRequisitionsApi.update(draft.requisitionId, request)
-                : await stdRequisitionsApi.create(request);
-
-            replaceDraft(mapStdRequisitionDetailToDraft(saved));
-
-            toast.success(`Requisition #${saved.requisitionNumber} saved`);
-
-            if (continueEditing) {
-                router.push(withReturnTo(`/standard-van-drivers/${saved.id}`, backHref));
-            } else {
-                router.push(backHref ?? "/standard-van-drivers");
-            }
-
-            return saved;
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to save requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to save requisition",
-            });
-        }
-    }
-
-    async function submitRequisition() {
-        const result = stdRequisitionSchema.safeParse(draft);
-
-        if (!result.success) {
-            setErrors(mapZodErrors(result.error));
-            setActiveKey("details");
-            return;
-        }
-
-        const subtotalError = getSubmitSubtotalError(subtotal);
-
-        if (subtotalError) {
-            setErrors({
-                form: subtotalError,
-            });
-
-            return;
-        }
-
-        try {
-            clearAllErrors();
-
-            const request = mapStdRequisitionDraftToSaveRequest(draft);
-
-            const submitted = draft.requisitionId
-                ? await stdRequisitionsApi.submitExisting(draft.requisitionId, request)
-                : await stdRequisitionsApi.submitNew(request);
-
-            toast.success(`Requisition #${submitted.requisitionNumber} submitted`);
-            router.push(backHref ?? "/standard-van-drivers");
-        } catch (err) {
-            if (err instanceof ApiError) {
-                setErrors({
-                    form: getApiErrorMessage(err, "Failed to submit requisition"),
-                });
-
-                return;
-            }
-
-            setErrors({
-                form: "Failed to submit requisition",
-            });
-        }
-    }
-
-    async function handleSaveDraft() {
-        setActiveAction("saveAndClose");
-
-        try {
-            await saveRequisition();
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    async function handleSaveAndContinue() {
-        setActiveAction("saveAndContinue");
-
-        try {
-            await saveRequisition(true);
-        } finally {
-            setActiveAction(null);
-        }
-    }
-
-    function handleSubmitRequest() {
-        setIsSubmitModalOpen(true);
-    }
-
-    async function handleSubmitConfirm() {
-        setIsSubmitModalOpen(false);
-        setActiveAction("submit");
-
-        try {
-            await submitRequisition();
-        } finally {
-            setActiveAction(null);
-        }
-    }
 
     return (
         <div className="space-y-4">
