@@ -230,12 +230,12 @@ function BanksAndBinsTable({
                             );
 
                             const hasLimitIssue = !readonly && limitStatus.state !== "ok";
-                            const hasInactiveLookup =
-                                row.isCollectionTypeActive === false || row.isLocationActive === false;
+                            const hasInactiveLookup = row.isCollectionTypeActive === false || row.isLocationActive === false;
+                            const hasLocationRelationshipBlocker = row.isLocationLinkedToRequisitionShop === false || row.isLocationLinkedToCollectionType === false;
 
                             const issueSeverity = getRequisitionRowIssueSeverity({
                                 hasWarning: hasInactiveLookup,
-                                hasBlocker: hasLimitIssue,
+                                hasBlocker: hasLimitIssue || hasLocationRelationshipBlocker,
                             });
 
                             return (
@@ -299,9 +299,21 @@ function BanksAndBinsTable({
                                             {row.isLocationActive === false && (
                                                 <InactiveLookupWarning label="location" />
                                             )}
+
+                                            {row.isLocationLinkedToRequisitionShop === false && (
+                                                <p className="mt-1 text-xs font-medium text-danger">
+                                                    This location no longer belongs to the requisition shop.
+                                                </p>
+                                            )}
+
+                                            {row.isLocationLinkedToCollectionType === false && (
+                                                <p className="mt-1 text-xs font-medium text-danger">
+                                                    This location no longer belongs to the selected collection type.
+                                                </p>
+                                            )}
                                         </div>
                                     </TableCell>
-
+                                    
                                     <TableCell align="right" className="tabular-nums">
                                         {row.numberOfBags ?? "-"}
                                     </TableCell>

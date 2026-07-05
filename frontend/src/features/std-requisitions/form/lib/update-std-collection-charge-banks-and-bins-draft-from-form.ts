@@ -21,6 +21,8 @@ export function updateStdCollectionChargeBanksAndBinsDraftFromForm(
         locationLabel: form.locationLabel,
         locationPostCode: form.locationPostCode,
         isLocationActive: form.isLocationActive,
+        isLocationLinkedToRequisitionShop: form.isLocationLinkedToRequisitionShop,
+        isLocationLinkedToCollectionType: form.isLocationLinkedToCollectionType,
 
         numberOfBags: form.numberOfBags,
 

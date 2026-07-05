@@ -15,6 +15,8 @@ export type StdCollectionChargeBanksAndBinsDraft = {
     locationLabel: string | null;
     locationPostCode: string | null;
     isLocationActive: boolean;
+    isLocationLinkedToRequisitionShop: boolean;
+    isLocationLinkedToCollectionType: boolean;
 
     numberOfBags: number | null;
 

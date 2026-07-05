@@ -16,7 +16,9 @@ public sealed class StdCollectionChargeBanksAndBinsDetailDto
     public required string LocationName { get; init; }
     public required string LocationPostCode { get; init; }
     public bool IsLocationActive { get; init; }
-
+    public bool IsLocationLinkedToRequisitionShop { get; init; }
+    public bool IsLocationLinkedToCollectionType { get; init; }
+    
     public int? NumberOfBags { get; init; }
 
     public StdChargeType ChargeType { get; init; }

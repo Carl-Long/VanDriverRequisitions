@@ -16,7 +16,7 @@ public static class StdRequisitionMapper
         bool isShopActive,
         IReadOnlyDictionary<Guid, bool> additionalCostReasonActiveMap,
         IReadOnlyDictionary<Guid, bool> collectionTypeActiveMap,
-        IReadOnlyDictionary<Guid, bool> locationActiveMap,
+        IReadOnlyDictionary<Guid, StdLocation> locationMap,
         IReadOnlyDictionary<Guid, bool> transferShopActiveMap)
     {
         return new StdRequisitionDetailDto
@@ -54,24 +54,31 @@ public static class StdRequisitionMapper
                 .ThenBy(x => x.LocationNameSnapshot)
                 .ThenBy(x => x.CreatedAtUtc)
                 .ThenBy(x => x.Id)
-                .Select(x => StdCollectionChargeBanksAndBinsMapper.ToDetailDto(
-                    x,
-                    IsLookupActive(collectionTypeActiveMap, x.CollectionTypeId),
-                    IsLookupActive(locationActiveMap, x.LocationId)))
+                .Select(x =>
+                {
+                    var locationStatus = GetLocationRelationshipStatus(requisition, x, locationMap);
+
+                    return StdCollectionChargeBanksAndBinsMapper.ToDetailDto(
+                        x,
+                        IsLookupActive(collectionTypeActiveMap, x.CollectionTypeId),
+                        locationStatus.IsActive,
+                        locationStatus.IsLinkedToRequisitionShop,
+                        locationStatus.IsLinkedToCollectionType);
+                })
                 .ToList(),
-            
+
             CollectionVanPacks = requisition.CollectionVanPacks
                 .OrderBy(x => x.DeliveryDate)
                 .ThenBy(x => x.PostCodeZone)
                 .Select(StdCollectionVanPackMapper.ToDetailDto)
                 .ToList(),
-            
+
             Pickups = requisition.Pickups
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.ChargeType)
                 .Select(StdPickupMapper.ToDetailDto)
                 .ToList(),
-            
+
             Transfers = requisition.Transfers
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.ShopNameFrom)
@@ -81,7 +88,7 @@ public static class StdRequisitionMapper
                     IsLookupActive(transferShopActiveMap, x.ShopIdFrom),
                     IsLookupActive(transferShopActiveMap, x.ShopIdTo)))
                 .ToList(),
-            
+
             AdditionalCosts = requisition.AdditionalCosts
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.ReasonTextSnapshot)
@@ -132,7 +139,23 @@ public static class StdRequisitionMapper
             })
             .ToList();
     }
-    
+
+
+    private readonly record struct StdLocationRelationshipStatus(bool IsActive, bool IsLinkedToRequisitionShop, bool IsLinkedToCollectionType);
+
+    private static StdLocationRelationshipStatus GetLocationRelationshipStatus(StdRequisition requisition, StdCollectionChargeBanksAndBins collectionCharge, IReadOnlyDictionary<Guid, StdLocation> locationMap)
+    {
+        if (!locationMap.TryGetValue(collectionCharge.LocationId, out var location))
+        {
+            return new StdLocationRelationshipStatus(IsActive: false, IsLinkedToRequisitionShop: false, IsLinkedToCollectionType: false);
+        }
+
+        return new StdLocationRelationshipStatus(
+            IsActive: location.IsActive,
+            IsLinkedToRequisitionShop: location.ShopId == requisition.ShopId,
+            IsLinkedToCollectionType: location.CollectionTypeId == collectionCharge.CollectionTypeId);
+    }
+
     private static bool IsLookupActive(IReadOnlyDictionary<Guid, bool> activeMap, Guid id)
     {
         return activeMap.TryGetValue(id, out var isActive) && isActive;

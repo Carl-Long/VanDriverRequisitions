@@ -16,6 +16,8 @@ export function createEmptyStdCollectionChargeBanksAndBinsForm(
         locationLabel: null,
         locationPostCode: null,
         isLocationActive: true,
+        isLocationLinkedToRequisitionShop: true,
+        isLocationLinkedToCollectionType: true,
 
         numberOfBags: null,
 

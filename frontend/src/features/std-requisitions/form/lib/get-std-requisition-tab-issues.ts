@@ -48,12 +48,19 @@ export function getStdRequisitionTabIssues({
 
     return {
         collectionChargesBanksAndBins: combineRequisitionTabIssueSeverities(
-            ...draft.collectionChargesBanksAndBins.map((row) =>
-                combineRequisitionTabIssueSeverities(
+            ...draft.collectionChargesBanksAndBins.map((row) => {
+                const hasLocationRelationshipBlocker =
+                    row.isLocationLinkedToRequisitionShop === false ||
+                    row.isLocationLinkedToCollectionType === false;
+
+                return combineRequisitionTabIssueSeverities(
                     getHistoricalLookupTabIssueSeverity(
                         row.isCollectionTypeActive === false ||
-                            row.isLocationActive === false,
+                        row.isLocationActive === false,
                     ),
+                    hasLocationRelationshipBlocker
+                        ? REQUISITION_TAB_ISSUE_SEVERITY.Blocker
+                        : REQUISITION_TAB_ISSUE_SEVERITY.None,
                     getLimitStatusTabIssueSeverity(
                         getStdChargeLimitStatus(
                             row,
@@ -61,8 +68,8 @@ export function getStdRequisitionTabIssues({
                             stdFlatChargeLimitRule,
                         ),
                     ),
-                ),
-            ),
+                );
+            }),
         ),
 
         collectionVanPacks: combineRequisitionTabIssueSeverities(
