@@ -8,7 +8,6 @@ const tabWidths = [
     "w-36",
     "w-40",
     "w-44",
-    "w-36",
 ] as const;
 
 export function RequisitionShellSkeleton() {
