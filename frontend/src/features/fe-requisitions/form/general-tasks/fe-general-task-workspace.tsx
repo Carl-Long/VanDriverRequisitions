@@ -24,8 +24,8 @@ import { DeleteRowButton } from "../../../requisitions-shared/components/delete-
 import { formatDateGB } from "@/lib/format/date";
 import { Alert } from "@/components/ui/alert";
 import { RequisitionWorkspaceHeader } from "@/features/requisitions-shared/components/requisition-workspace-header";
-import { RequisitionLimitWarningBlock } from "@/features/requisitions-shared/components/requisition-limit-warning-block";
 import { getRequisitionRowIssueSeverity } from "@/features/requisitions-shared/types/requisition-tab-issue-severity";
+import { RequisitionLimitIssueBlock } from "@/features/requisitions-shared/components/requisition-limit-issue-block";
 
 type Props = {
     readonly: boolean;
@@ -238,7 +238,7 @@ function TasksTable({ readonly, limitRule, tasks, onEdit, onDelete }: Readonly<T
                                             </EditableCellButton>
 
                                             {hasLimitIssue && (
-                                                <RequisitionLimitWarningBlock
+                                                <RequisitionLimitIssueBlock
                                                     status={limitStatus}
                                                     className="mt-1"
                                                 />

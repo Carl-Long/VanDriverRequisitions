@@ -2,24 +2,24 @@ import { AlertCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export type RequisitionLimitWarningState =
+export type RequisitionLimitIssueState =
     | "ok"
     | "missing-limit"
     | "exceeds-limit";
 
-export type RequisitionLimitWarningStatus = {
-    state: RequisitionLimitWarningState;
+export type RequisitionLimitIssueStatus = {
+    state: RequisitionLimitIssueState;
     messages: string[];
 };
 
 type Props = {
-    status: RequisitionLimitWarningStatus;
+    status: RequisitionLimitIssueStatus;
     className?: string;
     missingLabel?: string;
     exceedsLabel?: string;
 };
 
-export function RequisitionLimitWarningBlock({
+export function RequisitionLimitIssueBlock({
     status,
     className,
     missingLabel = "Missing limit",
