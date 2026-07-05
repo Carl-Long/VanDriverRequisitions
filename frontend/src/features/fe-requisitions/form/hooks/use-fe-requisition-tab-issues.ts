@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
-import { getFeRequisitionTabWarnings, type FeRequisitionTabWarnings } from "../lib/get-fe-requisition-tab-warnings";
+import {
+    getFeRequisitionTabIssues,
+    type FeRequisitionTabIssues,
+} from "../lib/get-fe-requisition-tab-issues";
 import type { FeRequisitionDraft } from "../types/fe-requisition-draft";
 
 type Params = {
@@ -10,24 +13,20 @@ type Params = {
     limitRules: RequisitionLimitRuleSummary[];
 };
 
-export type { FeRequisitionTabWarnings };
+export type { FeRequisitionTabIssues };
 
-export function useFeRequisitionTabWarnings({
+export function useFeRequisitionTabIssues({
     draft,
     isReadonly,
     limitRules,
-}: Readonly<Params>): FeRequisitionTabWarnings {
+}: Readonly<Params>): FeRequisitionTabIssues {
     return useMemo(
         () =>
-            getFeRequisitionTabWarnings({
+            getFeRequisitionTabIssues({
                 draft,
                 isReadonly,
                 limitRules,
             }),
-        [
-            draft,
-            isReadonly,
-            limitRules,
-        ],
+        [draft, isReadonly, limitRules],
     );
 }

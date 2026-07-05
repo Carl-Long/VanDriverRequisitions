@@ -3,9 +3,9 @@ import { useMemo } from "react";
 import type { RequisitionLimitRuleSummary } from "@/features/requisition-limit-rules/requisition-limit-rules-api";
 
 import {
-    getStdRequisitionTabWarnings,
-    type StdRequisitionTabWarnings,
-} from "../lib/get-std-requisition-tab-warnings";
+    getStdRequisitionTabIssues,
+    type StdRequisitionTabIssues,
+} from "../lib/get-std-requisition-tab-issues";
 import type { StdRequisitionDraft } from "../types/std-requisition-draft";
 
 type Params = {
@@ -16,18 +16,18 @@ type Params = {
     stdVanPackLimitRule?: RequisitionLimitRuleSummary;
 };
 
-export type { StdRequisitionTabWarnings };
+export type { StdRequisitionTabIssues };
 
-export function useStdRequisitionTabWarnings({
+export function useStdRequisitionTabIssues({
     draft,
     isReadonly,
     stdMileageLimitRule,
     stdFlatChargeLimitRule,
     stdVanPackLimitRule,
-}: Readonly<Params>): StdRequisitionTabWarnings {
+}: Readonly<Params>): StdRequisitionTabIssues {
     return useMemo(
         () =>
-            getStdRequisitionTabWarnings({
+            getStdRequisitionTabIssues({
                 draft,
                 isReadonly,
                 stdMileageLimitRule,

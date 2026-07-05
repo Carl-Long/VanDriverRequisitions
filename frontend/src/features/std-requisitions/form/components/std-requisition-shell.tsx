@@ -26,7 +26,6 @@ import { getStdCollectionVanPackRateChangeMessage } from "../lib/get-std-collect
 import { StdPickupWorkspace } from "../collection-pickups/std-pickup-workspace";
 import { StdTransferWorkspace } from "../transfers/std-transfer-workspace";
 import { StdAdditionalCostWorkspace } from "../additional-costs/std-additional-cost-workspace";
-import { useStdRequisitionTabWarnings } from "../hooks/use-std-requisition-tab-warnings";
 import { RequisitionFormErrorAlert } from "@/features/requisitions-shared/components/requisition-form-error-alert";
 import { useRequisitionShellUiState } from "@/features/requisitions-shared/hooks/use-requisition-shell-ui-state";
 import { withReturnTo } from "@/features/requisitions-shared/lib/get-safe-return-to";
@@ -36,6 +35,7 @@ import { RequisitionFormHeader } from "@/features/requisitions-shared/components
 import { RequisitionPageMode } from "@/features/requisitions-shared/types/requisition-page-mode";
 import { RequisitionDetailsTab } from "@/features/requisitions-shared/components/requisition-details-tab";
 import { useRequisitionApprovalActions } from "@/features/requisitions-shared/hooks/use-requisition-approval-actions";
+import { useStdRequisitionTabIssues } from "../hooks/use-std-requisition-tab-issues";
 
 type Props = {
     mode: RequisitionPageMode;
@@ -129,7 +129,7 @@ export function StdRequisitionShell({
 
     const vanPackRateChangeMessage = getStdCollectionVanPackRateChangeMessage(draft.collectionVanPacks, stdVanPackLimitRule,);
 
-    const tabWarnings = useStdRequisitionTabWarnings({
+    const tabIssues = useStdRequisitionTabIssues({
         draft,
         isReadonly,
         stdMileageLimitRule,
@@ -296,11 +296,11 @@ export function StdRequisitionShell({
                 activeKey={activeKey}
                 onActiveKeyChange={setActiveKey}
                 submissionHistoryCount={draft.submissionHistory.length}
-                collectionChargesBanksAndBinsHasWarning={tabWarnings.collectionChargesBanksAndBinsHasWarning}
-                collectionVanPacksHasWarning={tabWarnings.collectionVanPacksHasWarning}
-                pickupsHasWarning={tabWarnings.pickupsHasWarning}
-                transfersHasWarning={tabWarnings.transfersHasWarning}
-                additionalCostsHasWarning={tabWarnings.additionalCostsHasWarning}
+                collectionChargesBanksAndBinsIssueSeverity={tabIssues.collectionChargesBanksAndBins}
+                collectionVanPacksIssueSeverity={tabIssues.collectionVanPacks}
+                pickupsIssueSeverity={tabIssues.pickups}
+                transfersIssueSeverity={tabIssues.transfers}
+                additionalCostsIssueSeverity={tabIssues.additionalCosts}
                 details={
                     <RequisitionDetailsTab
                         readonly={isReadonly}
