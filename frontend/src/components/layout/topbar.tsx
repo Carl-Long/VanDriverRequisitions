@@ -1,11 +1,10 @@
 "use client";
 
-import { Menu } from "lucide-react";
-
 import { IconButton } from "@/components/ui/button/icon-button";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./user-menu";
 import Link from "next/link";
+import { Info, Menu } from "lucide-react";
 
 type TopbarProps = {
     onMenuClick?: () => void;
@@ -39,15 +38,21 @@ export function Topbar({ onMenuClick }: Readonly<TopbarProps>) {
                     Van Driver Requisitions
                 </Link>
 
-                <span
+                <Link
+                    href="/about"
                     className={cn(
-                        "hidden rounded-full border border-border md:inline-flex",
-                        "px-2 py-0.5",
-                        "text-xs font-medium text-muted-foreground",
+                        "inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border",
+                        "bg-surface-subtle px-2 py-0.5",
+                        "text-xs font-medium text-muted-foreground transition",
+                        "hover:border-primary/40 hover:text-primary",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     )}
+                    aria-label="View design notes"
+                    title="View design notes"
                 >
-                    Prototype • Next.js + .NET API
-                </span>
+                    <Info className="size-3.5" aria-hidden="true" />
+                    <span className="hidden md:inline">Design notes</span>
+                </Link>
             </div>
 
             <div className="flex shrink-0 items-center gap-3">

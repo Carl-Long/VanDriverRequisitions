@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Field } from "@/components/ui/field/field";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { Combobox } from "@/components/ui/field/combobox";
+import { Field } from "@/components/ui/field/field";
 import { shopsApi } from "@/lib/api/shops";
 import { toShopOptions, type ShopOption } from "@/lib/options/shop-options";
-import { InactiveLookupWarning } from "../inactive-lookup-warning";
+
+import {
+    InactiveLookupWarning,
+    type InactiveLookupWarningContext,
+} from "../inactive-lookup-warning";
 
 type Props = {
     required?: boolean;
@@ -19,15 +24,16 @@ type Props = {
     includeAllOption?: boolean;
     prefixLabel?: boolean;
     isShopActive?: boolean | null;
+    inactiveWarningContext?: InactiveLookupWarningContext;
     onChange: (value: string | null, label: string | null) => void;
 };
 
-const STATIC_OPTIONS: ShopOption[] = [
-    {
-        value: "__ALL__",
-        label: "All shops",
-    },
-];
+const ALL_SHOPS_OPTION_VALUE = "__ALL__";
+
+const ALL_SHOPS_OPTION: ShopOption = {
+    value: ALL_SHOPS_OPTION_VALUE,
+    label: "All shops",
+};
 
 export function ShopFilterField({
     required = false,
@@ -41,6 +47,7 @@ export function ShopFilterField({
     includeAllOption = false,
     prefixLabel = false,
     isShopActive,
+    inactiveWarningContext = "editable",
     onChange,
 }: Readonly<Props>) {
     const [options, setOptions] = useState<ShopOption[]>([]);
@@ -49,7 +56,7 @@ export function ShopFilterField({
     useEffect(() => {
         let cancelled = false;
 
-        async function loadOptions() {
+        async function loadShopOptions() {
             setLoading(true);
 
             try {
@@ -58,6 +65,10 @@ export function ShopFilterField({
                 if (!cancelled) {
                     setOptions(toShopOptions(shops));
                 }
+            } catch {
+                if (!cancelled) {
+                    setOptions([]);
+                }
             } finally {
                 if (!cancelled) {
                     setLoading(false);
@@ -65,7 +76,7 @@ export function ShopFilterField({
             }
         }
 
-        loadOptions();
+        void loadShopOptions();
 
         return () => {
             cancelled = true;
@@ -85,57 +96,72 @@ export function ShopFilterField({
                 label,
             },
         ];
-    }, [value, label, isShopActive]);
+    }, [isShopActive, label, value]);
 
     const pinnedOptions = useMemo<ShopOption[]>(() => {
-        return [
-            ...(includeAllOption ? STATIC_OPTIONS : []),
-            ...inactiveSelectedOptions,
-        ];
+        const allShopOptions = includeAllOption ? [ALL_SHOPS_OPTION] : [];
+
+        return [...allShopOptions, ...inactiveSelectedOptions];
     }, [includeAllOption, inactiveSelectedOptions]);
 
-    const combobox = (
+    const handleChange = useCallback(
+        (selectedValue: string | null, option?: ShopOption | null) => {
+            if (selectedValue === ALL_SHOPS_OPTION_VALUE) {
+                onChange(null, null);
+                return;
+            }
+
+            onChange(selectedValue, option?.label ?? null);
+        },
+        [onChange],
+    );
+
+    const fieldContent = (
         <div className="space-y-2">
             <Combobox
                 disabled={disabled || loading}
                 state={error ? "error" : "default"}
                 value={value}
-                label={
-                    label
-                        ? prefixLabel
-                            ? `Shop: ${label}`
-                            : label
-                        : prefixLabel
-                            ? "Shop: All shops"
-                            : null
-                }
+                label={getShopComboboxLabel({ label, prefixLabel })}
                 options={options}
                 emptyStateText={loading ? "Loading shops..." : "No shops available"}
                 noMatchesText="No matching shops found"
                 pinnedOptions={pinnedOptions}
                 placeholder={loading ? "Loading shops..." : placeholder}
-                onChange={(value, option) => {
-                    if (value === "__ALL__") {
-                        onChange(null, null);
-                        return;
-                    }
-
-                    onChange(value, option?.label ?? null);
-                }}
+                onChange={handleChange}
             />
 
             {showInactiveWarning && (
-                <InactiveLookupWarning label="shop" variant="field" />
+                <InactiveLookupWarning
+                    label="shop"
+                    variant="field"
+                    context={inactiveWarningContext}
+                />
             )}
         </div>
     );
+
     if (hideLabel) {
-        return combobox;
+        return fieldContent;
     }
 
     return (
         <Field required={required} label={fieldLabel} error={error}>
-            {combobox}
+            {fieldContent}
         </Field>
     );
+}
+
+function getShopComboboxLabel({
+    label,
+    prefixLabel,
+}: {
+    label: string | null;
+    prefixLabel: boolean;
+}) {
+    if (label) {
+        return prefixLabel ? `Shop: ${label}` : label;
+    }
+
+    return prefixLabel ? "Shop: All shops" : null;
 }
